@@ -341,3 +341,21 @@ export const listingsFor = (productId: string) =>
 export const productFor = (id: string) => products.find((p) => p.id === id);
 
 export const cheapest = (productId: string) => listingsFor(productId)[0] as Listing;
+export const gradeCriteria: Record<Grade, string> = {
+  "A+": "No signs of use. Fully functional, all original parts, complete accessories.",
+  A: "Minor signs of use visible only up close. Fully functional, no repairs.",
+  B: "Visible wear on body or frame. Fully functional; repairs disclosed in full.",
+  C: "Noticeable wear, possible cosmetic damage. Functional with disclosed limitations.",
+  D: "Heavy wear or limited functionality. Sold with explicit defect disclosure.",
+};
+
+export const grades: Grade[] = ["A+", "A", "B", "C", "D"];
+
+export const galleryShots: { label: string; position: string }[] = [
+  { label: "Front", position: "50% 50%" },
+  { label: "Back", position: "20% 30%" },
+  { label: "Edges & ports", position: "80% 70%" },
+  { label: "Powered on", position: "50% 85%" },
+];
+
+export const listingFor = (id: string) => listings.find((l) => l.id === id);
