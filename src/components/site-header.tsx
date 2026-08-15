@@ -17,16 +17,8 @@ export function SiteHeader() {
       <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur">
         <div className="mx-auto flex h-16 max-w-7xl items-center gap-6 px-5">
           <Link to="/" className="font-display text-lg font-semibold tracking-tight">
-            RESALE<span className="text-muted-foreground">.com</span>
+            RESALE
           </Link>
-          <nav className="hidden items-center gap-6 text-sm text-subtle-foreground md:flex">
-            <Link to="/" className="transition-colors hover:text-foreground">
-              Browse
-            </Link>
-            <span className="cursor-default">Smartphones</span>
-            <span className="cursor-default">Laptops</span>
-            <span className="cursor-default">Cameras</span>
-          </nav>
           <div className="ml-auto hidden flex-1 items-center gap-2 border border-border px-3 py-2 text-sm md:flex md:max-w-sm">
             <Search className="size-4 text-muted-foreground" />
             <input
@@ -59,6 +51,37 @@ export function SiteHeader() {
           </div>
         </div>
       </header>
+
+      {/* Secondary Category Navigation Bar */}
+      <nav className="sticky top-16 z-30 border-b border-border bg-background/95 backdrop-blur shadow-sm">
+        <div className="mx-auto max-w-7xl px-5 overflow-x-auto scrollbar-none">
+          <ul className="flex items-center gap-0 text-[12px] font-medium whitespace-nowrap">
+            {[
+              { label: "Home", to: "/" },
+              { label: "Accessories", to: "/accessories" },
+              { label: "Earbuds", to: "/earbuds" },
+              { label: "Headphones", to: "/headphones" },
+              { label: "Home Products", to: "/home-products" },
+              { label: "Speakers", to: "/speakers" },
+              { label: "Tablets", to: "/tablets" },
+              { label: "Wearables", to: "/wearables" },
+              { label: "Shop by Brands", to: "/brands" },
+              { label: "Sell with us", to: "/sell" },
+              { label: "Contact Us", to: "/contact" },
+            ].map((item) => (
+              <li key={item.label}>
+                <Link
+                  to={item.to}
+                  className="block px-3 py-2.5 text-subtle-foreground hover:text-foreground hover:bg-muted/60 transition-colors border-b-2 border-transparent hover:border-primary"
+                  activeProps={{ className: "text-primary border-b-2 border-primary bg-muted/40" }}
+                >
+                  {item.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </nav>
     </div>
   );
 }
