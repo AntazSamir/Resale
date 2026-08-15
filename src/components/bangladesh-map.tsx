@@ -62,8 +62,8 @@ const DIVISIONS: Division[] = [
 
 interface TooltipState {
   division: Division;
-  x: number;
-  y: number;
+  clientX: number;
+  clientY: number;
 }
 
 export function BangladeshMapSVG() {
@@ -71,13 +71,7 @@ export function BangladeshMapSVG() {
   const [tooltip, setTooltip] = useState<TooltipState | null>(null);
 
   const handleMouseMove = (e: React.MouseEvent<SVGPathElement>, division: Division) => {
-    const svgEl = (e.currentTarget as SVGPathElement).ownerSVGElement;
-    if (!svgEl) return;
-    const rect = svgEl.getBoundingClientRect();
-    const scale = rect.width / 437.80637;
-    const svgX = (e.clientX - rect.left) / scale;
-    const svgY = (e.clientY - rect.top) / scale;
-    setTooltip({ division, x: svgX, y: svgY });
+    setTooltip({ division, clientX: e.clientX, clientY: e.clientY });
   };
 
   const handleMouseLeave = () => {
@@ -89,13 +83,13 @@ export function BangladeshMapSVG() {
     <div className="relative inline-block select-none">
       <svg
         viewBox="0 0 437.80637 601.16034"
-        className="h-[1.25em] w-auto shrink-0 pointer-events-auto opacity-100 drop-shadow-xs overflow-visible"
+        className="h-[1.75em] w-auto shrink-0 pointer-events-auto opacity-100 drop-shadow-md overflow-visible transition-all duration-300"
         aria-label="Bangladesh Divisions Map"
         role="img"
       >
         <defs>
           <filter id="bd-glow" x="-20%" y="-20%" width="140%" height="140%">
-            <feGaussianBlur stdDeviation="4" result="blur" />
+            <feGaussianBlur stdDeviation="5" result="blur" />
             <feMerge>
               <feMergeNode in="blur" />
               <feMergeNode in="SourceGraphic" />
@@ -109,15 +103,16 @@ export function BangladeshMapSVG() {
             <path
               key={div.id}
               d={div.path}
-              fill={isHovered ? "hsl(var(--primary))" : "#333333"}
-              fillOpacity={isHovered ? 0.95 : 0.45}
-              stroke={isHovered ? "hsl(var(--primary))" : "#666666"}
-              strokeWidth={isHovered ? 1.5 : 0.5}
-              strokeOpacity={isHovered ? 1 : 0.6}
+              fill={isHovered ? "hsl(var(--primary))" : "#2d2d32"}
+              fillOpacity={isHovered ? 1 : 0.65}
+              stroke={isHovered ? "hsl(var(--primary))" : "#55555e"}
+              strokeWidth={isHovered ? 2 : 0.6}
+              strokeOpacity={isHovered ? 1 : 0.7}
               filter={isHovered ? "url(#bd-glow)" : undefined}
               style={{
                 cursor: "pointer",
-                transition: "fill 0.18s ease, fill-opacity 0.18s ease, stroke 0.18s ease",
+                transition:
+                  "fill 0.2s ease, fill-opacity 0.2s ease, stroke 0.2s ease, stroke-width 0.2s ease",
               }}
               onMouseEnter={() => setHovered(div.id)}
               onMouseMove={(e) => handleMouseMove(e, div)}
@@ -126,59 +121,36 @@ export function BangladeshMapSVG() {
             />
           );
         })}
-
-        {/* Interactive Tooltip Card on Hover */}
-        {tooltip && (
-          <g style={{ pointerEvents: "none" }}>
-            <rect
-              x={Math.max(10, Math.min(270, tooltip.x - 75))}
-              y={Math.max(10, tooltip.y - 58)}
-              width={150}
-              height={52}
-              rx={5}
-              fill="#1e1e24"
-              stroke="#3b82f6"
-              strokeWidth={1}
-              opacity={0.97}
-            />
-            <text
-              x={Math.max(10, Math.min(270, tooltip.x - 75)) + 75}
-              y={Math.max(10, tooltip.y - 58) + 14}
-              textAnchor="middle"
-              fontSize={10}
-              fontWeight="800"
-              fill="#ffffff"
-              fontFamily="var(--font-display, Inter, sans-serif)"
-            >
-              {tooltip.division.name} Division ({tooltip.division.userPercentage ?? "5.0%"})
-            </text>
-            <text
-              x={Math.max(10, Math.min(270, tooltip.x - 75)) + 75}
-              y={Math.max(10, tooltip.y - 58) + 29}
-              textAnchor="middle"
-              fontSize={7}
-              fill="#9ca3af"
-              fontFamily="var(--font-display, Inter, sans-serif)"
-            >
-              Districts:{" "}
-              {(tooltip.division.districts ?? tooltip.division.name).length > 32
-                ? (tooltip.division.districts ?? tooltip.division.name).slice(0, 30) + "..."
-                : (tooltip.division.districts ?? tooltip.division.name)}
-            </text>
-            <text
-              x={Math.max(10, Math.min(270, tooltip.x - 75)) + 75}
-              y={Math.max(10, tooltip.y - 58) + 43}
-              textAnchor="middle"
-              fontSize={8}
-              fontWeight="600"
-              fill="#3b82f6"
-              fontFamily="var(--font-display, Inter, sans-serif)"
-            >
-              ⚡ {tooltip.division.listings} Active Verified Listings
-            </text>
-          </g>
-        )}
       </svg>
+
+      {/* Floating HTML Popover Tooltip with Crystal Clear Text */}
+      {tooltip && (
+        <div
+          className="fixed z-50 pointer-events-none -translate-x-1/2 -translate-y-full mb-4 px-4 py-3 bg-slate-950/95 border border-primary/50 text-white rounded-xl shadow-2xl backdrop-blur-md transition-all duration-75 min-w-[210px] text-left leading-normal"
+          style={{ left: tooltip.clientX, top: tooltip.clientY }}
+        >
+          <div className="flex items-center justify-between gap-3 border-b border-slate-800/80 pb-1.5 mb-1.5">
+            <span className="font-display text-xs font-bold text-white tracking-wide">
+              {tooltip.division.name} Division
+            </span>
+            <span className="text-[10px] font-semibold text-primary bg-primary/20 px-2 py-0.5 rounded-full border border-primary/30 shrink-0">
+              {tooltip.division.userPercentage ?? "5.0%"} Users
+            </span>
+          </div>
+
+          <p className="text-[11px] text-slate-300 leading-snug font-sans mb-1.5">
+            <span className="text-slate-400 font-medium block text-[10px] uppercase tracking-wider mb-0.5">
+              Covered Districts:
+            </span>
+            {tooltip.division.districts ?? tooltip.division.name}
+          </p>
+
+          <div className="pt-1.5 border-t border-slate-800/80 flex items-center justify-between text-[10px] font-semibold text-emerald-400">
+            <span>⚡ {tooltip.division.listings} Verified Listings</span>
+            <span className="text-slate-400 font-normal text-[9px]">Active Region</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
