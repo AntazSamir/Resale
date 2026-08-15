@@ -62,7 +62,7 @@ export const products: Product[] = [
     retail: 145000,
     specs: [
       { label: "Storage", value: "256GB" },
-      { label: "Display", value: "6.1\" Super Retina XDR" },
+      { label: "Display", value: '6.1" Super Retina XDR' },
       { label: "Chip", value: "A17 Pro" },
     ],
   },
@@ -76,7 +76,7 @@ export const products: Product[] = [
     specs: [
       { label: "Memory", value: "8GB unified" },
       { label: "Storage", value: "256GB SSD" },
-      { label: "Display", value: "13.6\" Liquid Retina" },
+      { label: "Display", value: '13.6" Liquid Retina' },
     ],
   },
   {
@@ -115,7 +115,11 @@ export const listings: Listing[] = [
     sellerNote:
       "Bought from Apple Store Dhaka in Nov 2024, used with a case and screen protector from day one. Selling because I upgraded to the 16 Pro. Serial and IMEI shared with the buyer after purchase.",
     inspection: [
-      { component: "Screen", status: "Flawless", notes: "Original panel, no burn-in, true tone working" },
+      {
+        component: "Screen",
+        status: "Flawless",
+        notes: "Original panel, no burn-in, true tone working",
+      },
       { component: "Body / frame", status: "No visible signs of use" },
       { component: "Back panel", status: "No cracks or chips" },
       { component: "Cameras", status: "All lenses clear", notes: "Rear and front tested" },
@@ -149,7 +153,11 @@ export const listings: Listing[] = [
       "Daily driver for a year, always in a case. Minor frame marks visible only in direct light. Cable included, no box.",
     inspection: [
       { component: "Screen", status: "No visible scratches", notes: "Original panel" },
-      { component: "Body / frame", status: "Minor signs of use", notes: "Light marks on the stainless frame" },
+      {
+        component: "Body / frame",
+        status: "Minor signs of use",
+        notes: "Light marks on the stainless frame",
+      },
       { component: "Back panel", status: "No cracks" },
       { component: "Cameras", status: "All lenses clear" },
       { component: "Speaker & mic", status: "Working" },
@@ -181,8 +189,16 @@ export const listings: Listing[] = [
     sellerNote:
       "Screen was replaced at an authorised service centre in 2025 (job sheet available). Corners show scuffs from a drop before the repair. Priced accordingly.",
     inspection: [
-      { component: "Screen", status: "Replaced panel, no scratches", notes: "Official service replacement, Mar 2025" },
-      { component: "Body / frame", status: "Visible scuffs on corners", notes: "From a drop, no bends" },
+      {
+        component: "Screen",
+        status: "Replaced panel, no scratches",
+        notes: "Official service replacement, Mar 2025",
+      },
+      {
+        component: "Body / frame",
+        status: "Visible scuffs on corners",
+        notes: "From a drop, no bends",
+      },
       { component: "Back panel", status: "Hairline scratch, no crack" },
       { component: "Cameras", status: "Clear, no dust" },
       { component: "Speaker & mic", status: "Working" },
@@ -193,7 +209,11 @@ export const listings: Listing[] = [
       { component: "Water damage", status: "No indicator triggered" },
       { component: "Activation lock", status: "Removed" },
       { component: "Network lock", status: "Factory unlocked" },
-      { component: "Repairs / replaced parts", status: "Screen replaced (official)", notes: "Invoice not available" },
+      {
+        component: "Repairs / replaced parts",
+        status: "Screen replaced (official)",
+        notes: "Invoice not available",
+      },
     ],
     productId: "iphone-15-pro-256",
     price: 82000,
@@ -248,10 +268,18 @@ export const listings: Listing[] = [
     inspection: [
       { component: "Display", status: "Two faint scratches", notes: "Visible when screen is off" },
       { component: "Body / chassis", status: "Dent on lid corner" },
-      { component: "Keyboard", status: "Replaced, all keys working", notes: "Third-party service, 2025" },
+      {
+        component: "Keyboard",
+        status: "Replaced, all keys working",
+        notes: "Third-party service, 2025",
+      },
       { component: "Trackpad", status: "Click and gestures normal" },
       { component: "Speakers & mic", status: "Working" },
-      { component: "Ports & charging", status: "Working", notes: "Third-party 65W charger included" },
+      {
+        component: "Ports & charging",
+        status: "Working",
+        notes: "Third-party 65W charger included",
+      },
       { component: "Battery", status: "88% health" },
       { component: "Storage / RAM", status: "256GB SSD, 8GB" },
       { component: "Performance", status: "Normal" },

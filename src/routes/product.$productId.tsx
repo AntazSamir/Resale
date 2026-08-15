@@ -2,7 +2,15 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { Check, FileText, ShieldCheck, Star } from "lucide-react";
 import { SiteFooter, SiteHeader } from "@/components/site-header";
 import { GradeBadge } from "@/components/grade-badge";
-import { cheapest, gradeCriteria, gradeLabel, grades, listingsFor, productFor, taka } from "@/data/catalog";
+import {
+  cheapest,
+  gradeCriteria,
+  gradeLabel,
+  grades,
+  listingsFor,
+  productFor,
+  taka,
+} from "@/data/catalog";
 
 export const Route = createFileRoute("/product/$productId")({
   loader: ({ params }) => {
@@ -81,7 +89,10 @@ function ProductPage() {
 
             <dl className="mt-8 border-t border-border">
               {product.specs.map((s) => (
-                <div key={s.label} className="flex justify-between border-b border-border py-3 text-sm">
+                <div
+                  key={s.label}
+                  className="flex justify-between border-b border-border py-3 text-sm"
+                >
                   <dt className="text-muted-foreground">{s.label}</dt>
                   <dd>{s.value}</dd>
                 </div>
@@ -161,7 +172,10 @@ function ProductPage() {
           </div>
           <ul className="grid md:grid-cols-2">
             {grades.map((g) => (
-              <li key={g} className="grid gap-4 border-b border-border py-5 sm:grid-cols-[auto_1fr]">
+              <li
+                key={g}
+                className="grid gap-4 border-b border-border py-5 sm:grid-cols-[auto_1fr]"
+              >
                 <span className="grade-chip size-7 text-xs">{g}</span>
                 <span className="text-sm">
                   <span className="block font-medium">{gradeLabel[g]}</span>

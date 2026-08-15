@@ -176,10 +176,7 @@ function ListingPage() {
                 </span>
               </div>
               <div className="mt-3 h-px w-full bg-border">
-                <div
-                  className="h-px bg-primary"
-                  style={{ width: `${listing.conditionScore}%` }}
-                />
+                <div className="h-px bg-primary" style={{ width: `${listing.conditionScore}%` }} />
               </div>
               <dl className="mt-4 border-t border-border">
                 {transparency.map(([label, value]) => (
@@ -206,8 +203,8 @@ function ListingPage() {
           <div>
             <h2 className="text-2xl">Component inspection</h2>
             <p className="mt-2 max-w-xl text-sm text-muted-foreground">
-              Every listing is graded against a fixed checklist for its category, so the letter grade
-              is always backed by structured data.
+              Every listing is graded against a fixed checklist for its category, so the letter
+              grade is always backed by structured data.
             </p>
             <dl className="mt-8 border-t border-border">
               {listing.inspection.map((item) => (
@@ -219,7 +216,9 @@ function ListingPage() {
                   <dd className="text-sm">
                     {item.status}
                     {item.notes && (
-                      <span className="mt-1 block text-xs text-subtle-foreground">{item.notes}</span>
+                      <span className="mt-1 block text-xs text-subtle-foreground">
+                        {item.notes}
+                      </span>
                     )}
                   </dd>
                 </div>

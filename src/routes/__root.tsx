@@ -15,7 +15,7 @@ import { SiteFooter, SiteHeader } from "@/components/site-header";
 
 function NotFoundComponent() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background border-x border-border mx-auto max-w-7xl">
       <SiteHeader />
       <div className="flex items-center justify-center px-4 py-24">
         <div className="max-w-md text-center">
