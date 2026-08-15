@@ -152,5 +152,35 @@
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    letter-spacing: -0.025em;
+  }
+}
+
+@utility grade-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--color-foreground);
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+@utility hairline-grid {
+  border-top: 1px solid var(--color-border);
+  border-left: 1px solid var(--color-border);
+
+  & > * {
+    border-right: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border);
   }
 }
