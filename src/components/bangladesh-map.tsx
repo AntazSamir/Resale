@@ -127,8 +127,8 @@ export function BangladeshMapSVG() {
       {/* Compact Floating Tooltip */}
       {tooltip && (
         <div
-          className="fixed z-50 pointer-events-none -translate-x-1/2 -translate-y-full px-3 py-1.5 bg-slate-950/95 border border-white/10 text-white rounded-lg shadow-xl backdrop-blur-md flex items-center gap-2 text-xs whitespace-nowrap"
-          style={{ left: tooltip.clientX, top: tooltip.clientY - 8 }}
+          className="fixed z-50 pointer-events-none -translate-y-1/2 px-3 py-1.5 bg-slate-950/95 border border-white/10 text-white rounded-lg shadow-xl backdrop-blur-md flex items-center gap-2 text-xs whitespace-nowrap"
+          style={{ left: tooltip.clientX + 14, top: tooltip.clientY }}
         >
           <span className="font-bold text-white">{tooltip.division.name}</span>
           <span className="text-slate-500">·</span>
