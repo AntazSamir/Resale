@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { SiteHeader, SiteFooter } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
@@ -183,15 +183,15 @@ function SellWizardPage() {
 
               {/* Bold Orange CTA Button */}
               <div className="shrink-0 flex flex-col items-start md:items-end gap-2">
-                <a
-                  href="mailto:partners@resale.com?subject=Partner%20Inquiry%20-%20Excess%20Inventory"
+                <Link
+                  to="/partner"
                   className="inline-flex items-center justify-center bg-[#ea580c] hover:bg-[#c2410c] text-white font-bold text-base px-8 py-4 uppercase tracking-wider transition-colors border border-[#ea580c]"
                 >
                   Become a Partner
-                </a>
+                </Link>
                 <p className="text-[11px] text-muted-foreground flex items-center gap-1">
                   <Mail className="size-3 text-[#ea580c]" />
-                  <span>📩 Ready to partner? Contact partners@resale.com</span>
+                  <span>📩 Direct partner desk: partners@resale.com</span>
                 </p>
               </div>
             </div>

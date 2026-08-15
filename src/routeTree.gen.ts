@@ -14,6 +14,7 @@ import { Route as CartRouteImport } from './routes/cart'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as PartnerRouteImport } from './routes/partner'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as AccountDisputesRouteImport } from './routes/account.disputes'
 import { Route as AccountOrdersRouteImport } from './routes/account.orders'
@@ -52,6 +53,11 @@ const ContactRoute = ContactRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PartnerRoute = PartnerRouteImport.update({
+  id: '/partner',
+  path: '/partner',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RegisterRoute = RegisterRouteImport.update({
@@ -131,6 +137,7 @@ export interface FileRoutesByFullPath {
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
   '/login': typeof LoginRoute
+  '/partner': typeof PartnerRoute
   '/register': typeof RegisterRoute
   '/account/disputes': typeof AccountDisputesRoute
   '/account/orders': typeof AccountOrdersRouteWithChildren
@@ -152,6 +159,7 @@ export interface FileRoutesByTo {
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
   '/login': typeof LoginRoute
+  '/partner': typeof PartnerRoute
   '/register': typeof RegisterRoute
   '/account/disputes': typeof AccountDisputesRoute
   '/account/orders': typeof AccountOrdersRouteWithChildren
@@ -174,6 +182,7 @@ export interface FileRoutesById {
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
   '/login': typeof LoginRoute
+  '/partner': typeof PartnerRoute
   '/register': typeof RegisterRoute
   '/account/disputes': typeof AccountDisputesRoute
   '/account/orders': typeof AccountOrdersRouteWithChildren
@@ -197,6 +206,7 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/contact'
     | '/login'
+    | '/partner'
     | '/register'
     | '/account/disputes'
     | '/account/orders'
@@ -218,6 +228,7 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/contact'
     | '/login'
+    | '/partner'
     | '/register'
     | '/account/disputes'
     | '/account/orders'
@@ -239,6 +250,7 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/contact'
     | '/login'
+    | '/partner'
     | '/register'
     | '/account/disputes'
     | '/account/orders'
@@ -261,6 +273,7 @@ export interface RootRouteChildren {
   CheckoutRoute: typeof CheckoutRoute
   ContactRoute: typeof ContactRoute
   LoginRoute: typeof LoginRoute
+  PartnerRoute: typeof PartnerRoute
   RegisterRoute: typeof RegisterRoute
   AccountDisputesRoute: typeof AccountDisputesRoute
   AccountOrdersRoute: typeof AccountOrdersRouteWithChildren
@@ -311,6 +324,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/partner': {
+      id: '/partner'
+      path: '/partner'
+      fullPath: '/partner'
+      preLoaderRoute: typeof PartnerRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/register': {
@@ -432,6 +452,7 @@ const rootRouteChildren: RootRouteChildren = {
   CheckoutRoute: CheckoutRoute,
   ContactRoute: ContactRoute,
   LoginRoute: LoginRoute,
+  PartnerRoute: PartnerRoute,
   RegisterRoute: RegisterRoute,
   AccountDisputesRoute: AccountDisputesRoute,
   AccountOrdersRoute: AccountOrdersRouteWithChildren,

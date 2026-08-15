@@ -623,7 +623,7 @@ export default function ContactPage() {
                 For brand excess inventory, bulk liquidation, or authorized retail partnerships:
               </p>
               <Link
-                to="/sell"
+                to="/partner"
                 className="inline-block text-xs font-bold uppercase tracking-wider text-primary hover:underline"
               >
                 Become a Resale Partner →
@@ -738,7 +738,7 @@ export default function ContactPage() {
                 Email Support
               </a>
               <Link
-                to="/sell"
+                to="/partner"
                 className="inline-flex items-center justify-center bg-[#ea580c] hover:bg-[#c2410c] text-white font-bold text-sm px-6 py-3 uppercase tracking-wider transition-colors border border-[#ea580c]"
               >
                 Become a Partner →
