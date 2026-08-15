@@ -205,4 +205,4 @@ export const listingsFor = (productId: string) =>
 
 export const productFor = (id: string) => products.find((p) => p.id === id);
 
-export const cheapest = (productId: string) => listingsFor(productId)[0];
+export const cheapest = (productId: string) => listingsFor(productId)[0] as Listing;
