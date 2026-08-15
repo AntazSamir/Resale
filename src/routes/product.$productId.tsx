@@ -30,7 +30,7 @@ function ProductPage() {
   const { product } = Route.useLoaderData();
   const rows = listingsFor(product.id);
   const best = cheapest(product.id);
-  const high = rows[rows.length - 1];
+  const high = rows[rows.length - 1] ?? best;
   const available = grades.filter((g) => rows.some((l) => l.grade === g));
 
   return (

@@ -42,6 +42,7 @@ export const Route = createFileRoute("/listing/$listingId")({
 function ListingPage() {
   const { listing, product } = Route.useLoaderData();
   const [shot, setShot] = useState(0);
+  const active = galleryShots[shot] ?? galleryShots[0]!;
 
   const transparency = [
     ["Overall condition", `${listing.grade} — ${gradeLabel[listing.grade]}`],
@@ -83,11 +84,11 @@ function ListingPage() {
             <div className="bg-muted">
               <img
                 src={product.image}
-                alt={`${product.name} — ${galleryShots[shot].label.toLowerCase()} view of the unit sold by ${listing.seller.name}`}
+                alt={`${product.name} — ${active.label.toLowerCase()} view of the unit sold by ${listing.seller.name}`}
                 width={900}
                 height={900}
                 className="aspect-square w-full object-cover"
-                style={{ objectPosition: galleryShots[shot].position }}
+                style={{ objectPosition: active.position }}
               />
             </div>
             <div className="mt-3 grid grid-cols-4 gap-3">
