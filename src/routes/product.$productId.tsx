@@ -1,8 +1,8 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { Check, ShieldCheck, Star } from "lucide-react";
+import { Check, FileText, ShieldCheck, Star } from "lucide-react";
 import { SiteFooter, SiteHeader } from "@/components/site-header";
 import { GradeBadge } from "@/components/grade-badge";
-import { cheapest, listingsFor, productFor, taka } from "@/data/catalog";
+import { cheapest, gradeCriteria, gradeLabel, grades, listingsFor, productFor, taka } from "@/data/catalog";
 
 export const Route = createFileRoute("/product/$productId")({
   loader: ({ params }) => {
@@ -30,6 +30,8 @@ function ProductPage() {
   const { product } = Route.useLoaderData();
   const rows = listingsFor(product.id);
   const best = cheapest(product.id);
+  const high = rows[rows.length - 1] ?? best;
+  const available = grades.filter((g) => rows.some((l) => l.grade === g));
 
   return (
     <div className="min-h-screen bg-background">
@@ -62,8 +64,20 @@ function ProductPage() {
             <h1 className="mt-3 text-3xl md:text-4xl">{product.name}</h1>
             <p className="mt-6 font-display text-3xl">from {taka(best.price)}</p>
             <p className="mt-1 text-sm text-muted-foreground">
-              New retail {taka(product.retail)} · {rows.length} seller listings
+              {rows.length} seller listings · {taka(best.price)} – {taka(high.price)} · new retail{" "}
+              {taka(product.retail)}
             </p>
+
+            <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-3">
+              {available.map((g) => (
+                <span key={g} className="inline-flex items-center gap-2 text-xs">
+                  <span className="grade-chip size-6 text-[11px]">{g}</span>
+                  <span className="text-subtle-foreground">
+                    {gradeLabel[g]} · {rows.filter((l) => l.grade === g).length}
+                  </span>
+                </span>
+              ))}
+            </div>
 
             <dl className="mt-8 border-t border-border">
               {product.specs.map((s) => (
@@ -86,8 +100,16 @@ function ProductPage() {
             {rows.map((l) => (
               <li
                 key={l.id}
-                className="grid grid-cols-1 items-center gap-4 border-b border-border py-6 md:grid-cols-[1fr_auto_auto]"
+                className="grid grid-cols-1 gap-6 border-b border-border py-6 md:grid-cols-[88px_1fr_auto_auto] md:items-center"
               >
+                <div className="hidden bg-muted md:block">
+                  <img
+                    src={product.image}
+                    alt={`${product.name} unit listed by ${l.seller.name}`}
+                    className="aspect-square w-full object-cover"
+                    loading="lazy"
+                  />
+                </div>
                 <div>
                   <div className="flex flex-wrap items-center gap-4">
                     <GradeBadge grade={l.grade} />
@@ -108,6 +130,9 @@ function ProductPage() {
                     {l.invoice ? "Invoice available" : "No invoice"}
                     {l.battery ? ` · Battery ${l.battery}%` : ""} · {l.accessories}
                   </p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Condition score {l.conditionScore}/100 · {l.physical}
+                  </p>
                 </div>
                 <p className="font-display text-2xl md:text-right">{taka(l.price)}</p>
                 <Link
@@ -125,6 +150,26 @@ function ProductPage() {
             <Check className="size-4" /> Every listing above passed listing moderation and carries a
             full condition report.
           </p>
+        </section>
+
+        <section className="mt-20">
+          <div className="flex items-end justify-between border-b border-border pb-4">
+            <h2 className="text-2xl">What the grades mean</h2>
+            <p className="flex items-center gap-2 text-sm text-muted-foreground">
+              <FileText className="size-4" /> Same checklist for every seller
+            </p>
+          </div>
+          <ul className="grid md:grid-cols-2">
+            {grades.map((g) => (
+              <li key={g} className="grid gap-4 border-b border-border py-5 sm:grid-cols-[auto_1fr]">
+                <span className="grade-chip size-7 text-xs">{g}</span>
+                <span className="text-sm">
+                  <span className="block font-medium">{gradeLabel[g]}</span>
+                  <span className="mt-1 block text-muted-foreground">{gradeCriteria[g]}</span>
+                </span>
+              </li>
+            ))}
+          </ul>
         </section>
       </div>
       <SiteFooter />
