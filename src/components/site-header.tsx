@@ -93,8 +93,10 @@ export function SiteFooter() {
       {/* Light Mode Giant Watermark Banner Section */}
       <div className="border-b border-border bg-muted/40 pt-16 pb-6 px-5 text-center relative overflow-hidden select-none">
         <div className="mx-auto max-w-7xl relative z-10 flex flex-col items-center justify-center">
-          <div className="font-display font-black text-foreground/30 text-[13vw] md:text-[11vw] tracking-tighter leading-none uppercase mask-[linear-gradient(to_bottom,black_30%,transparent_100%)] flex items-center justify-center gap-3 md:gap-4">
-            <span>RESALE</span>
+          <div className="flex items-center justify-center gap-4 md:gap-6">
+            <span className="font-display font-black text-foreground/30 text-[13vw] md:text-[11vw] tracking-tighter leading-none uppercase mask-[linear-gradient(to_bottom,black_30%,transparent_100%)]">
+              RESALE
+            </span>
             <BangladeshMapSVG />
           </div>
         </div>

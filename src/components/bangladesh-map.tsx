@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { createPortal } from "react-dom";
 
 interface Division {
   id: string;
@@ -83,7 +84,7 @@ export function BangladeshMapSVG() {
     <div className="relative inline-block select-none">
       <svg
         viewBox="0 0 437.80637 601.16034"
-        className="h-[1.75em] w-auto shrink-0 pointer-events-auto opacity-100 drop-shadow-md overflow-visible transition-all duration-300"
+        className="h-[11vw] md:h-[9vw] w-auto shrink-0 pointer-events-auto opacity-100 drop-shadow-md overflow-visible transition-all duration-300"
         aria-label="Bangladesh Divisions Map"
         role="img"
       >
