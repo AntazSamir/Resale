@@ -20,10 +20,22 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Check,
+  CheckCircle2,
+  TrendingUp,
+  ShieldCheck,
+  Recycle,
+  Building2,
+  Mail,
+  ArrowDown,
+  Layers,
+  Sparkles,
+} from "lucide-react";
 
 export const Route = createFileRoute("/sell/")({
   head: () => ({
-    meta: [{ title: "Create Listing | Resale.com" }],
+    meta: [{ title: "Sell with Us & Partner Program | Resale.com" }],
   }),
   component: SellWizardPage,
 });
@@ -45,9 +57,161 @@ function SellWizardPage() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <SiteHeader />
-      <main className="flex-1 mx-auto max-w-3xl px-5 py-10 w-full">
-        <h1 className="text-3xl mb-2">Create a Listing</h1>
-        <p className="text-muted-foreground mb-8">Step {step} of 4</p>
+
+      {/* ── Partner & Excess Inventory Section ── */}
+      <section className="border-b border-border bg-card">
+        <div className="mx-auto max-w-5xl px-5 py-14 space-y-12">
+          {/* Main Hero Header */}
+          <div className="space-y-4 text-center max-w-3xl mx-auto">
+            <div className="inline-flex items-center gap-2 border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-primary">
+              <Building2 className="size-3.5" />
+              For Brands, Retailers &amp; Businesses
+            </div>
+            <h1 className="text-3xl md:text-5xl font-display font-bold tracking-tight text-foreground">
+              Sell Your Excess &amp; Pre-Owned Inventory — Partner with Resale
+            </h1>
+            <p className="text-sm md:text-base text-subtle-foreground leading-relaxed">
+              Are you a brand owner, authorized retailer, or business with excess, returned,
+              open-box, or unsold electronics? Don’t let valuable inventory sit idle. Resale helps
+              you turn unwanted stock into revenue through a trusted, structured resale marketplace
+              in Bangladesh.
+            </p>
+          </div>
+
+          {/* 4 Feature Pillars Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="border border-border p-6 bg-background space-y-2.5">
+              <div className="flex items-center gap-2 text-foreground font-semibold text-base">
+                <CheckCircle2 className="size-5 text-emerald-600 shrink-0" />
+                <span>Maximize Your Recovery</span>
+              </div>
+              <p className="text-xs md:text-sm text-subtle-foreground leading-relaxed">
+                Get better value from your excess inventory by reaching value-conscious consumers
+                directly through Resale. Turn unused, returned, or surplus electronics into revenue
+                instead of letting them lose value in storage.
+              </p>
+            </div>
+
+            <div className="border border-border p-6 bg-background space-y-2.5">
+              <div className="flex items-center gap-2 text-foreground font-semibold text-base">
+                <CheckCircle2 className="size-5 text-emerald-600 shrink-0" />
+                <span>Simple, Hassle-Free Selling</span>
+              </div>
+              <p className="text-xs md:text-sm text-subtle-foreground leading-relaxed">
+                From listing and product verification to buyer discovery and order fulfillment,
+                Resale is designed to make the selling process simple and transparent. Free up
+                storage space while reducing the operational burden of managing unwanted inventory.
+              </p>
+            </div>
+
+            <div className="border border-border p-6 bg-background space-y-2.5">
+              <div className="flex items-center gap-2 text-foreground font-semibold text-base">
+                <CheckCircle2 className="size-5 text-emerald-600 shrink-0" />
+                <span>Build Trust Through Transparency</span>
+              </div>
+              <p className="text-xs md:text-sm text-subtle-foreground leading-relaxed">
+                Every product can be presented with structured specifications, condition grades,
+                warranty information, invoice availability, and detailed product information,
+                helping buyers make confident purchasing decisions.
+              </p>
+            </div>
+
+            <div className="border border-border p-6 bg-background space-y-2.5">
+              <div className="flex items-center gap-2 text-foreground font-semibold text-base">
+                <CheckCircle2 className="size-5 text-emerald-600 shrink-0" />
+                <span>Support the Circular Economy</span>
+              </div>
+              <p className="text-xs md:text-sm text-subtle-foreground leading-relaxed">
+                Give electronics a second life. By reselling quality products instead of letting
+                them become waste, you help extend product lifecycles, reduce e-waste, and promote a
+                more sustainable electronics ecosystem in Bangladesh.
+              </p>
+            </div>
+          </div>
+
+          {/* Built for electronics banner */}
+          <div className="text-center py-2 space-y-1">
+            <p className="font-display font-semibold text-lg text-foreground">
+              Built for electronics. Designed for trust.
+            </p>
+            <p className="text-xs text-subtle-foreground">
+              Join Resale and turn excess, returned, open-box, and like-new inventory into new
+              opportunities.
+            </p>
+          </div>
+
+          {/* ── Compact Highlight Card (Shorter, website-friendly version) ── */}
+          <div className="border-2 border-[#ea580c] bg-orange-50/40 dark:bg-orange-950/20 p-8 space-y-6">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+              <div className="space-y-3 max-w-2xl">
+                <div className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-[#ea580c]">
+                  <Sparkles className="size-4 text-[#ea580c]" />
+                  Turn Excess Inventory Into Revenue
+                </div>
+                <h2 className="text-2xl md:text-3xl font-display font-bold text-foreground">
+                  Have returned, excess, open-box, or unsold electronics sitting in your inventory?
+                </h2>
+                <p className="text-sm text-subtle-foreground">
+                  Resale helps brands and authorized sellers reach consumers looking for quality
+                  electronics at better prices.
+                </p>
+
+                <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2 text-xs md:text-sm text-foreground">
+                  <li className="flex items-center gap-2">
+                    <Check className="size-4 text-[#ea580c] shrink-0 stroke-3" />
+                    <span>Recover more value from unwanted inventory</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="size-4 text-[#ea580c] shrink-0 stroke-3" />
+                    <span>Simplify your resale process with structured listings</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="size-4 text-[#ea580c] shrink-0 stroke-3" />
+                    <span>Build buyer confidence with transparent condition info</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="size-4 text-[#ea580c] shrink-0 stroke-3" />
+                    <span>Give products a second life and reduce e-waste</span>
+                  </li>
+                </ul>
+
+                <p className="text-xs md:text-sm font-medium text-foreground pt-1">
+                  Your excess inventory shouldn&apos;t sit in a warehouse. Give it a second life
+                  with Resale.
+                </p>
+              </div>
+
+              {/* Bold Orange CTA Button */}
+              <div className="shrink-0 flex flex-col items-start md:items-end gap-2">
+                <a
+                  href="mailto:partners@resale.com?subject=Partner%20Inquiry%20-%20Excess%20Inventory"
+                  className="inline-flex items-center justify-center bg-[#ea580c] hover:bg-[#c2410c] text-white font-bold text-base px-8 py-4 uppercase tracking-wider transition-colors border border-[#ea580c]"
+                >
+                  Become a Partner
+                </a>
+                <p className="text-[11px] text-muted-foreground flex items-center gap-1">
+                  <Mail className="size-3 text-[#ea580c]" />
+                  <span>📩 Ready to partner? Contact partners@resale.com</span>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Create Individual Listing Section ── */}
+      <main id="create-listing" className="flex-1 mx-auto max-w-3xl px-5 py-12 w-full">
+        <div className="mb-8 border-b border-border pb-4 flex items-end justify-between">
+          <div>
+            <h2 className="text-2xl md:text-3xl font-display font-bold">Create a Listing</h2>
+            <p className="text-sm text-muted-foreground mt-1">
+              List individual items directly on the marketplace
+            </p>
+          </div>
+          <p className="text-xs font-semibold uppercase tracking-widest text-primary">
+            Step {step} of 4
+          </p>
+        </div>
 
         <Card>
           {step === 1 && (

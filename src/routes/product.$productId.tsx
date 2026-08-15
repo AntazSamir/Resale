@@ -1,7 +1,8 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { Check, FileText, ShieldCheck, Star } from "lucide-react";
+import { Check, FileText, ShieldCheck, Sparkles, Star, Tag } from "lucide-react";
 import { SiteFooter, SiteHeader } from "@/components/site-header";
 import { GradeBadge } from "@/components/grade-badge";
+import { ProductCard } from "@/components/product-card";
 import {
   cheapest,
   gradeCriteria,
@@ -9,6 +10,7 @@ import {
   grades,
   listingsFor,
   productFor,
+  products,
   taka,
 } from "@/data/catalog";
 
@@ -40,6 +42,23 @@ function ProductPage() {
   const best = cheapest(product.id);
   const high = rows[rows.length - 1] ?? best;
   const available = grades.filter((g) => rows.some((l) => l.grade === g));
+
+  // Related products: same category first, then others
+  // Only include products that have at least one active listing
+  const others = products.filter((p) => p.id !== product.id && listingsFor(p.id).length > 0);
+  const sameCategory = others.filter((p) => p.category === product.category);
+  const different = others.filter((p) => p.category !== product.category);
+  const related = [...sameCategory, ...different].slice(0, 3);
+
+  // Best deal: product with highest discount % among all products
+  const bestDealProduct = products
+    .filter((p) => listingsFor(p.id).length > 0)
+    .reduce((best, p) => {
+      const c = cheapest(p.id);
+      const discountBest = (best.retail - cheapest(best.id).price) / best.retail;
+      const discountP = (p.retail - c.price) / p.retail;
+      return discountP > discountBest ? p : best;
+    });
 
   return (
     <div className="min-h-screen bg-background">
@@ -185,6 +204,57 @@ function ProductPage() {
             ))}
           </ul>
         </section>
+
+        {/* ── Related Products & Deals ── */}
+        {related.length > 0 && (
+          <section className="mt-20">
+            <div className="flex items-end justify-between border-b border-border pb-4">
+              <h2 className="text-2xl flex items-center gap-2">
+                <Sparkles className="size-5 text-primary" />
+                Related Products &amp; Deals
+              </h2>
+              <Link
+                to="/"
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Browse all →
+              </Link>
+            </div>
+
+            {/* Best deal banner */}
+            <div className="mt-6 flex items-center gap-4 rounded-lg border border-amber-300 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-700 px-5 py-4">
+              <Tag className="size-5 shrink-0 text-amber-600" />
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-semibold uppercase tracking-widest text-amber-700 dark:text-amber-400">
+                  🔥 Best Deal Right Now
+                </p>
+                <p className="mt-0.5 text-sm font-medium truncate">{bestDealProduct.name}</p>
+              </div>
+              <div className="text-right shrink-0">
+                <p className="font-display text-xl font-bold text-amber-700 dark:text-amber-400">
+                  {taka(cheapest(bestDealProduct.id).price)}
+                </p>
+                <p className="text-xs text-muted-foreground line-through">
+                  {taka(bestDealProduct.retail)}
+                </p>
+              </div>
+              <Link
+                to="/product/$productId"
+                params={{ productId: bestDealProduct.id }}
+                className="shrink-0 inline-flex items-center justify-center border border-amber-600 text-amber-700 dark:text-amber-400 dark:border-amber-600 px-4 py-2 text-sm font-medium transition-colors hover:bg-amber-600 hover:text-white"
+              >
+                View
+              </Link>
+            </div>
+
+            {/* Related product cards */}
+            <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {related.map((p) => (
+                <ProductCard key={p.id} product={p} />
+              ))}
+            </div>
+          </section>
+        )}
       </div>
       <SiteFooter />
     </div>

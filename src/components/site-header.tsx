@@ -1,6 +1,7 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useLocation } from "@tanstack/react-router";
 import { Search, ShoppingBag, User } from "lucide-react";
 import { BangladeshMapSVG } from "./bangladesh-map";
+import resaleLogo from "@/assets/resale-logo.png";
 
 export function SiteHeader() {
   return (
@@ -16,8 +17,16 @@ export function SiteHeader() {
 
       <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur">
         <div className="mx-auto flex h-16 max-w-7xl items-center gap-6 px-5">
-          <Link to="/" className="font-display text-lg font-semibold tracking-tight">
-            RESALE
+          <Link
+            to="/"
+            className="inline-flex items-center gap-0.5 font-display text-xl font-bold tracking-tight"
+          >
+            <img
+              src={resaleLogo}
+              alt="Resale logo"
+              className="h-10 w-auto object-contain shrink-0"
+            />
+            <span className="leading-none flex items-center">RESALE</span>
           </Link>
           <div className="ml-auto hidden flex-1 items-center gap-2 border border-border px-3 py-2 text-sm md:flex md:max-w-sm">
             <Search className="size-4 text-muted-foreground" />
@@ -87,43 +96,51 @@ export function SiteHeader() {
 }
 
 export function SiteFooter() {
+  const location = useLocation();
+  const isHomePage = location.pathname === "/";
+
   return (
     <footer className="mt-24 border-t border-border bg-card/60">
-      {/* Newsletter & Deal Alerts Header */}
-      <div className="border-b border-border py-12">
-        <div className="mx-auto max-w-7xl px-5 flex flex-col md:flex-row items-center justify-between gap-6">
-          <div>
-            <h3 className="text-lg font-display font-semibold text-foreground">
-              Never miss a Grade A+ open-box drop
-            </h3>
-            <p className="text-xs text-subtle-foreground mt-1">
-              Get notified when high-demand iPhones, MacBooks, and cameras are listed at verified
-              discount prices.
-            </p>
+      {isHomePage && (
+        <>
+          {/* Newsletter & Deal Alerts Header */}
+          <div className="border-b border-border py-12">
+            <div className="mx-auto max-w-7xl px-5 flex flex-col md:flex-row items-center justify-between gap-6">
+              <div>
+                <h3 className="text-lg font-display font-semibold text-foreground">
+                  Never miss a Grade A+ open-box drop
+                </h3>
+                <p className="text-xs text-subtle-foreground mt-1">
+                  Get notified when high-demand iPhones, MacBooks, and cameras are listed at
+                  verified discount prices.
+                </p>
+              </div>
+              <div className="flex w-full md:w-auto items-center gap-2 max-w-md">
+                <input
+                  type="email"
+                  placeholder="Enter your phone or email address"
+                  className="bg-background border border-border px-4 py-2.5 text-sm rounded-lg outline-none focus:border-primary flex-1 min-w-60"
+                />
+                <button className="bg-primary text-primary-foreground text-sm font-medium px-5 py-2.5 rounded-lg hover:opacity-90 transition-opacity shrink-0">
+                  Subscribe
+                </button>
+              </div>
+            </div>
           </div>
-          <div className="flex w-full md:w-auto items-center gap-2 max-w-md">
-            <input
-              type="email"
-              placeholder="Enter your phone or email address"
-              className="bg-background border border-border px-4 py-2.5 text-sm rounded-lg outline-none focus:border-primary flex-1 min-w-60"
-            />
-            <button className="bg-primary text-primary-foreground text-sm font-medium px-5 py-2.5 rounded-lg hover:opacity-90 transition-opacity shrink-0">
-              Subscribe
-            </button>
+          {/* Light Mode Giant Watermark Banner Section */}
+          <div className="border-b border-border bg-muted/40 pt-16 pb-6 px-5 text-center relative overflow-hidden select-none">
+            <div className="mx-auto max-w-7xl relative z-10 flex flex-col items-center justify-center">
+              <div className="flex items-center justify-center gap-4 md:gap-6">
+                <span className="font-display font-black text-foreground/30 text-[13vw] md:text-[11vw] tracking-tighter leading-none uppercase mask-[linear-gradient(to_bottom,black_30%,transparent_100%)]">
+                  RESALE
+                </span>
+                <BangladeshMapSVG />
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
-      {/* Light Mode Giant Watermark Banner Section */}
-      <div className="border-b border-border bg-muted/40 pt-16 pb-6 px-5 text-center relative overflow-hidden select-none">
-        <div className="mx-auto max-w-7xl relative z-10 flex flex-col items-center justify-center">
-          <div className="flex items-center justify-center gap-4 md:gap-6">
-            <span className="font-display font-black text-foreground/30 text-[13vw] md:text-[11vw] tracking-tighter leading-none uppercase mask-[linear-gradient(to_bottom,black_30%,transparent_100%)]">
-              RESALE
-            </span>
-            <BangladeshMapSVG />
-          </div>
-        </div>
-      </div>{" "}
+        </>
+      )}
+
       {/* Main Footer Links Grid with Hairline Border Grid */}
       <div className="mx-auto max-w-7xl px-5 py-12">
         <div className="hairline-grid grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 bg-card">
@@ -131,9 +148,14 @@ export function SiteFooter() {
           <div className="col-span-1 lg:col-span-2 p-6 md:p-8 space-y-4">
             <Link
               to="/"
-              className="font-display text-xl font-bold tracking-tight text-foreground block"
+              className="inline-flex items-center gap-0.5 font-display text-2xl font-bold tracking-tight text-foreground"
             >
-              RESALE<span className="text-primary">.com</span>
+              <img
+                src={resaleLogo}
+                alt="Resale logo"
+                className="h-11 w-auto object-contain shrink-0"
+              />
+              <span className="leading-none flex items-center">RESALE</span>
             </Link>
             <p className="text-xs text-subtle-foreground leading-relaxed max-w-sm">
               Bangladesh&apos;s premier C2C marketplace for quality-checked pre-owned, open-box, and
