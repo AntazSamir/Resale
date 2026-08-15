@@ -84,7 +84,7 @@ export function BangladeshMapSVG() {
     <div className="relative inline-block select-none">
       <svg
         viewBox="0 0 437.80637 601.16034"
-        className="h-[11vw] md:h-[9vw] w-auto shrink-0 pointer-events-auto opacity-100 drop-shadow-md overflow-visible transition-all duration-300"
+        className="h-[16vw] md:h-[13vw] w-auto shrink-0 pointer-events-auto opacity-100 drop-shadow-md overflow-visible transition-all duration-300"
         aria-label="Bangladesh Divisions Map"
         role="img"
       >
@@ -124,32 +124,16 @@ export function BangladeshMapSVG() {
         })}
       </svg>
 
-      {/* Floating HTML Popover Tooltip with Crystal Clear Text */}
+      {/* Compact Floating Tooltip */}
       {tooltip && (
         <div
-          className="fixed z-50 pointer-events-none -translate-x-1/2 -translate-y-full mb-4 px-4 py-3 bg-slate-950/95 border border-primary/50 text-white rounded-xl shadow-2xl backdrop-blur-md transition-all duration-75 min-w-[210px] text-left leading-normal"
-          style={{ left: tooltip.clientX, top: tooltip.clientY }}
+          className="fixed z-50 pointer-events-none -translate-x-1/2 -translate-y-full px-3 py-1.5 bg-slate-950/95 border border-white/10 text-white rounded-lg shadow-xl backdrop-blur-md flex items-center gap-2 text-xs whitespace-nowrap"
+          style={{ left: tooltip.clientX, top: tooltip.clientY - 8 }}
         >
-          <div className="flex items-center justify-between gap-3 border-b border-slate-800/80 pb-1.5 mb-1.5">
-            <span className="font-display text-xs font-bold text-white tracking-wide">
-              {tooltip.division.name} Division
-            </span>
-            <span className="text-[10px] font-semibold text-primary bg-primary/20 px-2 py-0.5 rounded-full border border-primary/30 shrink-0">
-              {tooltip.division.userPercentage ?? "5.0%"} Users
-            </span>
-          </div>
-
-          <p className="text-[11px] text-slate-300 leading-snug font-sans mb-1.5">
-            <span className="text-slate-400 font-medium block text-[10px] uppercase tracking-wider mb-0.5">
-              Covered Districts:
-            </span>
-            {tooltip.division.districts ?? tooltip.division.name}
-          </p>
-
-          <div className="pt-1.5 border-t border-slate-800/80 flex items-center justify-between text-[10px] font-semibold text-emerald-400">
-            <span>⚡ {tooltip.division.listings} Verified Listings</span>
-            <span className="text-slate-400 font-normal text-[9px]">Active Region</span>
-          </div>
+          <span className="font-bold text-white">{tooltip.division.name}</span>
+          <span className="text-slate-500">·</span>
+          <span className="text-emerald-400 font-medium">⚡ {tooltip.division.listings}</span>
+          <span className="text-primary font-semibold bg-primary/20 px-1.5 py-0.5 rounded-full text-[10px]">{tooltip.division.userPercentage ?? "5%"}</span>
         </div>
       )}
     </div>
