@@ -3,8 +3,8 @@ import { useState } from "react";
 interface Division {
   id: string;
   name: string;
-  districts: string;
-  userPercentage: string;
+  districts?: string;
+  userPercentage?: string;
   listings: number;
   path: string;
 }
@@ -150,7 +150,7 @@ export function BangladeshMapSVG() {
               fill="#ffffff"
               fontFamily="var(--font-display, Inter, sans-serif)"
             >
-              {tooltip.division.name} Division ({tooltip.division.userPercentage})
+              {tooltip.division.name} Division ({tooltip.division.userPercentage ?? "5.0%"})
             </text>
             <text
               x={Math.max(10, Math.min(270, tooltip.x - 75)) + 75}
@@ -161,9 +161,9 @@ export function BangladeshMapSVG() {
               fontFamily="var(--font-display, Inter, sans-serif)"
             >
               Districts:{" "}
-              {tooltip.division.districts.length > 32
-                ? tooltip.division.districts.slice(0, 30) + "..."
-                : tooltip.division.districts}
+              {(tooltip.division.districts ?? tooltip.division.name).length > 32
+                ? (tooltip.division.districts ?? tooltip.division.name).slice(0, 30) + "..."
+                : (tooltip.division.districts ?? tooltip.division.name)}
             </text>
             <text
               x={Math.max(10, Math.min(270, tooltip.x - 75)) + 75}
