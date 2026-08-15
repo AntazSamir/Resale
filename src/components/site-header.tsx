@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Search, ShoppingBag, User } from "lucide-react";
+import { BangladeshMapSVG } from "./bangladesh-map";
 
 export function SiteHeader() {
   return (
@@ -94,11 +95,7 @@ export function SiteFooter() {
         <div className="mx-auto max-w-7xl relative z-10 flex flex-col items-center justify-center">
           <div className="font-display font-black text-foreground/30 text-[13vw] md:text-[11vw] tracking-tighter leading-none uppercase mask-[linear-gradient(to_bottom,black_30%,transparent_100%)] flex items-center justify-center gap-3 md:gap-4">
             <span>RESALE</span>
-            <img
-              src="/bangladesh.svg"
-              alt="Bangladesh Silhouette"
-              className="h-[1.25em] w-auto shrink-0 select-none pointer-events-none opacity-40 drop-shadow-xs"
-            />
+            <BangladeshMapSVG />
           </div>
         </div>
       </div>{" "}
@@ -130,113 +127,115 @@ export function SiteFooter() {
             </div>
           </div>
 
-          {/* Navigation Columns */}
-          <div className="p-6 md:p-8 space-y-3">
-            <h4 className="text-xs font-semibold uppercase tracking-wider text-foreground">
-              Explore Categories
+          {/* Explore Categories */}
+          <div className="p-6 md:p-8 space-y-2.5">
+            <h4 className="mb-1 text-[11px] font-semibold uppercase tracking-widest text-foreground/70">
+              Categories
             </h4>
             <ul className="space-y-2 text-xs text-muted-foreground">
               <li>
-                <Link to="/" className="hover:text-primary transition-colors">
+                <Link to="/" className="hover:text-foreground transition-colors">
                   Smartphones &amp; iPhones
                 </Link>
               </li>
               <li>
-                <Link to="/" className="hover:text-primary transition-colors">
+                <Link to="/" className="hover:text-foreground transition-colors">
                   Laptops &amp; MacBooks
                 </Link>
               </li>
               <li>
-                <Link to="/" className="hover:text-primary transition-colors">
-                  Digital &amp; Mirrorless Cameras
+                <Link to="/" className="hover:text-foreground transition-colors">
+                  Cameras &amp; Lenses
                 </Link>
               </li>
               <li>
-                <Link to="/" className="hover:text-primary transition-colors">
-                  Audio &amp; ANC Earbuds
+                <Link to="/" className="hover:text-foreground transition-colors">
+                  Audio &amp; Earbuds
                 </Link>
               </li>
               <li>
-                <Link to="/" className="hover:text-primary transition-colors">
-                  Smartwatches &amp; Wearables
+                <Link to="/" className="hover:text-foreground transition-colors">
+                  Smartwatches
                 </Link>
               </li>
               <li>
-                <Link to="/" className="hover:text-primary transition-colors">
+                <Link to="/" className="hover:text-foreground transition-colors">
                   Gaming Consoles
                 </Link>
               </li>
             </ul>
           </div>
 
-          <div className="p-6 md:p-8 space-y-3">
-            <h4 className="text-xs font-semibold uppercase tracking-wider text-foreground">
-              For Sellers
+          {/* For Sellers */}
+          <div className="p-6 md:p-8 space-y-2.5">
+            <h4 className="mb-1 text-[11px] font-semibold uppercase tracking-widest text-foreground/70">
+              Sellers
             </h4>
             <ul className="space-y-2 text-xs text-muted-foreground">
               <li>
                 <Link
                   to="/sell"
-                  className="hover:text-primary transition-colors font-medium text-primary"
+                  className="hover:text-foreground transition-colors font-medium text-primary"
                 >
-                  List an Item (13 Steps)
+                  List an Item
                 </Link>
               </li>
               <li>
-                <Link to="/seller/dashboard" className="hover:text-primary transition-colors">
-                  Seller Dashboard
+                <Link to="/seller/dashboard" className="hover:text-foreground transition-colors">
+                  Dashboard
                 </Link>
               </li>
               <li>
-                <Link to="/seller/listings" className="hover:text-primary transition-colors">
-                  Manage My Listings
+                <Link to="/seller/listings" className="hover:text-foreground transition-colors">
+                  My Listings
                 </Link>
               </li>
               <li>
-                <Link to="/seller/payouts" className="hover:text-primary transition-colors">
-                  bKash &amp; Bank Payouts
+                <Link to="/seller/payouts" className="hover:text-foreground transition-colors">
+                  Payouts
                 </Link>
               </li>
               <li>
-                <Link to="/seller/dashboard" className="hover:text-primary transition-colors">
-                  NID Identity Verification
+                <Link to="/seller/dashboard" className="hover:text-foreground transition-colors">
+                  NID Verification
                 </Link>
               </li>
             </ul>
           </div>
 
-          <div className="p-6 md:p-8 space-y-3">
-            <h4 className="text-xs font-semibold uppercase tracking-wider text-foreground">
+          {/* Trust & Legal */}
+          <div className="p-6 md:p-8 space-y-2.5">
+            <h4 className="mb-1 text-[11px] font-semibold uppercase tracking-widest text-foreground/70">
               Trust &amp; Legal
             </h4>
             <ul className="space-y-2 text-xs text-muted-foreground">
               <li>
-                <Link to="/" className="hover:text-primary transition-colors">
-                  Grading System (A+ to D)
+                <Link to="/" className="hover:text-foreground transition-colors">
+                  Grading System (A+ – D)
                 </Link>
               </li>
               <li>
-                <Link to="/account/disputes" className="hover:text-primary transition-colors">
-                  48-Hour Dispute Policy
+                <Link to="/account/disputes" className="hover:text-foreground transition-colors">
+                  48-Hr Dispute Policy
                 </Link>
               </li>
               <li>
-                <Link to="/account/disputes" className="hover:text-primary transition-colors">
-                  Moderation Guidelines
+                <Link to="/account/disputes" className="hover:text-foreground transition-colors">
+                  Moderation Rules
                 </Link>
               </li>
               <li>
-                <Link to="/" className="hover:text-primary transition-colors">
+                <Link to="/" className="hover:text-foreground transition-colors">
                   Anti-Fraud Protection
                 </Link>
               </li>
               <li>
-                <Link to="/" className="hover:text-primary transition-colors">
+                <Link to="/" className="hover:text-foreground transition-colors">
                   Terms of Service
                 </Link>
               </li>
               <li>
-                <Link to="/" className="hover:text-primary transition-colors">
+                <Link to="/" className="hover:text-foreground transition-colors">
                   Privacy Policy
                 </Link>
               </li>
@@ -245,9 +244,11 @@ export function SiteFooter() {
         </div>
 
         {/* Payment Methods & Coverage Bar */}
-        <div className="mx-auto max-w-7xl px-5 pb-12 mt-0 pt-8 border-t border-border flex flex-col md:flex-row items-center justify-between gap-6 text-xs text-muted-foreground">
-          <div className="flex flex-wrap items-center gap-3">
-            <span className="font-medium text-foreground">Accepted Payments:</span>
+        <div className="pt-8 border-t border-border flex flex-col md:flex-row items-start md:items-center justify-between gap-4 text-xs text-muted-foreground">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="font-medium text-foreground text-[11px] uppercase tracking-wider">
+              Payments:
+            </span>
             <span className="bg-background border border-border px-2 py-1 rounded text-[11px] font-semibold text-rose-600">
               bKash
             </span>
@@ -258,18 +259,14 @@ export function SiteFooter() {
               Rocket
             </span>
             <span className="bg-background border border-border px-2 py-1 rounded text-[11px]">
-              Cash on Delivery (COD)
+              Cash on Delivery
             </span>
             <span className="bg-background border border-border px-2 py-1 rounded text-[11px]">
               Visa / Mastercard
             </span>
           </div>
-
-          <div className="flex items-center gap-2 text-subtle-foreground">
-            <span>
-              Nationwide Logistics: Dhaka · Chattogram · Sylhet · Rajshahi · Khulna · All 64
-              Districts
-            </span>
+          <div className="text-subtle-foreground text-[11px] shrink-0">
+            Nationwide · Dhaka · Chattogram · Sylhet · Rajshahi · Khulna · All 64 Districts
           </div>
         </div>
       </div>
