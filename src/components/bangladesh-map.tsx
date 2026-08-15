@@ -133,7 +133,9 @@ export function BangladeshMapSVG() {
           <span className="font-bold text-white">{tooltip.division.name}</span>
           <span className="text-slate-500">·</span>
           <span className="text-emerald-400 font-medium">⚡ {tooltip.division.listings}</span>
-          <span className="text-primary font-semibold bg-primary/20 px-1.5 py-0.5 rounded-full text-[10px]">{tooltip.division.userPercentage ?? "5%"}</span>
+          <span className="text-primary font-semibold bg-primary/20 px-1.5 py-0.5 rounded-full text-[10px]">
+            {tooltip.division.userPercentage ?? "5%"}
+          </span>
         </div>
       )}
     </div>
