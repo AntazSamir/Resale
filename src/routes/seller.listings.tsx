@@ -1,10 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { SiteHeader, SiteFooter } from "@/components/site-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SellerSidebar } from "./seller.dashboard";
 import { Badge } from "@/components/ui/badge";
 import { taka, listings } from "@/data/catalog";
 import { GradeBadge } from "@/components/grade-badge";
+import { readGradedDrafts, type GradedDraft } from "@/lib/grade-store";
+import { answerLabel, gradingCriteria } from "@/data/grading";
 
 export const Route = createFileRoute("/seller/listings")({
   head: () => ({
@@ -16,6 +19,11 @@ export const Route = createFileRoute("/seller/listings")({
 function SellerListingsPage() {
   // Use mock listings
   const myListings = listings.slice(0, 3);
+  const [drafts, setDrafts] = useState<GradedDraft[]>([]);
+
+  useEffect(() => {
+    setDrafts(readGradedDrafts());
+  }, []);
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -27,6 +35,37 @@ function SellerListingsPage() {
           <h1 className="text-3xl mb-8">My Listings</h1>
 
           <div className="space-y-4">
+            {drafts.map((draft) => (
+              <Card key={draft.id}>
+                <CardHeader className="bg-muted/30 py-4 flex flex-row items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Badge variant="outline">Pending Review</Badge>
+                    <span className="text-sm text-muted-foreground">
+                      Listing ID: {draft.id}
+                    </span>
+                  </div>
+                  <div className="font-display font-medium text-lg">{taka(draft.price)}</div>
+                </CardHeader>
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-3 mb-2">
+                    <GradeBadge grade={draft.grade} />
+                  </div>
+                  <p className="font-medium">{draft.productLabel}</p>
+                  <p className="text-sm text-muted-foreground">
+                    Score: {draft.conditionScore}/100 — calculated from the grading checklist
+                  </p>
+                  <dl className="mt-3 grid gap-x-6 gap-y-1 sm:grid-cols-2 text-xs">
+                    {gradingCriteria.map((c) => (
+                      <div key={c.id} className="flex justify-between gap-3 border-b border-border/60 py-1">
+                        <dt className="text-muted-foreground">{c.label}</dt>
+                        <dd className="text-right">{answerLabel(c.id, draft.answers[c.id])}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                </CardContent>
+              </Card>
+            ))}
+
             {myListings.map((listing) => (
               <Card key={listing.id}>
                 <CardHeader className="bg-muted/50 py-4 flex flex-row items-center justify-between">

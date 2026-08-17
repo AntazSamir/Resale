@@ -20,6 +20,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { GradeSelector } from "@/components/grade-selector";
+import { evaluateGrading, type GradingAnswers } from "@/data/grading";
+import { saveGradedDraft } from "@/lib/grade-store";
+import { taka } from "@/data/catalog";
 import {
   Check,
   CheckCircle2,
@@ -42,7 +46,11 @@ export const Route = createFileRoute("/sell/")({
 
 function SellWizardPage() {
   const [step, setStep] = useState(1);
+  const [answers, setAnswers] = useState<GradingAnswers>({});
+  const [productLabel, setProductLabel] = useState("");
+  const [price, setPrice] = useState("");
   const navigate = useNavigate();
+  const grading = evaluateGrading(answers);
 
   const handleNext = (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,6 +59,13 @@ function SellWizardPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    saveGradedDraft({
+      productLabel: productLabel || "Untitled listing",
+      price: Number(price) || 0,
+      grade: grading.grade,
+      conditionScore: grading.conditionScore,
+      answers,
+    });
     navigate({ to: "/seller/listings" });
   };
 
@@ -223,14 +238,18 @@ function SellWizardPage() {
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <Label>Search Product Catalog</Label>
-                  <Select required>
+                  <Select required value={productLabel} onValueChange={setProductLabel}>
                     <SelectTrigger>
                       <SelectValue placeholder="e.g. iPhone 15 Pro" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="iphone15pro">Apple iPhone 15 Pro (256GB)</SelectItem>
-                      <SelectItem value="macbookm2">Apple MacBook Air M2</SelectItem>
-                      <SelectItem value="s24">Samsung Galaxy S24 Ultra</SelectItem>
+                      <SelectItem value="Apple iPhone 15 Pro (256GB)">
+                        Apple iPhone 15 Pro (256GB)
+                      </SelectItem>
+                      <SelectItem value="Apple MacBook Air M2">Apple MacBook Air M2</SelectItem>
+                      <SelectItem value="Samsung Galaxy S24 Ultra">
+                        Samsung Galaxy S24 Ultra
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                   <p className="text-xs text-muted-foreground">
@@ -272,43 +291,15 @@ function SellWizardPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="space-y-2">
-                  <Label>Overall Grade</Label>
-                  <Select required>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a grade" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="A+">A+ (Like New)</SelectItem>
-                      <SelectItem value="A">A (Excellent)</SelectItem>
-                      <SelectItem value="B">B (Good)</SelectItem>
-                      <SelectItem value="C">C (Fair)</SelectItem>
-                      <SelectItem value="D">D (Heavy Wear)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-4 border-t pt-4">
-                  <h3 className="font-medium">Component Checklist</h3>
-                  <div className="space-y-2">
-                    <Label>Screen Condition</Label>
-                    <Input placeholder="e.g. Flawless, minor micro-scratches" required />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Battery Health %</Label>
-                    <Input type="number" placeholder="e.g. 95" required />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Repairs / Replaced Parts</Label>
-                    <Input placeholder="e.g. None, screen replaced by Apple" required />
-                  </div>
-                </div>
+                <GradeSelector answers={answers} onChange={setAnswers} />
               </CardContent>
               <CardFooter className="justify-between">
                 <Button type="button" variant="outline" onClick={() => setStep(1)}>
                   Back
                 </Button>
-                <Button type="submit">Next Step</Button>
+                <Button type="submit" disabled={!grading.complete}>
+                  Next Step
+                </Button>
               </CardFooter>
             </form>
           )}
@@ -330,12 +321,18 @@ function SellWizardPage() {
 
                 <div className="space-y-2">
                   <Label>Selling Price (৳)</Label>
-                  <Input type="number" placeholder="e.g. 85000" required />
+                  <Input
+                    type="number"
+                    placeholder="e.g. 85000"
+                    value={price}
+                    onChange={(e) => setPrice(e.target.value)}
+                    required
+                  />
                   <div className="bg-muted p-3 text-sm mt-2 rounded-md">
                     <span className="text-muted-foreground">Recommended Range: </span>
                     <span className="font-medium">৳82,000 - ৳88,000</span>
                     <p className="text-xs text-muted-foreground mt-1">
-                      Based on condition A+ and active warranty.
+                      Based on condition {grading.grade} and active warranty.
                     </p>
                   </div>
                 </div>
@@ -373,15 +370,15 @@ function SellWizardPage() {
               </CardHeader>
               <CardContent>
                 <div className="bg-muted/50 p-6 rounded-md space-y-4">
-                  <h3 className="text-lg font-medium">Apple iPhone 15 Pro (256GB)</h3>
-                  <div className="flex gap-4 text-sm text-muted-foreground">
-                    <span>Grade A+</span>
-                    <span>৳85,000</span>
-                    <span>Nationwide Delivery</span>
+                  <h3 className="text-lg font-medium">{productLabel || "Untitled listing"}</h3>
+                  <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
+                    <span>Grade {grading.grade}</span>
+                    <span>Condition score {grading.conditionScore}/100</span>
+                    <span>{taka(Number(price) || 0)}</span>
                   </div>
                   <p className="text-sm">
-                    Includes original box and charging cable. Battery health is 95%. No scratches or
-                    repairs.
+                    The grade above is calculated from your answers to the standard grading
+                    checklist and is stored with the listing.
                   </p>
                 </div>
                 <div className="mt-6">
