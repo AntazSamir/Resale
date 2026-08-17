@@ -6,10 +6,6 @@ import {
   User,
   Menu,
   X,
-  Home,
-  LayoutGrid,
-  Plus,
-  MessageSquare,
   ChevronDown,
   ShieldCheck,
   Building2,
@@ -320,7 +316,7 @@ export function SiteFooter() {
   };
 
   return (
-    <footer className="mt-20 md:mt-24 border-t border-border bg-card/60 pb-20 md:pb-0">
+    <footer className="mt-20 md:mt-24 border-t border-border bg-card/60">
       {/* ── Desktop & Mobile Newsletter Banner (Home only) ── */}
       {isHomePage && (
         <>
@@ -773,77 +769,6 @@ export function SiteFooter() {
         </div>
       </div>
 
-      {/* ── Fixed Mobile Bottom Navigation Bar (Fixed for <= 768px) ── */}
-      <MobileBottomNav />
     </footer>
-  );
-}
-
-export function MobileBottomNav() {
-  const location = useLocation();
-  const path = location.pathname;
-
-  return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur border-t border-border md:hidden">
-      <div className="grid grid-cols-5 items-center h-16 px-1 text-[10px] sm:text-[11px] font-medium">
-        {/* Home */}
-        <Link
-          to="/"
-          className={`flex flex-col items-center justify-center gap-1 transition-colors ${
-            path === "/" ? "text-primary font-bold" : "text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          <Home className="size-5" />
-          <span>Home</span>
-        </Link>
-
-        {/* Categories */}
-        <a
-          href="/#categories"
-          className="flex flex-col items-center justify-center gap-1 text-muted-foreground hover:text-foreground transition-colors"
-        >
-          <LayoutGrid className="size-5" />
-          <span>Categories</span>
-        </a>
-
-        {/* Sell Button (Elevated Circular Black Button) */}
-        <Link
-          to="/sell"
-          className="flex flex-col items-center justify-center -mt-4 group"
-          aria-label="Sell an item"
-        >
-          <div className="size-11 rounded-full bg-primary text-primary-foreground flex items-center justify-center border-2 border-background shadow-none transition-transform group-hover:scale-105">
-            <Plus className="size-6 stroke-3" />
-          </div>
-          <span className="text-[10px] font-bold text-foreground mt-0.5">Sell</span>
-        </Link>
-
-        {/* Inbox / Help */}
-        <Link
-          to="/contact"
-          className={`flex flex-col items-center justify-center gap-1 transition-colors ${
-            path === "/contact"
-              ? "text-primary font-bold"
-              : "text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          <MessageSquare className="size-5" />
-          <span>Inbox</span>
-        </Link>
-
-        {/* Account */}
-        <Link
-          to="/login"
-          className={`flex flex-col items-center justify-center gap-1 transition-colors ${
-            path.startsWith("/login") || path.startsWith("/seller") || path.startsWith("/account")
-              ? "text-primary font-bold"
-              : "text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          <User className="size-5" />
-          <span>Account</span>
-        </Link>
-      </div>
-    </nav>
   );
 }
