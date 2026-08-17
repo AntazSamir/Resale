@@ -592,91 +592,87 @@ function Index() {
           </p>
         </div>
 
-        {/* Bento grade cards */}
-        <div className="hidden md:grid grid-cols-3 gap-3">
-          {[
-            {
-              grade: "A+",
-              color: "bg-emerald-500",
-              name: "Like New",
-              desc: "Flawless condition with zero signs of wear. 100% original parts.",
-              span: "col-span-1",
-            },
-            {
-              grade: "A",
-              color: "bg-blue-500",
-              name: "Excellent",
-              desc: "Micro-scratches only visible under direct light. High battery health.",
-              span: "col-span-1",
-            },
-            {
-              grade: "B",
-              color: "bg-amber-500",
-              name: "Good",
-              desc: "Normal cosmetic wear. Fully functional; repairs explicitly listed.",
-              span: "col-span-1",
-            },
-            {
-              grade: "C",
-              color: "bg-orange-500",
-              name: "Fair",
-              desc: "Noticeable scratches or minor dents. Great value for budget buyers.",
-              span: "col-span-1",
-            },
-            {
-              grade: "D",
-              color: "bg-red-500",
-              name: "Heavy Wear",
-              desc: "Heavy cosmetic wear or battery under 80%. Deep discount pricing.",
-              span: "col-span-2",
-            },
-          ].map((item) => (
-            <div
-              key={item.grade}
-              className={`${item.span} rounded-xl border border-border bg-card p-5 transition-colors hover:border-primary/20`}
-            >
-              <div className="flex items-center gap-2 mb-2">
-                <span
-                  className={`inline-grid place-items-center ${item.color} text-white font-bold text-[10px] size-6 rounded-md`}
-                >
-                  {item.grade}
-                </span>
-                <h3 className="font-medium text-sm">{item.name}</h3>
-              </div>
-              <p className="text-xs text-muted-foreground leading-relaxed">{item.desc}</p>
-            </div>
-          ))}
+        {/* Desktop 5-grid */}
+        <div className="hidden md:grid hairline-grid grid-cols-5 bg-card">
+          <div className="p-6">
+            <span className="inline-block bg-emerald-500 text-white font-bold text-xs px-2.5 py-1 mb-3">
+              Grade A+
+            </span>
+            <h3 className="font-medium text-sm mb-1">Like New</h3>
+            <p className="text-xs text-muted-foreground">
+              Flawless condition with zero signs of wear. 100% original parts &amp; complete
+              original box.
+            </p>
+          </div>
+          <div className="p-6">
+            <span className="inline-block bg-blue-500 text-white font-bold text-xs px-2.5 py-1 mb-3">
+              Grade A
+            </span>
+            <h3 className="font-medium text-sm mb-1">Excellent</h3>
+            <p className="text-xs text-muted-foreground">
+              Micro-scratches only visible under direct light. High battery health, zero functional
+              defects.
+            </p>
+          </div>
+          <div className="p-6">
+            <span className="inline-block bg-amber-500 text-white font-bold text-xs px-2.5 py-1 mb-3">
+              Grade B
+            </span>
+            <h3 className="font-medium text-sm mb-1">Good</h3>
+            <p className="text-xs text-muted-foreground">
+              Normal cosmetic wear. Fully functional; any part repairs are explicitly listed.
+            </p>
+          </div>
+          <div className="p-6">
+            <span className="inline-block bg-orange-500 text-white font-bold text-xs px-2.5 py-1 mb-3">
+              Grade C
+            </span>
+            <h3 className="font-medium text-sm mb-1">Fair</h3>
+            <p className="text-xs text-muted-foreground">
+              Noticeable scratches or minor dents. Great value for budget buyers seeking 100%
+              functionality.
+            </p>
+          </div>
+          <div className="p-6">
+            <span className="inline-block bg-red-500 text-white font-bold text-xs px-2.5 py-1 mb-3">
+              Grade D
+            </span>
+            <h3 className="font-medium text-sm mb-1">Heavy Wear</h3>
+            <p className="text-xs text-muted-foreground">
+              Heavy cosmetic wear or battery under 80%. Fully functional with deep discount pricing.
+            </p>
+          </div>
         </div>
 
         {/* Mobile Horizontal Scrolling Row */}
         <div className="flex md:hidden gap-3 overflow-x-auto scrollbar-none snap-x snap-mandatory pb-2">
           {[
             {
-              grade: "A+",
+              grade: "Grade A+",
               color: "bg-emerald-500",
               name: "Like New",
               desc: "Minimal or virtually no signs of use. Flawless original parts.",
             },
             {
-              grade: "A",
+              grade: "Grade A",
               color: "bg-blue-500",
               name: "Excellent",
               desc: "Very good condition with minor micro-scratches only visible up close.",
             },
             {
-              grade: "B",
+              grade: "Grade B",
               color: "bg-amber-500",
               name: "Good",
               desc: "Visible signs of normal use, while remaining 100% functional.",
             },
             {
-              grade: "C",
+              grade: "Grade C",
               color: "bg-orange-500",
               name: "Fair",
               desc: "More noticeable signs of use, clearly disclosed in listing.",
             },
             {
-              grade: "D",
+              grade: "Grade D",
               color: "bg-red-500",
               name: "Heavy Wear",
               desc: "Significant cosmetic signs of use sold with defect disclosures.",
@@ -684,16 +680,14 @@ function Index() {
           ].map((item) => (
             <div
               key={item.grade}
-              className="w-[160px] shrink-0 snap-start rounded-xl border border-border bg-card p-4"
+              className="w-[180px] shrink-0 snap-start border border-border bg-card p-4 space-y-2"
             >
-              <div className="flex items-center gap-2 mb-2">
-                <span
-                  className={`inline-grid place-items-center ${item.color} text-white font-bold text-[10px] size-5 rounded-md`}
-                >
-                  {item.grade}
-                </span>
-                <h3 className="font-semibold text-xs text-foreground">{item.name}</h3>
-              </div>
+              <span
+                className={`inline-block ${item.color} text-white font-bold text-[10px] px-2 py-0.5`}
+              >
+                {item.grade}
+              </span>
+              <h3 className="font-semibold text-xs text-foreground">{item.name}</h3>
               <p className="text-[11px] text-muted-foreground leading-relaxed">{item.desc}</p>
             </div>
           ))}
