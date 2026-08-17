@@ -80,8 +80,16 @@ function Index() {
       ════════════════════════════════════════════════════════════════ */}
       {/* Desktop Hero (md+) */}
       <section className="hidden md:block border-b border-border">
-        <div className="grid items-center divide-y md:divide-y-0 md:divide-x divide-border md:grid-cols-2 py-8 md:py-12">
-          <div className="p-6 md:p-12">
+        <div
+          className="relative flex items-center py-24 md:py-32 px-6 md:px-12 overflow-hidden"
+          style={{
+            backgroundImage: `url(${hero})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center right",
+          }}
+        >
+
+          <div className="relative z-10">
             <p className="text-xs uppercase tracking-[0.25em] text-muted-foreground">
               Pre-owned · Open-box · Like-new
             </p>
@@ -104,21 +112,12 @@ function Index() {
               <span className="text-sm text-muted-foreground">2,400+ graded units live</span>
             </div>
           </div>
-          <div className="p-6 md:p-12">
-            <img
-              src={hero}
-              alt="Assorted pre-owned electronics laid out on a pale surface"
-              width={1600}
-              height={1000}
-              className="w-full object-cover border border-border"
-            />
-          </div>
         </div>
       </section>
 
       {/* Mobile Hero Card (<= 768px - Matching Mockup) */}
       <section className="block md:hidden p-4">
-        <div className="relative border border-border bg-card overflow-hidden p-5 sm:p-6 flex flex-col justify-between min-h-[340px]">
+        <div className="relative border border-border bg-card overflow-hidden p-5 sm:p-6 flex flex-col justify-between min-h-85">
           {/* Background image overlay */}
           <div className="absolute top-0 right-0 w-3/5 h-full opacity-35 dark:opacity-20 pointer-events-none overflow-hidden">
             <img
@@ -132,10 +131,10 @@ function Index() {
             <p className="text-[10px] sm:text-xs uppercase tracking-widest text-muted-foreground font-semibold">
               PRE-OWNED • OPEN-BOX • LIKE-NEW
             </p>
-            <h1 className="text-2xl sm:text-3xl font-display font-bold leading-tight text-foreground tracking-tight max-w-[260px]">
+            <h1 className="text-2xl sm:text-3xl font-display font-bold leading-tight text-foreground tracking-tight max-w-65">
               Buy used electronics without the guesswork.
             </h1>
-            <p className="text-xs text-subtle-foreground max-w-[230px] leading-relaxed">
+            <p className="text-xs text-subtle-foreground max-w-57.5 leading-relaxed">
               Bangladesh&apos;s marketplace where every listing is graded, tested and verified.
             </p>
 
@@ -383,7 +382,7 @@ function Index() {
                 key={p.id}
                 to="/product/$productId"
                 params={{ productId: p.id }}
-                className="w-[200px] shrink-0 snap-start border border-border bg-card p-3 flex flex-col justify-between relative group"
+                className="w-50 shrink-0 snap-start border border-border bg-card p-3 flex flex-col justify-between relative group"
               >
                 {/* Discount Badge */}
                 {discountPercent > 0 && (
@@ -545,7 +544,7 @@ function Index() {
               <a
                 key={listing.id}
                 href={`/listing/${listing.id}`}
-                className="w-[220px] shrink-0 snap-start border border-border bg-card p-3 flex flex-col justify-between"
+                className="w-55 shrink-0 snap-start border border-border bg-card p-3 flex flex-col justify-between"
               >
                 <div className="aspect-square bg-muted relative border border-border mb-3 flex items-center justify-center p-2">
                   <img
@@ -680,7 +679,7 @@ function Index() {
           ].map((item) => (
             <div
               key={item.grade}
-              className="w-[180px] shrink-0 snap-start border border-border bg-card p-4 space-y-2"
+              className="w-45 shrink-0 snap-start border border-border bg-card p-4 space-y-2"
             >
               <span
                 className={`inline-block ${item.color} text-white font-bold text-[10px] px-2 py-0.5`}
