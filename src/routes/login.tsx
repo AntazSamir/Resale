@@ -14,6 +14,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
+import { sendOtpFn, verifyOtpFn } from "@/lib/server-functions";
+import { AlertCircle } from "lucide-react";
 
 export const Route = createFileRoute("/login")({
   head: () => ({
@@ -26,21 +28,45 @@ function LoginPage() {
   const [step, setStep] = useState<"phone" | "otp">("phone");
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
   const { signIn } = useAuth();
 
-  const handleSendOtp = (e: React.FormEvent) => {
+  const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (phone.length >= 11) {
+    if (phone.length < 11) return;
+    setError(null);
+    setLoading(true);
+
+    try {
+      await sendOtpFn({ data: { phone } });
       setStep("otp");
+    } catch (err: any) {
+      setError(err?.message || "Failed to send OTP. Please check your connection.");
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleVerify = (e: React.FormEvent) => {
+  const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (otp.length === 6) {
-      signIn(phone);
-      navigate({ to: "/" });
+    if (otp.length !== 6) return;
+    setError(null);
+    setLoading(true);
+
+    try {
+      const res = await verifyOtpFn({ data: { phone, otp } });
+      if (res && res.success && res.user) {
+        signIn(res.user);
+        navigate({ to: "/" });
+      } else {
+        setError(res?.error || "Invalid verification code. Please try again.");
+      }
+    } catch (err: any) {
+      setError(err?.message || "Verification failed. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -54,10 +80,17 @@ function LoginPage() {
             <CardDescription>
               {step === "phone"
                 ? "Enter your phone number to sign in to your account."
-                : `We sent a 6-digit code to ${phone}.`}
+                : `We sent a 6-digit code to ${phone}. (Enter 123456 in dev/testing)`}
             </CardDescription>
           </CardHeader>
           <CardContent>
+            {error && (
+              <div className="mb-4 p-3 bg-destructive/10 border border-destructive/20 rounded-md text-destructive text-sm flex items-center gap-2">
+                <AlertCircle className="size-4 shrink-0" />
+                <span>{error}</span>
+              </div>
+            )}
+
             {step === "phone" ? (
               <form onSubmit={handleSendOtp} className="space-y-4">
                 <div className="space-y-2">
@@ -72,8 +105,8 @@ function LoginPage() {
                     title="Valid Bangladesh mobile number starting with 01"
                   />
                 </div>
-                <Button type="submit" className="w-full">
-                  Send OTP
+                <Button type="submit" className="w-full" disabled={loading}>
+                  {loading ? "Sending OTP…" : "Send OTP"}
                 </Button>
               </form>
             ) : (
@@ -91,13 +124,16 @@ function LoginPage() {
                     </InputOTPGroup>
                   </InputOTP>
                 </div>
-                <Button type="submit" className="w-full" disabled={otp.length !== 6}>
-                  Verify & Sign In
+                <Button type="submit" className="w-full" disabled={otp.length !== 6 || loading}>
+                  {loading ? "Verifying…" : "Verify & Sign In"}
                 </Button>
                 <div className="text-center">
                   <button
                     type="button"
-                    onClick={() => setStep("phone")}
+                    onClick={() => {
+                      setStep("phone");
+                      setError(null);
+                    }}
                     className="text-sm text-primary hover:underline"
                   >
                     Change phone number

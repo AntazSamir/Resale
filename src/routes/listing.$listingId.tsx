@@ -47,7 +47,7 @@ function ListingPage() {
   const active = galleryShots[shot] ?? galleryShots[0]!;
   const { addToCart, isInCart } = useCart();
   const navigate = useNavigate();
-  const inCart = isInCart(listing.id);;
+  const inCart = isInCart(listing.id);
 
   const transparency = [
     ["Overall condition", `${listing.grade} — ${gradeLabel[listing.grade]}`],
@@ -142,17 +142,25 @@ function ListingPage() {
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <button
-                onClick={() => { addToCart(listing.id); navigate({ to: "/cart" }); }}
+                onClick={() => {
+                  addToCart(listing.id);
+                  navigate({ to: "/cart" });
+                }}
                 className="flex-1 bg-primary px-6 py-3.5 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
               >
                 Buy now
               </button>
               <button
-                onClick={() => { addToCart(listing.id); setAddedToCart(true); }}
+                onClick={() => {
+                  addToCart(listing.id);
+                  setAddedToCart(true);
+                }}
                 className="flex-1 border border-primary px-6 py-3.5 text-sm font-medium transition-colors hover:bg-primary hover:text-primary-foreground flex items-center justify-center gap-2"
               >
                 {inCart || addedToCart ? (
-                  <><Check className="size-4" /> Added to cart</>
+                  <>
+                    <Check className="size-4" /> Added to cart
+                  </>
                 ) : (
                   "Add to cart"
                 )}

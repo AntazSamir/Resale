@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { SiteHeader, SiteFooter } from "@/components/site-header";
+import { useAuth } from "@/lib/auth-store";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,6 +14,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
+import { sendOtpFn, verifyOtpFn } from "@/lib/server-functions";
+import { AlertCircle } from "lucide-react";
 
 export const Route = createFileRoute("/register")({
   head: () => ({
@@ -27,26 +30,59 @@ function RegisterPage() {
   const [phone, setPhone] = useState("");
   const [nid, setNid] = useState("");
   const [otp, setOtp] = useState("");
-  const [generatedOtp, setGeneratedOtp] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+  const { signIn } = useAuth();
 
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (phone.length >= 11 && nid.length >= 10 && name.length > 2) {
-      setLoading(true);
-      // Simulate/call OTP generation
-      const mockOtp = Math.floor(100000 + Math.random() * 900000).toString();
-      setGeneratedOtp(mockOtp);
+    if (
+      phone.length < 11 ||
+      (nid.length !== 10 && nid.length !== 13 && nid.length !== 17) ||
+      name.length < 2
+    ) {
+      return;
+    }
+    setError(null);
+    setLoading(true);
+
+    try {
+      await sendOtpFn({ data: { phone } });
       setStep("otp");
+    } catch (err: any) {
+      setError(err?.message || "Failed to send OTP. Please try again.");
+    } finally {
       setLoading(false);
     }
   };
 
-  const handleVerify = (e: React.FormEvent) => {
+  const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (otp.length === 6) {
-      navigate({ to: "/" });
+    if (otp.length !== 6) return;
+    setError(null);
+    setLoading(true);
+
+    try {
+      const res = await verifyOtpFn({
+        data: {
+          phone,
+          otp,
+          name,
+          nid,
+        },
+      });
+
+      if (res && res.success && res.user) {
+        signIn(res.user);
+        navigate({ to: "/" });
+      } else {
+        setError(res?.error || "Invalid or expired verification code.");
+      }
+    } catch (err: any) {
+      setError(err?.message || "Registration verification failed.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -60,10 +96,17 @@ function RegisterPage() {
             <CardDescription>
               {step === "details"
                 ? "Join Resale.com to buy or sell quality-checked electronics."
-                : `We sent a 6-digit code to ${phone}.`}
+                : `We sent a 6-digit code to ${phone}. (Enter 123456 in dev/testing)`}
             </CardDescription>
           </CardHeader>
           <CardContent>
+            {error && (
+              <div className="mb-4 p-3 bg-destructive/10 border border-destructive/20 rounded-md text-destructive text-sm flex items-center gap-2">
+                <AlertCircle className="size-4 shrink-0" />
+                <span>{error}</span>
+              </div>
+            )}
+
             {step === "details" ? (
               <form onSubmit={handleSendOtp} className="space-y-4">
                 <div className="space-y-2">
@@ -92,7 +135,7 @@ function RegisterPage() {
                   <Label htmlFor="nid">NID Number</Label>
                   <Input
                     id="nid"
-                    placeholder="10 or 17 digit NID number"
+                    placeholder="10, 13, or 17 digit NID number"
                     value={nid}
                     onChange={(e) => setNid(e.target.value.replace(/\D/g, ""))}
                     required
@@ -103,20 +146,12 @@ function RegisterPage() {
                     Required for all users to ensure marketplace trust per PRD guidelines.
                   </p>
                 </div>
-                <Button type="submit" className="w-full">
-                  Send OTP
+                <Button type="submit" className="w-full" disabled={loading}>
+                  {loading ? "Sending OTP…" : "Send OTP"}
                 </Button>
               </form>
             ) : (
               <form onSubmit={handleVerify} className="space-y-6">
-                {generatedOtp && (
-                  <div className="bg-primary/10 border border-primary/20 text-primary p-3 rounded-lg text-center font-mono text-xs">
-                    <p className="font-bold">SMS Sent via Gateway to {phone}</p>
-                    <p className="text-base font-black tracking-widest mt-1">
-                      OTP CODE: {generatedOtp}
-                    </p>
-                  </div>
-                )}
                 <div className="space-y-2 flex flex-col items-center">
                   <Label htmlFor="otp">One-Time Password</Label>
                   <InputOTP maxLength={6} value={otp} onChange={(value) => setOtp(value)}>
@@ -130,16 +165,19 @@ function RegisterPage() {
                     </InputOTPGroup>
                   </InputOTP>
                 </div>
-                <Button type="submit" className="w-full" disabled={otp.length !== 6}>
-                  Verify & Create Account
+                <Button type="submit" className="w-full" disabled={otp.length !== 6 || loading}>
+                  {loading ? "Verifying…" : "Complete Registration"}
                 </Button>
                 <div className="text-center">
                   <button
                     type="button"
-                    onClick={() => setStep("details")}
+                    onClick={() => {
+                      setStep("details");
+                      setError(null);
+                    }}
                     className="text-sm text-primary hover:underline"
                   >
-                    Go back
+                    Change registration details
                   </button>
                 </div>
               </form>
@@ -149,7 +187,7 @@ function RegisterPage() {
             <p className="text-sm text-muted-foreground">
               Already have an account?{" "}
               <Link to="/login" className="text-primary hover:underline">
-                Sign in
+                Sign in here
               </Link>
             </p>
           </CardFooter>

@@ -16,6 +16,8 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { CheckCircle2 } from "lucide-react";
 import { taka, listingFor, productFor } from "@/data/catalog";
 import { useCart } from "@/lib/cart-store";
+import { saveOrder, type OrderRecord } from "@/lib/order-store";
+import { placeOrderFn } from "@/lib/server-functions";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({
@@ -45,7 +47,10 @@ function CheckoutPage() {
       if (!product) return null;
       return { listing, product };
     })
-    .filter(Boolean) as { listing: NonNullable<ReturnType<typeof listingFor>>; product: NonNullable<ReturnType<typeof productFor>> }[];
+    .filter(Boolean) as {
+    listing: NonNullable<ReturnType<typeof listingFor>>;
+    product: NonNullable<ReturnType<typeof productFor>>;
+  }[];
 
   const total = subtotal + SHIPPING;
 
@@ -74,12 +79,64 @@ function CheckoutPage() {
     setStep("payment");
   };
 
-  const handlePaymentSubmit = (e: React.FormEvent) => {
+  const handlePaymentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (submitting) return;
     setSubmitting(true);
     const id = generateOrderId();
     setOrderId(id);
+
+    const orderItems = cartItems.map(({ listing, product }) => ({
+      listingId: listing.id,
+      productId: product.id,
+      name: `${product.name} (Grade ${listing.grade})`,
+      grade: listing.grade,
+      price: listing.price,
+      image: product.image,
+      sellerName: listing.seller.name,
+    }));
+
+    const newOrder: OrderRecord = {
+      id,
+      date: new Date().toISOString().split("T")[0] || "",
+      status: "CONFIRMED",
+      items: orderItems,
+      subtotal,
+      deliveryFee: SHIPPING,
+      total,
+      paymentMethod,
+      shippingAddress: {
+        name: address.name,
+        phone: address.phone,
+        division: address.division,
+        district: address.district,
+        area: address.district,
+        address: address.addressLine,
+      },
+      nidNumber: nid,
+      createdAt: new Date().toISOString(),
+    };
+
+    saveOrder(newOrder);
+
+    // Also notify server function
+    try {
+      if (cartItems[0]) {
+        await placeOrderFn({
+          data: {
+            orderId: id,
+            listingId: cartItems[0].listing.id,
+            amount: total,
+            paymentMethod,
+            shippingAddress: address,
+            nidNumber: nid,
+          },
+        });
+      }
+    } catch (err) {
+      console.error("Server order sync notice:", err);
+    }
+
     clearCart();
     setStep("success");
   };
@@ -100,11 +157,18 @@ function CheckoutPage() {
               </CardDescription>
             </CardHeader>
             <CardFooter className="flex-col gap-3">
-              <Button onClick={() => navigate({ to: "/account/orders" })} className="w-full">
-                View My Orders
+              <Button
+                onClick={() => navigate({ to: `/account/orders/${orderId}` as any })}
+                className="w-full"
+              >
+                View Order Details
               </Button>
-              <Button variant="outline" onClick={() => navigate({ to: "/" })} className="w-full">
-                Continue Shopping
+              <Button
+                variant="outline"
+                onClick={() => navigate({ to: "/account/orders" })}
+                className="w-full"
+              >
+                View All My Orders
               </Button>
             </CardFooter>
           </Card>
