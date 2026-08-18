@@ -1,62 +1,127 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
 import { GradeBadge } from "./grade-badge";
 import { cheapest, listingsFor, taka, type Product } from "@/data/catalog";
+import { useCart } from "@/lib/cart-store";
+import { ShoppingBag, Check, Zap } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export function ProductCard({ product }: { product: Product }) {
   const best = cheapest(product.id);
   const count = listingsFor(product.id).length;
+  const { addToCart, isInCart } = useCart();
+  const navigate = useNavigate();
+  const [justAdded, setJustAdded] = useState(false);
 
   if (!best) return null;
 
+  const inCart = isInCart(best.id);
   const discountPercent = Math.round(((product.retail - best.price) / product.retail) * 100);
 
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    addToCart(best.id);
+    setJustAdded(true);
+    setTimeout(() => setJustAdded(false), 1500);
+  };
+
+  const handleBuyNow = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    addToCart(best.id);
+    navigate({ to: "/cart" });
+  };
+
   return (
-    <Link
-      to="/product/$productId"
-      params={{ productId: product.id }}
-      className="group flex flex-col bg-card p-5 transition-all hover:bg-secondary relative overflow-hidden"
-    >
-      {/* Discount badge */}
-      {discountPercent > 0 && (
-        <div className="absolute top-3 left-3 bg-red-600 text-white font-bold text-xs px-2 py-0.5 rounded shadow-sm z-10">
-          -{discountPercent}% OFF
+    <div className="group flex flex-col bg-card p-4 transition-all hover:bg-secondary/40 relative overflow-hidden border border-border flex-between justify-between">
+      <div>
+        {/* Discount badge */}
+        {discountPercent > 0 && (
+          <div className="absolute top-3 left-3 bg-red-600 text-white font-bold text-[10px] px-1.5 py-0.5 rounded shadow-sm z-10">
+            -{discountPercent}% OFF
+          </div>
+        )}
+
+        {/* Product Image Link */}
+        <Link
+          to="/product/$productId"
+          params={{ productId: product.id }}
+          className="block aspect-square overflow-hidden bg-muted rounded-none relative"
+        >
+          <img
+            src={product.image}
+            alt={product.name}
+            width={900}
+            height={900}
+            loading="lazy"
+            className="size-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+          />
+          <div className="absolute bottom-2 right-2">
+            <GradeBadge grade={best.grade} showLabel={false} />
+          </div>
+        </Link>
+
+        {/* Brand & Name */}
+        <div className="pt-3">
+          <p className="text-[11px] uppercase tracking-widest text-muted-foreground font-medium">
+            {product.brand}
+          </p>
+          <Link
+            to="/product/$productId"
+            params={{ productId: product.id }}
+            className="mt-1 block text-sm font-medium leading-snug hover:underline line-clamp-1 text-foreground"
+          >
+            {product.name}
+          </Link>
         </div>
-      )}
 
-      <div className="aspect-square overflow-hidden bg-muted rounded-md relative">
-        <img
-          src={product.image}
-          alt={product.name}
-          width={900}
-          height={900}
-          loading="lazy"
-          className="size-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
-        />
-        <div className="absolute bottom-2 right-2">
-          <GradeBadge grade={best.grade} showLabel={false} />
+        {/* Pricing */}
+        <div className="mt-2 flex items-baseline gap-2">
+          <p className="font-display text-lg font-bold text-primary">{taka(best.price)}</p>
+          <p className="text-xs text-muted-foreground line-through">{taka(product.retail)}</p>
+        </div>
+
+        {/* Units and Grade Meta */}
+        <div className="mt-2 flex items-center justify-between text-[11px] text-muted-foreground pt-2 border-t border-border/50">
+          <span>
+            {count} unit{count > 1 ? "s" : ""} · {best.seller.district}
+          </span>
+          <span className="text-emerald-600 font-medium">Grade {best.grade}</span>
         </div>
       </div>
 
-      <p className="mt-4 text-xs uppercase tracking-widest text-muted-foreground font-medium">
-        {product.brand}
-      </p>
-      <h3 className="mt-1 text-base font-medium leading-tight group-hover:underline">
-        {product.name}
-      </h3>
-
-      <div className="mt-3 flex items-baseline gap-2">
-        <p className="font-display text-xl font-bold text-primary">{taka(best.price)}</p>
-        <p className="text-xs text-muted-foreground line-through">{taka(product.retail)}</p>
+      {/* Action Buttons: Add to Cart & Buy Now */}
+      <div className="mt-3.5 pt-2 grid grid-cols-2 gap-1.5 border-t border-border/40">
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={handleAddToCart}
+          className="h-8 px-2 text-[11px] rounded-none border-border font-medium flex items-center justify-center gap-1 hover:bg-muted"
+        >
+          {inCart || justAdded ? (
+            <>
+              <Check className="size-3 text-success" />
+              <span>Added</span>
+            </>
+          ) : (
+            <>
+              <ShoppingBag className="size-3" />
+              <span>Add to cart</span>
+            </>
+          )}
+        </Button>
+        <Button
+          type="button"
+          size="sm"
+          onClick={handleBuyNow}
+          className="h-8 px-2 text-[11px] rounded-none bg-primary text-primary-foreground font-semibold hover:opacity-90 flex items-center justify-center gap-1"
+        >
+          <Zap className="size-3 fill-current" />
+          <span>Buy now</span>
+        </Button>
       </div>
-
-      <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground pt-2 border-t border-border/50">
-        <span>
-          {count} unit{count > 1 ? "s" : ""} from {best.seller.district}
-        </span>
-        <span className="text-emerald-600 font-medium bg-emerald-50 px-1.5 py-0.5 rounded">
-          Grade {best.grade}
-        </span>
-      </div>
-    </Link>
+    </div>
   );
 }

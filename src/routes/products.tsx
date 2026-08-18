@@ -663,7 +663,7 @@ function ProductsPage() {
           {/* Main Product Grid / Content Area */}
           <div className="space-y-6">
             {sortedProducts.length > 0 ? (
-              <div className="hairline-grid grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 bg-card">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
                 {sortedProducts.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}
