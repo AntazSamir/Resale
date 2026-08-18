@@ -68,7 +68,7 @@ export function ProductCard({ product, compact = false }: { product: Product; co
             <Link
               to="/product/$productId"
               params={{ productId: product.id }}
-              className="mt-1 block text-[11px] font-semibold leading-[1.2] hover:underline line-clamp-2 text-foreground break-words min-h-[26px]"
+              className="mt-1 block text-[11px] font-semibold leading-[1.2] hover:underline line-clamp-2 text-foreground wrap-break-word min-h-6.5"
               title={product.name}
             >
               {product.name}
