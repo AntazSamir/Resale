@@ -42,8 +42,9 @@ function LoginPage() {
     try {
       await sendOtpFn({ data: { phone } });
       setStep("otp");
-    } catch (err: any) {
-      setError(err?.message || "Failed to send OTP. Please check your connection.");
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Failed to send OTP. Please check your connection.";
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -63,8 +64,9 @@ function LoginPage() {
       } else {
         setError(res?.error || "Invalid verification code. Please try again.");
       }
-    } catch (err: any) {
-      setError(err?.message || "Verification failed. Please try again.");
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Verification failed. Please try again.";
+      setError(message);
     } finally {
       setLoading(false);
     }

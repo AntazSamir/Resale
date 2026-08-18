@@ -120,14 +120,7 @@ export const sendOtpFn = createServerFn({ method: "POST" })
 
 // Verify OTP & Authenticate/Register User on Server
 export const verifyOtpFn = createServerFn({ method: "POST" })
-  .validator(
-    (data: {
-      phone: string;
-      otp: string;
-      name?: string;
-      nid?: string;
-    }) => data,
-  )
+  .validator((data: { phone: string; otp: string; name?: string; nid?: string }) => data)
   .handler(async ({ data }) => {
     const record = db.otps.get(data.phone);
 

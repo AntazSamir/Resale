@@ -50,8 +50,9 @@ function RegisterPage() {
     try {
       await sendOtpFn({ data: { phone } });
       setStep("otp");
-    } catch (err: any) {
-      setError(err?.message || "Failed to send OTP. Please try again.");
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Failed to send OTP. Please try again.";
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -79,8 +80,9 @@ function RegisterPage() {
       } else {
         setError(res?.error || "Invalid or expired verification code.");
       }
-    } catch (err: any) {
-      setError(err?.message || "Registration verification failed.");
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Registration verification failed.";
+      setError(message);
     } finally {
       setLoading(false);
     }

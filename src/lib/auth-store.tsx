@@ -1,10 +1,17 @@
-import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+  type ReactNode,
+} from "react";
 
 export interface AuthUser {
-  id?: string;
+  id?: string | undefined;
   phone: string;
-  name?: string;
-  role?: "BUYER" | "SELLER" | "ADMIN";
+  name?: string | undefined;
+  role?: "BUYER" | "SELLER" | "ADMIN" | undefined;
   isAdmin: boolean;
 }
 
@@ -47,9 +54,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } else {
       newUser = {
         id: userData.id,
-        phone: userData.phone || "",
+        phone: userData.phone ?? "",
         name: userData.name,
-        role: userData.role || (userData.phone === ADMIN_PHONE ? "ADMIN" : "BUYER"),
+        role: userData.role ?? (userData.phone === ADMIN_PHONE ? "ADMIN" : "BUYER"),
         isAdmin: userData.isAdmin ?? userData.phone === ADMIN_PHONE,
       };
     }
