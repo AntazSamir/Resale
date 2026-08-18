@@ -27,7 +27,7 @@ export function readGradedDrafts(): GradedDraft[] {
 export function saveGradedDraft(draft: Omit<GradedDraft, "id" | "createdAt">): GradedDraft {
   const record: GradedDraft = {
     ...draft,
-    id: `lst-${Date.now()}`,
+    id: `lst-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`,
     createdAt: new Date().toISOString(),
   };
   if (typeof window !== "undefined") {

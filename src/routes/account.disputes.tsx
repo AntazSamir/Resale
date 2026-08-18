@@ -1,8 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useState } from "react";
 import { SiteHeader, SiteFooter } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { CheckCircle2 } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -20,6 +22,48 @@ export const Route = createFileRoute("/account/disputes")({
 });
 
 function DisputesPage() {
+  const [order, setOrder] = useState("");
+  const [reason, setReason] = useState("");
+  const [explanation, setExplanation] = useState("");
+  const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!order || !reason) {
+      setError("Please select an order and a reason for the dispute.");
+      return;
+    }
+    setError("");
+    setSubmitted(true);
+  };
+
+  if (submitted) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col">
+        <SiteHeader />
+        <main className="flex-1 mx-auto max-w-2xl px-5 py-10 w-full">
+          <Card className="text-center py-12">
+            <CardContent className="space-y-4">
+              <div className="mx-auto bg-success/10 p-3 rounded-full w-fit">
+                <CheckCircle2 className="size-8 text-success" />
+              </div>
+              <h2 className="text-xl font-semibold">Dispute Submitted</h2>
+              <p className="text-muted-foreground text-sm max-w-sm mx-auto">
+                Your dispute for order <strong>{order}</strong> has been received. Our team will
+                review within 24 hours and contact you.
+              </p>
+              <Button asChild className="mt-4">
+                <Link to="/account/orders">Back to Orders</Link>
+              </Button>
+            </CardContent>
+          </Card>
+        </main>
+        <SiteFooter />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <SiteHeader />
@@ -35,11 +79,17 @@ function DisputesPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {error && (
+                <p className="text-sm text-destructive bg-destructive/10 px-4 py-2 rounded-md">
+                  {error}
+                </p>
+              )}
+
               <div className="space-y-2">
-                <Label>Select Order</Label>
-                <Select>
-                  <SelectTrigger>
+                <Label htmlFor="order-select">Select Order</Label>
+                <Select value={order} onValueChange={setOrder}>
+                  <SelectTrigger id="order-select">
                     <SelectValue placeholder="Choose a delivered order" />
                   </SelectTrigger>
                   <SelectContent>
@@ -51,9 +101,9 @@ function DisputesPage() {
               </div>
 
               <div className="space-y-2">
-                <Label>Reason for Dispute</Label>
-                <Select>
-                  <SelectTrigger>
+                <Label htmlFor="reason-select">Reason for Dispute</Label>
+                <Select value={reason} onValueChange={setReason}>
+                  <SelectTrigger id="reason-select">
                     <SelectValue placeholder="Select a reason" />
                   </SelectTrigger>
                   <SelectContent>
@@ -67,10 +117,13 @@ function DisputesPage() {
               </div>
 
               <div className="space-y-2">
-                <Label>Detailed Explanation</Label>
+                <Label htmlFor="explanation">Detailed Explanation</Label>
                 <Textarea
+                  id="explanation"
                   placeholder="Please describe exactly what doesn't match the condition report..."
                   className="min-h-30"
+                  value={explanation}
+                  onChange={(e) => setExplanation(e.target.value)}
                 />
               </div>
 

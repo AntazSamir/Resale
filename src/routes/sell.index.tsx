@@ -49,6 +49,7 @@ function SellWizardPage() {
   const [answers, setAnswers] = useState<GradingAnswers>({});
   const [productLabel, setProductLabel] = useState("");
   const [price, setPrice] = useState("");
+  const [submitting, setSubmitting] = useState(false);
   const navigate = useNavigate();
   const grading = evaluateGrading(answers);
 
@@ -59,6 +60,8 @@ function SellWizardPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (submitting) return;
+    setSubmitting(true);
     saveGradedDraft({
       productLabel: productLabel || "Untitled listing",
       price: Number(price) || 0,
@@ -355,7 +358,9 @@ function SellWizardPage() {
                 <Button type="button" variant="outline" onClick={() => setStep(2)}>
                   Back
                 </Button>
-                <Button type="submit">Review Listing</Button>
+                <Button type="submit" disabled={submitting}>
+                  {submitting ? "Publishing…" : "Publish Listing"}
+                </Button>
               </CardFooter>
             </form>
           )}

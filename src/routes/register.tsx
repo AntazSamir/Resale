@@ -94,9 +94,9 @@ function RegisterPage() {
                     id="nid"
                     placeholder="10 or 17 digit NID number"
                     value={nid}
-                    onChange={(e) => setNid(e.target.value)}
+                    onChange={(e) => setNid(e.target.value.replace(/\D/g, ""))}
                     required
-                    pattern="\d{10}|\d{13}|\d{17}"
+                    pattern="^\d{10}$|^\d{13}$|^\d{17}$"
                     title="Please enter a valid 10, 13, or 17 digit NID number"
                   />
                   <p className="text-[10px] text-muted-foreground">

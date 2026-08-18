@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { Lock, ShieldCheck, Star, Truck } from "lucide-react";
+import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
+import { Check, Lock, ShieldCheck, Star, Truck } from "lucide-react";
 import { SiteFooter, SiteHeader } from "@/components/site-header";
+import { useCart } from "@/lib/cart-store";
 import { GradeBadge } from "@/components/grade-badge";
 import {
   galleryShots,
@@ -42,7 +43,11 @@ export const Route = createFileRoute("/listing/$listingId")({
 function ListingPage() {
   const { listing, product } = Route.useLoaderData();
   const [shot, setShot] = useState(0);
+  const [addedToCart, setAddedToCart] = useState(false);
   const active = galleryShots[shot] ?? galleryShots[0]!;
+  const { addToCart, isInCart } = useCart();
+  const navigate = useNavigate();
+  const inCart = isInCart(listing.id);;
 
   const transparency = [
     ["Overall condition", `${listing.grade} — ${gradeLabel[listing.grade]}`],
@@ -136,11 +141,21 @@ function ListingPage() {
             </p>
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <button className="flex-1 bg-primary px-6 py-3.5 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90">
+              <button
+                onClick={() => { addToCart(listing.id); navigate({ to: "/cart" }); }}
+                className="flex-1 bg-primary px-6 py-3.5 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
+              >
                 Buy now
               </button>
-              <button className="flex-1 border border-primary px-6 py-3.5 text-sm font-medium transition-colors hover:bg-primary hover:text-primary-foreground">
-                Add to cart
+              <button
+                onClick={() => { addToCart(listing.id); setAddedToCart(true); }}
+                className="flex-1 border border-primary px-6 py-3.5 text-sm font-medium transition-colors hover:bg-primary hover:text-primary-foreground flex items-center justify-center gap-2"
+              >
+                {inCart || addedToCart ? (
+                  <><Check className="size-4" /> Added to cart</>
+                ) : (
+                  "Add to cart"
+                )}
               </button>
             </div>
 

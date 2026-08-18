@@ -3,8 +3,9 @@ import { SiteHeader, SiteFooter } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ShieldCheck, Trash2 } from "lucide-react";
-import { listings, productFor, taka } from "@/data/catalog";
+import { productFor, taka, listingFor } from "@/data/catalog";
 import { GradeBadge } from "@/components/grade-badge";
+import { useCart } from "@/lib/cart-store";
 
 export const Route = createFileRoute("/cart")({
   head: () => ({
@@ -13,16 +14,22 @@ export const Route = createFileRoute("/cart")({
   component: CartPage,
 });
 
-function CartPage() {
-  // Mock cart items (first two listings)
-  const cartItems = listings.slice(0, 2).map((l) => ({
-    listing: l,
-    product: productFor(l.productId),
-  }));
+const SHIPPING = 120;
 
-  const subtotal = cartItems.reduce((acc, item) => acc + item.listing.price, 0);
-  const shipping = 120; // flat rate shipping
-  const total = subtotal + shipping;
+function CartPage() {
+  const { items, removeFromCart, subtotal } = useCart();
+
+  const cartItems = items
+    .map((item) => {
+      const listing = listingFor(item.listingId);
+      if (!listing) return null;
+      const product = productFor(listing.productId);
+      if (!product) return null;
+      return { listing, product };
+    })
+    .filter(Boolean) as { listing: ReturnType<typeof listingFor> & {}; product: ReturnType<typeof productFor> & {} }[];
+
+  const total = subtotal + (cartItems.length > 0 ? SHIPPING : 0);
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -39,8 +46,8 @@ function CartPage() {
                   <CardContent className="p-6 flex flex-col sm:flex-row gap-6">
                     <div className="w-24 h-24 shrink-0 bg-muted rounded-md overflow-hidden">
                       <img
-                        src={item.product?.image}
-                        alt={item.product?.name}
+                        src={item.product.image}
+                        alt={item.product.name}
                         className="w-full h-full object-cover"
                       />
                     </div>
@@ -50,7 +57,7 @@ function CartPage() {
                           <div className="flex items-center gap-3 mb-2">
                             <GradeBadge grade={item.listing.grade} />
                             <span className="text-xs text-muted-foreground uppercase tracking-widest">
-                              {item.product?.brand}
+                              {item.product.brand}
                             </span>
                           </div>
                           <Link
@@ -58,7 +65,7 @@ function CartPage() {
                             params={{ listingId: item.listing.id }}
                             className="text-lg font-medium hover:underline"
                           >
-                            {item.product?.name}
+                            {item.product.name}
                           </Link>
                         </div>
                         <p className="font-display text-xl">{taka(item.listing.price)}</p>
@@ -71,7 +78,12 @@ function CartPage() {
                             <ShieldCheck className="size-3.5 inline ml-1 text-success" />
                           )}
                         </div>
-                        <Button variant="ghost" size="sm" className="text-destructive">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-destructive"
+                          onClick={() => removeFromCart(item.listing.id)}
+                        >
                           <Trash2 className="size-4 mr-2" />
                           Remove
                         </Button>
@@ -94,7 +106,7 @@ function CartPage() {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Shipping Estimate</span>
-                      <span>{taka(shipping)}</span>
+                      <span>{taka(SHIPPING)}</span>
                     </div>
                     <div className="border-t pt-4 flex justify-between font-medium text-lg">
                       <span>Total</span>

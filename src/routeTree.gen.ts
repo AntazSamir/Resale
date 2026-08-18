@@ -21,6 +21,7 @@ import { Route as AccountOrdersRouteImport } from './routes/account.orders'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminIdentityRouteImport } from './routes/admin.identity'
 import { Route as AdminModerationRouteImport } from './routes/admin.moderation'
+import { Route as CategoryCategorySlugRouteImport } from './routes/category.$categorySlug'
 import { Route as ListingListingIdRouteImport } from './routes/listing.$listingId'
 import { Route as ProductProductIdRouteImport } from './routes/product.$productId'
 import { Route as SellIndexRouteImport } from './routes/sell.index'
@@ -90,6 +91,11 @@ const AdminModerationRoute = AdminModerationRouteImport.update({
   path: '/admin/moderation',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CategoryCategorySlugRoute = CategoryCategorySlugRouteImport.update({
+  id: '/category/$categorySlug',
+  path: '/category/$categorySlug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ListingListingIdRoute = ListingListingIdRouteImport.update({
   id: '/listing/$listingId',
   path: '/listing/$listingId',
@@ -143,6 +149,7 @@ export interface FileRoutesByFullPath {
   '/account/orders': typeof AccountOrdersRouteWithChildren
   '/admin/identity': typeof AdminIdentityRoute
   '/admin/moderation': typeof AdminModerationRoute
+  '/category/$categorySlug': typeof CategoryCategorySlugRoute
   '/listing/$listingId': typeof ListingListingIdRoute
   '/product/$productId': typeof ProductProductIdRoute
   '/seller/$sellerId': typeof SellerSellerIdRoute
@@ -165,6 +172,7 @@ export interface FileRoutesByTo {
   '/account/orders': typeof AccountOrdersRouteWithChildren
   '/admin/identity': typeof AdminIdentityRoute
   '/admin/moderation': typeof AdminModerationRoute
+  '/category/$categorySlug': typeof CategoryCategorySlugRoute
   '/listing/$listingId': typeof ListingListingIdRoute
   '/product/$productId': typeof ProductProductIdRoute
   '/seller/$sellerId': typeof SellerSellerIdRoute
@@ -188,6 +196,7 @@ export interface FileRoutesById {
   '/account/orders': typeof AccountOrdersRouteWithChildren
   '/admin/identity': typeof AdminIdentityRoute
   '/admin/moderation': typeof AdminModerationRoute
+  '/category/$categorySlug': typeof CategoryCategorySlugRoute
   '/listing/$listingId': typeof ListingListingIdRoute
   '/product/$productId': typeof ProductProductIdRoute
   '/seller/$sellerId': typeof SellerSellerIdRoute
@@ -212,6 +221,7 @@ export interface FileRouteTypes {
     | '/account/orders'
     | '/admin/identity'
     | '/admin/moderation'
+    | '/category/$categorySlug'
     | '/listing/$listingId'
     | '/product/$productId'
     | '/seller/$sellerId'
@@ -234,6 +244,7 @@ export interface FileRouteTypes {
     | '/account/orders'
     | '/admin/identity'
     | '/admin/moderation'
+    | '/category/$categorySlug'
     | '/listing/$listingId'
     | '/product/$productId'
     | '/seller/$sellerId'
@@ -256,6 +267,7 @@ export interface FileRouteTypes {
     | '/account/orders'
     | '/admin/identity'
     | '/admin/moderation'
+    | '/category/$categorySlug'
     | '/listing/$listingId'
     | '/product/$productId'
     | '/seller/$sellerId'
@@ -279,6 +291,7 @@ export interface RootRouteChildren {
   AccountOrdersRoute: typeof AccountOrdersRouteWithChildren
   AdminIdentityRoute: typeof AdminIdentityRoute
   AdminModerationRoute: typeof AdminModerationRoute
+  CategoryCategorySlugRoute: typeof CategoryCategorySlugRoute
   ListingListingIdRoute: typeof ListingListingIdRoute
   ProductProductIdRoute: typeof ProductProductIdRoute
   SellerSellerIdRoute: typeof SellerSellerIdRoute
@@ -375,6 +388,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminModerationRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/category/$categorySlug': {
+      id: '/category/$categorySlug'
+      path: '/category/$categorySlug'
+      fullPath: '/category/$categorySlug'
+      preLoaderRoute: typeof CategoryCategorySlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/listing/$listingId': {
       id: '/listing/$listingId'
       path: '/listing/$listingId'
@@ -458,6 +478,7 @@ const rootRouteChildren: RootRouteChildren = {
   AccountOrdersRoute: AccountOrdersRouteWithChildren,
   AdminIdentityRoute: AdminIdentityRoute,
   AdminModerationRoute: AdminModerationRoute,
+  CategoryCategorySlugRoute: CategoryCategorySlugRoute,
   ListingListingIdRoute: ListingListingIdRoute,
   ProductProductIdRoute: ProductProductIdRoute,
   SellerSellerIdRoute: SellerSellerIdRoute,

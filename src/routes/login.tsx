@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { SiteHeader, SiteFooter } from "@/components/site-header";
+import { useAuth } from "@/lib/auth-store";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -26,6 +27,7 @@ function LoginPage() {
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
   const navigate = useNavigate();
+  const { signIn } = useAuth();
 
   const handleSendOtp = (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,7 +39,7 @@ function LoginPage() {
   const handleVerify = (e: React.FormEvent) => {
     e.preventDefault();
     if (otp.length === 6) {
-      // Mock successful login
+      signIn(phone);
       navigate({ to: "/" });
     }
   };

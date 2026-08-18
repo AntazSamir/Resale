@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 import { SiteFooter, SiteHeader } from "@/components/site-header";
 import { ProductCard } from "@/components/product-card";
-import { products, listings, productFor, taka, cheapest } from "@/data/catalog";
+import { products, listings, productFor, taka, cheapest, listingFor } from "@/data/catalog";
 import hero from "@/assets/hero.jpg";
 import pPhone from "@/assets/p-phone.jpg";
 import pLaptop from "@/assets/p-laptop.jpg";
@@ -88,7 +88,6 @@ function Index() {
             backgroundPosition: "center right",
           }}
         >
-
           <div className="relative z-10">
             <p className="text-xs uppercase tracking-[0.25em] text-muted-foreground">
               Pre-owned · Open-box · Like-new
@@ -225,45 +224,65 @@ function Index() {
           </div>
 
           {/* Content Layout */}
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="space-y-3 w-full md:max-w-xl">
-              <h2 className="text-xl md:text-3xl font-display font-bold tracking-tight text-foreground">
-                Apple iPhone 15 Pro 256GB (Grade A+)
-              </h2>
-              <div className="text-xs text-subtle-foreground space-y-0.5">
-                <p className="font-medium">Mint Condition • Like New • 256GB</p>
-                <p className="text-muted-foreground">4 months Apple warranty remaining</p>
-              </div>
+          {(() => {
+            const dealListing = listingFor("l-1");
+            const dealProduct = dealListing ? productFor(dealListing.productId) : undefined;
+            if (!dealListing || !dealProduct) return null;
 
-              {/* Pricing */}
-              <div className="flex flex-wrap items-baseline gap-2.5 pt-1">
-                <span className="text-2xl md:text-3xl font-display font-bold text-primary">
-                  ৳95,000
-                </span>
-                <span className="text-xs md:text-sm text-muted-foreground line-through">
-                  ৳145,000
-                </span>
-                <span className="text-[11px] bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 font-bold px-2 py-0.5">
-                  Save ৳50,000 (34% OFF)
-                </span>
-              </div>
+            const saveAmount = dealProduct.retail - dealListing.price;
+            const savePercent = Math.round((saveAmount / dealProduct.retail) * 100);
 
-              <div className="pt-2">
-                <Link
-                  to="/listing/$listingId"
-                  params={{ listingId: "l-1" }}
-                  className="inline-flex items-center justify-center bg-primary text-primary-foreground font-semibold px-5 py-3 text-xs md:text-sm uppercase tracking-wider hover:opacity-90 w-full sm:w-auto"
-                >
-                  Claim Deal Before Sold →
-                </Link>
-              </div>
-            </div>
+            return (
+              <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+                <div className="space-y-3 w-full md:max-w-xl">
+                  <h2 className="text-xl md:text-3xl font-display font-bold tracking-tight text-foreground">
+                    {dealProduct.name} (Grade {dealListing.grade})
+                  </h2>
+                  <div className="text-xs text-subtle-foreground space-y-0.5">
+                    <p className="font-medium">
+                      Mint Condition • Like New •{" "}
+                      {dealProduct.specs.find((s) => s.label === "Storage")?.value}
+                    </p>
+                    <p className="text-muted-foreground">
+                      {dealListing.warrantyMonths} months warranty remaining
+                    </p>
+                  </div>
 
-            {/* Product image */}
-            <div className="relative w-full md:w-64 aspect-square border border-border bg-muted shrink-0 flex items-center justify-center p-4">
-              <img src={pPhone} alt="iPhone 15 Pro Deal" className="size-full object-contain" />
-            </div>
-          </div>
+                  {/* Pricing */}
+                  <div className="flex flex-wrap items-baseline gap-2.5 pt-1">
+                    <span className="text-2xl md:text-3xl font-display font-bold text-primary">
+                      {taka(dealListing.price)}
+                    </span>
+                    <span className="text-xs md:text-sm text-muted-foreground line-through">
+                      {taka(dealProduct.retail)}
+                    </span>
+                    <span className="text-[11px] bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 font-bold px-2 py-0.5">
+                      Save {taka(saveAmount)} ({savePercent}% OFF)
+                    </span>
+                  </div>
+
+                  <div className="pt-2">
+                    <Link
+                      to="/listing/$listingId"
+                      params={{ listingId: dealListing.id }}
+                      className="inline-flex items-center justify-center bg-primary text-primary-foreground font-semibold px-5 py-3 text-xs md:text-sm uppercase tracking-wider hover:opacity-90 w-full sm:w-auto"
+                    >
+                      Claim Deal Before Sold →
+                    </Link>
+                  </div>
+                </div>
+
+                {/* Product image */}
+                <div className="relative w-full md:w-64 aspect-square border border-border bg-muted shrink-0 flex items-center justify-center p-4">
+                  <img
+                    src={dealProduct.image}
+                    alt={dealProduct.name}
+                    className="size-full object-contain"
+                  />
+                </div>
+              </div>
+            );
+          })()}
         </div>
       </section>
 
@@ -375,6 +394,7 @@ function Index() {
         <div className="flex md:hidden gap-3 overflow-x-auto scrollbar-none snap-x snap-mandatory pb-2">
           {products.map((p) => {
             const best = cheapest(p.id);
+            if (!best) return null;
             const discountPercent = Math.round(((p.retail - best.price) / p.retail) * 100);
 
             return (
@@ -500,9 +520,10 @@ function Index() {
           {listings.slice(0, 4).map((listing) => {
             const product = productFor(listing.productId);
             return (
-              <a
+              <Link
                 key={listing.id}
-                href={`/listing/${listing.id}`}
+                to="/listing/$listingId"
+                params={{ listingId: listing.id }}
                 className="group block h-full p-5 hover:bg-secondary transition-all"
               >
                 <div className="flex flex-col h-full overflow-hidden">
@@ -531,7 +552,7 @@ function Index() {
                     </div>
                   </div>
                 </div>
-              </a>
+              </Link>
             );
           })}
         </div>
@@ -541,9 +562,10 @@ function Index() {
           {listings.slice(0, 4).map((listing) => {
             const product = productFor(listing.productId);
             return (
-              <a
+              <Link
                 key={listing.id}
-                href={`/listing/${listing.id}`}
+                to="/listing/$listingId"
+                params={{ listingId: listing.id }}
                 className="w-55 shrink-0 snap-start border border-border bg-card p-3 flex flex-col justify-between"
               >
                 <div className="aspect-square bg-muted relative border border-border mb-3 flex items-center justify-center p-2">
@@ -572,7 +594,7 @@ function Index() {
                     <span>{listing.seller.district}</span>
                   </div>
                 </div>
-              </a>
+              </Link>
             );
           })}
         </div>

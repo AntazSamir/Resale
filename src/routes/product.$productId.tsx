@@ -54,11 +54,14 @@ function ProductPage() {
   const bestDealProduct = products
     .filter((p) => listingsFor(p.id).length > 0)
     .reduce((best, p) => {
-      const c = cheapest(p.id);
-      const discountBest = (best.retail - cheapest(best.id).price) / best.retail;
-      const discountP = (p.retail - c.price) / p.retail;
+      const c1 = cheapest(best.id);
+      const c2 = cheapest(p.id);
+      if (!c1) return p;
+      if (!c2) return best;
+      const discountBest = (best.retail - c1.price) / best.retail;
+      const discountP = (p.retail - c2.price) / p.retail;
       return discountP > discountBest ? p : best;
-    });
+    }, products[0]!);
 
   return (
     <div className="min-h-screen bg-background">

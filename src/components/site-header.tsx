@@ -1,5 +1,6 @@
 import { Link, useLocation } from "@tanstack/react-router";
 import { useState } from "react";
+import { useCart } from "@/lib/cart-store";
 import {
   Search,
   ShoppingBag,
@@ -19,6 +20,7 @@ import resaleLogo from "@/assets/resale-logo.png";
 export function SiteHeader() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+  const { itemCount } = useCart();
 
   return (
     <div>
@@ -86,9 +88,11 @@ export function SiteHeader() {
               className="relative text-subtle-foreground hover:text-foreground p-1"
             >
               <ShoppingBag className="size-5" />
-              <span className="absolute -top-1 -right-1 size-4 bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center">
-                2
-              </span>
+              {itemCount > 0 && (
+                <span className="absolute -top-1 -right-1 size-4 bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center">
+                  {itemCount}
+                </span>
+              )}
             </Link>
           </div>
 
@@ -103,9 +107,11 @@ export function SiteHeader() {
             </button>
             <Link to="/cart" aria-label="Cart" className="relative p-2 text-foreground">
               <ShoppingBag className="size-5" />
-              <span className="absolute top-1 right-0.5 size-4 bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center">
-                2
-              </span>
+              {itemCount > 0 && (
+                <span className="absolute top-1 right-0.5 size-4 bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center">
+                  {itemCount}
+                </span>
+              )}
             </Link>
           </div>
         </div>
@@ -302,6 +308,15 @@ export function SiteHeader() {
 export function SiteFooter() {
   const location = useLocation();
   const isHomePage = location.pathname === "/";
+  const [newsletterEmail, setNewsletterEmail] = useState("");
+  const [newsletterDone, setNewsletterDone] = useState(false);
+
+  const handleNewsletter = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newsletterEmail.trim()) {
+      setNewsletterDone(true);
+    }
+  };
 
   // Mobile footer accordion state
   const [openAccordions, setOpenAccordions] = useState({
@@ -332,14 +347,24 @@ export function SiteFooter() {
                 </p>
               </div>
               <div className="flex flex-col sm:flex-row w-full md:w-auto items-stretch sm:items-center gap-2 max-w-md">
-                <input
-                  type="email"
-                  placeholder="Enter your phone or email address"
-                  className="bg-background border border-border px-4 py-2.5 text-sm outline-none focus:border-primary flex-1 min-w-60"
-                />
-                <button className="bg-primary text-primary-foreground text-sm font-medium px-5 py-2.5 hover:opacity-90 transition-opacity shrink-0">
-                  Subscribe
-                </button>
+                {newsletterDone ? (
+                  <p className="text-sm text-success font-medium py-2.5">✓ You&apos;re subscribed!</p>
+                ) : (
+                  <form onSubmit={handleNewsletter} className="flex flex-col sm:flex-row gap-2 w-full">
+                    <input
+                      type="email"
+                      aria-label="Email or phone for newsletter"
+                      placeholder="Enter your phone or email address"
+                      value={newsletterEmail}
+                      onChange={(e) => setNewsletterEmail(e.target.value)}
+                      required
+                      className="bg-background border border-border px-4 py-2.5 text-sm outline-none focus:border-primary flex-1 min-w-60"
+                    />
+                    <button type="submit" className="bg-primary text-primary-foreground text-sm font-medium px-5 py-2.5 hover:opacity-90 transition-opacity shrink-0">
+                      Subscribe
+                    </button>
+                  </form>
+                )}
               </div>
             </div>
           </div>

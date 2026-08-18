@@ -14,7 +14,8 @@ import {
 } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { CheckCircle2 } from "lucide-react";
-import { taka } from "@/data/catalog";
+import { taka, listingFor, productFor } from "@/data/catalog";
+import { useCart } from "@/lib/cart-store";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({
@@ -23,9 +24,30 @@ export const Route = createFileRoute("/checkout")({
   component: CheckoutPage,
 });
 
+const SHIPPING = 120;
+
+function generateOrderId() {
+  return `ORD-${Date.now().toString(36).toUpperCase().slice(-6)}`;
+}
+
 function CheckoutPage() {
   const [step, setStep] = useState<"address" | "identity" | "payment" | "success">("address");
+  const [orderId, setOrderId] = useState("");
+  const [submitting, setSubmitting] = useState(false);
   const navigate = useNavigate();
+  const { items, subtotal, clearCart } = useCart();
+
+  const cartItems = items
+    .map((item) => {
+      const listing = listingFor(item.listingId);
+      if (!listing) return null;
+      const product = productFor(listing.productId);
+      if (!product) return null;
+      return { listing, product };
+    })
+    .filter(Boolean) as { listing: NonNullable<ReturnType<typeof listingFor>>; product: NonNullable<ReturnType<typeof productFor>> }[];
+
+  const total = subtotal + SHIPPING;
 
   // Address State
   const [address, setAddress] = useState({
@@ -42,8 +64,6 @@ function CheckoutPage() {
   // Payment State
   const [paymentMethod, setPaymentMethod] = useState("cod");
 
-  const total = 124000; // Mock total
-
   const handleAddressSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setStep("identity");
@@ -56,6 +76,11 @@ function CheckoutPage() {
 
   const handlePaymentSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (submitting) return;
+    setSubmitting(true);
+    const id = generateOrderId();
+    setOrderId(id);
+    clearCart();
     setStep("success");
   };
 
@@ -71,7 +96,7 @@ function CheckoutPage() {
               </div>
               <CardTitle className="text-2xl">Order Placed Successfully!</CardTitle>
               <CardDescription>
-                Your order #ORD-84392 has been confirmed. The seller will ship your item soon.
+                Your order #{orderId} has been confirmed. The seller will ship your item soon.
               </CardDescription>
             </CardHeader>
             <CardFooter className="flex-col gap-3">
@@ -106,7 +131,7 @@ function CheckoutPage() {
               {step === "address" && (
                 <CardContent>
                   <form onSubmit={handleAddressSubmit} className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="name">Recipient Name</Label>
                         <Input
@@ -126,7 +151,7 @@ function CheckoutPage() {
                         />
                       </div>
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="division">Division</Label>
                         <Input
@@ -179,16 +204,26 @@ function CheckoutPage() {
                         id="nid"
                         required
                         placeholder="10, 13 or 17 digit NID"
-                        pattern="\d{10}|\d{13}|\d{17}"
+                        inputMode="numeric"
                         value={nid}
-                        onChange={(e) => setNid(e.target.value)}
+                        onChange={(e) => setNid(e.target.value.replace(/\D/g, ""))}
                       />
+                      {nid && nid.length !== 10 && nid.length !== 13 && nid.length !== 17 && (
+                        <p className="text-xs text-destructive">
+                          NID must be exactly 10, 13, or 17 digits.
+                        </p>
+                      )}
                     </div>
                     <div className="flex gap-3">
                       <Button type="button" variant="outline" onClick={() => setStep("address")}>
                         Back
                       </Button>
-                      <Button type="submit">Continue to Payment</Button>
+                      <Button
+                        type="submit"
+                        disabled={nid.length !== 10 && nid.length !== 13 && nid.length !== 17}
+                      >
+                        Continue to Payment
+                      </Button>
                     </div>
                   </form>
                 </CardContent>
@@ -232,8 +267,8 @@ function CheckoutPage() {
                       <Button type="button" variant="outline" onClick={() => setStep("identity")}>
                         Back
                       </Button>
-                      <Button type="submit" className="flex-1">
-                        Place Order • {taka(total)}
+                      <Button type="submit" className="flex-1" disabled={submitting}>
+                        {submitting ? "Placing order…" : `Place Order • ${taka(total)}`}
                       </Button>
                     </div>
                   </form>
@@ -251,15 +286,21 @@ function CheckoutPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4 text-sm">
+                {cartItems.length > 0 ? (
+                  cartItems.map((item) => (
+                    <div key={item.listing.id} className="flex justify-between">
+                      <span className="text-muted-foreground">1× {item.product.name}</span>
+                      <span>{taka(item.listing.price)}</span>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-muted-foreground text-xs">No items in cart.</p>
+                )}
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">1x iPhone 15 Pro</span>
-                  <span>{taka(123880)}</span>
-                </div>
-                <div className="flex justify-between border-b pb-4">
                   <span className="text-muted-foreground">Shipping</span>
-                  <span>{taka(120)}</span>
+                  <span>{taka(SHIPPING)}</span>
                 </div>
-                <div className="flex justify-between font-medium text-lg pt-2">
+                <div className="flex justify-between font-medium text-lg pt-2 border-t">
                   <span>Total</span>
                   <span>{taka(total)}</span>
                 </div>

@@ -368,7 +368,7 @@ export const listingsFor = (productId: string) =>
 
 export const productFor = (id: string) => products.find((p) => p.id === id);
 
-export const cheapest = (productId: string) => listingsFor(productId)[0] as Listing;
+export const cheapest = (productId: string) => listingsFor(productId)[0] as Listing | undefined;
 export const gradeCriteria: Record<Grade, string> = {
   "A+": "No signs of use. Fully functional, all original parts, complete accessories.",
   A: "Minor signs of use visible only up close. Fully functional, no repairs.",

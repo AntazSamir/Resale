@@ -6,6 +6,8 @@ export function ProductCard({ product }: { product: Product }) {
   const best = cheapest(product.id);
   const count = listingsFor(product.id).length;
 
+  if (!best) return null;
+
   const discountPercent = Math.round(((product.retail - best.price) / product.retail) * 100);
 
   return (
