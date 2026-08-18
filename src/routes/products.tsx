@@ -677,19 +677,20 @@ function ProductsPage() {
                         const catProducts = sortedProducts.filter((p) => p.category === cat);
                         return (
                           <div key={cat} className="space-y-2">
-                            <div className="flex items-center justify-between px-1">
-                              <h3 className="font-display font-bold text-sm text-foreground">
+                            <div className="flex items-center justify-between px-1 gap-2">
+                              <h3 className="font-display font-bold text-sm text-foreground truncate">
                                 {cat}
                               </h3>
-                              <span className="text-[10px] text-muted-foreground">
-                                {catProducts.length} models · Swipe →
+                              <span className="text-[10px] text-muted-foreground font-medium shrink-0">
+                                {catProducts.length} models ·{" "}
+                                <span className="text-primary">Swipe →</span>
                               </span>
                             </div>
-                            <div className="flex overflow-x-auto snap-x snap-mandatory gap-2 pb-3 -mx-4 px-4 scrollbar-none touch-pan-x overscroll-x-contain">
+                            <div className="flex overflow-x-auto snap-x snap-mandatory scroll-px-4 gap-1.5 pb-2 pt-1 -mx-4 px-4 scrollbar-none touch-pan-x overscroll-x-contain">
                               {catProducts.map((product) => (
                                 <div
                                   key={product.id}
-                                  className="w-[calc((100vw-2.5rem)/3)] min-w-27 max-w-35 shrink-0 snap-start"
+                                  className="w-[calc((100vw-44px)/3)] min-w-[90px] max-w-[140px] shrink-0 snap-start flex flex-col"
                                 >
                                   <ProductCard product={product} compact={true} />
                                 </div>
@@ -701,17 +702,17 @@ function ProductsPage() {
                   ) : (
                     // Filtered/Searched: Single continuous 3-card swipe carousel
                     <div className="space-y-2">
-                      <div className="flex items-center justify-between px-1 text-xs text-muted-foreground">
-                        <span>{sortedProducts.length} results</span>
-                        <span className="text-primary font-medium">
-                          ← Swipe 3 items at a time →
+                      <div className="flex items-center justify-between px-1 text-xs text-muted-foreground gap-2">
+                        <span className="font-medium">{sortedProducts.length} results</span>
+                        <span className="text-primary font-medium text-[11px] shrink-0">
+                          ← Swipe models →
                         </span>
                       </div>
-                      <div className="flex overflow-x-auto snap-x snap-mandatory gap-2 pb-3 -mx-4 px-4 scrollbar-none touch-pan-x overscroll-x-contain">
+                      <div className="flex overflow-x-auto snap-x snap-mandatory scroll-px-4 gap-1.5 pb-2 pt-1 -mx-4 px-4 scrollbar-none touch-pan-x overscroll-x-contain">
                         {sortedProducts.map((product) => (
                           <div
                             key={product.id}
-                            className="w-[calc((100vw-2.5rem)/3)] min-w-27 max-w-35 shrink-0 snap-start"
+                            className="w-[calc((100vw-44px)/3)] min-w-[90px] max-w-[140px] shrink-0 snap-start flex flex-col"
                           >
                             <ProductCard product={product} compact={true} />
                           </div>

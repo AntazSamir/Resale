@@ -35,11 +35,11 @@ export function ProductCard({ product, compact = false }: { product: Product; co
 
   if (compact) {
     return (
-      <div className="group flex flex-col bg-card p-2.5 transition-all hover:bg-secondary/40 relative overflow-hidden border border-border h-full justify-between select-none">
+      <div className="group relative flex flex-col justify-between h-full bg-card border border-border p-2 transition-colors hover:bg-secondary/40 select-none overflow-hidden rounded-none">
         <div>
           {/* Discount badge */}
           {discountPercent > 0 && (
-            <div className="absolute top-1.5 left-1.5 bg-red-600 text-white font-bold text-[8px] px-1 py-0.2 rounded shadow-xs z-10">
+            <div className="absolute top-1 left-1 bg-destructive text-destructive-foreground font-bold text-[8.5px] px-1 py-0.5 rounded-xs leading-none z-10 shadow-xs">
               -{discountPercent}%
             </div>
           )}
@@ -48,7 +48,7 @@ export function ProductCard({ product, compact = false }: { product: Product; co
           <Link
             to="/product/$productId"
             params={{ productId: product.id }}
-            className="block aspect-square overflow-hidden bg-muted rounded-none relative"
+            className="relative block aspect-square w-full overflow-hidden bg-muted/40 rounded-none"
           >
             <img
               src={product.image}
@@ -56,22 +56,19 @@ export function ProductCard({ product, compact = false }: { product: Product; co
               width={400}
               height={400}
               loading="lazy"
-              className="size-full object-cover transition-transform duration-300 group-hover:scale-[1.04]"
+              className="size-full object-cover transition-transform duration-300 group-hover:scale-105"
             />
-            <div className="absolute bottom-1 right-1 scale-75 origin-bottom-right">
-              <GradeBadge grade={best.grade} showLabel={false} />
-            </div>
           </Link>
 
           {/* Brand & Name */}
-          <div className="pt-2">
-            <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium line-clamp-1">
+          <div className="pt-1.5 flex flex-col">
+            <span className="text-[8.5px] uppercase tracking-wider text-muted-foreground font-semibold truncate leading-none">
               {product.brand}
-            </p>
+            </span>
             <Link
               to="/product/$productId"
               params={{ productId: product.id }}
-              className="mt-0.5 block text-xs font-semibold leading-tight hover:underline line-clamp-1 text-foreground"
+              className="mt-1 block text-[11px] font-semibold leading-[1.2] hover:underline line-clamp-2 text-foreground break-words min-h-[26px]"
               title={product.name}
             >
               {product.name}
@@ -79,18 +76,20 @@ export function ProductCard({ product, compact = false }: { product: Product; co
           </div>
 
           {/* Pricing */}
-          <div className="mt-1 flex flex-col gap-0.5">
-            <p className="font-display text-xs sm:text-sm font-bold text-primary leading-none">
+          <div className="mt-1 flex flex-col">
+            <span className="font-display text-xs font-bold text-primary leading-tight">
               {taka(best.price)}
-            </p>
-            <p className="text-[9px] text-muted-foreground line-through leading-none">
-              {taka(product.retail)}
-            </p>
+            </span>
+            {product.retail > best.price && (
+              <span className="text-[9px] text-muted-foreground line-through leading-tight mt-0.5">
+                {taka(product.retail)}
+              </span>
+            )}
           </div>
 
           {/* Units and Grade Meta */}
-          <div className="mt-1.5 flex items-center justify-between text-[9px] text-muted-foreground pt-1 border-t border-border/40">
-            <span className="truncate">
+          <div className="mt-1.5 flex items-center justify-between text-[9px] text-muted-foreground pt-1 border-t border-border/40 gap-1">
+            <span className="truncate font-normal">
               {count} unit{count > 1 ? "s" : ""}
             </span>
             <span className="text-emerald-600 font-semibold shrink-0">Gr. {best.grade}</span>
@@ -98,13 +97,13 @@ export function ProductCard({ product, compact = false }: { product: Product; co
         </div>
 
         {/* Action Buttons: Add to Cart & Buy Now */}
-        <div className="mt-2 pt-1.5 grid grid-cols-1 gap-1 border-t border-border/40">
+        <div className="mt-2 pt-1.5 flex flex-col gap-1 border-t border-border/40">
           <Button
             type="button"
             variant="outline"
             size="sm"
             onClick={handleAddToCart}
-            className="h-6 px-1 text-[9px] rounded-none border-border font-medium flex items-center justify-center gap-1 hover:bg-muted w-full"
+            className="h-6 px-1 text-[9.5px] rounded-none border-border font-medium flex items-center justify-center gap-1 hover:bg-muted w-full leading-none"
           >
             {inCart || justAdded ? (
               <>
@@ -122,7 +121,7 @@ export function ProductCard({ product, compact = false }: { product: Product; co
             type="button"
             size="sm"
             onClick={handleBuyNow}
-            className="h-6 px-1 text-[9px] rounded-none bg-primary text-primary-foreground font-semibold hover:opacity-90 flex items-center justify-center gap-1 w-full"
+            className="h-6 px-1 text-[9.5px] rounded-none bg-primary text-primary-foreground font-semibold hover:opacity-90 flex items-center justify-center gap-1 w-full leading-none"
           >
             <Zap className="size-2.5 fill-current shrink-0" />
             <span className="truncate">Buy now</span>
