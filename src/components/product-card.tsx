@@ -6,7 +6,7 @@ import { useCart } from "@/lib/cart-store";
 import { ShoppingBag, Check, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-export function ProductCard({ product }: { product: Product }) {
+export function ProductCard({ product, compact = false }: { product: Product; compact?: boolean }) {
   const best = cheapest(product.id);
   const count = listingsFor(product.id).length;
   const { addToCart, isInCart } = useCart();
@@ -33,8 +33,107 @@ export function ProductCard({ product }: { product: Product }) {
     navigate({ to: "/cart" });
   };
 
+  if (compact) {
+    return (
+      <div className="group flex flex-col bg-card p-2.5 transition-all hover:bg-secondary/40 relative overflow-hidden border border-border h-full justify-between select-none">
+        <div>
+          {/* Discount badge */}
+          {discountPercent > 0 && (
+            <div className="absolute top-1.5 left-1.5 bg-red-600 text-white font-bold text-[8px] px-1 py-0.2 rounded shadow-xs z-10">
+              -{discountPercent}%
+            </div>
+          )}
+
+          {/* Product Image Link */}
+          <Link
+            to="/product/$productId"
+            params={{ productId: product.id }}
+            className="block aspect-square overflow-hidden bg-muted rounded-none relative"
+          >
+            <img
+              src={product.image}
+              alt={product.name}
+              width={400}
+              height={400}
+              loading="lazy"
+              className="size-full object-cover transition-transform duration-300 group-hover:scale-[1.04]"
+            />
+            <div className="absolute bottom-1 right-1 scale-75 origin-bottom-right">
+              <GradeBadge grade={best.grade} showLabel={false} />
+            </div>
+          </Link>
+
+          {/* Brand & Name */}
+          <div className="pt-2">
+            <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium line-clamp-1">
+              {product.brand}
+            </p>
+            <Link
+              to="/product/$productId"
+              params={{ productId: product.id }}
+              className="mt-0.5 block text-xs font-semibold leading-tight hover:underline line-clamp-1 text-foreground"
+              title={product.name}
+            >
+              {product.name}
+            </Link>
+          </div>
+
+          {/* Pricing */}
+          <div className="mt-1 flex flex-col gap-0.5">
+            <p className="font-display text-xs sm:text-sm font-bold text-primary leading-none">
+              {taka(best.price)}
+            </p>
+            <p className="text-[9px] text-muted-foreground line-through leading-none">
+              {taka(product.retail)}
+            </p>
+          </div>
+
+          {/* Units and Grade Meta */}
+          <div className="mt-1.5 flex items-center justify-between text-[9px] text-muted-foreground pt-1 border-t border-border/40">
+            <span className="truncate">
+              {count} unit{count > 1 ? "s" : ""}
+            </span>
+            <span className="text-emerald-600 font-semibold shrink-0">Gr. {best.grade}</span>
+          </div>
+        </div>
+
+        {/* Action Buttons: Add to Cart & Buy Now */}
+        <div className="mt-2 pt-1.5 grid grid-cols-1 gap-1 border-t border-border/40">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={handleAddToCart}
+            className="h-6 px-1 text-[9px] rounded-none border-border font-medium flex items-center justify-center gap-1 hover:bg-muted w-full"
+          >
+            {inCart || justAdded ? (
+              <>
+                <Check className="size-2.5 text-success shrink-0" />
+                <span className="truncate">Added</span>
+              </>
+            ) : (
+              <>
+                <ShoppingBag className="size-2.5 shrink-0" />
+                <span className="truncate">Add to cart</span>
+              </>
+            )}
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            onClick={handleBuyNow}
+            className="h-6 px-1 text-[9px] rounded-none bg-primary text-primary-foreground font-semibold hover:opacity-90 flex items-center justify-center gap-1 w-full"
+          >
+            <Zap className="size-2.5 fill-current shrink-0" />
+            <span className="truncate">Buy now</span>
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="group flex flex-col bg-card p-4 transition-all hover:bg-secondary/40 relative overflow-hidden border border-border flex-between justify-between">
+    <div className="group flex flex-col bg-card p-4 transition-all hover:bg-secondary/40 relative overflow-hidden border border-border h-full justify-between">
       <div>
         {/* Discount badge */}
         {discountPercent > 0 && (

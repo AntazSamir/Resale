@@ -19,10 +19,9 @@ import {
   X,
   ChevronRight,
   RotateCcw,
-  Check,
   Package,
   Layers,
-  ArrowUpDown,
+  Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -47,9 +46,9 @@ import {
 
 export const Route = createFileRoute("/products")({
   validateSearch: (search: Record<string, unknown>) => ({
-    q: typeof search.q === "string" ? search.q : undefined,
-    category: typeof search.category === "string" ? search.category : undefined,
-    brand: typeof search.brand === "string" ? search.brand : undefined,
+    q: typeof search["q"] === "string" ? search["q"] : undefined,
+    category: typeof search["category"] === "string" ? search["category"] : undefined,
+    brand: typeof search["brand"] === "string" ? search["brand"] : undefined,
   }),
   head: () => ({
     meta: [
@@ -66,6 +65,8 @@ export const Route = createFileRoute("/products")({
 
 type SortOption = "relevance" | "price-asc" | "price-desc" | "name-asc" | "units-desc";
 
+const MAX_CATALOG_PRICE = 300000;
+
 function ProductsPage() {
   const urlSearch = useSearch({ from: "/products" });
 
@@ -80,7 +81,7 @@ function ProductsPage() {
   const [selectedGrades, setSelectedGrades] = useState<Grade[]>([]);
   const [selectedDistricts, setSelectedDistricts] = useState<string[]>([]);
   const [inStockOnly, setInStockOnly] = useState(false);
-  const [priceMax, setPriceMax] = useState<number>(200000);
+  const [priceMax, setPriceMax] = useState<number>(MAX_CATALOG_PRICE);
   const [sortBy, setSortBy] = useState<SortOption>("relevance");
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
 
@@ -131,7 +132,7 @@ function ProductsPage() {
     setSelectedGrades([]);
     setSelectedDistricts([]);
     setInStockOnly(false);
-    setPriceMax(200000);
+    setPriceMax(MAX_CATALOG_PRICE);
     setSortBy("relevance");
   };
 
@@ -142,7 +143,7 @@ function ProductsPage() {
     selectedGrades.length +
     selectedDistricts.length +
     (inStockOnly ? 1 : 0) +
-    (priceMax < 200000 ? 1 : 0);
+    (priceMax < MAX_CATALOG_PRICE ? 1 : 0);
 
   // Filter & Search Engine
   const filteredProducts = useMemo(() => {
@@ -343,17 +344,17 @@ function ProductsPage() {
         </div>
         <input
           type="range"
-          min={25000}
-          max={200000}
+          min={10000}
+          max={MAX_CATALOG_PRICE}
           step={5000}
           value={priceMax}
           onChange={(e) => setPriceMax(Number(e.target.value))}
           className="w-full accent-primary cursor-pointer"
         />
         <div className="flex justify-between text-[11px] text-muted-foreground mt-1.5">
-          <span>৳25k</span>
-          <span>৳100k</span>
-          <span>৳200k</span>
+          <span>৳10k</span>
+          <span>৳150k</span>
+          <span>৳300k</span>
         </div>
       </div>
 
@@ -607,11 +608,11 @@ function ProductsPage() {
               </Badge>
             ))}
 
-            {priceMax < 200000 && (
+            {priceMax < MAX_CATALOG_PRICE && (
               <Badge variant="secondary" className="text-xs font-normal gap-1 rounded-none py-1">
                 <span>Under {taka(priceMax)}</span>
                 <button
-                  onClick={() => setPriceMax(200000)}
+                  onClick={() => setPriceMax(MAX_CATALOG_PRICE)}
                   className="hover:text-destructive"
                   aria-label="Remove price ceiling filter"
                 >
@@ -661,13 +662,74 @@ function ProductsPage() {
           </aside>
 
           {/* Main Product Grid / Content Area */}
-          <div className="space-y-6">
+          <div className="space-y-6 overflow-hidden">
             {sortedProducts.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
-                {sortedProducts.map((product) => (
-                  <ProductCard key={product.id} product={product} />
-                ))}
-              </div>
+              <>
+                {/* ═══════════════════════════════════════════════════════════════
+                    MOBILE VIEW (< md): 3 CARDS VISIBLE + HORIZONTAL SWIPE
+                ═══════════════════════════════════════════════════════════════ */}
+                <div className="block md:hidden space-y-6">
+                  {selectedCategories.length === 0 && !searchQuery ? (
+                    // When browsing all products on mobile, render categorized 3-card swipe carousels
+                    allCategories
+                      .filter((cat) => sortedProducts.some((p) => p.category === cat))
+                      .map((cat) => {
+                        const catProducts = sortedProducts.filter((p) => p.category === cat);
+                        return (
+                          <div key={cat} className="space-y-2">
+                            <div className="flex items-center justify-between px-1">
+                              <h3 className="font-display font-bold text-sm text-foreground">
+                                {cat}
+                              </h3>
+                              <span className="text-[10px] text-muted-foreground">
+                                {catProducts.length} models · Swipe →
+                              </span>
+                            </div>
+                            <div className="flex overflow-x-auto snap-x snap-mandatory gap-2 pb-3 -mx-4 px-4 scrollbar-none touch-pan-x overscroll-x-contain">
+                              {catProducts.map((product) => (
+                                <div
+                                  key={product.id}
+                                  className="w-[calc((100vw-2.5rem)/3)] min-w-[108px] max-w-[140px] shrink-0 snap-start"
+                                >
+                                  <ProductCard product={product} compact={true} />
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        );
+                      })
+                  ) : (
+                    // Filtered/Searched: Single continuous 3-card swipe carousel
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between px-1 text-xs text-muted-foreground">
+                        <span>{sortedProducts.length} results</span>
+                        <span className="text-primary font-medium">
+                          ← Swipe 3 items at a time →
+                        </span>
+                      </div>
+                      <div className="flex overflow-x-auto snap-x snap-mandatory gap-2 pb-3 -mx-4 px-4 scrollbar-none touch-pan-x overscroll-x-contain">
+                        {sortedProducts.map((product) => (
+                          <div
+                            key={product.id}
+                            className="w-[calc((100vw-2.5rem)/3)] min-w-[108px] max-w-[140px] shrink-0 snap-start"
+                          >
+                            <ProductCard product={product} compact={true} />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* ═══════════════════════════════════════════════════════════════
+                    DESKTOP & TABLET VIEW (>= md): 4 PRODUCTS PER ROW
+                ═══════════════════════════════════════════════════════════════ */}
+                <div className="hidden md:grid sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
+                  {sortedProducts.map((product) => (
+                    <ProductCard key={product.id} product={product} />
+                  ))}
+                </div>
+              </>
             ) : (
               <div className="border border-dashed border-border bg-card p-12 text-center">
                 <div className="mx-auto size-12 bg-muted flex items-center justify-center mb-4">
