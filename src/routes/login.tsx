@@ -43,7 +43,8 @@ function LoginPage() {
       await sendOtpFn({ data: { phone } });
       setStep("otp");
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Failed to send OTP. Please check your connection.";
+      const message =
+        err instanceof Error ? err.message : "Failed to send OTP. Please check your connection.";
       setError(message);
     } finally {
       setLoading(false);
