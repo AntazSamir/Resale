@@ -1,4 +1,4 @@
-import { Link, useLocation } from "@tanstack/react-router";
+import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { useCart } from "@/lib/cart-store";
 import {
@@ -20,7 +20,20 @@ import resaleLogo from "@/assets/resale-logo.png";
 export function SiteHeader() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const { itemCount } = useCart();
+  const navigate = useNavigate();
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate({ to: "/products" as any, search: { q: searchQuery.trim() } as any });
+      setMobileSearchOpen(false);
+    } else {
+      navigate({ to: "/products" as any });
+      setMobileSearchOpen(false);
+    }
+  };
 
   return (
     <div>
@@ -61,17 +74,28 @@ export function SiteHeader() {
           </Link>
 
           {/* Desktop Center: Search Bar */}
-          <div className="ml-auto hidden flex-1 items-center gap-2 border border-border px-3 py-2 text-sm md:flex md:max-w-sm">
-            <Search className="size-4 text-muted-foreground" />
+          <form
+            onSubmit={handleSearchSubmit}
+            className="ml-auto hidden flex-1 items-center gap-2 border border-border px-3 py-2 text-sm md:flex md:max-w-sm"
+          >
+            <Search className="size-4 text-muted-foreground shrink-0" />
             <input
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full bg-transparent outline-none placeholder:text-muted-foreground"
               placeholder="Search products, brands, models"
               aria-label="Search listings"
             />
-          </div>
+          </form>
 
           {/* Desktop Right: Actions */}
-          <div className="ml-auto hidden md:flex items-center gap-4">
+          <div className="ml-auto hidden md:flex items-center gap-5">
+            <Link
+              to="/products"
+              className="text-sm font-medium text-foreground hover:text-primary transition-colors"
+            >
+              Browse
+            </Link>
             <Link to="/sell" className="text-sm font-medium text-primary hover:underline">
               Sell an item
             </Link>
@@ -119,14 +143,19 @@ export function SiteHeader() {
         {/* Mobile Search Input Dropdown */}
         {mobileSearchOpen && (
           <div className="md:hidden border-t border-border bg-card p-3">
-            <div className="flex items-center gap-2 border border-border bg-background px-3 py-2 text-sm">
-              <Search className="size-4 text-muted-foreground" />
+            <form
+              onSubmit={handleSearchSubmit}
+              className="flex items-center gap-2 border border-border bg-background px-3 py-2 text-sm"
+            >
+              <Search className="size-4 text-muted-foreground shrink-0" />
               <input
                 autoFocus
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search phones, laptops, brands..."
                 className="w-full bg-transparent outline-none text-xs text-foreground"
               />
-            </div>
+            </form>
           </div>
         )}
       </header>
@@ -174,6 +203,13 @@ export function SiteHeader() {
                   className="block px-3 py-2 hover:bg-muted text-foreground"
                 >
                   Home
+                </Link>
+                <Link
+                  to="/products"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block px-3 py-2 hover:bg-muted text-foreground"
+                >
+                  Browse Products
                 </Link>
                 <Link
                   to="/sell"
@@ -348,9 +384,14 @@ export function SiteFooter() {
               </div>
               <div className="flex flex-col sm:flex-row w-full md:w-auto items-stretch sm:items-center gap-2 max-w-md">
                 {newsletterDone ? (
-                  <p className="text-sm text-success font-medium py-2.5">✓ You&apos;re subscribed!</p>
+                  <p className="text-sm text-success font-medium py-2.5">
+                    ✓ You&apos;re subscribed!
+                  </p>
                 ) : (
-                  <form onSubmit={handleNewsletter} className="flex flex-col sm:flex-row gap-2 w-full">
+                  <form
+                    onSubmit={handleNewsletter}
+                    className="flex flex-col sm:flex-row gap-2 w-full"
+                  >
                     <input
                       type="email"
                       aria-label="Email or phone for newsletter"
@@ -360,7 +401,10 @@ export function SiteFooter() {
                       required
                       className="bg-background border border-border px-4 py-2.5 text-sm outline-none focus:border-primary flex-1 min-w-60"
                     />
-                    <button type="submit" className="bg-primary text-primary-foreground text-sm font-medium px-5 py-2.5 hover:opacity-90 transition-opacity shrink-0">
+                    <button
+                      type="submit"
+                      className="bg-primary text-primary-foreground text-sm font-medium px-5 py-2.5 hover:opacity-90 transition-opacity shrink-0"
+                    >
                       Subscribe
                     </button>
                   </form>
@@ -793,7 +837,6 @@ export function SiteFooter() {
           </div>
         </div>
       </div>
-
     </footer>
   );
 }

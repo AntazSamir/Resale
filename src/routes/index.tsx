@@ -16,6 +16,7 @@ import {
   ArrowRight,
   ChevronRight,
   Check,
+  Layers,
 } from "lucide-react";
 import { SiteFooter, SiteHeader } from "@/components/site-header";
 import { ProductCard } from "@/components/product-card";
@@ -102,12 +103,13 @@ function Index() {
               warranty status and a verified seller behind it.
             </p>
             <div className="mt-8 flex items-center gap-3">
-              <a
-                href="#browse"
-                className="bg-primary px-6 py-3 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
+              <Link
+                to="/products"
+                className="inline-flex items-center gap-2 bg-primary px-6 py-3 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
               >
-                Browse listings
-              </a>
+                <Layers className="size-4" />
+                <span>Browse listings</span>
+              </Link>
               <span className="text-sm text-muted-foreground">2,400+ graded units live</span>
             </div>
           </div>
@@ -138,13 +140,14 @@ function Index() {
             </p>
 
             <div className="pt-2">
-              <a
-                href="#browse"
+              <Link
+                to="/products"
                 className="inline-flex items-center gap-2 bg-primary text-primary-foreground text-xs font-semibold px-4 py-2.5 hover:opacity-90 transition-opacity"
               >
+                <Layers className="size-3.5" />
                 <span>Browse Products</span>
                 <ArrowRight className="size-3.5" />
-              </a>
+              </Link>
             </div>
           </div>
 
@@ -378,9 +381,9 @@ function Index() {
             <h2 className="text-xl md:text-2xl font-display font-bold">Popular Products</h2>
             <p className="text-xs text-muted-foreground">Compare all verified listings per model</p>
           </div>
-          <a href="#browse" className="text-xs font-semibold text-primary hover:underline">
+          <Link to="/products" className="text-xs font-semibold text-primary hover:underline">
             View all →
-          </a>
+          </Link>
         </div>
 
         {/* Desktop 4-grid */}
