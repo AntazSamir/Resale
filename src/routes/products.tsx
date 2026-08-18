@@ -689,7 +689,7 @@ function ProductsPage() {
                               {catProducts.map((product) => (
                                 <div
                                   key={product.id}
-                                  className="w-[calc((100vw-2.5rem)/3)] min-w-[108px] max-w-[140px] shrink-0 snap-start"
+                                  className="w-[calc((100vw-2.5rem)/3)] min-w-27 max-w-35 shrink-0 snap-start"
                                 >
                                   <ProductCard product={product} compact={true} />
                                 </div>
@@ -711,7 +711,7 @@ function ProductsPage() {
                         {sortedProducts.map((product) => (
                           <div
                             key={product.id}
-                            className="w-[calc((100vw-2.5rem)/3)] min-w-[108px] max-w-[140px] shrink-0 snap-start"
+                            className="w-[calc((100vw-2.5rem)/3)] min-w-27 max-w-35 shrink-0 snap-start"
                           >
                             <ProductCard product={product} compact={true} />
                           </div>
