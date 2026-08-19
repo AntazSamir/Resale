@@ -126,7 +126,7 @@ function SellerProfilePage() {
                   <h3 className="font-medium text-lg leading-tight mb-2 group-hover:underline">
                     {item.product?.name}
                   </h3>
-                  <p className="font-display text-xl mb-4">{taka(item.price)}</p>
+                  <p className="font-display text-xl mb-1.5">{taka(item.price)}</p>
                   <p className="text-xs text-muted-foreground line-clamp-2">{item.sellerNote}</p>
                 </CardContent>
               </Card>

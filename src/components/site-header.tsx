@@ -559,11 +559,11 @@ export function SiteFooter() {
             </div>
           </div>
 
-          {/* Desktop Giant Watermark Banner (Home only, hidden on small mobile) */}
-          <div className="border-b border-border bg-muted/40 pt-16 pb-6 px-5 text-center relative overflow-hidden select-none hidden md:block">
+          {/* Giant Watermark Banner (Home only, all screen sizes) */}
+          <div className="border-b border-border bg-muted/40 pt-12 pb-4 px-5 text-center relative overflow-hidden select-none">
             <div className="mx-auto max-w-7xl relative z-10 flex flex-col items-center justify-center">
-              <div className="flex items-center justify-center gap-4 md:gap-6">
-                <span className="font-display font-black text-foreground/30 text-[13vw] md:text-[11vw] tracking-tighter leading-none uppercase mask-[linear-gradient(to_bottom,black_30%,transparent_100%)]">
+              <div className="flex items-center justify-center gap-3 md:gap-6">
+                <span className="font-display font-black text-foreground/30 text-[17vw] md:text-[11vw] tracking-tighter leading-none uppercase mask-[linear-gradient(to_bottom,black_30%,transparent_100%)]">
                   RESALE
                 </span>
                 <BangladeshMapSVG />

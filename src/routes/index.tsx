@@ -98,7 +98,7 @@ function Index() {
                 search={{ q: undefined, category: undefined, brand: undefined }}
                 className="inline-flex items-center gap-2 bg-primary px-6 py-3 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
               >
-                <Layers className="size-4" />
+                <Layers className="size-4 text-orange-500" />
                 <span>Browse listings</span>
               </Link>
               <span className="text-sm text-muted-foreground">2,400+ graded units live</span>
@@ -136,7 +136,7 @@ function Index() {
                 search={{ q: undefined, category: undefined, brand: undefined }}
                 className="inline-flex items-center gap-2 bg-primary text-primary-foreground text-xs font-semibold px-4 py-2.5 hover:opacity-90 transition-opacity"
               >
-                <Layers className="size-3.5" />
+                <Layers className="size-3.5 text-orange-500" />
                 <span>Browse Products</span>
                 <ArrowRight className="size-3.5" />
               </Link>
@@ -501,19 +501,19 @@ function Index() {
               ))}
             </div>
 
-            {/* Tablet & Mobile: 3 visible per row in a horizontal swipeable carousel */}
+            {/* Tablet & Mobile: Horizontal Snap Scroll matching Recently Added Listings */}
             <div className="block lg:hidden">
               <div className="flex items-center justify-between px-1 text-xs text-muted-foreground mb-2">
                 <span>{section.items.length} models available</span>
                 <span className="text-primary font-medium text-[11px]">← Swipe →</span>
               </div>
-              <div className="flex overflow-x-auto snap-x snap-mandatory scroll-px-4 gap-1.5 pb-2 pt-1 -mx-4 px-4 sm:-mx-5 sm:px-5 scrollbar-none touch-pan-x overscroll-x-contain">
+              <div className="flex gap-3 overflow-x-auto scrollbar-none snap-x snap-mandatory pb-2">
                 {section.items.map((p) => (
                   <div
                     key={p.id}
-                    className="w-[calc((100vw-44px)/3)] sm:w-[calc((100vw-56px)/3)] md:w-[calc((100vw-72px)/3)] min-w-25 max-w-60 shrink-0 snap-start flex flex-col"
+                    className="w-55 shrink-0 snap-start border border-border bg-card flex flex-col"
                   >
-                    <ProductCard product={p} compact={true} />
+                    <ProductCard product={p} />
                   </div>
                 ))}
               </div>
@@ -798,11 +798,13 @@ function Index() {
                     <h3 className="font-medium leading-tight mb-2 group-hover:underline">
                       {product?.name}
                     </h3>
-                    <p className="font-display text-xl mb-3 text-primary">{taka(listing.price)}</p>
+                    <p className="font-display text-xl mb-1.5 text-primary">
+                      {taka(listing.price)}
+                    </p>
                     <p className="text-xs text-muted-foreground line-clamp-2 flex-1">
                       {listing.sellerNote}
                     </p>
-                    <div className="mt-4 pt-4 border-t border-border flex items-center justify-between text-xs text-muted-foreground">
+                    <div className="mt-2 pt-2 border-t border-border flex items-center justify-between text-xs text-muted-foreground">
                       <span>{listing.seller.name}</span>
                       <span>{listing.seller.district}</span>
                     </div>
