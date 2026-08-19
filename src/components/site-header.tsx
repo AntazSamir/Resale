@@ -532,7 +532,7 @@ export function SiteHeader() {
               <div
                 key={item.label}
                 style={{ position: "fixed", top: rect.bottom, left: rect.left, zIndex: 9999 }}
-                className="min-w-[200px] bg-background border border-border shadow-xl py-1"
+                className="min-w-50 bg-background border border-border border-t-0 shadow-lg"
                 onMouseEnter={() => setOpenDropdown(item.label)}
                 onMouseLeave={() => setOpenDropdown(null)}
               >
@@ -542,7 +542,7 @@ export function SiteHeader() {
                     to="/products"
                     search={{ q: sub.q, category: sub.category, brand: undefined }}
                     onClick={() => setOpenDropdown(null)}
-                    className="flex items-center px-4 py-2.5 text-[12px] text-subtle-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
+                    className="flex items-center px-4 py-1.5 text-[12px] text-subtle-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
                   >
                     {sub.label}
                   </Link>
