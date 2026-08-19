@@ -14,66 +14,70 @@
 ## ✨ Key Features & User Experience
 
 ### 🧭 1. Dual-Tier Navigation & Rich Dropdown Engine
-* **Desktop Secondary Category Header**: Sticky navigation strip with hover/click dropdowns mounted directly to `document.body` via React Portals (`createPortal`), guaranteeing top-level foreground rendering (`z-[99999]`) over hero banners and media components:
-  * **[Accessories ▾]**: Chargers & Cables, Power Banks, Cases & Covers, Screen Protectors, Stylus & Pens, USB Hubs & Docks, Memory Cards, Mounts & Stands, Keyboard & Mouse, Camera Bags & Straps, All Accessories.
-  * **[Essentials ▾]**: Smartwatches, Earbuds, Headphones, Bluetooth Speakers, Soundbars, Wearable Fitness Bands, Smart Home Devices, Home Products.
-  * **Direct Category Links**: Smartphones, Laptops, Cameras, Tablets, Gaming Consoles, Sell with Us, Partner Program.
-* **Mobile Drawer Navigation**: Slide-over drawer featuring expandable accordion submenus for Accessories and Essentials with fluid chevron rotation animations and instant navigation handling.
+
+- **Desktop Secondary Category Header**: Sticky navigation strip with hover/click dropdowns mounted directly to `document.body` via React Portals (`createPortal`), guaranteeing top-level foreground rendering (`z-[99999]`) over hero banners and media components:
+  - **[Accessories ▾]**: Chargers & Cables, Power Banks, Cases & Covers, Screen Protectors, Stylus & Pens, USB Hubs & Docks, Memory Cards, Mounts & Stands, Keyboard & Mouse, Camera Bags & Straps, All Accessories.
+  - **[Essentials ▾]**: Smartwatches, Earbuds, Headphones, Bluetooth Speakers, Soundbars, Wearable Fitness Bands, Smart Home Devices, Home Products.
+  - **Direct Category Links**: Smartphones, Laptops, Cameras, Tablets, Gaming Consoles, Sell with Us, Partner Program.
+- **Mobile Drawer Navigation**: Slide-over drawer featuring expandable accordion submenus for Accessories and Essentials with fluid chevron rotation animations and instant navigation handling.
 
 ### 📝 2. 4-Step Interactive Selling Wizard (`/sell`)
-* **Step 1 — Product & Details**:
-  * Category dropdown selection (9 main marketplace categories).
-  * Product Name / Model text input (e.g. *Apple iPhone 15 Pro 256GB Natural Titanium*).
-  * Short Description / Seller Note textarea for usage history and details.
-  * Warranty status dropdown (*Active Manufacturer Warranty*, *Expired*, *No Warranty*).
-  * Accessories included dropdown (*Box and all original accessories*, *Some original accessories*, *Device only*).
-  * **Full Validation Engine**: Visual asterisks (`*`), red border highlighting on submit attempt, inline helper error messages.
-* **Step 2 — Diagnostic Condition Grading Checklist**:
-  * 5 objective hardware checks totaling 100 points.
-  * **Conditional Repair Disclosure**: Selecting *"Official service repair, documented"* or *"Third-party repair"* opens a required input for replaced parts details.
-* **Step 3 — Media & Pricing**:
-  * Multi-photo drag-and-drop dropzone with instant thumbnail rendering, photo order badges (`#1`, `#2`...), and deletion (`✕`).
-  * Selling price in BDT (৳) with platform fee and credit estimates.
-* **Step 4 — Preview & Submit**:
-  * Consolidated pre-moderation summary previewing category badge, product title, seller notes, calculated condition grade, checklist breakdown, and photo gallery.
+
+- **Step 1 — Product & Details**:
+  - Category dropdown selection (9 main marketplace categories).
+  - Product Name / Model text input (e.g. _Apple iPhone 15 Pro 256GB Natural Titanium_).
+  - Short Description / Seller Note textarea for usage history and details.
+  - Warranty status dropdown (_Active Manufacturer Warranty_, _Expired_, _No Warranty_).
+  - Accessories included dropdown (_Box and all original accessories_, _Some original accessories_, _Device only_).
+  - **Full Validation Engine**: Visual asterisks (`*`), red border highlighting on submit attempt, inline helper error messages.
+- **Step 2 — Diagnostic Condition Grading Checklist**:
+  - 5 objective hardware checks totaling 100 points.
+  - **Conditional Repair Disclosure**: Selecting _"Official service repair, documented"_ or _"Third-party repair"_ opens a required input for replaced parts details.
+- **Step 3 — Media & Pricing**:
+  - Multi-photo drag-and-drop dropzone with instant thumbnail rendering, photo order badges (`#1`, `#2`...), and deletion (`✕`).
+  - Selling price in BDT (৳) with platform fee and credit estimates.
+- **Step 4 — Preview & Submit**:
+  - Consolidated pre-moderation summary previewing category badge, product title, seller notes, calculated condition grade, checklist breakdown, and photo gallery.
 
 ### 🔍 3. Objective Condition Grading Matrix (100-Point Scale)
-* **Grade A+ (Like New / Open-box)**: 95–100 pts · Flawless display & housing, 95%+ battery capacity, complete accessories.
-* **Grade A (Excellent)**: 85–94 pts · Micro-scratches only visible under direct light, high battery health, zero functional defects.
-* **Grade B (Good)**: 70–84 pts · Normal everyday cosmetic wear, 100% functional components, all repairs disclosed.
-* **Grade C (Fair)**: 55–69 pts · Noticeable casing marks or scuffs, fully operational for value buyers.
-* **Grade D (Heavy Wear)**: < 55 pts · Heavy wear or replaced parts sold with full disclosure and discount pricing.
+
+- **Grade A+ (Like New / Open-box)**: 95–100 pts · Flawless display & housing, 95%+ battery capacity, complete accessories.
+- **Grade A (Excellent)**: 85–94 pts · Micro-scratches only visible under direct light, high battery health, zero functional defects.
+- **Grade B (Good)**: 70–84 pts · Normal everyday cosmetic wear, 100% functional components, all repairs disclosed.
+- **Grade C (Fair)**: 55–69 pts · Noticeable casing marks or scuffs, fully operational for value buyers.
+- **Grade D (Heavy Wear)**: < 55 pts · Heavy wear or replaced parts sold with full disclosure and discount pricing.
 
 ### 🛡️ 4. Trust & Buyer Protection Ecosystem
-* **NID Identity Verification**: Government-verified seller profiles ensuring platform safety.
-* **Nationwide Cash on Delivery (COD)**: Safe transactions delivered through trusted courier partners across all 64 districts.
-* **48-Hour Inspection & Return Policy**: Escrow protection window allowing buyers to inspect their device upon arrival.
-* **Seller Portal (`/seller/listings`)**: Comprehensive dashboard showing active listings and pending drafts with live grade breakdowns, warranty tags, and repair disclosures.
+
+- **NID Identity Verification**: Government-verified seller profiles ensuring platform safety.
+- **Nationwide Cash on Delivery (COD)**: Safe transactions delivered through trusted courier partners across all 64 districts.
+- **48-Hour Inspection & Return Policy**: Escrow protection window allowing buyers to inspect their device upon arrival.
+- **Seller Portal (`/seller/listings`)**: Comprehensive dashboard showing active listings and pending drafts with live grade breakdowns, warranty tags, and repair disclosures.
 
 ---
 
 ## 🎨 UI/UX Design System Guidelines
 
-| Token / Layer | Light Mode | Dark Mode | Usage |
-| :--- | :--- | :--- | :--- |
-| **Primary (Brand Orange)** | `hsl(24, 95%, 53%)` (`#ea580c`) | Highlights & Action CTAs | Primary buttons, active tabs, badges |
-| **Background Canvas** | `hsl(0, 0%, 100%)` | `hsl(240, 10%, 3.9%)` | Page background |
-| **Card / Surface** | `hsl(0, 0%, 98%)` | `hsl(240, 10%, 6%)` | Elevated cards, forms, drawer backgrounds |
-| **Hairline Dividers** | `hsl(240, 5.9%, 90%)` | `hsl(240, 3.7%, 15.9%)` | Crisp 1px structural grid lines |
-| **Success / Verified** | `hsl(142, 76%, 36%)` | `hsl(142, 70%, 45%)` | NID verification badges, 100% functional tags |
-| **Destructive / Error** | `hsl(0, 84.2%, 60.2%)` | `hsl(0, 62.8%, 30.6%)` | Validation errors, defect warnings |
+| Token / Layer              | Light Mode                      | Dark Mode                | Usage                                         |
+| :------------------------- | :------------------------------ | :----------------------- | :-------------------------------------------- |
+| **Primary (Brand Orange)** | `hsl(24, 95%, 53%)` (`#ea580c`) | Highlights & Action CTAs | Primary buttons, active tabs, badges          |
+| **Background Canvas**      | `hsl(0, 0%, 100%)`              | `hsl(240, 10%, 3.9%)`    | Page background                               |
+| **Card / Surface**         | `hsl(0, 0%, 98%)`               | `hsl(240, 10%, 6%)`      | Elevated cards, forms, drawer backgrounds     |
+| **Hairline Dividers**      | `hsl(240, 5.9%, 90%)`           | `hsl(240, 3.7%, 15.9%)`  | Crisp 1px structural grid lines               |
+| **Success / Verified**     | `hsl(142, 76%, 36%)`            | `hsl(142, 70%, 45%)`     | NID verification badges, 100% functional tags |
+| **Destructive / Error**    | `hsl(0, 84.2%, 60.2%)`          | `hsl(0, 62.8%, 30.6%)`   | Validation errors, defect warnings            |
 
 ---
 
 ## 🛠️ Technology Stack
 
-| Layer | Technology |
-| :--- | :--- |
-| **Framework** | [TanStack Start](https://tanstack.com/start) + [TanStack Router](https://tanstack.com/router) |
-| **Frontend** | React 19, TypeScript 5.7+ |
-| **Styling** | Tailwind CSS v4, PostCSS, Radix UI Primitives, Lucide Icons |
-| **State & Data** | In-Memory Catalog Data Store, TanStack Query, Nitro Server Functions |
-| **Deployment** | Vercel (Edge & Serverless) / Cloudflare Workers / Nitro Multi-target Preset |
+| Layer            | Technology                                                                                    |
+| :--------------- | :-------------------------------------------------------------------------------------------- |
+| **Framework**    | [TanStack Start](https://tanstack.com/start) + [TanStack Router](https://tanstack.com/router) |
+| **Frontend**     | React 19, TypeScript 5.7+                                                                     |
+| **Styling**      | Tailwind CSS v4, PostCSS, Radix UI Primitives, Lucide Icons                                   |
+| **State & Data** | In-Memory Catalog Data Store, TanStack Query, Nitro Server Functions                          |
+| **Deployment**   | Vercel (Edge & Serverless) / Cloudflare Workers / Nitro Multi-target Preset                   |
 
 ---
 
@@ -122,18 +126,21 @@
 ## 🚀 Getting Started
 
 ### Prerequisites
-* **Node.js**: `v20.x` or higher
-* **Package Manager**: `npm` (`v10+`)
+
+- **Node.js**: `v20.x` or higher
+- **Package Manager**: `npm` (`v10+`)
 
 ### Installation & Local Development
 
 1. **Clone the repository:**
+
    ```bash
    git clone https://github.com/AntazSamir/Resale.git
    cd Resale
    ```
 
 2. **Install dependencies:**
+
    ```bash
    npm install
    ```

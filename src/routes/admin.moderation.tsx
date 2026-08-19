@@ -120,17 +120,34 @@ function AdminModerationPage() {
 
                         {expanded === l.id && (
                           <div className="mb-6 p-4 bg-muted/50 rounded-md text-sm space-y-2 border">
-                            <p><span className="font-medium">Seller:</span> {l.seller}</p>
-                            <p><span className="font-medium">Listed Price:</span> {taka(l.price)}</p>
-                            <p><span className="font-medium">Grade:</span> {l.grade}</p>
-                            <p><span className="font-medium">Risk Level:</span> <Badge variant={l.risk === "CRITICAL" ? "destructive" : "secondary"}>{l.risk}</Badge></p>
-                            <p><span className="font-medium">Flag Reason:</span> {l.reason}</p>
+                            <p>
+                              <span className="font-medium">Seller:</span> {l.seller}
+                            </p>
+                            <p>
+                              <span className="font-medium">Listed Price:</span> {taka(l.price)}
+                            </p>
+                            <p>
+                              <span className="font-medium">Grade:</span> {l.grade}
+                            </p>
+                            <p>
+                              <span className="font-medium">Risk Level:</span>{" "}
+                              <Badge variant={l.risk === "CRITICAL" ? "destructive" : "secondary"}>
+                                {l.risk}
+                              </Badge>
+                            </p>
+                            <p>
+                              <span className="font-medium">Flag Reason:</span> {l.reason}
+                            </p>
                           </div>
                         )}
 
                         {action ? (
-                          <p className={`text-sm font-medium ${action === "approved" ? "text-success" : "text-destructive"}`}>
-                            {action === "approved" ? "✓ Approved — going live shortly" : "✗ Rejected — seller will be notified"}
+                          <p
+                            className={`text-sm font-medium ${action === "approved" ? "text-success" : "text-destructive"}`}
+                          >
+                            {action === "approved"
+                              ? "✓ Approved — going live shortly"
+                              : "✗ Rejected — seller will be notified"}
                           </p>
                         ) : (
                           <div className="flex flex-wrap gap-4 mt-6 border-t pt-6">
@@ -153,9 +170,13 @@ function AdminModerationPage() {
                               onClick={() => setExpanded(expanded === l.id ? null : l.id)}
                             >
                               {expanded === l.id ? (
-                                <><ChevronUp className="size-4 mr-2" /> Hide Details</>
+                                <>
+                                  <ChevronUp className="size-4 mr-2" /> Hide Details
+                                </>
                               ) : (
-                                <><ChevronDown className="size-4 mr-2" /> View Full Details</>
+                                <>
+                                  <ChevronDown className="size-4 mr-2" /> View Full Details
+                                </>
                               )}
                             </Button>
                           </div>

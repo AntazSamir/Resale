@@ -1,11 +1,4 @@
-import {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  useCallback,
-  type ReactNode,
-} from "react";
+import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react";
 import { listingFor } from "@/data/catalog";
 
 export interface CartItem {
@@ -59,17 +52,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
     writeToStorage(next);
   }, []);
 
-  const addToCart = useCallback(
-    (listingId: string) => {
-      setItems((prev) => {
-        if (prev.some((i) => i.listingId === listingId)) return prev;
-        const next = [...prev, { listingId }];
-        writeToStorage(next);
-        return next;
-      });
-    },
-    [],
-  );
+  const addToCart = useCallback((listingId: string) => {
+    setItems((prev) => {
+      if (prev.some((i) => i.listingId === listingId)) return prev;
+      const next = [...prev, { listingId }];
+      writeToStorage(next);
+      return next;
+    });
+  }, []);
 
   const removeFromCart = useCallback(
     (listingId: string) => {

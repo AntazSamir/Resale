@@ -128,9 +128,9 @@ Moderation queue, fraud scoring, dispute tools, dashboards
 Critical architectural rule: Product ≠ Listing.
 
 PRODUCT: iPhone 15 Pro 256GB
-   ├── LISTING (Seller A): ৳95,000 · Like New · Warranty 4mo
-   ├── LISTING (Seller B): ৳88,000 · Excellent · No warranty
-   └── LISTING (Seller C): ৳82,000 · Good · No warranty
+├── LISTING (Seller A): ৳95,000 · Like New · Warranty 4mo
+├── LISTING (Seller B): ৳88,000 · Excellent · No warranty
+└── LISTING (Seller C): ৳82,000 · Good · No warranty
 
 Product = canonical catalog entry (brand, model, specs) — admin/catalog-managed, potentially crowd-suggested but admin-approved to avoid duplicate/fragmented products.
 
@@ -145,27 +145,27 @@ Sellers search/select an existing Product during listing creation (§12 wizard s
 7.1 Buyer journey
 
 Browse → Search/Filter → Product Page (all listings)
-   → Select Listing → Listing Detail (condition, seller, warranty)
-   → Add to Cart / Buy Now → Checkout (address + payment method)
-   → COD or Digital Payment → Order Placed → Seller Confirms
-   → Courier Pickup → Shipped → Delivered → Payment Settled
-   → Review (product + seller) [48h window]
+→ Select Listing → Listing Detail (condition, seller, warranty)
+→ Add to Cart / Buy Now → Checkout (address + payment method)
+→ COD or Digital Payment → Order Placed → Seller Confirms
+→ Courier Pickup → Shipped → Delivered → Payment Settled
+→ Review (product + seller) [48h window]
 
 7.2 Seller journey
 
 Register (phone OTP + NID number, mandatory) → Seller Profile Setup
-   → Create Listing (13-step wizard) → Submit for Moderation
-   → Approved → Listing Live → Order Received → Confirm Order
-   → Hand off to Courier → Delivered → Return/Dispute Window Closes
-   → Payout Eligible → Payout Processed → Review Received
+→ Create Listing (13-step wizard) → Submit for Moderation
+→ Approved → Listing Live → Order Received → Confirm Order
+→ Hand off to Courier → Delivered → Return/Dispute Window Closes
+→ Payout Eligible → Payout Processed → Review Received
 
 7.3 Dispute journey
 
 Buyer reports issue (within 48h of delivery) → Uploads evidence
-   → Seller notified → Seller responds (48h SLA)
-   → Admin reviews (listing snapshot + evidence + order history)
-   → Decision: Full refund / Partial refund / Return / Replacement / Reject
-   → Seller penalty applied if at fault → Case closed, logged
+→ Seller notified → Seller responds (48h SLA)
+→ Admin reviews (listing snapshot + evidence + order history)
+→ Decision: Full refund / Partial refund / Return / Replacement / Reject
+→ Seller penalty applied if at fault → Case closed, logged
 
 8. Feature Requirements (Summary Matrix)
 
@@ -418,14 +418,14 @@ Cameras: shutter count where available, lens condition.
 
 13.3 Buyer-facing condition transparency block (required on every PDP)
 
-Overall Condition:  A — Excellent
-Physical:           Minor signs of use
-Screen:              No visible scratches
-Battery:             92%
-Repairs:             None
-Accessories:         Charger included
-Invoice:             Available
-Warranty:            3 months remaining
+Overall Condition: A — Excellent
+Physical: Minor signs of use
+Screen: No visible scratches
+Battery: 92%
+Repairs: None
+Accessories: Charger included
+Invoice: Available
+Warranty: 3 months remaining
 
 13.4 Sensitive fields
 
@@ -437,13 +437,13 @@ Inputs: original price, product age (from purchase date), condition grade, warra
 
 Output: recommended min/avg/max resale price range + a short explanation string, shown to the seller during wizard step 10 as a non-blocking suggestion (seller can override).
 
-Original price:        ৳145,000
-Current market price:  ৳128,000  (rule: category depreciation curve)
-Condition:              A
-Battery:                94%
-Warranty:                4 months remaining
+Original price: ৳145,000
+Current market price: ৳128,000 (rule: category depreciation curve)
+Condition: A
+Battery: 94%
+Warranty: 4 months remaining
 
-Recommended range:  ৳118,000 – ৳124,000
+Recommended range: ৳118,000 – ৳124,000
 
 MVP implementation: simple depreciation-curve + condition-multiplier rules per category, hand-tuned by ops. Phase 2: incorporate historical Resale.com sales data, live demand signals, seller reputation, location, seasonality; Phase 3 (post-MVP, optional): ML/AI pricing model. Do not build AI pricing before the rule-based version is validated against real sales data.
 
@@ -482,11 +482,11 @@ Price/availability re-validated at checkout (PRICE_CHANGED, LISTING_NOT_APPROVED
 Bangladesh payment abstraction — never couple business logic to one provider:
 
 PaymentService
-   ├── CashOnDeliveryProvider   (MVP primary)
-   ├── BkashProvider            (MVP, basic)
-   ├── NagadProvider            (MVP, basic)
-   ├── RocketProvider           (Phase 1.5)
-   └── CardProvider             (Phase 1.5, via local PSP e.g. SSLCommerz)
+├── CashOnDeliveryProvider (MVP primary)
+├── BkashProvider (MVP, basic)
+├── NagadProvider (MVP, basic)
+├── RocketProvider (Phase 1.5)
+└── CardProvider (Phase 1.5, via local PSP e.g. SSLCommerz)
 
 All non-COD providers integrate via webhook confirmation — never trust a frontend "payment success" callback as source of truth; order only advances to PAID once the backend receives and signature-verifies the provider webhook.
 
@@ -499,8 +499,8 @@ Idempotency keys required on all payment-initiating requests (see §30 origin sp
 COD is the MVP's primary and highest-risk payment path.
 
 Order placed → Buyer verification (OTP) → Seller confirmation
-   → Courier pickup → Shipment → Delivery attempt
-   → Buyer receives & pays → Payment collected → Seller payout
+→ Courier pickup → Shipment → Delivery attempt
+→ Buyer receives & pays → Payment collected → Seller payout
 
 Failure modes to handle explicitly: buyer refuses order at door, seller fails to ship, courier fails delivery, incorrect address, buyer unreachable, fake/prank orders, repeated COD abuse by one buyer identity, high-value COD orders, buyer cancels after seller already confirmed.
 
@@ -539,7 +539,7 @@ PROPOSED BUSINESS RULE: COD is capped at a configurable maximum order value (rec
 Order state machine (strict — no arbitrary transitions, every change logged to audit_logs):
 
 PENDING_PAYMENT → PAID → CONFIRMED → PROCESSING → PACKED
-   → SHIPPED → OUT_FOR_DELIVERY → DELIVERED → COMPLETED
+→ SHIPPED → OUT_FOR_DELIVERY → DELIVERED → COMPLETED
 
 PENDING_PAYMENT → CANCELLED
 PAID → CANCELLED
@@ -553,17 +553,17 @@ For COD orders, PAID is effectively skipped/renamed conceptually to CONFIRMED at
 Return reasons: wrong product, not as described, damaged, defective, missing accessory, counterfeit/suspicious, other.
 
 Requested → Under Review → Approved → Pickup → Received
-   → Inspection → Approved for Refund → Refunded → Closed
-                              ↘ Rejected → Closed
+→ Inspection → Approved for Refund → Refunded → Closed
+↘ Rejected → Closed
 
 PROPOSED BUSINESS RULE: Return window = 48 hours from delivery for condition-mismatch claims (matches dispute SLA in §22); defective/DOA electronics get a longer window (recommend 7 days) since some defects only surface after initial use.
 
 22. Disputes
 
 Issue reported (within 48h of delivery) → Evidence uploaded (photos/video)
-   → Seller notified → Seller responds (48h SLA)
-   → Admin reviews (order snapshot + evidence + history)
-   → Decision → Full refund | Partial refund | Return | Replacement | Seller warning/penalty | Buyer claim rejected
+→ Seller notified → Seller responds (48h SLA)
+→ Admin reviews (order snapshot + evidence + history)
+→ Decision → Full refund | Partial refund | Return | Replacement | Seller warning/penalty | Buyer claim rejected
 
 Evidence types: photos, video, order details, listing snapshot at time of purchase (critical — see §44), messages, QC records.
 
@@ -643,7 +643,7 @@ Credits table types: free | purchased | promotional | consumed | expired | refun
 28. Seller Payouts
 
 Order delivered → Return/dispute window closes (48h+)
-   → Payout eligible → Payout processed → Seller balance updated
+→ Payout eligible → Payout processed → Seller balance updated
 
 MVP note: because MVP payment is COD-dominant, cash is often collected by the courier and remitted to the seller outside the platform in the simplest version — but the schema/ledger (seller_payouts, transaction history) must track this from day one so Phase 2 (commission deduction) doesn't require a redesign. Recommended MVP default: Resale.com does not intermediate COD cash flow initially (seller keeps 100%, platform earns only via listing credits — matches §51/§18 note in prior draft); the payout ledger exists in schema now specifically so Phase 2's commission-deduction flow has infrastructure to plug into.
 
@@ -722,190 +722,190 @@ Full DDL for core tables below; secondary/support tables listed with key columns
 -- ========== USERS & IDENTITY ==========
 
 CREATE TYPE verification_status AS ENUM (
-  'unverified','phone_verified','identity_pending','identity_verified','rejected','suspended'
+'unverified','phone_verified','identity_pending','identity_verified','rejected','suspended'
 );
 
 CREATE TABLE users (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  phone VARCHAR(15) UNIQUE NOT NULL,          -- +8801XXXXXXXXX
-  phone_verified_at TIMESTAMPTZ,
-  email VARCHAR(255) UNIQUE,
-  password_hash TEXT NOT NULL,
-  name VARCHAR(120) NOT NULL,
-  profile_photo_url TEXT,
-  division VARCHAR(50),
-  district VARCHAR(50),
-  role_flags JSONB NOT NULL DEFAULT '{"buyer": true, "seller": false}',
-  verification_status verification_status NOT NULL DEFAULT 'unverified',
-  is_suspended BOOLEAN NOT NULL DEFAULT false,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+phone VARCHAR(15) UNIQUE NOT NULL, -- +8801XXXXXXXXX
+phone_verified_at TIMESTAMPTZ,
+email VARCHAR(255) UNIQUE,
+password_hash TEXT NOT NULL,
+name VARCHAR(120) NOT NULL,
+profile_photo_url TEXT,
+division VARCHAR(50),
+district VARCHAR(50),
+role_flags JSONB NOT NULL DEFAULT '{"buyer": true, "seller": false}',
+verification_status verification_status NOT NULL DEFAULT 'unverified',
+is_suspended BOOLEAN NOT NULL DEFAULT false,
+created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 -- NID stored separately from `users` for stricter access control (§33, §35)
 CREATE TABLE user_identity_documents (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  nid_number_encrypted TEXT NOT NULL,          -- app-level or pgcrypto encrypted
-  nid_number_hash TEXT UNIQUE NOT NULL,        -- deterministic hash for uniqueness checks w/o decrypting
-  nid_front_image_url TEXT,
-  nid_back_image_url TEXT,
-  submitted_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  reviewed_by UUID REFERENCES users(id),
-  reviewed_at TIMESTAMPTZ,
-  status verification_status NOT NULL DEFAULT 'phone_verified',
-  rejection_reason TEXT
+id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+nid_number_encrypted TEXT NOT NULL, -- app-level or pgcrypto encrypted
+nid_number_hash TEXT UNIQUE NOT NULL, -- deterministic hash for uniqueness checks w/o decrypting
+nid_front_image_url TEXT,
+nid_back_image_url TEXT,
+submitted_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+reviewed_by UUID REFERENCES users(id),
+reviewed_at TIMESTAMPTZ,
+status verification_status NOT NULL DEFAULT 'phone_verified',
+rejection_reason TEXT
 );
 CREATE UNIQUE INDEX idx_identity_nid_hash ON user_identity_documents(nid_number_hash);
 
 CREATE TABLE user_sessions (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  refresh_token_hash TEXT NOT NULL,
-  device_info JSONB,
-  ip_address INET,
-  expires_at TIMESTAMPTZ NOT NULL,
-  revoked_at TIMESTAMPTZ,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+refresh_token_hash TEXT NOT NULL,
+device_info JSONB,
+ip_address INET,
+expires_at TIMESTAMPTZ NOT NULL,
+revoked_at TIMESTAMPTZ,
+created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 CREATE TABLE addresses (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  label VARCHAR(50),                            -- "Home", "Office"
-  recipient_name VARCHAR(120) NOT NULL,
-  phone VARCHAR(15) NOT NULL,
-  division VARCHAR(50) NOT NULL,
-  district VARCHAR(50) NOT NULL,
-  area VARCHAR(120),
-  thana_upazila VARCHAR(80),
-  postal_code VARCHAR(10),
-  address_line TEXT NOT NULL,
-  is_default BOOLEAN NOT NULL DEFAULT false,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+label VARCHAR(50), -- "Home", "Office"
+recipient_name VARCHAR(120) NOT NULL,
+phone VARCHAR(15) NOT NULL,
+division VARCHAR(50) NOT NULL,
+district VARCHAR(50) NOT NULL,
+area VARCHAR(120),
+thana_upazila VARCHAR(80),
+postal_code VARCHAR(10),
+address_line TEXT NOT NULL,
+is_default BOOLEAN NOT NULL DEFAULT false,
+created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 CREATE TYPE seller_type AS ENUM ('individual','verified_individual','professional','business');
 
 CREATE TABLE seller_profiles (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID UNIQUE NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  seller_type seller_type NOT NULL DEFAULT 'individual',
-  bio TEXT,
-  social_links JSONB,                           -- e.g., YouTube channel for creators
-  rating_avg NUMERIC(2,1) DEFAULT 0,
-  successful_sales_count INT NOT NULL DEFAULT 0,
-  completed_order_pct NUMERIC(5,2) DEFAULT 0,
-  cancellation_rate NUMERIC(5,2) DEFAULT 0,
-  return_rate NUMERIC(5,2) DEFAULT 0,
-  dispute_rate NUMERIC(5,2) DEFAULT 0,
-  response_rate NUMERIC(5,2) DEFAULT 0,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+user_id UUID UNIQUE NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+seller_type seller_type NOT NULL DEFAULT 'individual',
+bio TEXT,
+social_links JSONB, -- e.g., YouTube channel for creators
+rating_avg NUMERIC(2,1) DEFAULT 0,
+successful_sales_count INT NOT NULL DEFAULT 0,
+completed_order_pct NUMERIC(5,2) DEFAULT 0,
+cancellation_rate NUMERIC(5,2) DEFAULT 0,
+return_rate NUMERIC(5,2) DEFAULT 0,
+dispute_rate NUMERIC(5,2) DEFAULT 0,
+response_rate NUMERIC(5,2) DEFAULT 0,
+created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 -- ========== CATALOG ==========
 
 CREATE TABLE brands (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  name VARCHAR(100) UNIQUE NOT NULL,
-  slug VARCHAR(120) UNIQUE NOT NULL,
-  logo_url TEXT
+id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+name VARCHAR(100) UNIQUE NOT NULL,
+slug VARCHAR(120) UNIQUE NOT NULL,
+logo_url TEXT
 );
 
 CREATE TABLE categories (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  parent_id UUID REFERENCES categories(id),
-  name VARCHAR(100) NOT NULL,
-  slug VARCHAR(120) UNIQUE NOT NULL,
-  attribute_schema JSONB,                        -- category-specific spec/condition fields
-  seo_title VARCHAR(160),
-  seo_description VARCHAR(320),
-  sort_order INT DEFAULT 0,
-  image_url TEXT
+id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+parent_id UUID REFERENCES categories(id),
+name VARCHAR(100) NOT NULL,
+slug VARCHAR(120) UNIQUE NOT NULL,
+attribute_schema JSONB, -- category-specific spec/condition fields
+seo_title VARCHAR(160),
+seo_description VARCHAR(320),
+sort_order INT DEFAULT 0,
+image_url TEXT
 );
 
 CREATE TABLE products (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  brand_id UUID NOT NULL REFERENCES brands(id),
-  category_id UUID NOT NULL REFERENCES categories(id),
-  name VARCHAR(200) NOT NULL,
-  slug VARCHAR(220) UNIQUE NOT NULL,
-  base_specifications JSONB,
-  status VARCHAR(20) NOT NULL DEFAULT 'approved',  -- pending_review | approved | rejected
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+brand_id UUID NOT NULL REFERENCES brands(id),
+category_id UUID NOT NULL REFERENCES categories(id),
+name VARCHAR(200) NOT NULL,
+slug VARCHAR(220) UNIQUE NOT NULL,
+base_specifications JSONB,
+status VARCHAR(20) NOT NULL DEFAULT 'approved', -- pending_review | approved | rejected
+created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 CREATE TABLE product_variants (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  product_id UUID NOT NULL REFERENCES products(id) ON DELETE CASCADE,
-  variant_name VARCHAR(120),                       -- e.g., "256GB / Titanium"
-  specifications JSONB
+id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+product_id UUID NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+variant_name VARCHAR(120), -- e.g., "256GB / Titanium"
+specifications JSONB
 );
 
 CREATE TABLE product_images (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  product_id UUID NOT NULL REFERENCES products(id) ON DELETE CASCADE,
-  image_url TEXT NOT NULL,
-  sort_order INT DEFAULT 0
+id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+product_id UUID NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+image_url TEXT NOT NULL,
+sort_order INT DEFAULT 0
 );
 
 -- ========== LISTINGS ==========
 
 CREATE TYPE condition_grade AS ENUM ('A_PLUS','A','B','C','D');
 CREATE TYPE listing_status AS ENUM (
-  'draft','pending_review','approved','rejected','suspended','sold','expired','removed'
+'draft','pending_review','approved','rejected','suspended','sold','expired','removed'
 );
 
 CREATE TABLE listings (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  seller_id UUID NOT NULL REFERENCES seller_profiles(id),
-  product_id UUID NOT NULL REFERENCES products(id),
-  variant_id UUID REFERENCES product_variants(id),
-  title VARCHAR(200) NOT NULL,
-  original_price_poisha BIGINT NOT NULL,
-  resale_price_poisha BIGINT NOT NULL,
-  condition_grade condition_grade NOT NULL,
-  condition_score SMALLINT,                        -- 0-100 computed from checklist
-  purchase_date DATE,
-  warranty_status VARCHAR(120),
-  invoice_available BOOLEAN NOT NULL DEFAULT false,
-  accessories JSONB,
-  battery_health SMALLINT,
-  known_defects TEXT,
-  serial_number_encrypted TEXT,
-  imei_encrypted TEXT,
-  seller_division VARCHAR(50),
-  seller_district VARCHAR(50),
-  pickup_available BOOLEAN DEFAULT false,
-  delivery_available BOOLEAN DEFAULT true,
-  negotiable BOOLEAN DEFAULT false,
-  status listing_status NOT NULL DEFAULT 'draft',
-  moderation_reason TEXT,
-  credit_consumed BOOLEAN NOT NULL DEFAULT false,
-  views_count INT NOT NULL DEFAULT 0,
-  saves_count INT NOT NULL DEFAULT 0,
-  video_url TEXT,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  deleted_at TIMESTAMPTZ
+id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+seller_id UUID NOT NULL REFERENCES seller_profiles(id),
+product_id UUID NOT NULL REFERENCES products(id),
+variant_id UUID REFERENCES product_variants(id),
+title VARCHAR(200) NOT NULL,
+original_price_poisha BIGINT NOT NULL,
+resale_price_poisha BIGINT NOT NULL,
+condition_grade condition_grade NOT NULL,
+condition_score SMALLINT, -- 0-100 computed from checklist
+purchase_date DATE,
+warranty_status VARCHAR(120),
+invoice_available BOOLEAN NOT NULL DEFAULT false,
+accessories JSONB,
+battery_health SMALLINT,
+known_defects TEXT,
+serial_number_encrypted TEXT,
+imei_encrypted TEXT,
+seller_division VARCHAR(50),
+seller_district VARCHAR(50),
+pickup_available BOOLEAN DEFAULT false,
+delivery_available BOOLEAN DEFAULT true,
+negotiable BOOLEAN DEFAULT false,
+status listing_status NOT NULL DEFAULT 'draft',
+moderation_reason TEXT,
+credit_consumed BOOLEAN NOT NULL DEFAULT false,
+views_count INT NOT NULL DEFAULT 0,
+saves_count INT NOT NULL DEFAULT 0,
+video_url TEXT,
+created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+deleted_at TIMESTAMPTZ
 );
 CREATE INDEX idx_listings_product ON listings(product_id) WHERE status = 'approved';
 CREATE INDEX idx_listings_seller ON listings(seller_id);
 
 CREATE TABLE listing_images (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  listing_id UUID NOT NULL REFERENCES listings(id) ON DELETE CASCADE,
-  image_url TEXT NOT NULL,
-  sort_order INT DEFAULT 0
+id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+listing_id UUID NOT NULL REFERENCES listings(id) ON DELETE CASCADE,
+image_url TEXT NOT NULL,
+sort_order INT DEFAULT 0
 );
 
 CREATE TABLE listing_condition_details (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  listing_id UUID NOT NULL REFERENCES listings(id) ON DELETE CASCADE,
-  component VARCHAR(60) NOT NULL,                  -- 'screen','battery','ports',...
-  status VARCHAR(120) NOT NULL,                     -- free text or enum per category schema
-  notes TEXT
+id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+listing_id UUID NOT NULL REFERENCES listings(id) ON DELETE CASCADE,
+component VARCHAR(60) NOT NULL, -- 'screen','battery','ports',...
+status VARCHAR(120) NOT NULL, -- free text or enum per category schema
+notes TEXT
 );
 
 -- ========== INVENTORY / RESERVATION (unit-level) ==========
@@ -913,230 +913,230 @@ CREATE TABLE listing_condition_details (
 CREATE TYPE inventory_status AS ENUM ('available','reserved','sold');
 
 CREATE TABLE inventory_units (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  listing_id UUID UNIQUE NOT NULL REFERENCES listings(id),
-  status inventory_status NOT NULL DEFAULT 'available',
-  reserved_until TIMESTAMPTZ
+id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+listing_id UUID UNIQUE NOT NULL REFERENCES listings(id),
+status inventory_status NOT NULL DEFAULT 'available',
+reserved_until TIMESTAMPTZ
 );
 
 -- ========== CART / CHECKOUT ==========
 
 CREATE TABLE carts (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID REFERENCES users(id),                -- nullable for guest carts
-  session_token TEXT,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+user_id UUID REFERENCES users(id), -- nullable for guest carts
+session_token TEXT,
+created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 CREATE TABLE cart_items (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  cart_id UUID NOT NULL REFERENCES carts(id) ON DELETE CASCADE,
-  listing_id UUID NOT NULL REFERENCES listings(id),
-  price_snapshot_poisha BIGINT NOT NULL,
-  added_at TIMESTAMPTZ NOT NULL DEFAULT now()
+id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+cart_id UUID NOT NULL REFERENCES carts(id) ON DELETE CASCADE,
+listing_id UUID NOT NULL REFERENCES listings(id),
+price_snapshot_poisha BIGINT NOT NULL,
+added_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 -- ========== ORDERS ==========
 
 CREATE TYPE order_status AS ENUM (
-  'pending_payment','confirmed','processing','packed','shipped',
-  'out_for_delivery','delivered','completed','cancelled',
-  'return_requested','returned'
+'pending_payment','confirmed','processing','packed','shipped',
+'out_for_delivery','delivered','completed','cancelled',
+'return_requested','returned'
 );
 CREATE TYPE payment_status AS ENUM ('unpaid','paid','collected','settled','refunded','failed');
 
 CREATE TABLE orders (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  order_number VARCHAR(20) UNIQUE NOT NULL,
-  buyer_id UUID REFERENCES users(id),                -- nullable if buyer never created an account
-  seller_id UUID NOT NULL REFERENCES seller_profiles(id),
-  listing_id UUID NOT NULL REFERENCES listings(id),
-  -- snapshot fields (§44) — never join back to live listing for historical accuracy
-  listing_title_snapshot VARCHAR(200) NOT NULL,
-  price_snapshot_poisha BIGINT NOT NULL,
-  condition_snapshot condition_grade NOT NULL,
-  warranty_snapshot VARCHAR(120),
-  image_snapshot_url TEXT,
-  buyer_name VARCHAR(120) NOT NULL,
-  buyer_phone VARCHAR(15) NOT NULL,
-  buyer_nid_hash TEXT,                                -- reference only, not raw NID
-  shipping_address_id UUID REFERENCES addresses(id),
-  status order_status NOT NULL DEFAULT 'pending_payment',
-  payment_status payment_status NOT NULL DEFAULT 'unpaid',
-  payment_method VARCHAR(20) NOT NULL,                 -- cod | bkash | nagad | rocket | card
-  cod_amount_poisha BIGINT,
-  commission_poisha BIGINT DEFAULT 0,                  -- Phase 2
-  courier_partner VARCHAR(40),
-  courier_tracking_id VARCHAR(80),
-  risk_score SMALLINT,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  completed_at TIMESTAMPTZ
+id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+order_number VARCHAR(20) UNIQUE NOT NULL,
+buyer_id UUID REFERENCES users(id), -- nullable if buyer never created an account
+seller_id UUID NOT NULL REFERENCES seller_profiles(id),
+listing_id UUID NOT NULL REFERENCES listings(id),
+-- snapshot fields (§44) — never join back to live listing for historical accuracy
+listing_title_snapshot VARCHAR(200) NOT NULL,
+price_snapshot_poisha BIGINT NOT NULL,
+condition_snapshot condition_grade NOT NULL,
+warranty_snapshot VARCHAR(120),
+image_snapshot_url TEXT,
+buyer_name VARCHAR(120) NOT NULL,
+buyer_phone VARCHAR(15) NOT NULL,
+buyer_nid_hash TEXT, -- reference only, not raw NID
+shipping_address_id UUID REFERENCES addresses(id),
+status order_status NOT NULL DEFAULT 'pending_payment',
+payment_status payment_status NOT NULL DEFAULT 'unpaid',
+payment_method VARCHAR(20) NOT NULL, -- cod | bkash | nagad | rocket | card
+cod_amount_poisha BIGINT,
+commission_poisha BIGINT DEFAULT 0, -- Phase 2
+courier_partner VARCHAR(40),
+courier_tracking_id VARCHAR(80),
+risk_score SMALLINT,
+created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+completed_at TIMESTAMPTZ
 );
 CREATE INDEX idx_orders_seller ON orders(seller_id);
 CREATE INDEX idx_orders_buyer ON orders(buyer_id);
 CREATE INDEX idx_orders_status ON orders(status);
 
 CREATE TABLE order_status_history (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  order_id UUID NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
-  from_status order_status,
-  to_status order_status NOT NULL,
-  changed_by UUID REFERENCES users(id),
-  reason TEXT,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+order_id UUID NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+from_status order_status,
+to_status order_status NOT NULL,
+changed_by UUID REFERENCES users(id),
+reason TEXT,
+created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 -- ========== PAYMENTS ==========
 
 CREATE TABLE payments (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  order_id UUID REFERENCES orders(id),
-  purpose VARCHAR(30) NOT NULL,                       -- 'order' | 'listing_credit'
-  provider VARCHAR(20) NOT NULL,                       -- cod | bkash | nagad | rocket | card
-  amount_poisha BIGINT NOT NULL,
-  status VARCHAR(20) NOT NULL DEFAULT 'initiated',     -- initiated | success | failed | refunded
-  idempotency_key TEXT UNIQUE NOT NULL,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+order_id UUID REFERENCES orders(id),
+purpose VARCHAR(30) NOT NULL, -- 'order' | 'listing_credit'
+provider VARCHAR(20) NOT NULL, -- cod | bkash | nagad | rocket | card
+amount_poisha BIGINT NOT NULL,
+status VARCHAR(20) NOT NULL DEFAULT 'initiated', -- initiated | success | failed | refunded
+idempotency_key TEXT UNIQUE NOT NULL,
+created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 CREATE TABLE payment_transactions (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  payment_id UUID NOT NULL REFERENCES payments(id) ON DELETE CASCADE,
-  provider_transaction_id VARCHAR(120),
-  raw_payload JSONB,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+payment_id UUID NOT NULL REFERENCES payments(id) ON DELETE CASCADE,
+provider_transaction_id VARCHAR(120),
+raw_payload JSONB,
+created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 CREATE TABLE payment_webhooks (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  provider VARCHAR(20) NOT NULL,
-  payload JSONB NOT NULL,
-  signature_valid BOOLEAN NOT NULL,
-  processed BOOLEAN NOT NULL DEFAULT false,
-  received_at TIMESTAMPTZ NOT NULL DEFAULT now()
+id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+provider VARCHAR(20) NOT NULL,
+payload JSONB NOT NULL,
+signature_valid BOOLEAN NOT NULL,
+processed BOOLEAN NOT NULL DEFAULT false,
+received_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 CREATE TABLE refunds (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  order_id UUID NOT NULL REFERENCES orders(id),
-  amount_poisha BIGINT NOT NULL,
-  reason TEXT,
-  status VARCHAR(20) NOT NULL DEFAULT 'pending',
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+order_id UUID NOT NULL REFERENCES orders(id),
+amount_poisha BIGINT NOT NULL,
+reason TEXT,
+status VARCHAR(20) NOT NULL DEFAULT 'pending',
+created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 -- ========== SHIPPING ==========
 
 CREATE TABLE shipments (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  order_id UUID UNIQUE NOT NULL REFERENCES orders(id),
-  courier_partner VARCHAR(40) NOT NULL,
-  tracking_id VARCHAR(80),
-  picked_up_at TIMESTAMPTZ,
-  delivered_at TIMESTAMPTZ
+id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+order_id UUID UNIQUE NOT NULL REFERENCES orders(id),
+courier_partner VARCHAR(40) NOT NULL,
+tracking_id VARCHAR(80),
+picked_up_at TIMESTAMPTZ,
+delivered_at TIMESTAMPTZ
 );
 
 CREATE TABLE shipment_events (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  shipment_id UUID NOT NULL REFERENCES shipments(id) ON DELETE CASCADE,
-  event VARCHAR(60) NOT NULL,
-  raw_payload JSONB,
-  occurred_at TIMESTAMPTZ NOT NULL DEFAULT now()
+id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+shipment_id UUID NOT NULL REFERENCES shipments(id) ON DELETE CASCADE,
+event VARCHAR(60) NOT NULL,
+raw_payload JSONB,
+occurred_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 -- ========== RETURNS & DISPUTES ==========
 
 CREATE TABLE returns (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  order_id UUID NOT NULL REFERENCES orders(id),
-  reason VARCHAR(60) NOT NULL,
-  status VARCHAR(30) NOT NULL DEFAULT 'requested',
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  resolved_at TIMESTAMPTZ
+id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+order_id UUID NOT NULL REFERENCES orders(id),
+reason VARCHAR(60) NOT NULL,
+status VARCHAR(30) NOT NULL DEFAULT 'requested',
+created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+resolved_at TIMESTAMPTZ
 );
 
 CREATE TABLE return_items (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  return_id UUID NOT NULL REFERENCES returns(id) ON DELETE CASCADE,
-  order_id UUID NOT NULL REFERENCES orders(id)
+id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+return_id UUID NOT NULL REFERENCES returns(id) ON DELETE CASCADE,
+order_id UUID NOT NULL REFERENCES orders(id)
 );
 
 CREATE TABLE return_evidence (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  return_id UUID NOT NULL REFERENCES returns(id) ON DELETE CASCADE,
-  file_url TEXT NOT NULL,
-  uploaded_by UUID REFERENCES users(id)
+id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+return_id UUID NOT NULL REFERENCES returns(id) ON DELETE CASCADE,
+file_url TEXT NOT NULL,
+uploaded_by UUID REFERENCES users(id)
 );
 
 CREATE TABLE disputes (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  order_id UUID NOT NULL REFERENCES orders(id),
-  raised_by UUID NOT NULL REFERENCES users(id),
-  reason TEXT NOT NULL,
-  status VARCHAR(30) NOT NULL DEFAULT 'open',           -- open | investigating | resolved
-  resolution VARCHAR(30),                                 -- refund | partial_refund | return | replacement | rejected
-  resolution_notes TEXT,
-  deadline_at TIMESTAMPTZ NOT NULL,                       -- delivery + 48h
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  resolved_at TIMESTAMPTZ
+id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+order_id UUID NOT NULL REFERENCES orders(id),
+raised_by UUID NOT NULL REFERENCES users(id),
+reason TEXT NOT NULL,
+status VARCHAR(30) NOT NULL DEFAULT 'open', -- open | investigating | resolved
+resolution VARCHAR(30), -- refund | partial_refund | return | replacement | rejected
+resolution_notes TEXT,
+deadline_at TIMESTAMPTZ NOT NULL, -- delivery + 48h
+created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+resolved_at TIMESTAMPTZ
 );
 
 CREATE TABLE dispute_evidence (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  dispute_id UUID NOT NULL REFERENCES disputes(id) ON DELETE CASCADE,
-  file_url TEXT NOT NULL,
-  uploaded_by UUID REFERENCES users(id)
+id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+dispute_id UUID NOT NULL REFERENCES disputes(id) ON DELETE CASCADE,
+file_url TEXT NOT NULL,
+uploaded_by UUID REFERENCES users(id)
 );
 
 -- ========== REVIEWS ==========
 
 CREATE TABLE reviews (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  order_id UUID NOT NULL REFERENCES orders(id),          -- enforces "verified purchase only"
-  product_id UUID REFERENCES products(id),
-  reviewer_id UUID NOT NULL REFERENCES users(id),
-  rating SMALLINT NOT NULL CHECK (rating BETWEEN 1 AND 5),
-  comment TEXT,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+order_id UUID NOT NULL REFERENCES orders(id), -- enforces "verified purchase only"
+product_id UUID REFERENCES products(id),
+reviewer_id UUID NOT NULL REFERENCES users(id),
+rating SMALLINT NOT NULL CHECK (rating BETWEEN 1 AND 5),
+comment TEXT,
+created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 CREATE TABLE seller_reviews (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  order_id UUID NOT NULL REFERENCES orders(id),
-  seller_id UUID NOT NULL REFERENCES seller_profiles(id),
-  reviewer_id UUID NOT NULL REFERENCES users(id),
-  rating SMALLINT NOT NULL CHECK (rating BETWEEN 1 AND 5),
-  comment TEXT,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+order_id UUID NOT NULL REFERENCES orders(id),
+seller_id UUID NOT NULL REFERENCES seller_profiles(id),
+reviewer_id UUID NOT NULL REFERENCES users(id),
+rating SMALLINT NOT NULL CHECK (rating BETWEEN 1 AND 5),
+comment TEXT,
+created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 -- ========== WISHLIST / COUPONS ==========
 
 CREATE TABLE wishlists (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID UNIQUE NOT NULL REFERENCES users(id)
+id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+user_id UUID UNIQUE NOT NULL REFERENCES users(id)
 );
 CREATE TABLE wishlist_items (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  wishlist_id UUID NOT NULL REFERENCES wishlists(id) ON DELETE CASCADE,
-  listing_id UUID NOT NULL REFERENCES listings(id),
-  added_at TIMESTAMPTZ NOT NULL DEFAULT now()
+id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+wishlist_id UUID NOT NULL REFERENCES wishlists(id) ON DELETE CASCADE,
+listing_id UUID NOT NULL REFERENCES listings(id),
+added_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 CREATE TABLE coupons (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  code VARCHAR(30) UNIQUE NOT NULL,
-  discount_type VARCHAR(10) NOT NULL,                    -- percent | flat
-  discount_value INT NOT NULL,
-  valid_from TIMESTAMPTZ, valid_to TIMESTAMPTZ,
-  usage_limit INT, per_user_limit INT DEFAULT 1
+id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+code VARCHAR(30) UNIQUE NOT NULL,
+discount_type VARCHAR(10) NOT NULL, -- percent | flat
+discount_value INT NOT NULL,
+valid_from TIMESTAMPTZ, valid_to TIMESTAMPTZ,
+usage_limit INT, per_user_limit INT DEFAULT 1
 );
 CREATE TABLE coupon_usages (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  coupon_id UUID NOT NULL REFERENCES coupons(id),
-  user_id UUID NOT NULL REFERENCES users(id),
-  order_id UUID REFERENCES orders(id),
-  used_at TIMESTAMPTZ NOT NULL DEFAULT now()
+id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+coupon_id UUID NOT NULL REFERENCES coupons(id),
+user_id UUID NOT NULL REFERENCES users(id),
+order_id UUID REFERENCES orders(id),
+used_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 -- ========== CREDITS & PAYOUTS ==========
@@ -1144,75 +1144,75 @@ CREATE TABLE coupon_usages (
 CREATE TYPE credit_txn_type AS ENUM ('free','purchased','promotional','consumed','expired','refunded');
 
 CREATE TABLE seller_credits (
-  seller_id UUID PRIMARY KEY REFERENCES seller_profiles(id),
-  balance INT NOT NULL DEFAULT 0
+seller_id UUID PRIMARY KEY REFERENCES seller_profiles(id),
+balance INT NOT NULL DEFAULT 0
 );
 
 CREATE TABLE credit_transactions (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  seller_id UUID NOT NULL REFERENCES seller_profiles(id),
-  type credit_txn_type NOT NULL,
-  amount INT NOT NULL,                                    -- positive=credit, negative=debit
-  reference_id UUID,                                       -- payment_id or listing_id
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+seller_id UUID NOT NULL REFERENCES seller_profiles(id),
+type credit_txn_type NOT NULL,
+amount INT NOT NULL, -- positive=credit, negative=debit
+reference_id UUID, -- payment_id or listing_id
+created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 CREATE TYPE payout_status AS ENUM ('pending','available','processing','paid','failed','reversed');
 
 CREATE TABLE seller_payouts (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  seller_id UUID NOT NULL REFERENCES seller_profiles(id),
-  order_id UUID REFERENCES orders(id),
-  amount_poisha BIGINT NOT NULL,
-  status payout_status NOT NULL DEFAULT 'pending',
-  payout_method VARCHAR(20),                               -- bkash | nagad | bank
-  processed_at TIMESTAMPTZ,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+seller_id UUID NOT NULL REFERENCES seller_profiles(id),
+order_id UUID REFERENCES orders(id),
+amount_poisha BIGINT NOT NULL,
+status payout_status NOT NULL DEFAULT 'pending',
+payout_method VARCHAR(20), -- bkash | nagad | bank
+processed_at TIMESTAMPTZ,
+created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 -- ========== FRAUD / MODERATION / SUPPORT ==========
 
 CREATE TABLE fraud_risk_scores (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  entity_type VARCHAR(20) NOT NULL,                        -- 'user' | 'listing' | 'order'
-  entity_id UUID NOT NULL,
-  score SMALLINT NOT NULL,
-  level VARCHAR(10) NOT NULL,                               -- LOW|MEDIUM|HIGH|CRITICAL
-  signals JSONB,
-  computed_at TIMESTAMPTZ NOT NULL DEFAULT now()
+id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+entity_type VARCHAR(20) NOT NULL, -- 'user' | 'listing' | 'order'
+entity_id UUID NOT NULL,
+score SMALLINT NOT NULL,
+level VARCHAR(10) NOT NULL, -- LOW|MEDIUM|HIGH|CRITICAL
+signals JSONB,
+computed_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 CREATE TABLE reports (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  entity_type VARCHAR(20) NOT NULL,                         -- seller|listing|product|review|message
-  entity_id UUID NOT NULL,
-  reported_by UUID NOT NULL REFERENCES users(id),
-  reason VARCHAR(60) NOT NULL,
-  status VARCHAR(20) NOT NULL DEFAULT 'open',                -- open|under_review|resolved|dismissed
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+entity_type VARCHAR(20) NOT NULL, -- seller|listing|product|review|message
+entity_id UUID NOT NULL,
+reported_by UUID NOT NULL REFERENCES users(id),
+reason VARCHAR(60) NOT NULL,
+status VARCHAR(20) NOT NULL DEFAULT 'open', -- open|under_review|resolved|dismissed
+created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 CREATE TABLE notifications (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL REFERENCES users(id),
-  channel VARCHAR(10) NOT NULL,                              -- sms|email|whatsapp|push
-  event VARCHAR(60) NOT NULL,
-  payload JSONB,
-  status VARCHAR(20) NOT NULL DEFAULT 'queued',
-  sent_at TIMESTAMPTZ,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+user_id UUID NOT NULL REFERENCES users(id),
+channel VARCHAR(10) NOT NULL, -- sms|email|whatsapp|push
+event VARCHAR(60) NOT NULL,
+payload JSONB,
+status VARCHAR(20) NOT NULL DEFAULT 'queued',
+sent_at TIMESTAMPTZ,
+created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 CREATE TABLE audit_logs (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  actor_id UUID REFERENCES users(id),
-  actor_role VARCHAR(20),
-  action VARCHAR(60) NOT NULL,
-  entity_type VARCHAR(40) NOT NULL,
-  entity_id UUID,
-  before_state JSONB,
-  after_state JSONB,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+actor_id UUID REFERENCES users(id),
+actor_role VARCHAR(20),
+action VARCHAR(60) NOT NULL,
+entity_type VARCHAR(40) NOT NULL,
+entity_id UUID,
+before_state JSONB,
+after_state JSONB,
+created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 36.1 Secondary tables (summary)
@@ -1255,11 +1255,11 @@ listings 1───1 inventory_units
 
 carts 1───* cart_items ──* listings
 
-orders *───1 seller_profiles
+orders _───1 seller_profiles
 orders *───1 listings (source, plus denormalized snapshot fields)
 orders *───0..1 users (buyer, nullable for guest)
 orders 1───* order_status_history
-orders 1───* payments ──* payment_transactions
+orders 1───* payments ──_ payment_transactions
 orders 1───0..1 shipments ──* shipment_events
 orders 1───0..* returns ──* return_evidence
 orders 1───0..* disputes ──* dispute_evidence
@@ -1292,28 +1292,29 @@ Representative full detail given for the highest-complexity endpoints; remaining
 POST /auth/register
 Auth: none | Role: none
 Body: {
-  phone: string (required, +8801XXXXXXXXX),
-  password: string (required, min 8 chars),
-  name: string (required),
-  nidNumber: string (required, 10 or 13 or 17 digits — see §50),
-  email?: string,
-  division?: string, district?: string
+phone: string (required, +8801XXXXXXXXX),
+password: string (required, min 8 chars),
+name: string (required),
+nidNumber: string (required, 10 or 13 or 17 digits — see §50),
+email?: string,
+division?: string, district?: string
 }
 Validation:
-  - phone must be unique & valid BD format → else 409 PHONE_ALREADY_REGISTERED
-  - nidNumber required, format-validated, checked via nid_number_hash uniqueness
-    → duplicate NID on a different account → 409 NID_ALREADY_REGISTERED
-Success 201: { success:true, data:{ userId, verificationStatus:"unverified" } }
-Errors: 400 VALIDATION_ERROR, 409 PHONE_ALREADY_REGISTERED, 409 NID_ALREADY_REGISTERED
-Rate limit: 5/hour/IP
-Idempotency: not required (natural uniqueness on phone/NID)
 
-POST /auth/otp/send        Body: { phone }                 → sends OTP, rate-limited 3/10min
-POST /auth/otp/verify      Body: { phone, otp }             → sets phone_verified_at, status→phone_verified
-POST /auth/login           Body: { phone, password }        → { accessToken, refreshToken }
-POST /auth/refresh         Body: { refreshToken }           → rotates & returns new pair
-POST /auth/logout          Auth: required                   → revokes session
-POST /auth/forgot-password Body: { phone }                  → sends OTP-based reset flow
+- phone must be unique & valid BD format → else 409 PHONE_ALREADY_REGISTERED
+- nidNumber required, format-validated, checked via nid_number_hash uniqueness
+  → duplicate NID on a different account → 409 NID_ALREADY_REGISTERED
+  Success 201: { success:true, data:{ userId, verificationStatus:"unverified" } }
+  Errors: 400 VALIDATION_ERROR, 409 PHONE_ALREADY_REGISTERED, 409 NID_ALREADY_REGISTERED
+  Rate limit: 5/hour/IP
+  Idempotency: not required (natural uniqueness on phone/NID)
+
+POST /auth/otp/send Body: { phone } → sends OTP, rate-limited 3/10min
+POST /auth/otp/verify Body: { phone, otp } → sets phone_verified_at, status→phone_verified
+POST /auth/login Body: { phone, password } → { accessToken, refreshToken }
+POST /auth/refresh Body: { refreshToken } → rotates & returns new pair
+POST /auth/logout Auth: required → revokes session
+POST /auth/forgot-password Body: { phone } → sends OTP-based reset flow
 
 39.2 Identity verification (NID document upload — upgrade to identity_verified)
 
@@ -1325,144 +1326,145 @@ Errors: 400 INVALID_FILE, 409 ALREADY_PENDING
 
 39.3 User / Addresses
 
-GET   /me                          Auth: required
-PATCH /me                          Auth: required   Body: { name?, email?, profilePhotoUrl?, division?, district? }
-GET    /me/addresses                Auth: required
-POST   /me/addresses                Auth: required   Body: { label, recipientName, phone, division, district, area, thanaUpazila, postalCode, addressLine, isDefault? }
-PATCH  /me/addresses/:id            Auth: required
-DELETE /me/addresses/:id            Auth: required
+GET /me Auth: required
+PATCH /me Auth: required Body: { name?, email?, profilePhotoUrl?, division?, district? }
+GET /me/addresses Auth: required
+POST /me/addresses Auth: required Body: { label, recipientName, phone, division, district, area, thanaUpazila, postalCode, addressLine, isDefault? }
+PATCH /me/addresses/:id Auth: required
+DELETE /me/addresses/:id Auth: required
 
 39.4 Products & Categories
 
-GET /categories                     Auth: none  → tree of categories
-GET /products                       Auth: none  Query: category, brand, q, cursor, limit
-GET /products/:slug                 Auth: none  → product + aggregated active listings
-GET /products/:id/reviews           Auth: none  Query: cursor, limit
+GET /categories Auth: none → tree of categories
+GET /products Auth: none Query: category, brand, q, cursor, limit
+GET /products/:slug Auth: none → product + aggregated active listings
+GET /products/:id/reviews Auth: none Query: cursor, limit
 
 39.5 Listings (seller-facing)
 
 POST /seller/listings
 Auth: required | Role: seller (must be at least phone_verified)
 Body: {
-  productId, variantId?, title, originalPricePoisha, resalePricePoisha,
-  conditionGrade, conditionDetails:[{component, status, notes?}],
-  purchaseDate?, warrantyStatus?, invoiceAvailable, accessories?[],
-  batteryHealth?, knownDefects?, serialNumber?, imei?,
-  pickupAvailable, deliveryAvailable, negotiable?, videoUrl?
+productId, variantId?, title, originalPricePoisha, resalePricePoisha,
+conditionGrade, conditionDetails:[{component, status, notes?}],
+purchaseDate?, warrantyStatus?, invoiceAvailable, accessories?[],
+batteryHealth?, knownDefects?, serialNumber?, imei?,
+pickupAvailable, deliveryAvailable, negotiable?, videoUrl?
 }
 Validation:
-  - min 4 images required before submit (added via separate image endpoint, referenced by listingId)
-  - resalePricePoisha > 0
-  - seller must have available credit OR be within free-5 allotment → else 402 INSUFFICIENT_CREDITS
-Success 201: { data: { listingId, status: "draft" } }
 
-POST   /seller/listings/:id/images        multipart, up to 10 images
-PATCH  /seller/listings/:id               edit while draft/rejected
-POST   /seller/listings/:id/submit        draft → pending_review (consumes 1 credit on success)
-  Errors: 402 INSUFFICIENT_CREDITS, 400 MISSING_REQUIRED_FIELDS, 400 MIN_IMAGES_REQUIRED
-DELETE /seller/listings/:id               only if draft/rejected/no active orders
-GET    /seller/listings                   own listings, filter by status
+- min 4 images required before submit (added via separate image endpoint, referenced by listingId)
+- resalePricePoisha > 0
+- seller must have available credit OR be within free-5 allotment → else 402 INSUFFICIENT_CREDITS
+  Success 201: { data: { listingId, status: "draft" } }
+
+POST /seller/listings/:id/images multipart, up to 10 images
+PATCH /seller/listings/:id edit while draft/rejected
+POST /seller/listings/:id/submit draft → pending_review (consumes 1 credit on success)
+Errors: 402 INSUFFICIENT_CREDITS, 400 MISSING_REQUIRED_FIELDS, 400 MIN_IMAGES_REQUIRED
+DELETE /seller/listings/:id only if draft/rejected/no active orders
+GET /seller/listings own listings, filter by status
 
 39.6 Listings (buyer-facing) & Search
 
-GET /listings                Auth: none   Query: category, brand, priceMin, priceMax, condition,
-                                                   division, district, warranty, invoiceAvailable,
-                                                   verifiedSellerOnly, deliveryAvailable, pickupAvailable,
-                                                   sort, cursor, limit
-GET /listings/:id            Auth: none
-GET /search                  Auth: none   Query: q, + all filters above
-GET /search/suggestions      Auth: none   Query: q
+GET /listings Auth: none Query: category, brand, priceMin, priceMax, condition,
+division, district, warranty, invoiceAvailable,
+verifiedSellerOnly, deliveryAvailable, pickupAvailable,
+sort, cursor, limit
+GET /listings/:id Auth: none
+GET /search Auth: none Query: q, + all filters above
+GET /search/suggestions Auth: none Query: q
 
 39.7 Cart & Checkout
 
-GET    /cart                              Auth: optional (guest via session cookie)
-POST   /cart/items          Body:{listingId, qty=1}
-PATCH  /cart/items/:id      Body:{qty}
+GET /cart Auth: optional (guest via session cookie)
+POST /cart/items Body:{listingId, qty=1}
+PATCH /cart/items/:id Body:{qty}
 DELETE /cart/items/:id
-POST   /checkout
-  Auth: optional (guest allowed, NID + phone still required in body per §50)
-  Header: Idempotency-Key (required)
-  Body: {
-    cartId, buyerName, buyerPhone, buyerNidNumber,
-    shippingAddress:{...} | shippingAddressId,
-    paymentMethod: "cod"|"bkash"|"nagad"|"rocket"|"card"
-  }
-  Validation: re-checks listing status/price → 409 PRICE_CHANGED / 409 LISTING_NOT_APPROVED
-  Effect: creates 1 order PER SELLER in the cart (§17)
-  Success 201: { data: { orders:[{orderId, orderNumber, status}], paymentIntent? } }
-POST /checkout/validate      pre-flight check without creating orders (price/availability only)
+POST /checkout
+Auth: optional (guest allowed, NID + phone still required in body per §50)
+Header: Idempotency-Key (required)
+Body: {
+cartId, buyerName, buyerPhone, buyerNidNumber,
+shippingAddress:{...} | shippingAddressId,
+paymentMethod: "cod"|"bkash"|"nagad"|"rocket"|"card"
+}
+Validation: re-checks listing status/price → 409 PRICE_CHANGED / 409 LISTING_NOT_APPROVED
+Effect: creates 1 order PER SELLER in the cart (§17)
+Success 201: { data: { orders:[{orderId, orderNumber, status}], paymentIntent? } }
+POST /checkout/validate pre-flight check without creating orders (price/availability only)
 
 39.8 Orders
 
-GET  /orders                     Auth: required (buyer) | scoped to own orders
-GET  /orders/:id                 Auth: required, owner or seller or admin
-POST /orders/:id/cancel          Auth: required   Allowed only from pending_payment/confirmed
-GET  /orders/:id/tracking        Auth: required
+GET /orders Auth: required (buyer) | scoped to own orders
+GET /orders/:id Auth: required, owner or seller or admin
+POST /orders/:id/cancel Auth: required Allowed only from pending_payment/confirmed
+GET /orders/:id/tracking Auth: required
 
 -- Seller-side --
-GET   /seller/orders                        filter by status
-POST  /seller/orders/:id/confirm            confirmed → processing path start
-POST  /seller/orders/:id/reject             seller can't fulfil → cancelled, listing re-activated
+GET /seller/orders filter by status
+POST /seller/orders/:id/confirm confirmed → processing path start
+POST /seller/orders/:id/reject seller can't fulfil → cancelled, listing re-activated
 
 39.9 Returns & Disputes
 
-POST /orders/:id/returns          Body:{reason, description}
-GET  /returns                     Auth: required, scoped to self
-GET  /returns/:id
-POST /orders/:id/disputes         Body:{reason, description}  → deadline_at = delivered_at + 48h
-GET  /disputes
-GET  /disputes/:id
-POST /disputes/:id/evidence       multipart file upload
-POST /admin/disputes/:id/resolve  Role: admin  Body:{resolution, notes, refundAmountPoisha?}
+POST /orders/:id/returns Body:{reason, description}
+GET /returns Auth: required, scoped to self
+GET /returns/:id
+POST /orders/:id/disputes Body:{reason, description} → deadline_at = delivered_at + 48h
+GET /disputes
+GET /disputes/:id
+POST /disputes/:id/evidence multipart file upload
+POST /admin/disputes/:id/resolve Role: admin Body:{resolution, notes, refundAmountPoisha?}
 
 39.10 Reviews
 
-POST /products/:id/reviews        Body:{orderId, rating, comment?}  — order must belong to reviewer & be completed
-POST /sellers/:id/reviews         Body:{orderId, rating, comment?}
+POST /products/:id/reviews Body:{orderId, rating, comment?} — order must belong to reviewer & be completed
+POST /sellers/:id/reviews Body:{orderId, rating, comment?}
 
 39.11 Wishlist
 
-GET    /wishlist
-POST   /wishlist/items       Body:{listingId}
+GET /wishlist
+POST /wishlist/items Body:{listingId}
 DELETE /wishlist/items/:id
 
 39.12 Payments & Webhooks
 
-POST /payments                    Body:{purpose:"order"|"listing_credit", orderId?|creditPackageId, provider}
-POST /payments/:id/confirm        client-side confirmation ping (NOT trusted as final — see §18)
-POST /webhooks/bkash              signature-verified, updates payment_transactions + order/credit state
+POST /payments Body:{purpose:"order"|"listing_credit", orderId?|creditPackageId, provider}
+POST /payments/:id/confirm client-side confirmation ping (NOT trusted as final — see §18)
+POST /webhooks/bkash signature-verified, updates payment_transactions + order/credit state
 POST /webhooks/nagad
-POST /webhooks/payment            generic/card PSP webhook
+POST /webhooks/payment generic/card PSP webhook
 
 39.13 Seller dashboard
 
-GET /seller/dashboard          summary metrics
+GET /seller/dashboard summary metrics
 GET /seller/orders
 GET /seller/listings
-GET /seller/analytics          views/saves/conversion per listing
+GET /seller/analytics views/saves/conversion per listing
 GET /seller/payouts
 GET /seller/reputation
-POST /seller/credits/purchase  Body:{packageId, provider}  Header: Idempotency-Key
-GET  /seller/credits/balance
+POST /seller/credits/purchase Body:{packageId, provider} Header: Idempotency-Key
+GET /seller/credits/balance
 
 39.14 Admin
 
-GET  /admin/dashboard
-GET  /admin/users
-GET  /admin/sellers                    + verification queue filter
-POST /admin/sellers/:id/verify         Body:{decision:"approve"|"reject", reason?}
-GET  /admin/listings                   + pending_review filter
-POST /admin/listings/:id/moderate      Body:{decision:"approve"|"reject"|"suspend", reason?}
-GET  /admin/products
-GET  /admin/orders
-GET  /admin/returns
-GET  /admin/disputes
-GET  /admin/reports
-GET  /admin/fraud
-GET  /admin/reviews
-POST /admin/categories  / PATCH /admin/categories/:id
-POST /admin/credits/adjust             Body:{sellerId, amount, reason}
-GET  /admin/audit-logs
+GET /admin/dashboard
+GET /admin/users
+GET /admin/sellers + verification queue filter
+POST /admin/sellers/:id/verify Body:{decision:"approve"|"reject", reason?}
+GET /admin/listings + pending_review filter
+POST /admin/listings/:id/moderate Body:{decision:"approve"|"reject"|"suspend", reason?}
+GET /admin/products
+GET /admin/orders
+GET /admin/returns
+GET /admin/disputes
+GET /admin/reports
+GET /admin/fraud
+GET /admin/reviews
+POST /admin/categories / PATCH /admin/categories/:id
+POST /admin/credits/adjust Body:{sellerId, amount, reason}
+GET /admin/audit-logs
 
 40. API Error Model
 
@@ -1872,31 +1874,31 @@ Star ratings and rating indicators
 The frontend should define the palette centrally so the visual system can be changed without modifying individual components.
 
 :root {
-  --primary: #111111;
-  --primary-hover: #2A2A2A;
+--primary: #111111;
+--primary-hover: #2A2A2A;
 
-  --text-primary: #111111;
-  --text-secondary: #555555;
-  --text-muted: #777777;
+--text-primary: #111111;
+--text-secondary: #555555;
+--text-muted: #777777;
 
-  --background: #FFFFFF;
-  --surface: #F8F8F8;
-  --surface-hover: #F2F2F2;
+--background: #FFFFFF;
+--surface: #F8F8F8;
+--surface-hover: #F2F2F2;
 
-  --border: #E5E5E5;
-  --border-dark: #D0D0D0;
+--border: #E5E5E5;
+--border-dark: #D0D0D0;
 
-  --sale: #D32F2F;
-  --success: #2E7D32;
-  --warning: #F59E0B;
+--sale: #D32F2F;
+--success: #2E7D32;
+--warning: #F59E0B;
 
-  --rating: #F5B301;
+--rating: #F5B301;
 
-  --button-primary: #111111;
-  --button-primary-hover: #333333;
+--button-primary: #111111;
+--button-primary-hover: #333333;
 
-  --button-secondary: #FFFFFF;
-  --button-secondary-border: #111111;
+--button-secondary: #FFFFFF;
+--button-secondary-border: #111111;
 }
 
 53.3 Visual Balance

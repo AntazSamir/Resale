@@ -122,7 +122,7 @@ class MemoryDatabase {
   select() {
     return {
       from: <T>(table: T) => {
-        let items: any[] = [];
+        let items: unknown[] = [];
         if (table === schema.products) items = [...this.products];
         else if (table === schema.listings) items = [...this.listings];
         else if (table === schema.users) items = [...this.users];
@@ -130,38 +130,40 @@ class MemoryDatabase {
         else if (table === schema.disputes) items = [...this.disputes];
 
         return {
-          where: (predicate?: any) => {
+          where: (predicate?: (item: unknown) => boolean) => {
             if (predicate && typeof predicate === "function") {
               return items.filter(predicate);
             }
             return items;
           },
-          then: (resolve: (val: any) => any) => Promise.resolve(resolve(items)),
+          then: <R>(resolve: (val: unknown[]) => R) => Promise.resolve(resolve(items)),
         };
       },
     };
   }
 
-  insert(table: any) {
+  insert<T>(table: T) {
     return {
-      values: (values: any) => {
+      values: <V>(values: V) => {
         if (table === schema.users) {
-          const existing = this.users.find((u) => u.id === values.id || u.phone === values.phone);
-          if (!existing) this.users.push(values);
+          const u = values as unknown as User;
+          const existing = this.users.find((entry) => entry.id === u.id || entry.phone === u.phone);
+          if (!existing) this.users.push(u);
         } else if (table === schema.products) {
-          const existing = this.products.find((p) => p.id === values.id);
-          if (!existing) this.products.push(values);
+          const p = values as unknown as Product;
+          const existing = this.products.find((entry) => entry.id === p.id);
+          if (!existing) this.products.push(p);
         } else if (table === schema.listings) {
-          this.listings.unshift(values);
+          this.listings.unshift(values as unknown as Listing);
         } else if (table === schema.orders) {
-          this.orders.unshift(values);
+          this.orders.unshift(values as unknown as Order);
         } else if (table === schema.disputes) {
-          this.disputes.unshift(values);
+          this.disputes.unshift(values as unknown as Dispute);
         }
 
         return {
           onConflictDoNothing: () => Promise.resolve(),
-          then: (resolve: (val: any) => any) => Promise.resolve(resolve(values)),
+          then: <R>(resolve: (val: V) => R) => Promise.resolve(resolve(values)),
         };
       },
     };

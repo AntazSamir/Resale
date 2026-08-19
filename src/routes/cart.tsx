@@ -27,7 +27,10 @@ function CartPage() {
       if (!product) return null;
       return { listing, product };
     })
-    .filter(Boolean) as { listing: ReturnType<typeof listingFor> & {}; product: ReturnType<typeof productFor> & {} }[];
+    .filter(Boolean) as {
+    listing: ReturnType<typeof listingFor> & {};
+    product: ReturnType<typeof productFor> & {};
+  }[];
 
   const total = subtotal + (cartItems.length > 0 ? SHIPPING : 0);
 
