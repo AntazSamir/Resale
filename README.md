@@ -6,49 +6,61 @@
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v4-38B2AC?logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
 [![Cloudflare Workers](https://img.shields.io/badge/Deploy-Cloudflare-F38020?logo=cloudflare&logoColor=white)](https://workers.cloudflare.com/)
 
-**Resale.com** is Bangladesh's premier marketplace for quality-checked pre-owned, open-box, and like-new consumer electronics. Designed with objective component-level condition grading (A+ to D), NID-verified sellers, nationwide Cash on Delivery (COD), and a 48-hour buyer protection guarantee.
+**Resale.com** is Bangladesh's premier C2C and B2B marketplace for quality-checked pre-owned, open-box, and refurbished electronics. Engineered with objective component-level condition grading (A+ to D), NID-verified sellers, nationwide Cash on Delivery (COD), and a 48-hour buyer protection guarantee.
 
 ---
 
 ## ✨ Key Features & User Experience
 
-### 🛒 1. Listing-First Marketplace Architecture
-* **Verified Seller Units**: Browse real, individualized units with condition scores, seller district locations, warranty statuses, and verified badges.
-* **Direct Permalink URLs**: Every listing has its own dedicated page (`/listing/$listingId`) with full diagnostic inspection checklists, seller notes, invoice statuses, and direct checkout actions.
-* **Responsive Listings Grid**: Clean multi-column grid across all devices (2 columns on mobile, 3 columns on tablet, 4 columns on desktop) with granular facet filters.
+### 🧭 1. Dual-Tier Navigation & Rich Dropdown Engine
+* **Desktop Secondary Category Header**: Sticky navigation strip with hover/click dropdowns mounted directly to `document.body` via React Portals (`createPortal`), guaranteeing top-level foreground rendering (`z-[99999]`) over hero banners and media components:
+  * **[Accessories ▾]**: Chargers & Cables, Power Banks, Cases & Covers, Screen Protectors, Stylus & Pens, USB Hubs & Docks, Memory Cards, Mounts & Stands, Keyboard & Mouse, Camera Bags & Straps, All Accessories.
+  * **[Essentials ▾]**: Smartwatches, Earbuds, Headphones, Bluetooth Speakers, Soundbars, Wearable Fitness Bands, Smart Home Devices, Home Products.
+  * **Direct Category Links**: Smartphones, Laptops, Cameras, Tablets, Gaming Consoles, Sell with Us, Partner Program.
+* **Mobile Drawer Navigation**: Slide-over drawer featuring expandable accordion submenus for Accessories and Essentials with fluid chevron rotation animations and instant navigation handling.
 
-### 🧭 2. Secondary Category Navigation & Instant Filters
-* **Secondary Category Navbar**: Fast desktop navigation strip and mobile drawer linking directly to targeted inventory:
-  * **[Accessories]**: Fast wireless chargers, MagSafe gear, high-output power banks, and styluses.
-  * **[Earbuds]**: AirPods Pro 2, Samsung Galaxy Buds, Sony WF-1000XM5 ANC earbuds.
-  * **[Headphones]**: Sony WH-1000XM5, Bose QuietComfort Ultra over-ear headphones.
-  * **[Speakers]**: JBL portable Bluetooth speakers, smart home displays.
-  * **[Wearables]**: Apple Watch Series 9, smartwatch inventory with battery and sensor reports.
-  * **[Tablets]**: iPad Pro M2 and tablet devices.
-  * **[Home Products]**: Smart home displays and voice assistants.
+### 📝 2. 4-Step Interactive Selling Wizard (`/sell`)
+* **Step 1 — Product & Details**:
+  * Category dropdown selection (9 main marketplace categories).
+  * Product Name / Model text input (e.g. *Apple iPhone 15 Pro 256GB Natural Titanium*).
+  * Short Description / Seller Note textarea for usage history and details.
+  * Warranty status dropdown (*Active Manufacturer Warranty*, *Expired*, *No Warranty*).
+  * Accessories included dropdown (*Box and all original accessories*, *Some original accessories*, *Device only*).
+  * **Full Validation Engine**: Visual asterisks (`*`), red border highlighting on submit attempt, inline helper error messages.
+* **Step 2 — Diagnostic Condition Grading Checklist**:
+  * 5 objective hardware checks totaling 100 points.
+  * **Conditional Repair Disclosure**: Selecting *"Official service repair, documented"* or *"Third-party repair"* opens a required input for replaced parts details.
+* **Step 3 — Media & Pricing**:
+  * Multi-photo drag-and-drop dropzone with instant thumbnail rendering, photo order badges (`#1`, `#2`...), and deletion (`✕`).
+  * Selling price in BDT (৳) with platform fee and credit estimates.
+* **Step 4 — Preview & Submit**:
+  * Consolidated pre-moderation summary previewing category badge, product title, seller notes, calculated condition grade, checklist breakdown, and photo gallery.
 
-### 🏷️ 3. Service & Promotional Banners
-* **Instant Device Cashout (`/sell`)**: Integrated service banner connecting sellers with instant algorithmic valuations, free doorstep pickup across 64 districts, and same-day payout.
-* **Resale Assurance & Warranty (`/products`)**: Dedicated assurance highlight featuring 32-point hardware diagnostics, genuine parts certification, and 48-hour return windows.
-* **Slash Deal of the Day**: Limited-time featured listings with automated retail-price comparison and savings badges.
+### 🔍 3. Objective Condition Grading Matrix (100-Point Scale)
+* **Grade A+ (Like New / Open-box)**: 95–100 pts · Flawless display & housing, 95%+ battery capacity, complete accessories.
+* **Grade A (Excellent)**: 85–94 pts · Micro-scratches only visible under direct light, high battery health, zero functional defects.
+* **Grade B (Good)**: 70–84 pts · Normal everyday cosmetic wear, 100% functional components, all repairs disclosed.
+* **Grade C (Fair)**: 55–69 pts · Noticeable casing marks or scuffs, fully operational for value buyers.
+* **Grade D (Heavy Wear)**: < 55 pts · Heavy wear or replaced parts sold with full disclosure and discount pricing.
 
-### 🔍 4. Objective Condition Grading Matrix
-* **Grade A+ (Like New / Open-box)**: Flawless display & housing, 95%+ battery health, complete original accessories.
-* **Grade A (Excellent)**: Micro-scratches only visible under direct light, high battery health, zero functional defects.
-* **Grade B (Good)**: Normal cosmetic wear, 100% functional components, all repairs disclosed in full.
-* **Grade C (Fair)**: Noticeable scuffs or casing marks, fully functional for value buyers.
-* **Grade D (Heavy Wear)**: Heavy cosmetic wear or battery under 80%, sold with deep discount pricing and full disclosure.
-
-### 🛡️ 5. Trust & Protection Ecosystem
+### 🛡️ 4. Trust & Buyer Protection Ecosystem
 * **NID Identity Verification**: Government-verified seller profiles ensuring platform safety.
-* **Nationwide Cash on Delivery (COD)**: Safe transactions delivered through trusted courier partners.
-* **48-Hour Inspection & Return Policy**: Protection window allowing buyers to inspect their device and raise instant disputes if not as described.
+* **Nationwide Cash on Delivery (COD)**: Safe transactions delivered through trusted courier partners across all 64 districts.
+* **48-Hour Inspection & Return Policy**: Escrow protection window allowing buyers to inspect their device upon arrival.
+* **Seller Portal (`/seller/listings`)**: Comprehensive dashboard showing active listings and pending drafts with live grade breakdowns, warranty tags, and repair disclosures.
 
-### 💼 6. Seller Hub & B2B Partner Program
-* **Interactive Selling Wizard (`/sell`)**: Step-by-step diagnostic condition questionnaire with automated grade scoring and instant listing publication.
-* **Seller Portal (`/seller/dashboard`)**: Comprehensive management dashboard for active listings, sales analytics, and payout tracking.
-* **B2B Excess Inventory Intake (`/partner`)**: Corporate partner program for authorized retailers, distributors, and bulk refurbishers.
-* **Admin Moderation Portal (`/admin`)**: Listing moderation, identity review queue, and GMV analytics.
+---
+
+## 🎨 UI/UX Design System Guidelines
+
+| Token / Layer | Light Mode | Dark Mode | Usage |
+| :--- | :--- | :--- | :--- |
+| **Primary (Brand Orange)** | `hsl(24, 95%, 53%)` (`#ea580c`) | Highlights & Action CTAs | Primary buttons, active tabs, badges |
+| **Background Canvas** | `hsl(0, 0%, 100%)` | `hsl(240, 10%, 3.9%)` | Page background |
+| **Card / Surface** | `hsl(0, 0%, 98%)` | `hsl(240, 10%, 6%)` | Elevated cards, forms, drawer backgrounds |
+| **Hairline Dividers** | `hsl(240, 5.9%, 90%)` | `hsl(240, 3.7%, 15.9%)` | Crisp 1px structural grid lines |
+| **Success / Verified** | `hsl(142, 76%, 36%)` | `hsl(142, 70%, 45%)` | NID verification badges, 100% functional tags |
+| **Destructive / Error** | `hsl(0, 84.2%, 60.2%)` | `hsl(0, 62.8%, 30.6%)` | Validation errors, defect warnings |
 
 ---
 
@@ -72,18 +84,20 @@
 │   ├── assets/                 # Brand assets & images (official logo, hero media, product images)
 │   ├── components/
 │   │   ├── ui/                 # Accessible Radix & Tailwind UI components (Button, Sheet, Select, etc.)
-│   │   ├── site-header.tsx     # Header bar, secondary category navigation strip & mobile drawer
+│   │   ├── site-header.tsx     # Dual header bar, portal dropdown engine & mobile drawer
 │   │   ├── site-footer.tsx     # Footer, newsletter subscription & platform directory
 │   │   ├── listing-card.tsx    # Listing-first product offer card
 │   │   ├── product-card.tsx    # Catalog model showcase card
 │   │   ├── grade-badge.tsx     # Visual condition grade badge (A+ to D)
+│   │   ├── grade-selector.tsx  # Condition grading form & conditional repair inputs
 │   │   └── protected-route.tsx # Auth guard for accounts, sellers & admin
 │   ├── data/
 │   │   ├── catalog.ts          # Products catalog, active listings, brands & pricing utilities
-│   │   └── grading.ts          # Condition grading calculation matrix
+│   │   └── grading.ts          # 100-point condition grading calculation matrix
 │   ├── lib/
 │   │   ├── auth-store.tsx      # User authentication session store
 │   │   ├── cart-store.tsx      # Shopping cart store & persistence
+│   │   ├── grade-store.ts      # Graded listing drafts store
 │   │   ├── order-store.ts      # Orders & delivery tracking store
 │   │   └── server-functions.ts # Nitro server functions (OTP auth, checkout handlers)
 │   ├── routes/
@@ -93,7 +107,7 @@
 │   │   ├── categories.tsx      # Compact Category Catalog Hub
 │   │   ├── listing.$listingId.tsx # Individual Listing Details & Diagnostic Report
 │   │   ├── checkout.tsx        # Multi-step checkout & COD order placement
-│   │   ├── sell.index.tsx      # Interactive Grading Wizard & Listing Submission
+│   │   ├── sell.index.tsx      # Interactive 4-Step Grading Wizard & Listing Submission
 │   │   ├── partner.tsx         # B2B Corporate Excess Inventory Application
 │   │   ├── seller.*.tsx        # Seller Dashboard, My Listings & Payouts
 │   │   ├── admin.*.tsx         # Admin Moderation & Identity Verification
