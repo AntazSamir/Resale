@@ -147,10 +147,10 @@ export default function PartnerPage() {
     <div className="min-h-screen bg-background flex flex-col">
       <SiteHeader />
 
-      {/* ── Hero Banner with 3D Lanyard on Right ── */}
-      <section className="border-b border-border bg-card overflow-hidden">
+      {/* ── Hero Banner with 3D Lanyard hanging from secondary nav ── */}
+      <section className="border-b border-border bg-card" style={{ overflow: 'visible' }}>
         <div className="mx-auto max-w-7xl px-5 py-10 md:py-14">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
             {/* Left Column (7 cols): Content & Highlights */}
             <div className="lg:col-span-7 space-y-6 text-left">
               <div className="flex flex-wrap items-center gap-3">
@@ -224,36 +224,18 @@ export default function PartnerPage() {
               </div>
             </div>
 
-            {/* Right Column (5 cols): 3D Physics Lanyard Card */}
-            <div className="lg:col-span-5 flex flex-col items-center justify-center">
-              <div className="relative w-full h-115 md:h-130 rounded-2xl bg-linear-to-b from-muted/30 via-background to-muted/20 border border-border/80 p-2 overflow-hidden shadow-inner flex flex-col">
-                <div className="absolute top-3 left-3 z-10 flex items-center gap-2">
-                  <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#ea580c] opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-[#ea580c]"></span>
-                  </span>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground bg-background/80 backdrop-blur px-2 py-0.5 border border-border/60">
-                    Interactive 3D ID · Drag to swing
-                  </span>
-                </div>
-
-                <div className="flex-1 w-full h-full">
-                  <Lanyard
-                    position={[0, 0, 20]}
-                    gravity={[0, -40, 0]}
-                    frontImage={partnerCardImg}
-                    backImage={partnerCardImg}
-                    imageFit="cover"
-                  />
-                </div>
-
-                <div className="text-center pb-2 z-10">
-                  <p className="text-[11px] font-medium text-muted-foreground">
-                    Resale Authorized Partner Pass ·{" "}
-                    <strong className="text-foreground">Official Credential</strong>
-                  </p>
-                </div>
-              </div>
+            {/* Right Column (5 cols): Lanyard hangs from secondary nav — no container */}
+            <div
+              className="hidden lg:block lg:col-span-5"
+              style={{ marginTop: '-48px', height: '600px', position: 'relative', zIndex: 1 }}
+            >
+              <Lanyard
+                position={[0, 0, 20]}
+                gravity={[0, -40, 0]}
+                frontImage={partnerCardImg}
+                backImage={partnerCardImg}
+                imageFit="cover"
+              />
             </div>
           </div>
         </div>
