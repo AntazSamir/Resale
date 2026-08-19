@@ -415,7 +415,7 @@ function Index() {
           <div>
             <h2 className="text-xl md:text-2xl font-display font-bold">Featured Brands</h2>
             <p className="text-xs text-muted-foreground">
-              Explore verified pre-owned electronics from top global manufacturers
+              Verified pre-owned electronics from top global manufacturers
             </p>
           </div>
           <Link
@@ -467,7 +467,7 @@ function Index() {
                   </p>
                 </div>
                 <div className="mt-4 pt-3 border-t border-border/50 flex items-center justify-between text-xs font-medium text-primary">
-                  <span>Explore {b.name}</span>
+                  <span>{b.name}</span>
                   <span className="group-hover:translate-x-0.5 transition-transform">→</span>
                 </div>
               </Link>
