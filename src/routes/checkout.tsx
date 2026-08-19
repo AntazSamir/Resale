@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { SiteHeader, SiteFooter } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
@@ -171,7 +171,9 @@ function CheckoutPage() {
             </CardHeader>
             <CardFooter className="flex-col gap-3">
               <Button
-                onClick={() => navigate({ to: `/account/orders/${orderId}` as any })}
+                onClick={() =>
+                  navigate({ to: "/account/orders/$orderId", params: { orderId } })
+                }
                 className="w-full"
               >
                 View Order Details

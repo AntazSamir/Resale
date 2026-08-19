@@ -22,11 +22,7 @@ export function SellerSidebar({ active }: { active: "dashboard" | "listings" | "
           to="/seller/dashboard"
           className="flex items-center gap-2 px-4 py-2 mb-4 border-b border-border text-foreground hover:opacity-90 transition-opacity"
         >
-          <img
-            src={resaleLogo}
-            alt="Resale logo"
-            className="h-7 w-auto object-contain shrink-0"
-          />
+          <img src={resaleLogo} alt="Resale logo" className="h-7 w-auto object-contain shrink-0" />
           <span className="font-display font-bold text-sm tracking-tight">Seller Hub</span>
         </Link>
         <Link
@@ -96,7 +92,9 @@ function SellerDashboardPage() {
               </Card>
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">Rating</CardTitle>
+                  <CardTitle className="text-sm font-medium text-muted-foreground">
+                    Rating
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold flex items-center gap-2">

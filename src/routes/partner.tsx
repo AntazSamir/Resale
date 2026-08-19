@@ -149,7 +149,10 @@ export default function PartnerPage() {
       <section className="border-b border-border bg-card">
         <div className="mx-auto max-w-5xl px-5 py-12 md:py-16 space-y-6 text-center">
           <div className="flex justify-center">
-            <Link to="/" className="inline-flex items-center gap-1.5 hover:opacity-90 transition-opacity">
+            <Link
+              to="/"
+              className="inline-flex items-center gap-1.5 hover:opacity-90 transition-opacity"
+            >
               <img
                 src={resaleLogo}
                 alt="Resale logo"

@@ -83,7 +83,10 @@ function SellWizardPage() {
           {/* Main Hero Header */}
           <div className="space-y-4 text-center max-w-3xl mx-auto">
             <div className="flex justify-center mb-2">
-              <Link to="/" className="inline-flex items-center gap-1.5 hover:opacity-90 transition-opacity">
+              <Link
+                to="/"
+                className="inline-flex items-center gap-1.5 hover:opacity-90 transition-opacity"
+              >
                 <img
                   src={resaleLogo}
                   alt="Resale logo"
