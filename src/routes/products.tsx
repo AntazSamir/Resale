@@ -592,42 +592,19 @@ function ProductsPage() {
           {/* Listing Grid */}
           <div className="space-y-6 overflow-hidden">
             {sortedListings.length > 0 ? (
-              <>
-                {/* ═══════════════════════════════════════════════════════
-                    MOBILE: flat 3-card horizontal swipe (no category groups)
-                ═══════════════════════════════════════════════════════ */}
-                <div className="block md:hidden space-y-2">
-                  <div className="flex items-center justify-between px-1 text-xs text-muted-foreground gap-2">
-                    <span className="font-medium">{sortedListings.length} listings</span>
-                    <span className="text-primary font-medium text-[11px] shrink-0">← Swipe →</span>
-                  </div>
-                  <div className="flex overflow-x-auto snap-x snap-mandatory scroll-px-4 gap-1.5 pb-2 pt-1 -mx-4 px-4 scrollbar-none touch-pan-x overscroll-x-contain">
-                    {sortedListings.map((listing) => {
-                      const product = productFor(listing.productId);
-                      if (!product) return null;
-                      return (
-                        <div
-                          key={listing.id}
-                          className="w-[calc((100vw-44px)/3)] min-w-22.5 max-w-35 shrink-0 snap-start flex flex-col"
-                        >
-                          <ListingCard listing={listing} product={product} compact={true} />
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* ═══════════════════════════════════════════════════════
-                    DESKTOP/TABLET: responsive listing grid
-                ═══════════════════════════════════════════════════════ */}
-                <div className="hidden md:grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-5 items-stretch auto-rows-fr">
-                  {sortedListings.map((listing) => {
-                    const product = productFor(listing.productId);
-                    if (!product) return null;
-                    return <ListingCard key={listing.id} listing={listing} product={product} />;
-                  })}
-                </div>
-              </>
+              /* ═══════════════════════════════════════════════════════
+                  RESPONSIVE VERTICAL LISTING GRID
+                  - Mobile: 2 items per row vertical scroll
+                  - Tablet: 3 items per row
+                  - Desktop: 3 to 4 items per row
+              ═══════════════════════════════════════════════════════ */
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-5 items-stretch auto-rows-fr">
+                {sortedListings.map((listing) => {
+                  const product = productFor(listing.productId);
+                  if (!product) return null;
+                  return <ListingCard key={listing.id} listing={listing} product={product} />;
+                })}
+              </div>
             ) : (
               <div className="border border-dashed border-border bg-card p-12 text-center">
                 <div className="mx-auto size-12 bg-muted flex items-center justify-center mb-4">
