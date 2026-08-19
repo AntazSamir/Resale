@@ -4,7 +4,8 @@
 [![TanStack Router](https://img.shields.io/badge/TanStack-Router-FF4154?logo=react-router&logoColor=white)](https://tanstack.com/router)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v4-38B2AC?logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
-[![Cloudflare Workers](https://img.shields.io/badge/Deploy-Cloudflare-F38020?logo=cloudflare&logoColor=white)](https://workers.cloudflare.com/)
+[![Vercel](https://img.shields.io/badge/Deploy-Vercel-000000?logo=vercel&logoColor=white)](https://vercel.com/)
+[![Cloudflare](https://img.shields.io/badge/Deploy-Cloudflare-F38020?logo=cloudflare&logoColor=white)](https://workers.cloudflare.com/)
 
 **Resale.com** is Bangladesh's premier C2C and B2B marketplace for quality-checked pre-owned, open-box, and refurbished electronics. Engineered with objective component-level condition grading (A+ to D), NID-verified sellers, nationwide Cash on Delivery (COD), and a 48-hour buyer protection guarantee.
 
@@ -72,13 +73,14 @@
 | **Frontend** | React 19, TypeScript 5.7+ |
 | **Styling** | Tailwind CSS v4, PostCSS, Radix UI Primitives, Lucide Icons |
 | **State & Data** | In-Memory Catalog Data Store, TanStack Query, Nitro Server Functions |
-| **Deployment** | Cloudflare Workers / Nitro Cloudflare Module Preset |
+| **Deployment** | Vercel (Edge & Serverless) / Cloudflare Workers / Nitro Multi-target Preset |
 
 ---
 
 ## 📁 Project Structure
 
 ```
+├── vercel.json                 # Vercel deployment configuration
 ├── public/                     # Static public assets (logos, maps, favicons)
 ├── src/
 │   ├── assets/                 # Brand assets & images (official logo, hero media, product images)
@@ -142,9 +144,23 @@
    ```
    Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-### Build & Production Check
+---
 
-To compile TypeScript and build the Cloudflare Worker SSR bundle:
+## ☁️ Deployment
+
+### 1. Deploying to Vercel (Recommended)
+
+This project is pre-configured with [`vercel.json`](./vercel.json) for instant, one-click deployments on Vercel:
+
+1. Push your code to GitHub.
+2. Go to [Vercel Dashboard](https://vercel.com/dashboard) and click **"Add New..." ➔ "Project"**.
+3. Select the `AntazSamir/Resale` repository.
+4. Leave all settings default (`vercel.json` automatically triggers `NITRO_PRESET=vercel vite build`).
+5. Click **"Deploy"**.
+
+### 2. Deploying to Cloudflare Workers
+
+To compile TypeScript and build for Cloudflare Workers / Nitro:
 
 ```bash
 npm run build
