@@ -130,7 +130,7 @@ export function ProductCard({ product, compact = false }: { product: Product; co
   }
 
   return (
-    <div className="group flex flex-col bg-card p-4 transition-all hover:bg-secondary/40 relative overflow-hidden border border-border h-full justify-between">
+    <div className="group flex flex-col bg-card p-4 transition-all hover:bg-secondary/40 relative overflow-hidden h-full justify-between">
       <div>
         {/* Discount badge */}
         {discountPercent > 0 && (

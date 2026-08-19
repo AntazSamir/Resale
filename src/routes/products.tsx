@@ -11,14 +11,7 @@ import {
   taka,
   type Grade,
 } from "@/data/catalog";
-import {
-  Search,
-  SlidersHorizontal,
-  X,
-  ChevronRight,
-  RotateCcw,
-  Package,
-} from "lucide-react";
+import { Search, SlidersHorizontal, X, ChevronRight, RotateCcw, Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -168,15 +161,19 @@ function ProductsPage() {
       if (listing.price > priceMax) return false;
 
       // 6. Seller district
-      if (
-        selectedDistricts.length > 0 &&
-        !selectedDistricts.includes(listing.seller.district)
-      )
+      if (selectedDistricts.length > 0 && !selectedDistricts.includes(listing.seller.district))
         return false;
 
       return true;
     });
-  }, [searchQuery, selectedCategories, selectedBrands, selectedGrades, selectedDistricts, priceMax]);
+  }, [
+    searchQuery,
+    selectedCategories,
+    selectedBrands,
+    selectedGrades,
+    selectedDistricts,
+    priceMax,
+  ]);
 
   // ── Sorting engine ─────────────────────────────────────────────────────────
   const sortedListings = useMemo(() => {
@@ -193,9 +190,7 @@ function ProductsPage() {
           return pa.localeCompare(pb);
         });
       case "newest":
-        return list.sort(
-          (a, b) => new Date(b.listedAt).getTime() - new Date(a.listedAt).getTime(),
-        );
+        return list.sort((a, b) => new Date(b.listedAt).getTime() - new Date(a.listedAt).getTime());
       case "relevance":
       default:
         return list;
@@ -241,9 +236,7 @@ function ProductsPage() {
         </h3>
         <div className="space-y-2">
           {allBrands.map((brand) => {
-            const count = listings.filter(
-              (l) => productFor(l.productId)?.brand === brand,
-            ).length;
+            const count = listings.filter((l) => productFor(l.productId)?.brand === brand).length;
             const checked = selectedBrands.includes(brand);
             return (
               <label
@@ -606,9 +599,7 @@ function ProductsPage() {
                 <div className="block md:hidden space-y-2">
                   <div className="flex items-center justify-between px-1 text-xs text-muted-foreground gap-2">
                     <span className="font-medium">{sortedListings.length} listings</span>
-                    <span className="text-primary font-medium text-[11px] shrink-0">
-                      ← Swipe →
-                    </span>
+                    <span className="text-primary font-medium text-[11px] shrink-0">← Swipe →</span>
                   </div>
                   <div className="flex overflow-x-auto snap-x snap-mandatory scroll-px-4 gap-1.5 pb-2 pt-1 -mx-4 px-4 scrollbar-none touch-pan-x overscroll-x-contain">
                     {sortedListings.map((listing) => {
@@ -633,9 +624,7 @@ function ProductsPage() {
                   {sortedListings.map((listing) => {
                     const product = productFor(listing.productId);
                     if (!product) return null;
-                    return (
-                      <ListingCard key={listing.id} listing={listing} product={product} />
-                    );
+                    return <ListingCard key={listing.id} listing={listing} product={product} />;
                   })}
                 </div>
               </>
