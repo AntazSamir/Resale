@@ -226,13 +226,13 @@ function Index() {
             const savePercent = Math.round((saveAmount / dealProduct.retail) * 100);
 
             return (
-              <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-                <div className="space-y-3 w-full md:max-w-xl">
-                  <h2 className="text-xl md:text-3xl font-display font-bold tracking-tight text-foreground">
+              <div className="flex flex-row items-center justify-between gap-4 sm:gap-6">
+                <div className="space-y-2 sm:space-y-3 min-w-0 flex-1">
+                  <h2 className="text-base sm:text-xl md:text-3xl font-display font-bold tracking-tight text-foreground line-clamp-2">
                     {dealProduct.name} (Grade {dealListing.grade})
                   </h2>
-                  <div className="text-xs text-subtle-foreground space-y-0.5">
-                    <p className="font-medium">
+                  <div className="text-[11px] sm:text-xs text-subtle-foreground space-y-0.5">
+                    <p className="font-medium truncate">
                       Mint Condition • Like New •{" "}
                       {dealProduct.specs.find((s) => s.label === "Storage")?.value}
                     </p>
@@ -242,23 +242,23 @@ function Index() {
                   </div>
 
                   {/* Pricing */}
-                  <div className="flex flex-wrap items-baseline gap-2.5 pt-1">
-                    <span className="text-2xl md:text-3xl font-display font-bold text-primary">
+                  <div className="flex flex-wrap items-baseline gap-1.5 sm:gap-2.5 pt-0.5 sm:pt-1">
+                    <span className="text-lg sm:text-2xl md:text-3xl font-display font-bold text-primary">
                       {taka(dealListing.price)}
                     </span>
-                    <span className="text-xs md:text-sm text-muted-foreground line-through">
+                    <span className="text-[11px] sm:text-xs md:text-sm text-muted-foreground line-through">
                       {taka(dealProduct.retail)}
                     </span>
-                    <span className="text-[11px] bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 font-bold px-2 py-0.5">
+                    <span className="text-[10px] sm:text-[11px] bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 font-bold px-1.5 sm:px-2 py-0.5">
                       Save {taka(saveAmount)} ({savePercent}% OFF)
                     </span>
                   </div>
 
-                  <div className="pt-2">
+                  <div className="pt-1 sm:pt-2">
                     <Link
                       to="/listing/$listingId"
                       params={{ listingId: dealListing.id }}
-                      className="inline-flex items-center justify-center bg-primary text-primary-foreground font-semibold px-5 py-3 text-xs md:text-sm uppercase tracking-wider hover:opacity-90 w-full sm:w-auto"
+                      className="inline-flex items-center justify-center bg-primary text-primary-foreground font-semibold px-3.5 sm:px-5 py-2 sm:py-3 text-[11px] sm:text-xs md:text-sm uppercase tracking-wider hover:opacity-90 w-auto"
                     >
                       Claim Deal Before Sold →
                     </Link>
@@ -266,7 +266,7 @@ function Index() {
                 </div>
 
                 {/* Product image */}
-                <div className="relative w-full md:w-64 aspect-square border border-border bg-muted shrink-0 flex items-center justify-center p-4">
+                <div className="relative w-28 sm:w-44 md:w-56 lg:w-64 aspect-square border border-border bg-muted shrink-0 flex items-center justify-center p-2 sm:p-4">
                   <img
                     src={dealProduct.image}
                     alt={dealProduct.name}
