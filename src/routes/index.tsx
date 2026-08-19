@@ -213,7 +213,6 @@ function Index() {
               <Zap className="size-3.5 fill-current text-amber-600" />
               <span>SLASH DEAL OF THE DAY</span>
             </div>
-            <span className="text-xs font-bold text-red-600">Only 1 Left!</span>
           </div>
 
           {/* Content Layout */}
@@ -226,8 +225,8 @@ function Index() {
             const savePercent = Math.round((saveAmount / dealProduct.retail) * 100);
 
             return (
-              <div className="flex flex-row items-center justify-between gap-4 sm:gap-6">
-                <div className="space-y-2 sm:space-y-3 min-w-0 flex-1">
+              <div className="flex flex-row items-center justify-between gap-4 sm:gap-8">
+                <div className="space-y-2 sm:space-y-3.5 min-w-0 flex-1">
                   <h2 className="text-base sm:text-xl md:text-3xl font-display font-bold tracking-tight text-foreground line-clamp-2">
                     {dealProduct.name} (Grade {dealListing.grade})
                   </h2>
@@ -258,7 +257,7 @@ function Index() {
                     <Link
                       to="/listing/$listingId"
                       params={{ listingId: dealListing.id }}
-                      className="inline-flex items-center justify-center bg-primary text-primary-foreground font-semibold px-3.5 sm:px-5 py-2 sm:py-3 text-[11px] sm:text-xs md:text-sm uppercase tracking-wider hover:opacity-90 w-auto"
+                      className="inline-flex items-center justify-center bg-primary text-primary-foreground font-semibold px-3.5 sm:px-6 py-2 sm:py-3.5 text-[11px] sm:text-xs md:text-sm uppercase tracking-wider hover:opacity-90 w-auto"
                     >
                       Claim Deal Before Sold →
                     </Link>
@@ -266,7 +265,7 @@ function Index() {
                 </div>
 
                 {/* Product image */}
-                <div className="relative w-36 sm:w-56 md:w-72 lg:w-80 aspect-square border border-border bg-muted shrink-0 overflow-hidden flex items-center justify-center">
+                <div className="relative w-40 sm:w-64 md:w-80 lg:w-96 aspect-square border border-border bg-muted shrink-0 overflow-hidden flex items-center justify-center">
                   <img
                     src={dealProduct.image}
                     alt={dealProduct.name}
