@@ -171,9 +171,7 @@ function CheckoutPage() {
             </CardHeader>
             <CardFooter className="flex-col gap-3">
               <Button
-                onClick={() =>
-                  navigate({ to: "/account/orders/$orderId", params: { orderId } })
-                }
+                onClick={() => navigate({ to: "/account/orders/$orderId", params: { orderId } })}
                 className="w-full"
               >
                 View Order Details
