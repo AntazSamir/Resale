@@ -725,7 +725,7 @@ function ProductsPage() {
                 {/* ═══════════════════════════════════════════════════════════════
                     DESKTOP & TABLET VIEW (>= md): 4 PRODUCTS PER ROW
                 ═══════════════════════════════════════════════════════════════ */}
-                <div className="hidden md:grid sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
+                <div className="hidden md:grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-5 items-stretch auto-rows-fr">
                   {sortedProducts.map((product) => (
                     <ProductCard key={product.id} product={product} />
                   ))}
