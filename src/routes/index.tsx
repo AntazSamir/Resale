@@ -22,10 +22,6 @@ import { SiteFooter, SiteHeader } from "@/components/site-header";
 import { ProductCard } from "@/components/product-card";
 import { products, listings, productFor, taka, cheapest, listingFor } from "@/data/catalog";
 import hero from "@/assets/hero.jpg";
-import pPhone from "@/assets/p-phone.jpg";
-import pLaptop from "@/assets/p-laptop.jpg";
-import pCamera from "@/assets/p-camera.jpg";
-import pHeadphones from "@/assets/p-headphones.jpg";
 
 const title = "Resale.com — Quality-checked pre-owned electronics in Bangladesh";
 const description =
@@ -59,14 +55,6 @@ const trust = [
     t: "Cash on delivery",
     d: "Pay when it arrives. 48-hour dispute window backed by our resolution team.",
   },
-];
-
-const mobileCategories = [
-  { label: "Smartphones", icon: Smartphone, to: "/#browse" },
-  { label: "Laptops", icon: Laptop, to: "/#browse" },
-  { label: "Cameras", icon: Camera, to: "/#browse" },
-  { label: "Audio & Wearables", icon: Headphones, to: "/#browse" },
-  { label: "Accessories", icon: Plug, to: "/#browse" },
 ];
 
 function Index() {
@@ -104,7 +92,8 @@ function Index() {
             </p>
             <div className="mt-8 flex items-center gap-3">
               <Link
-                to="/products" search={{ q: undefined, category: undefined, brand: undefined }}
+                to="/products"
+                search={{ q: undefined, category: undefined, brand: undefined }}
                 className="inline-flex items-center gap-2 bg-primary px-6 py-3 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
               >
                 <Layers className="size-4" />
@@ -141,7 +130,8 @@ function Index() {
 
             <div className="pt-2">
               <Link
-                to="/products" search={{ q: undefined, category: undefined, brand: undefined }}
+                to="/products"
+                search={{ q: undefined, category: undefined, brand: undefined }}
                 className="inline-flex items-center gap-2 bg-primary text-primary-foreground text-xs font-semibold px-4 py-2.5 hover:opacity-90 transition-opacity"
               >
                 <Layers className="size-3.5" />
@@ -290,155 +280,195 @@ function Index() {
       </section>
 
       {/* ════════════════════════════════════════════════════════════════
-          4. EXPLORE BY CATEGORY (Desktop Grid vs Mobile Horizontal Scroll)
+          4. POPULAR PRODUCTS (Desktop 4x2 Grid vs Tablet/Mobile 3-Card Carousel)
       ════════════════════════════════════════════════════════════════ */}
-      <section id="categories" className="py-6 px-4 md:px-5">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xs uppercase tracking-[0.2em] text-muted-foreground font-bold">
-            EXPLORE BY CATEGORY
-          </h2>
-          <a href="#browse" className="text-xs font-semibold text-primary hover:underline">
-            View all →
-          </a>
-        </div>
-
-        {/* Desktop 4-grid (md+) */}
-        <div className="hidden md:grid hairline-grid grid-cols-4 bg-card">
-          <div className="p-6 transition-all cursor-pointer flex flex-col justify-between h-36 group hover:bg-secondary">
-            <div>
-              <span className="font-display text-lg font-bold group-hover:text-primary transition-colors">
-                Smartphones
-              </span>
-              <p className="text-xs text-muted-foreground mt-1">
-                iPhones, Samsung Galaxy, Google Pixel
-              </p>
-            </div>
-            <span className="text-xs font-semibold text-primary">Min 30% Off MRP →</span>
-          </div>
-          <div className="p-6 transition-all cursor-pointer flex flex-col justify-between h-36 group hover:bg-secondary">
-            <div>
-              <span className="font-display text-lg font-bold group-hover:text-primary transition-colors">
-                Laptops
-              </span>
-              <p className="text-xs text-muted-foreground mt-1">
-                MacBook M1/M2/M3, Dell XPS, ThinkPad
-              </p>
-            </div>
-            <span className="text-xs font-semibold text-primary">Up to 45% Savings →</span>
-          </div>
-          <div className="p-6 transition-all cursor-pointer flex flex-col justify-between h-36 group hover:bg-secondary">
-            <div>
-              <span className="font-display text-lg font-bold group-hover:text-primary transition-colors">
-                Cameras
-              </span>
-              <p className="text-xs text-muted-foreground mt-1">
-                Fujifilm X100V, Sony Alpha, Canon
-              </p>
-            </div>
-            <span className="text-xs font-semibold text-primary">Certified Inspection →</span>
-          </div>
-          <div className="p-6 transition-all cursor-pointer flex flex-col justify-between h-36 group hover:bg-secondary">
-            <div>
-              <span className="font-display text-lg font-bold group-hover:text-primary transition-colors">
-                Audio &amp; Wearables
-              </span>
-              <p className="text-xs text-muted-foreground mt-1">
-                AirPods Pro, Sony XM5, Galaxy Watch
-              </p>
-            </div>
-            <span className="text-xs font-semibold text-primary">Mint Condition →</span>
-          </div>
-        </div>
-
-        {/* Mobile Horizontal Scrollable Row (<= 768px - Matching Mockup) */}
-        <div className="grid grid-cols-5 md:hidden gap-2">
-          {mobileCategories.map((cat) => {
-            const Icon = cat.icon;
-            return (
-              <a
-                key={cat.label}
-                href={cat.to}
-                className="flex flex-col items-center justify-center p-2.5 border border-border bg-card text-center hover:bg-secondary transition-colors"
-              >
-                <div className="size-8 flex items-center justify-center text-foreground mb-1.5">
-                  <Icon className="size-5" />
-                </div>
-                <span className="text-[10px] font-semibold text-foreground leading-tight line-clamp-2">
-                  {cat.label}
-                </span>
-              </a>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* ════════════════════════════════════════════════════════════════
-          5. POPULAR PRODUCTS (Desktop 4-col Grid vs Mobile 1.8-Card Carousel)
-      ════════════════════════════════════════════════════════════════ */}
-      <section id="browse" className="py-6 px-4 md:px-5">
+      <section id="popular-products" className="py-6 px-4 md:px-5">
         <div className="flex items-end justify-between border-b border-border pb-4 mb-6">
           <div>
             <h2 className="text-xl md:text-2xl font-display font-bold">Popular Products</h2>
             <p className="text-xs text-muted-foreground">Compare all verified listings per model</p>
           </div>
-          <Link to="/products" search={{ q: undefined, category: undefined, brand: undefined }} className="text-xs font-semibold text-primary hover:underline">
+          <Link
+            to="/products"
+            search={{ q: undefined, category: undefined, brand: undefined }}
+            className="text-xs font-semibold text-primary hover:underline"
+          >
             View all →
           </Link>
         </div>
 
-        {/* Desktop 4-grid */}
-        <div className="hidden md:grid hairline-grid grid-cols-4 bg-card">
-          {products.map((p) => (
+        {/* Desktop 4-grid × 2 rows (8 products) */}
+        <div className="hidden lg:grid hairline-grid grid-cols-4 bg-card">
+          {products.slice(0, 8).map((p) => (
             <ProductCard key={p.id} product={p} />
           ))}
         </div>
 
-        {/* Mobile Snap-Scroll Carousel (<= 768px - 1.8 cards visible) */}
-        <div className="flex md:hidden gap-3 overflow-x-auto scrollbar-none snap-x snap-mandatory pb-2">
-          {products.map((p) => {
-            const best = cheapest(p.id);
-            if (!best) return null;
-            const discountPercent = Math.round(((p.retail - best.price) / p.retail) * 100);
+        {/* Tablet & Mobile: 3 visible per row in a horizontal swipeable carousel */}
+        <div className="block lg:hidden">
+          <div className="flex items-center justify-between px-1 text-xs text-muted-foreground mb-2">
+            <span>8 models · Swipe to view</span>
+            <span className="text-primary font-medium text-[11px]">← Swipe →</span>
+          </div>
+          <div className="flex overflow-x-auto snap-x snap-mandatory scroll-px-4 gap-1.5 pb-2 pt-1 -mx-4 px-4 sm:-mx-5 sm:px-5 scrollbar-none touch-pan-x overscroll-x-contain">
+            {products.slice(0, 8).map((p) => (
+              <div
+                key={p.id}
+                className="w-[calc((100vw-44px)/3)] sm:w-[calc((100vw-56px)/3)] md:w-[calc((100vw-72px)/3)] min-w-[100px] max-w-[240px] shrink-0 snap-start flex flex-col"
+              >
+                <ProductCard product={p} compact={true} />
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
+      {/* ════════════════════════════════════════════════════════════════
+          5. PRODUCT TYPE SECTIONS (Smartphones, Laptops, Cameras, Audio, etc.)
+      ════════════════════════════════════════════════════════════════ */}
+      {[
+        {
+          id: "smartphones",
+          title: "Smartphones",
+          subtitle: "Apple iPhones, Samsung Galaxy, Google Pixel & flagship Androids",
+          category: "Smartphones",
+          items: products.filter((p) => p.category === "Smartphones"),
+        },
+        {
+          id: "laptops",
+          title: "Laptops & MacBooks",
+          subtitle: "MacBook Air & Pro, Dell XPS, Lenovo ThinkPad & ASUS ZenBook",
+          category: "Laptops",
+          items: products.filter((p) => p.category === "Laptops"),
+        },
+        {
+          id: "cameras",
+          title: "Cameras & Photography",
+          subtitle: "Fujifilm X100V, Sony Alpha, Canon EOS R & Nikon mirrorless bodies",
+          category: "Cameras",
+          items: products.filter((p) => p.category === "Cameras"),
+        },
+        {
+          id: "audio",
+          title: "Audio & Headphones",
+          subtitle: "Sony WH-1000XM5, Bose QuietComfort Ultra, AirPods Pro 2 & JBL",
+          category: "Audio",
+          items: products.filter((p) => p.category === "Audio"),
+        },
+        {
+          id: "tablets-gaming",
+          title: "Tablets, Watches & Gaming",
+          subtitle: "Apple iPad Pro M2, Apple Watch Series 9 & PlayStation 5 Slim",
+          category: "Tablets",
+          items: products.filter((p) =>
+            ["Tablets", "Smartwatches", "Gaming Consoles"].includes(p.category),
+          ),
+        },
+      ].map((section) => (
+        <section key={section.id} id={section.id} className="py-6 px-4 md:px-5">
+          <div className="flex items-end justify-between border-b border-border pb-4 mb-6">
+            <div>
+              <h2 className="text-xl md:text-2xl font-display font-bold">{section.title}</h2>
+              <p className="text-xs text-muted-foreground">{section.subtitle}</p>
+            </div>
+            <Link
+              to="/products"
+              search={{ q: undefined, category: section.category, brand: undefined }}
+              className="text-xs font-semibold text-primary hover:underline shrink-0 ml-4"
+            >
+              View {section.title.split(" ")[0]} →
+            </Link>
+          </div>
+
+          {/* Desktop 4-grid */}
+          <div className="hidden lg:grid hairline-grid grid-cols-4 bg-card">
+            {section.items.map((p) => (
+              <ProductCard key={p.id} product={p} />
+            ))}
+          </div>
+
+          {/* Tablet & Mobile: 3 visible per row in a horizontal swipeable carousel */}
+          <div className="block lg:hidden">
+            <div className="flex items-center justify-between px-1 text-xs text-muted-foreground mb-2">
+              <span>{section.items.length} models available</span>
+              <span className="text-primary font-medium text-[11px]">← Swipe →</span>
+            </div>
+            <div className="flex overflow-x-auto snap-x snap-mandatory scroll-px-4 gap-1.5 pb-2 pt-1 -mx-4 px-4 sm:-mx-5 sm:px-5 scrollbar-none touch-pan-x overscroll-x-contain">
+              {section.items.map((p) => (
+                <div
+                  key={p.id}
+                  className="w-[calc((100vw-44px)/3)] sm:w-[calc((100vw-56px)/3)] md:w-[calc((100vw-72px)/3)] min-w-[100px] max-w-[240px] shrink-0 snap-start flex flex-col"
+                >
+                  <ProductCard product={p} compact={true} />
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      ))}
+
+      {/* ════════════════════════════════════════════════════════════════
+          6. FEATURED BRANDS
+      ════════════════════════════════════════════════════════════════ */}
+      <section id="brands" className="py-8 px-4 md:px-5">
+        <div className="flex items-end justify-between border-b border-border pb-4 mb-6">
+          <div>
+            <h2 className="text-xl md:text-2xl font-display font-bold">Featured Brands</h2>
+            <p className="text-xs text-muted-foreground">
+              Explore verified pre-owned electronics from top global manufacturers
+            </p>
+          </div>
+          <Link
+            to="/products"
+            search={{ q: undefined, category: undefined, brand: undefined }}
+            className="text-xs font-semibold text-primary hover:underline shrink-0 ml-4"
+          >
+            All products →
+          </Link>
+        </div>
+
+        <div className="hairline-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 bg-card">
+          {[
+            { name: "Apple", tagline: "iPhones, MacBooks, iPads & Watches" },
+            { name: "Samsung", tagline: "Galaxy S-Series & Galaxy Buds" },
+            { name: "Sony", tagline: "Alpha Cameras, WH-Headphones & PS5" },
+            { name: "Dell", tagline: "XPS & Latitude Business Laptops" },
+            { name: "Google", tagline: "Pixel Smartphones & Tensor Chip" },
+            { name: "Fujifilm", tagline: "X-Series & Premium Compacts" },
+            { name: "Canon", tagline: "EOS R Full-Frame Mirrorless" },
+            { name: "Nikon", tagline: "Z-Series Mirrorless Systems" },
+            { name: "Bose", tagline: "QuietComfort ANC Headphones" },
+            { name: "Lenovo", tagline: "ThinkPad X1 & Carbon Ultrabooks" },
+            { name: "ASUS", tagline: "ZenBook OLED & ROG Hardware" },
+            { name: "HP", tagline: "EliteBook & ProBook Laptops" },
+            { name: "JBL", tagline: "Portable Bluetooth Speakers" },
+            { name: "OnePlus", tagline: "Fast Charging & ProXDR Flagships" },
+            { name: "Xiaomi", tagline: "Leica Optics & HyperOS Devices" },
+          ].map((b) => {
+            const count = products.filter((p) => p.brand === b.name).length;
             return (
               <Link
-                key={p.id}
-                to="/listing/$listingId"
-                params={{ listingId: best.id }}
-                className="w-50 shrink-0 snap-start border border-border bg-card p-3 flex flex-col justify-between relative group"
+                key={b.name}
+                to="/products"
+                search={{ brand: b.name, category: undefined, q: undefined }}
+                className="group p-4 md:p-5 flex flex-col justify-between hover:bg-secondary/60 transition-all"
               >
-                {/* Discount Badge */}
-                {discountPercent > 0 && (
-                  <div className="absolute top-2 left-2 bg-red-600 text-white font-bold text-[10px] px-1.5 py-0.5 z-10">
-                    -{discountPercent}% OFF
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="font-display text-base font-bold group-hover:text-primary transition-colors">
+                      {b.name}
+                    </span>
+                    <span className="text-[10px] font-medium bg-muted px-1.5 py-0.5 text-muted-foreground">
+                      {count} {count === 1 ? "model" : "models"}
+                    </span>
                   </div>
-                )}
-
-                {/* Product Image */}
-                <div className="aspect-square bg-muted flex items-center justify-center p-3 relative overflow-hidden">
-                  <img src={p.image} alt={p.name} className="size-full object-contain" />
+                  <p className="text-[11px] text-muted-foreground line-clamp-2 leading-relaxed">
+                    {b.tagline}
+                  </p>
                 </div>
-
-                {/* Info */}
-                <div className="pt-3 space-y-1">
-                  <h3 className="font-semibold text-xs text-foreground line-clamp-2 leading-snug">
-                    {p.name}
-                  </h3>
-                  <div className="flex items-baseline gap-1.5 pt-1">
-                    <span className="font-display font-bold text-sm text-primary">
-                      {taka(best.price)}
-                    </span>
-                    <span className="text-[10px] text-muted-foreground line-through">
-                      {taka(p.retail)}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between text-[10px] text-muted-foreground pt-1.5 border-t border-border/60">
-                    <span className="text-emerald-600 font-medium">Grade {best.grade}</span>
-                    <span className="flex items-center gap-0.5">
-                      <Star className="size-2.5 fill-amber-400 text-amber-400" />
-                      <span>4.8 (128)</span>
-                    </span>
-                  </div>
+                <div className="mt-4 pt-3 border-t border-border/50 flex items-center justify-between text-xs font-medium text-primary">
+                  <span>Explore {b.name}</span>
+                  <span className="group-hover:translate-x-0.5 transition-transform">→</span>
                 </div>
               </Link>
             );
