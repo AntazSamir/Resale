@@ -203,6 +203,119 @@ function Index() {
       </section>
 
       {/* ════════════════════════════════════════════════════════════════
+          3. EXPLORE BY CATEGORY (Desktop Grid vs Mobile/Tablet Icon Grid)
+      ════════════════════════════════════════════════════════════════ */}
+      <section id="categories" className="py-6 px-4 md:px-5">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xs uppercase tracking-[0.2em] text-muted-foreground font-bold">
+            EXPLORE BY CATEGORY
+          </h2>
+          <Link
+            to="/products"
+            search={{ q: undefined, category: undefined, brand: undefined }}
+            className="text-xs font-semibold text-primary hover:underline"
+          >
+            View all →
+          </Link>
+        </div>
+
+        {/* Desktop 4-grid (md+) */}
+        <div className="hidden md:grid hairline-grid grid-cols-4 bg-card">
+          <Link
+            to="/products"
+            search={{ category: "Smartphones", q: undefined, brand: undefined }}
+            className="p-6 transition-all cursor-pointer flex flex-col justify-between h-36 group hover:bg-secondary"
+          >
+            <div>
+              <span className="font-display text-lg font-bold group-hover:text-primary transition-colors">
+                Smartphones
+              </span>
+              <p className="text-xs text-muted-foreground mt-1">
+                iPhones, Samsung Galaxy, Google Pixel
+              </p>
+            </div>
+            <span className="text-xs font-semibold text-primary">Min 30% Off MRP →</span>
+          </Link>
+
+          <Link
+            to="/products"
+            search={{ category: "Laptops", q: undefined, brand: undefined }}
+            className="p-6 transition-all cursor-pointer flex flex-col justify-between h-36 group hover:bg-secondary"
+          >
+            <div>
+              <span className="font-display text-lg font-bold group-hover:text-primary transition-colors">
+                Laptops
+              </span>
+              <p className="text-xs text-muted-foreground mt-1">
+                MacBook M1/M2/M3, Dell XPS, ThinkPad
+              </p>
+            </div>
+            <span className="text-xs font-semibold text-primary">Up to 45% Savings →</span>
+          </Link>
+
+          <Link
+            to="/products"
+            search={{ category: "Cameras", q: undefined, brand: undefined }}
+            className="p-6 transition-all cursor-pointer flex flex-col justify-between h-36 group hover:bg-secondary"
+          >
+            <div>
+              <span className="font-display text-lg font-bold group-hover:text-primary transition-colors">
+                Cameras
+              </span>
+              <p className="text-xs text-muted-foreground mt-1">
+                Fujifilm X100V, Sony Alpha, Canon
+              </p>
+            </div>
+            <span className="text-xs font-semibold text-primary">Certified Inspection →</span>
+          </Link>
+
+          <Link
+            to="/products"
+            search={{ category: "Audio", q: undefined, brand: undefined }}
+            className="p-6 transition-all cursor-pointer flex flex-col justify-between h-36 group hover:bg-secondary"
+          >
+            <div>
+              <span className="font-display text-lg font-bold group-hover:text-primary transition-colors">
+                Audio &amp; Wearables
+              </span>
+              <p className="text-xs text-muted-foreground mt-1">
+                AirPods Pro, Sony XM5, Galaxy Watch
+              </p>
+            </div>
+            <span className="text-xs font-semibold text-primary">Mint Condition →</span>
+          </Link>
+        </div>
+
+        {/* Mobile & Tablet Horizontal Grid (<= 768px) */}
+        <div className="grid grid-cols-5 md:hidden gap-2">
+          {[
+            { label: "Smartphones", icon: Smartphone, category: "Smartphones" },
+            { label: "Laptops", icon: Laptop, category: "Laptops" },
+            { label: "Cameras", icon: Camera, category: "Cameras" },
+            { label: "Audio", icon: Headphones, category: "Audio" },
+            { label: "Tablets", icon: Plug, category: "Tablets" },
+          ].map((cat) => {
+            const Icon = cat.icon;
+            return (
+              <Link
+                key={cat.label}
+                to="/products"
+                search={{ category: cat.category, q: undefined, brand: undefined }}
+                className="flex flex-col items-center justify-center p-2.5 border border-border bg-card text-center hover:bg-secondary transition-colors"
+              >
+                <div className="size-8 flex items-center justify-center text-foreground mb-1.5">
+                  <Icon className="size-5" />
+                </div>
+                <span className="text-[10px] font-semibold text-foreground leading-tight line-clamp-2">
+                  {cat.label}
+                </span>
+              </Link>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* ════════════════════════════════════════════════════════════════
           3. SLASH DEAL OF THE DAY (Desktop vs Mobile)
       ════════════════════════════════════════════════════════════════ */}
       <section className="py-4 md:py-6 px-4 md:px-5">
