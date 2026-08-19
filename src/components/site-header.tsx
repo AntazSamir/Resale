@@ -1,5 +1,6 @@
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { useState, useRef, useEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { useCart } from "@/lib/cart-store";
 import {
   Search,
@@ -159,6 +160,18 @@ export function SiteHeader() {
       window.removeEventListener("resize", updateCatFade);
     };
   }, [updateCatFade]);
+
+  useEffect(() => {
+    if (!openDropdown) return;
+    const handleScrollOrResize = () => setOpenDropdown(null);
+    window.addEventListener("scroll", handleScrollOrResize, { passive: true });
+    window.addEventListener("resize", handleScrollOrResize);
+    return () => {
+      window.removeEventListener("scroll", handleScrollOrResize);
+      window.removeEventListener("resize", handleScrollOrResize);
+    };
+  }, [openDropdown]);
+
   const { itemCount } = useCart();
   const navigate = useNavigate();
 
@@ -521,35 +534,42 @@ export function SiteHeader() {
             </ul>
           </div>
 
-          {/* Dropdown panels — rendered OUTSIDE overflow container via fixed positioning */}
-          {desktopCategoryNav.map((item) => {
-            if (!("dropdown" in item)) return null;
-            if (openDropdown !== item.label) return null;
-            const btnEl = dropdownRefs.current[item.label];
-            const rect = btnEl?.getBoundingClientRect();
-            if (!rect) return null;
-            return (
-              <div
-                key={item.label}
-                style={{ position: "fixed", top: rect.bottom, left: rect.left, zIndex: 9999 }}
-                className="min-w-50 bg-background border border-border border-t-0 shadow-lg"
-                onMouseEnter={() => setOpenDropdown(item.label)}
-                onMouseLeave={() => setOpenDropdown(null)}
-              >
-                {item.dropdown.map((sub) => (
-                  <Link
-                    key={sub.label}
-                    to="/products"
-                    search={{ q: sub.q, category: sub.category, brand: undefined }}
-                    onClick={() => setOpenDropdown(null)}
-                    className="flex items-center px-4 py-1.5 text-[12px] text-subtle-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
-                  >
-                    {sub.label}
-                  </Link>
-                ))}
-              </div>
-            );
-          })}
+          {/* Dropdown panels — rendered into document.body via Portal to escape all stacking contexts & backdrop-filters */}
+          {typeof document !== "undefined" &&
+            desktopCategoryNav.map((item) => {
+              if (!("dropdown" in item)) return null;
+              if (openDropdown !== item.label) return null;
+              const btnEl = dropdownRefs.current[item.label];
+              const rect = btnEl?.getBoundingClientRect();
+              if (!rect) return null;
+              return createPortal(
+                <div
+                  key={item.label}
+                  style={{
+                    position: "fixed",
+                    top: rect.bottom,
+                    left: rect.left,
+                    zIndex: 99999,
+                  }}
+                  className="min-w-50 bg-background border border-border border-t-0 shadow-2xl py-1"
+                  onMouseEnter={() => setOpenDropdown(item.label)}
+                  onMouseLeave={() => setOpenDropdown(null)}
+                >
+                  {item.dropdown.map((sub) => (
+                    <Link
+                      key={sub.label}
+                      to="/products"
+                      search={{ q: sub.q, category: sub.category, brand: undefined }}
+                      onClick={() => setOpenDropdown(null)}
+                      className="flex items-center px-4 py-1.5 text-[12px] text-subtle-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
+                    >
+                      {sub.label}
+                    </Link>
+                  ))}
+                </div>,
+                document.body,
+              );
+            })}
 
           {catFade.left && (
             <div className="pointer-events-none absolute inset-y-0 left-0 w-8 bg-linear-to-r from-background to-transparent" />
