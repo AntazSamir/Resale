@@ -840,8 +840,8 @@ function Index() {
                 <h3 className="font-bold text-xs sm:text-sm text-foreground">Excellent</h3>
               </div>
               <p className="text-[11px] sm:text-xs text-muted-foreground leading-relaxed">
-                Micro-scratches only visible under direct light. High battery health, zero functional
-                defects.
+                Micro-scratches only visible under direct light. High battery health, zero
+                functional defects.
               </p>
             </div>
           </div>
@@ -887,7 +887,8 @@ function Index() {
                 <h3 className="font-bold text-xs sm:text-sm text-foreground">Heavy Wear</h3>
               </div>
               <p className="text-[11px] text-muted-foreground leading-relaxed">
-                Heavy cosmetic wear or battery under 80%. Fully functional with deep discount pricing.
+                Heavy cosmetic wear or battery under 80%. Fully functional with deep discount
+                pricing.
               </p>
             </div>
           </div>
