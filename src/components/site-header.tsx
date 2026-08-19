@@ -133,6 +133,7 @@ export function SiteHeader() {
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const dropdownRefs = useRef<Record<string, HTMLButtonElement | null>>({});
   const catScrollRef = useRef<HTMLDivElement | null>(null);
   const [catFade, setCatFade] = useState({ left: false, right: false });
 
@@ -458,8 +459,11 @@ export function SiteHeader() {
                 if ("dropdown" in item) {
                   const isOpen = openDropdown === item.label;
                   return (
-                    <li key={item.label} className="relative shrink-0 snap-start">
+                    <li key={item.label} className="shrink-0 snap-start">
                       <button
+                        ref={(el) => {
+                          dropdownRefs.current[item.label] = el;
+                        }}
                         onMouseEnter={() => setOpenDropdown(item.label)}
                         onClick={() => setOpenDropdown(isOpen ? null : item.label)}
                         className={`flex min-h-11 items-center gap-1 px-3 lg:px-3.5 transition-colors border-b-2 ${
@@ -475,26 +479,6 @@ export function SiteHeader() {
                           }`}
                         />
                       </button>
-
-                      {isOpen && (
-                        <div className="absolute top-full left-0 z-50 min-w-[200px] bg-background border border-border shadow-lg py-1">
-                          {item.dropdown.map((sub) => (
-                            <Link
-                              key={sub.label}
-                              to="/products"
-                              search={{
-                                q: sub.q,
-                                category: sub.category,
-                                brand: undefined,
-                              }}
-                              onClick={() => setOpenDropdown(null)}
-                              className="flex items-center px-4 py-2 text-[12px] text-subtle-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
-                            >
-                              {sub.label}
-                            </Link>
-                          ))}
-                        </div>
-                      )}
                     </li>
                   );
                 }
@@ -536,6 +520,37 @@ export function SiteHeader() {
               })}
             </ul>
           </div>
+
+          {/* Dropdown panels — rendered OUTSIDE overflow container via fixed positioning */}
+          {desktopCategoryNav.map((item) => {
+            if (!("dropdown" in item)) return null;
+            if (openDropdown !== item.label) return null;
+            const btnEl = dropdownRefs.current[item.label];
+            const rect = btnEl?.getBoundingClientRect();
+            if (!rect) return null;
+            return (
+              <div
+                key={item.label}
+                style={{ position: "fixed", top: rect.bottom, left: rect.left, zIndex: 9999 }}
+                className="min-w-[200px] bg-background border border-border shadow-xl py-1"
+                onMouseEnter={() => setOpenDropdown(item.label)}
+                onMouseLeave={() => setOpenDropdown(null)}
+              >
+                {item.dropdown.map((sub) => (
+                  <Link
+                    key={sub.label}
+                    to="/products"
+                    search={{ q: sub.q, category: sub.category, brand: undefined }}
+                    onClick={() => setOpenDropdown(null)}
+                    className="flex items-center px-4 py-2.5 text-[12px] text-subtle-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
+                  >
+                    {sub.label}
+                  </Link>
+                ))}
+              </div>
+            );
+          })}
+
           {catFade.left && (
             <div className="pointer-events-none absolute inset-y-0 left-0 w-8 bg-linear-to-r from-background to-transparent" />
           )}
