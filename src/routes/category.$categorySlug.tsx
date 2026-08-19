@@ -58,7 +58,7 @@ function CategoryPage() {
         </div>
 
         {categoryProducts.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-5 items-stretch auto-rows-fr">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 md:gap-5 items-stretch auto-rows-fr">
             {categoryProducts.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
