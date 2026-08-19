@@ -21,6 +21,31 @@ export function SiteHeader() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const catScrollRef = useRef<HTMLDivElement | null>(null);
+  const [catFade, setCatFade] = useState({ left: false, right: false });
+
+  const updateCatFade = useCallback(() => {
+    const el = catScrollRef.current;
+    if (!el) return;
+    const max = el.scrollWidth - el.clientWidth;
+    setCatFade({
+      left: el.scrollLeft > 4,
+      right: max > 4 && el.scrollLeft < max - 4,
+    });
+  }, []);
+
+  useEffect(() => {
+    updateCatFade();
+    const el = catScrollRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(updateCatFade);
+    ro.observe(el);
+    window.addEventListener("resize", updateCatFade);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", updateCatFade);
+    };
+  }, [updateCatFade]);
   const { itemCount } = useCart();
   const navigate = useNavigate();
 
@@ -311,11 +336,13 @@ export function SiteHeader() {
       <nav className="hidden md:block sticky top-16 z-30 border-b border-border bg-background/95 backdrop-blur shadow-none">
         <div className="relative mx-auto max-w-7xl">
           <div
-            className="overflow-x-auto scrollbar-none px-3 lg:px-5 [scroll-snap-type:x_proximity]"
+            ref={catScrollRef}
+            onScroll={updateCatFade}
+            className="overflow-x-auto scrollbar-none px-3 lg:px-5 [scroll-snap-type:x_proximity] touch-pan-x overscroll-x-contain scroll-smooth [-webkit-overflow-scrolling:touch] scroll-px-3 lg:scroll-px-5"
             role="group"
             aria-label="Category navigation"
           >
-            <ul className="flex w-max items-center gap-0 text-[11px] lg:text-[12px] font-medium whitespace-nowrap">
+            <ul className="flex w-max items-center gap-0 text-[12px] font-medium whitespace-nowrap">
             {[
               { label: "Home", to: "/" },
               { label: "Accessories", to: "/" },
@@ -332,7 +359,7 @@ export function SiteHeader() {
               <li key={item.label} className="shrink-0 [scroll-snap-align:start]">
                 <Link
                   to={item.to}
-                  className="block px-2.5 lg:px-3 py-2.5 text-subtle-foreground hover:text-foreground hover:bg-muted/60 transition-colors border-b-2 border-transparent hover:border-primary"
+                  className="flex min-h-11 items-center px-3 lg:px-3.5 text-subtle-foreground hover:text-foreground hover:bg-muted/60 transition-colors border-b-2 border-transparent hover:border-primary"
                   activeProps={{ className: "text-primary border-b-2 border-primary bg-muted/40" }}
                 >
                   {item.label}
@@ -341,7 +368,12 @@ export function SiteHeader() {
             ))}
             </ul>
           </div>
-          <div className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-background to-transparent lg:hidden" />
+          {catFade.left && (
+            <div className="pointer-events-none absolute inset-y-0 left-0 w-8 bg-gradient-to-r from-background to-transparent" />
+          )}
+          {catFade.right && (
+            <div className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-background via-background/80 to-transparent" />
+          )}
         </div>
       </nav>
     </div>
