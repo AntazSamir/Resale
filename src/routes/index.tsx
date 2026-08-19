@@ -391,7 +391,7 @@ function Index() {
       </section>
 
       {/* ════════════════════════════════════════════════════════════════
-          4. POPULAR PRODUCTS (Desktop 4x2 Grid vs Tablet/Mobile 3-Card Carousel)
+          4. POPULAR PRODUCTS (Responsive: 2-col mobile, 3-col tablet, 4-col desktop)
       ════════════════════════════════════════════════════════════════ */}
       <section id="popular-products" className="py-6 px-4 md:px-5">
         <div className="flex items-end justify-between border-b border-border pb-4 mb-6">
@@ -408,29 +408,11 @@ function Index() {
           </Link>
         </div>
 
-        {/* Desktop 4-grid × 2 rows (8 products) */}
-        <div className="hidden lg:grid hairline-grid grid-cols-4 bg-card">
+        {/* Responsive Grid: 2-col mobile, 3-col tablet, 4-col desktop */}
+        <div className="hairline-grid grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 bg-card">
           {products.slice(0, 8).map((p) => (
             <ProductCard key={p.id} product={p} />
           ))}
-        </div>
-
-        {/* Tablet & Mobile: 3 visible per row in a horizontal swipeable carousel */}
-        <div className="block lg:hidden">
-          <div className="flex items-center justify-between px-1 text-xs text-muted-foreground mb-2">
-            <span>8 models · Swipe to view</span>
-            <span className="text-primary font-medium text-[11px]">← Swipe →</span>
-          </div>
-          <div className="flex overflow-x-auto snap-x snap-mandatory scroll-px-4 gap-1.5 pb-2 pt-1 -mx-4 px-4 sm:-mx-5 sm:px-5 scrollbar-none touch-pan-x overscroll-x-contain">
-            {products.slice(0, 8).map((p) => (
-              <div
-                key={p.id}
-                className="w-[calc((100vw-44px)/3)] sm:w-[calc((100vw-56px)/3)] md:w-[calc((100vw-72px)/3)] min-w-25 max-w-60 shrink-0 snap-start flex flex-col"
-              >
-                <ProductCard product={p} compact={true} />
-              </div>
-            ))}
-          </div>
         </div>
       </section>
 
@@ -491,29 +473,11 @@ function Index() {
             </Link>
           </div>
 
-          {/* Desktop 4-grid */}
-          <div className="hidden lg:grid hairline-grid grid-cols-4 bg-card">
+          {/* Responsive Grid: 2-col mobile, 3-col tablet, 4-col desktop */}
+          <div className="hairline-grid grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 bg-card">
             {section.items.map((p) => (
               <ProductCard key={p.id} product={p} />
             ))}
-          </div>
-
-          {/* Tablet & Mobile: 3 visible per row in a horizontal swipeable carousel */}
-          <div className="block lg:hidden">
-            <div className="flex items-center justify-between px-1 text-xs text-muted-foreground mb-2">
-              <span>{section.items.length} models available</span>
-              <span className="text-primary font-medium text-[11px]">← Swipe →</span>
-            </div>
-            <div className="flex overflow-x-auto snap-x snap-mandatory scroll-px-4 gap-1.5 pb-2 pt-1 -mx-4 px-4 sm:-mx-5 sm:px-5 scrollbar-none touch-pan-x overscroll-x-contain">
-              {section.items.map((p) => (
-                <div
-                  key={p.id}
-                  className="w-[calc((100vw-44px)/3)] sm:w-[calc((100vw-56px)/3)] md:w-[calc((100vw-72px)/3)] min-w-25 max-w-60 shrink-0 snap-start flex flex-col"
-                >
-                  <ProductCard product={p} compact={true} />
-                </div>
-              ))}
-            </div>
           </div>
         </section>
       ))}
