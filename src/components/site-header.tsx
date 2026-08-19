@@ -371,8 +371,12 @@ export function SiteHeader() {
                   {mobileCategoryNav.map((cat) => (
                     <Link
                       key={cat.label}
-                      to={cat.to}
-                      search={cat.search}
+                      to="/products"
+                      search={{
+                        category: cat.search?.category,
+                        q: cat.search?.q,
+                        brand: undefined,
+                      }}
                       onClick={() => setMobileMenuOpen(false)}
                       className="block px-3 py-2 hover:bg-muted hover:text-foreground"
                     >
@@ -441,16 +445,32 @@ export function SiteHeader() {
             <ul className="flex w-max items-center gap-0 text-[12px] font-medium whitespace-nowrap">
               {desktopCategoryNav.map((item) => (
                 <li key={item.label} className="shrink-0 snap-start">
-                  <Link
-                    to={item.to}
-                    search={item.search}
-                    className="flex min-h-11 items-center px-3 lg:px-3.5 text-subtle-foreground hover:text-foreground hover:bg-muted/60 transition-colors border-b-2 border-transparent hover:border-primary"
-                    activeProps={{
-                      className: "text-primary border-b-2 border-primary bg-muted/40",
-                    }}
-                  >
-                    {item.label}
-                  </Link>
+                  {item.search ? (
+                    <Link
+                      to="/products"
+                      search={{
+                        category: item.search.category,
+                        q: item.search.q,
+                        brand: undefined,
+                      }}
+                      className="flex min-h-11 items-center px-3 lg:px-3.5 text-subtle-foreground hover:text-foreground hover:bg-muted/60 transition-colors border-b-2 border-transparent hover:border-primary"
+                      activeProps={{
+                        className: "text-primary border-b-2 border-primary bg-muted/40",
+                      }}
+                    >
+                      {item.label}
+                    </Link>
+                  ) : (
+                    <Link
+                      to={item.to}
+                      className="flex min-h-11 items-center px-3 lg:px-3.5 text-subtle-foreground hover:text-foreground hover:bg-muted/60 transition-colors border-b-2 border-transparent hover:border-primary"
+                      activeProps={{
+                        className: "text-primary border-b-2 border-primary bg-muted/40",
+                      }}
+                    >
+                      {item.label}
+                    </Link>
+                  )}
                 </li>
               ))}
             </ul>
