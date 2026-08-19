@@ -82,7 +82,7 @@ export default function Lanyard({
     <div className="lanyard-wrapper">
       <Canvas
         camera={{ position: position, fov: fov }}
-        dpr={[1, isMobile ? 1.5 : 2]}
+        dpr={[1, 3]}
         gl={{ alpha: transparent }}
         onCreated={({ gl }) => gl.setClearColor(new THREE.Color(0x000000), transparent ? 0 : 1)}
       >
@@ -189,8 +189,10 @@ function Band({
     const baseImg = baseMap.image;
     if (!baseImg) return baseMap;
 
-    const W = baseImg.width || 1024;
-    const H = baseImg.height || 1024;
+    // Render at 2× the baked atlas size for sharper textures on high-DPI screens.
+    const SCALE = 2;
+    const W = (baseImg.width || 1024) * SCALE;
+    const H = (baseImg.height || 1024) * SCALE;
     const canvas = document.createElement("canvas");
     canvas.width = W;
     canvas.height = H;
@@ -227,6 +229,10 @@ function Band({
     const composite = new THREE.CanvasTexture(canvas);
     composite.colorSpace = THREE.SRGBColorSpace;
     composite.flipY = baseMap.flipY;
+    // Use mipmapped linear filtering for maximum sharpness at any angle.
+    composite.generateMipmaps = true;
+    composite.minFilter = THREE.LinearMipmapLinearFilter;
+    composite.magFilter = THREE.LinearFilter;
     composite.anisotropy = 16;
     composite.needsUpdate = true;
     return composite;
