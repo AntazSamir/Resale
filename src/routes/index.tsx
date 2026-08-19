@@ -210,11 +210,7 @@ function Index() {
           <h2 className="text-xs uppercase tracking-[0.2em] text-muted-foreground font-bold">
             EXPLORE BY CATEGORY
           </h2>
-          <Link
-            to="/products"
-            search={{ q: undefined, category: undefined, brand: undefined }}
-            className="text-xs font-semibold text-primary hover:underline"
-          >
+          <Link to="/categories" className="text-xs font-semibold text-primary hover:underline">
             View all →
           </Link>
         </div>
