@@ -239,7 +239,9 @@ function CategoriesPage() {
                   <div>
                     {minPrice !== null ? (
                       <div>
-                        <span className="text-[10px] text-muted-foreground block">Starting from</span>
+                        <span className="text-[10px] text-muted-foreground block">
+                          Starting from
+                        </span>
                         <span className="font-display text-base font-bold text-primary">
                           {taka(minPrice)}
                         </span>
