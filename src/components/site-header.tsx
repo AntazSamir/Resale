@@ -91,7 +91,7 @@ export function SiteHeader() {
           {/* Desktop Right: Actions */}
           <div className="ml-auto hidden md:flex items-center gap-5">
             <Link
-              to="/products" search={{}}
+              to="/products" search={{ q: undefined, category: undefined, brand: undefined }}
               className="text-sm font-medium text-foreground hover:text-primary transition-colors"
             >
               Browse
@@ -205,7 +205,7 @@ export function SiteHeader() {
                   Home
                 </Link>
                 <Link
-                  to="/products" search={{}}
+                  to="/products" search={{ q: undefined, category: undefined, brand: undefined }}
                   onClick={() => setMobileMenuOpen(false)}
                   className="block px-3 py-2 hover:bg-muted text-foreground"
                 >
