@@ -266,12 +266,15 @@ function Index() {
                 </div>
 
                 {/* Product image */}
-                <div className="relative w-28 sm:w-44 md:w-56 lg:w-64 aspect-square border border-border bg-muted shrink-0 flex items-center justify-center p-2 sm:p-4">
+                <div className="relative w-36 sm:w-56 md:w-72 lg:w-80 aspect-square border border-border bg-muted shrink-0 overflow-hidden flex items-center justify-center">
                   <img
                     src={dealProduct.image}
                     alt={dealProduct.name}
-                    className="size-full object-contain"
+                    className="size-full object-cover"
                   />
+                  <div className="absolute top-2 right-2 bg-background/90 backdrop-blur-xs text-[10px] sm:text-xs font-semibold px-2 py-0.5 border border-border shadow-xs">
+                    Grade {dealListing.grade}
+                  </div>
                 </div>
               </div>
             );
