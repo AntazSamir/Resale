@@ -1,7 +1,8 @@
 import { createClient } from "@supabase/supabase-js";
 
 const SUPABASE_URL = process.env.SUPABASE_URL || "https://taqsfmxkiznbjyxbmbge.supabase.co";
-const SUPABASE_KEY = process.env.SUPABASE_ANON_KEY || "sb_publishable_yX2oOIHAzCMGLeazCCb9vg_ev_XaoDc";
+const SUPABASE_KEY =
+  process.env.SUPABASE_ANON_KEY || "sb_publishable_yX2oOIHAzCMGLeazCCb9vg_ev_XaoDc";
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -145,7 +146,7 @@ const products = [
   // ── Laptops ──
   {
     id: "macbook-air-m2",
-    name: "MacBook Air 13.6\" M2 8/256",
+    name: 'MacBook Air 13.6" M2 8/256',
     brand: "Apple",
     category: "Laptops",
     image: "/src/assets/p-laptop.jpg",
@@ -159,7 +160,7 @@ const products = [
   },
   {
     id: "macbook-pro-14-m3-pro",
-    name: "MacBook Pro 14\" M3 Pro 18/512",
+    name: 'MacBook Pro 14" M3 Pro 18/512',
     brand: "Apple",
     category: "Laptops",
     image: "/src/assets/p-laptop.jpg",
@@ -318,7 +319,7 @@ const products = [
   },
   {
     id: "ipad-pro-11-m4",
-    name: "iPad Pro 11\" M4 256GB Wi-Fi",
+    name: 'iPad Pro 11" M4 256GB Wi-Fi',
     brand: "Apple",
     category: "Accessories",
     image: "/src/assets/p-laptop.jpg",
@@ -341,7 +342,8 @@ const listings = [
     grade: "A+",
     condition_score: 96,
     price_poisha: 12400000,
-    seller_note: "Flawless condition, always used with case and screen protector. Battery health 98%. Comes with original box and cable.",
+    seller_note:
+      "Flawless condition, always used with case and screen protector. Battery health 98%. Comes with original box and cable.",
     status: "PUBLISHED",
     warranty_months: 6,
     has_invoice: true,
@@ -359,7 +361,8 @@ const listings = [
     grade: "A",
     condition_score: 91,
     price_poisha: 9800000,
-    seller_note: "Clean device used for programming. Light hairline mark near port. Cycle count 124.",
+    seller_note:
+      "Clean device used for programming. Light hairline mark near port. Cycle count 124.",
     status: "PUBLISHED",
     warranty_months: 3,
     has_invoice: true,
@@ -395,7 +398,8 @@ const listings = [
     grade: "B",
     condition_score: 83,
     price_poisha: 2650000,
-    seller_note: "Great sound and battery life. Some cosmetic scuffs on outer earcups from daily transit.",
+    seller_note:
+      "Great sound and battery life. Some cosmetic scuffs on outer earcups from daily transit.",
     status: "PUBLISHED",
     warranty_months: 1,
     has_invoice: false,
@@ -413,7 +417,8 @@ const listings = [
     grade: "A+",
     condition_score: 98,
     price_poisha: 8400000,
-    seller_note: "Worn sparingly. Battery health 100%. Comes with Orange Ocean Band and fast charger.",
+    seller_note:
+      "Worn sparingly. Battery health 100%. Comes with Orange Ocean Band and fast charger.",
     status: "PUBLISHED",
     warranty_months: 8,
     has_invoice: true,
@@ -428,15 +433,63 @@ const listings = [
 
 // 4. Inspection Items
 const inspectionItems = [
-  { id: "insp-1", listing_id: "l-1", component: "Display & Touch", status: "PASSED", notes: "100% responsive, True Tone functional" },
-  { id: "insp-2", listing_id: "l-1", component: "Face ID & Sensors", status: "PASSED", notes: "Instant unlock" },
-  { id: "insp-3", listing_id: "l-1", component: "Camera Array", status: "PASSED", notes: "0.5x, 1x, 2x, 3x sharp, OIS active" },
-  { id: "insp-4", listing_id: "l-1", component: "Battery Health", status: "PASSED", notes: "98% original capacity" },
-  { id: "insp-5", listing_id: "l-1", component: "Speakers & Mic", status: "PASSED", notes: "Clean stereo separation" },
+  {
+    id: "insp-1",
+    listing_id: "l-1",
+    component: "Display & Touch",
+    status: "PASSED",
+    notes: "100% responsive, True Tone functional",
+  },
+  {
+    id: "insp-2",
+    listing_id: "l-1",
+    component: "Face ID & Sensors",
+    status: "PASSED",
+    notes: "Instant unlock",
+  },
+  {
+    id: "insp-3",
+    listing_id: "l-1",
+    component: "Camera Array",
+    status: "PASSED",
+    notes: "0.5x, 1x, 2x, 3x sharp, OIS active",
+  },
+  {
+    id: "insp-4",
+    listing_id: "l-1",
+    component: "Battery Health",
+    status: "PASSED",
+    notes: "98% original capacity",
+  },
+  {
+    id: "insp-5",
+    listing_id: "l-1",
+    component: "Speakers & Mic",
+    status: "PASSED",
+    notes: "Clean stereo separation",
+  },
 
-  { id: "insp-6", listing_id: "l-2", component: "Keyboard & Trackpad", status: "PASSED", notes: "Full travel, Force Touch working" },
-  { id: "insp-7", listing_id: "l-2", component: "Liquid Retina Display", status: "PASSED", notes: "No dead pixels, no bleeding" },
-  { id: "insp-8", listing_id: "l-2", component: "Ports & MagSafe", status: "PASSED", notes: "Full charging rate verified" },
+  {
+    id: "insp-6",
+    listing_id: "l-2",
+    component: "Keyboard & Trackpad",
+    status: "PASSED",
+    notes: "Full travel, Force Touch working",
+  },
+  {
+    id: "insp-7",
+    listing_id: "l-2",
+    component: "Liquid Retina Display",
+    status: "PASSED",
+    notes: "No dead pixels, no bleeding",
+  },
+  {
+    id: "insp-8",
+    listing_id: "l-2",
+    component: "Ports & MagSafe",
+    status: "PASSED",
+    notes: "Full charging rate verified",
+  },
 ];
 
 // 5. Initial Orders
@@ -487,11 +540,15 @@ async function seedSupabase() {
 
   // 1. Upload Users
   console.log(`\n1. Upserting ${users.length} users...`);
-  const { data: uData, error: uErr } = await supabase.from("users").upsert(users, { onConflict: "id" });
+  const { data: uData, error: uErr } = await supabase
+    .from("users")
+    .upsert(users, { onConflict: "id" });
   if (uErr) {
     console.error("  ❌ Error uploading users:", uErr.message);
     if (uErr.code === "PGRST205" || uErr.message.includes("Could not find the table")) {
-      console.log("\n⚠️ Table not found! Please execute the SQL migration in `supabase/schema.sql` first in your Supabase SQL Editor.");
+      console.log(
+        "\n⚠️ Table not found! Please execute the SQL migration in `supabase/schema.sql` first in your Supabase SQL Editor.",
+      );
       return;
     }
   } else {
@@ -500,25 +557,33 @@ async function seedSupabase() {
 
   // 2. Upload Products
   console.log(`\n2. Upserting ${products.length} products...`);
-  const { data: pData, error: pErr } = await supabase.from("products").upsert(products, { onConflict: "id" });
+  const { data: pData, error: pErr } = await supabase
+    .from("products")
+    .upsert(products, { onConflict: "id" });
   if (pErr) console.error("  ❌ Error uploading products:", pErr.message);
   else console.log("  ✅ Products uploaded successfully!");
 
   // 3. Upload Listings
   console.log(`\n3. Upserting ${listings.length} listings...`);
-  const { data: lData, error: lErr } = await supabase.from("listings").upsert(listings, { onConflict: "id" });
+  const { data: lData, error: lErr } = await supabase
+    .from("listings")
+    .upsert(listings, { onConflict: "id" });
   if (lErr) console.error("  ❌ Error uploading listings:", lErr.message);
   else console.log("  ✅ Listings uploaded successfully!");
 
   // 4. Upload Inspection Items
   console.log(`\n4. Upserting ${inspectionItems.length} inspection items...`);
-  const { data: iData, error: iErr } = await supabase.from("inspection_items").upsert(inspectionItems, { onConflict: "id" });
+  const { data: iData, error: iErr } = await supabase
+    .from("inspection_items")
+    .upsert(inspectionItems, { onConflict: "id" });
   if (iErr) console.error("  ❌ Error uploading inspection items:", iErr.message);
   else console.log("  ✅ Inspection items uploaded successfully!");
 
   // 5. Upload Orders
   console.log(`\n5. Upserting ${orders.length} orders...`);
-  const { data: oData, error: oErr } = await supabase.from("orders").upsert(orders, { onConflict: "id" });
+  const { data: oData, error: oErr } = await supabase
+    .from("orders")
+    .upsert(orders, { onConflict: "id" });
   if (oErr) console.error("  ❌ Error uploading orders:", oErr.message);
   else console.log("  ✅ Orders uploaded successfully!");
 

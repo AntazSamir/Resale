@@ -13,5 +13,5 @@ export default defineConfig({
         inlineDynamicImports: true,
       },
     },
-  },
+  } as Record<string, unknown>,
 });
