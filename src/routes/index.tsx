@@ -403,8 +403,8 @@ function Index() {
             return (
               <Link
                 key={p.id}
-                to="/product/$productId"
-                params={{ productId: p.id }}
+                to="/listing/$listingId"
+                params={{ listingId: best.id }}
                 className="w-50 shrink-0 snap-start border border-border bg-card p-3 flex flex-col justify-between relative group"
               >
                 {/* Discount Badge */}

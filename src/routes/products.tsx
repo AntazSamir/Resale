@@ -1,17 +1,15 @@
 import { createFileRoute, Link, useSearch } from "@tanstack/react-router";
 import { useState, useMemo, useEffect } from "react";
 import { SiteHeader, SiteFooter } from "@/components/site-header";
-import { ProductCard } from "@/components/product-card";
+import { ListingCard } from "@/components/listing-card";
 import {
   products,
   listings,
-  cheapest,
-  listingsFor,
+  productFor,
   grades,
   gradeLabel,
   taka,
   type Grade,
-  type Product,
 } from "@/data/catalog";
 import {
   Search,
@@ -20,8 +18,6 @@ import {
   ChevronRight,
   RotateCcw,
   Package,
-  Layers,
-  Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -52,7 +48,7 @@ export const Route = createFileRoute("/products")({
   }),
   head: () => ({
     meta: [
-      { title: "Browse Products & Listings | Resale.com" },
+      { title: "Browse Listings | Resale.com" },
       {
         name: "description",
         content:
@@ -63,14 +59,14 @@ export const Route = createFileRoute("/products")({
   component: ProductsPage,
 });
 
-type SortOption = "relevance" | "price-asc" | "price-desc" | "name-asc" | "units-desc";
+type SortOption = "relevance" | "price-asc" | "price-desc" | "name-asc" | "newest";
 
 const MAX_CATALOG_PRICE = 300000;
 
 function ProductsPage() {
   const urlSearch = useSearch({ from: "/products" });
 
-  // Filter States
+  // Filter states
   const [searchQuery, setSearchQuery] = useState(urlSearch.q || "");
   const [selectedCategories, setSelectedCategories] = useState<string[]>(
     urlSearch.category ? [urlSearch.category] : [],
@@ -80,7 +76,6 @@ function ProductsPage() {
   );
   const [selectedGrades, setSelectedGrades] = useState<Grade[]>([]);
   const [selectedDistricts, setSelectedDistricts] = useState<string[]>([]);
-  const [inStockOnly, setInStockOnly] = useState(false);
   const [priceMax, setPriceMax] = useState<number>(MAX_CATALOG_PRICE);
   const [sortBy, setSortBy] = useState<SortOption>("relevance");
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
@@ -92,7 +87,7 @@ function ProductsPage() {
     if (urlSearch.brand !== undefined) setSelectedBrands([urlSearch.brand]);
   }, [urlSearch.q, urlSearch.category, urlSearch.brand]);
 
-  // Derived unique facet lists from real catalog data
+  // Facet value lists — categories/brands from product catalog, districts from actual listings
   const allCategories = useMemo(() => Array.from(new Set(products.map((p) => p.category))), []);
   const allBrands = useMemo(() => Array.from(new Set(products.map((p) => p.brand))), []);
   const allDistricts = useMemo(
@@ -101,29 +96,25 @@ function ProductsPage() {
   );
 
   // Toggle helpers
-  const toggleCategory = (cat: string) => {
+  const toggleCategory = (cat: string) =>
     setSelectedCategories((prev) =>
       prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat],
     );
-  };
 
-  const toggleBrand = (brand: string) => {
+  const toggleBrand = (brand: string) =>
     setSelectedBrands((prev) =>
       prev.includes(brand) ? prev.filter((b) => b !== brand) : [...prev, brand],
     );
-  };
 
-  const toggleGrade = (grade: Grade) => {
+  const toggleGrade = (grade: Grade) =>
     setSelectedGrades((prev) =>
       prev.includes(grade) ? prev.filter((g) => g !== grade) : [...prev, grade],
     );
-  };
 
-  const toggleDistrict = (district: string) => {
+  const toggleDistrict = (district: string) =>
     setSelectedDistricts((prev) =>
       prev.includes(district) ? prev.filter((d) => d !== district) : [...prev, district],
     );
-  };
 
   const clearAllFilters = () => {
     setSearchQuery("");
@@ -131,7 +122,6 @@ function ProductsPage() {
     setSelectedBrands([]);
     setSelectedGrades([]);
     setSelectedDistricts([]);
-    setInStockOnly(false);
     setPriceMax(MAX_CATALOG_PRICE);
     setSortBy("relevance");
   };
@@ -142,13 +132,17 @@ function ProductsPage() {
     selectedBrands.length +
     selectedGrades.length +
     selectedDistricts.length +
-    (inStockOnly ? 1 : 0) +
     (priceMax < MAX_CATALOG_PRICE ? 1 : 0);
 
-  // Filter & Search Engine
-  const filteredProducts = useMemo(() => {
-    return products.filter((product) => {
-      // 1. Text Search
+  // ── Listing filter engine ──────────────────────────────────────────────────
+  // We now iterate over individual listings, not products.
+  // Product fields (name, brand, category, specs) are joined for search/filter.
+  const filteredListings = useMemo(() => {
+    return listings.filter((listing) => {
+      const product = productFor(listing.productId);
+      if (!product) return false;
+
+      // 1. Text search across product fields
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase().trim();
         const matchesName = product.name.toLowerCase().includes(q);
@@ -157,101 +151,68 @@ function ProductsPage() {
         const matchesSpecs = product.specs.some(
           (s) => s.label.toLowerCase().includes(q) || s.value.toLowerCase().includes(q),
         );
-        if (!matchesName && !matchesBrand && !matchesCategory && !matchesSpecs) {
-          return false;
-        }
+        if (!matchesName && !matchesBrand && !matchesCategory && !matchesSpecs) return false;
       }
 
-      // 2. Category Filter
-      if (selectedCategories.length > 0 && !selectedCategories.includes(product.category)) {
+      // 2. Category
+      if (selectedCategories.length > 0 && !selectedCategories.includes(product.category))
         return false;
-      }
 
-      // 3. Brand Filter
-      if (selectedBrands.length > 0 && !selectedBrands.includes(product.brand)) {
+      // 3. Brand
+      if (selectedBrands.length > 0 && !selectedBrands.includes(product.brand)) return false;
+
+      // 4. Grade — now directly on the listing
+      if (selectedGrades.length > 0 && !selectedGrades.includes(listing.grade)) return false;
+
+      // 5. Price — listing's actual selling price
+      if (listing.price > priceMax) return false;
+
+      // 6. Seller district
+      if (
+        selectedDistricts.length > 0 &&
+        !selectedDistricts.includes(listing.seller.district)
+      )
         return false;
-      }
-
-      // 4. In-Stock Filter
-      const productListings = listingsFor(product.id);
-      if (inStockOnly && productListings.length === 0) {
-        return false;
-      }
-
-      // 5. Price Filter (matches lowest listing price or retail price)
-      const lowestPrice = cheapest(product.id)?.price ?? product.retail;
-      if (lowestPrice > priceMax) {
-        return false;
-      }
-
-      // 6. Grade Filter (product must have at least one active listing in selected grade)
-      if (selectedGrades.length > 0) {
-        const hasGrade = productListings.some((l) => selectedGrades.includes(l.grade));
-        if (!hasGrade) return false;
-      }
-
-      // 7. District Filter (product must have at least one active listing in selected district)
-      if (selectedDistricts.length > 0) {
-        const hasDistrict = productListings.some((l) =>
-          selectedDistricts.includes(l.seller.district),
-        );
-        if (!hasDistrict) return false;
-      }
 
       return true;
     });
-  }, [
-    searchQuery,
-    selectedCategories,
-    selectedBrands,
-    selectedGrades,
-    selectedDistricts,
-    inStockOnly,
-    priceMax,
-  ]);
+  }, [searchQuery, selectedCategories, selectedBrands, selectedGrades, selectedDistricts, priceMax]);
 
-  // Sorting Engine
-  const sortedProducts = useMemo(() => {
-    const list = [...filteredProducts];
+  // ── Sorting engine ─────────────────────────────────────────────────────────
+  const sortedListings = useMemo(() => {
+    const list = [...filteredListings];
     switch (sortBy) {
       case "price-asc":
-        return list.sort((a, b) => {
-          const priceA = cheapest(a.id)?.price ?? a.retail;
-          const priceB = cheapest(b.id)?.price ?? b.retail;
-          return priceA - priceB;
-        });
+        return list.sort((a, b) => a.price - b.price);
       case "price-desc":
-        return list.sort((a, b) => {
-          const priceA = cheapest(a.id)?.price ?? a.retail;
-          const priceB = cheapest(b.id)?.price ?? b.retail;
-          return priceB - priceA;
-        });
+        return list.sort((a, b) => b.price - a.price);
       case "name-asc":
-        return list.sort((a, b) => a.name.localeCompare(b.name));
-      case "units-desc":
-        return list.sort((a, b) => listingsFor(b.id).length - listingsFor(a.id).length);
+        return list.sort((a, b) => {
+          const pa = productFor(a.productId)?.name ?? "";
+          const pb = productFor(b.productId)?.name ?? "";
+          return pa.localeCompare(pb);
+        });
+      case "newest":
+        return list.sort(
+          (a, b) => new Date(b.listedAt).getTime() - new Date(a.listedAt).getTime(),
+        );
       case "relevance":
       default:
         return list;
     }
-  }, [filteredProducts, sortBy]);
+  }, [filteredListings, sortBy]);
 
-  // Total active listings count for matching products
-  const totalMatchingListings = useMemo(() => {
-    return sortedProducts.reduce((acc, p) => acc + listingsFor(p.id).length, 0);
-  }, [sortedProducts]);
-
-  // Filter Panel Component (Shared between desktop sidebar & mobile drawer)
+  // ── Filter panel (shared between desktop sidebar & mobile drawer) ──────────
   const FilterContent = (
     <div className="space-y-6 text-sm">
-      {/* Category Facet */}
+      {/* Category */}
       <div>
         <h3 className="font-semibold text-xs uppercase tracking-wider text-muted-foreground mb-3">
           Category
         </h3>
         <div className="space-y-2">
           {allCategories.map((cat) => {
-            const count = products.filter((p) => p.category === cat).length;
+            const count = listings.filter((l) => productFor(l.productId)?.category === cat).length;
             const checked = selectedCategories.includes(cat);
             return (
               <label
@@ -273,14 +234,16 @@ function ProductsPage() {
         </div>
       </div>
 
-      {/* Brand Facet */}
+      {/* Brand */}
       <div className="border-t border-border pt-5">
         <h3 className="font-semibold text-xs uppercase tracking-wider text-muted-foreground mb-3">
           Brand
         </h3>
         <div className="space-y-2">
           {allBrands.map((brand) => {
-            const count = products.filter((p) => p.brand === brand).length;
+            const count = listings.filter(
+              (l) => productFor(l.productId)?.brand === brand,
+            ).length;
             const checked = selectedBrands.includes(brand);
             return (
               <label
@@ -302,16 +265,14 @@ function ProductsPage() {
         </div>
       </div>
 
-      {/* Condition Grade Facet */}
+      {/* Condition Grade */}
       <div className="border-t border-border pt-5">
         <h3 className="font-semibold text-xs uppercase tracking-wider text-muted-foreground mb-3">
           Condition Grade
         </h3>
         <div className="space-y-2">
           {grades.map((grade) => {
-            const matchingCount = products.filter((p) =>
-              listingsFor(p.id).some((l) => l.grade === grade),
-            ).length;
+            const count = listings.filter((l) => l.grade === grade).length;
             const checked = selectedGrades.includes(grade);
             return (
               <label
@@ -327,14 +288,14 @@ function ProductsPage() {
                   <span className="font-medium">Grade {grade}</span>
                   <span className="text-xs text-muted-foreground">({gradeLabel[grade]})</span>
                 </div>
-                <span className="text-xs text-muted-foreground">{matchingCount}</span>
+                <span className="text-xs text-muted-foreground">{count}</span>
               </label>
             );
           })}
         </div>
       </div>
 
-      {/* Price Ceiling */}
+      {/* Max Price */}
       <div className="border-t border-border pt-5">
         <div className="flex items-center justify-between mb-3">
           <h3 className="font-semibold text-xs uppercase tracking-wider text-muted-foreground">
@@ -358,16 +319,14 @@ function ProductsPage() {
         </div>
       </div>
 
-      {/* Seller District Facet */}
+      {/* Seller District */}
       <div className="border-t border-border pt-5">
         <h3 className="font-semibold text-xs uppercase tracking-wider text-muted-foreground mb-3">
           Seller District
         </h3>
         <div className="space-y-2">
           {allDistricts.map((district) => {
-            const count = products.filter((p) =>
-              listingsFor(p.id).some((l) => l.seller.district === district),
-            ).length;
+            const count = listings.filter((l) => l.seller.district === district).length;
             const checked = selectedDistricts.includes(district);
             return (
               <label
@@ -388,18 +347,6 @@ function ProductsPage() {
           })}
         </div>
       </div>
-
-      {/* In Stock Only Toggle */}
-      <div className="border-t border-border pt-5">
-        <label className="flex items-center gap-2.5 cursor-pointer py-1 text-foreground">
-          <Checkbox
-            checked={inStockOnly}
-            onCheckedChange={(checked) => setInStockOnly(Boolean(checked))}
-            id="in-stock-only"
-          />
-          <span className="font-medium text-xs">In-Stock Models Only</span>
-        </label>
-      </div>
     </div>
   );
 
@@ -408,37 +355,38 @@ function ProductsPage() {
       <SiteHeader />
 
       <main className="flex-1 w-full max-w-7xl mx-auto px-4 md:px-5 py-6 md:py-8">
-        {/* Breadcrumb Navigation */}
+        {/* Breadcrumb */}
         <nav className="text-xs text-muted-foreground mb-4 flex items-center gap-1.5">
           <Link to="/" className="hover:text-foreground transition-colors">
             Home
           </Link>
           <ChevronRight className="size-3" />
-          <span className="text-foreground font-medium">Browse Electronics</span>
+          <span className="text-foreground font-medium">Browse Listings</span>
         </nav>
 
-        {/* Page Title & Intro */}
+        {/* Page Title */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-6 border-b border-border">
           <div>
             <h1 className="text-2xl md:text-3xl font-display font-bold tracking-tight text-foreground">
-              Browse Electronics
+              Browse Listings
             </h1>
             <p className="text-xs md:text-sm text-subtle-foreground mt-1">
-              Explore graded pre-owned electronics from verified sellers across Bangladesh.
+              Individual verified units from sellers across Bangladesh — each card is a specific
+              offer.
             </p>
           </div>
           <div className="text-xs text-muted-foreground flex items-center gap-2 shrink-0">
             <Package className="size-4 text-primary" />
             <span>
-              <strong>{sortedProducts.length}</strong> models ·{" "}
-              <strong>{totalMatchingListings}</strong> verified units live
+              <strong>{sortedListings.length}</strong> listing
+              {sortedListings.length !== 1 ? "s" : ""} available
             </span>
           </div>
         </div>
 
-        {/* Top Search & Controls Bar */}
+        {/* Search & Controls Bar */}
         <div className="mt-6 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-card border border-border p-3">
-          {/* Search Field */}
+          {/* Search */}
           <div className="relative flex-1">
             <Search className="size-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
             <Input
@@ -459,7 +407,7 @@ function ProductsPage() {
           </div>
 
           <div className="flex items-center gap-2.5">
-            {/* Mobile Filters Sheet Trigger */}
+            {/* Mobile Filters Sheet */}
             <Sheet open={mobileDrawerOpen} onOpenChange={setMobileDrawerOpen}>
               <SheetTrigger asChild>
                 <Button
@@ -494,14 +442,14 @@ function ProductsPage() {
                 <SheetFooter className="mt-8 pt-4 border-t border-border">
                   <SheetClose asChild>
                     <Button className="w-full rounded-none" size="sm">
-                      Apply Filters ({sortedProducts.length} Results)
+                      Apply Filters ({sortedListings.length} Results)
                     </Button>
                   </SheetClose>
                 </SheetFooter>
               </SheetContent>
             </Sheet>
 
-            {/* Sort Select */}
+            {/* Sort */}
             <div className="flex items-center gap-2 shrink-0">
               <span className="hidden sm:inline text-xs text-muted-foreground font-medium">
                 Sort by:
@@ -511,11 +459,11 @@ function ProductsPage() {
                   <SelectValue placeholder="Sort by" />
                 </SelectTrigger>
                 <SelectContent className="rounded-none border-border bg-card">
-                  <SelectItem value="relevance">Featured &amp; Popular</SelectItem>
+                  <SelectItem value="relevance">Featured</SelectItem>
                   <SelectItem value="price-asc">Price: Low to High</SelectItem>
                   <SelectItem value="price-desc">Price: High to Low</SelectItem>
                   <SelectItem value="name-asc">Model Name (A–Z)</SelectItem>
-                  <SelectItem value="units-desc">Most Available Units</SelectItem>
+                  <SelectItem value="newest">Newest Listed</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -621,19 +569,6 @@ function ProductsPage() {
               </Badge>
             )}
 
-            {inStockOnly && (
-              <Badge variant="secondary" className="text-xs font-normal gap-1 rounded-none py-1">
-                <span>In-Stock Only</span>
-                <button
-                  onClick={() => setInStockOnly(false)}
-                  className="hover:text-destructive"
-                  aria-label="Remove in-stock only filter"
-                >
-                  <X className="size-3" />
-                </button>
-              </Badge>
-            )}
-
             <button
               onClick={clearAllFilters}
               className="text-xs text-primary hover:underline font-semibold ml-2"
@@ -643,9 +578,9 @@ function ProductsPage() {
           </div>
         )}
 
-        {/* Layout Grid: Desktop Sidebar + Product Grid */}
+        {/* Layout: Desktop sidebar + listing grid */}
         <div className="mt-8 grid grid-cols-1 lg:grid-cols-[240px_1fr] gap-8 items-start">
-          {/* Desktop Left Sidebar */}
+          {/* Desktop Sidebar */}
           <aside className="hidden lg:block border border-border bg-card p-5 sticky top-20">
             <div className="flex items-center justify-between pb-3 border-b border-border mb-5">
               <h2 className="font-display font-bold text-sm tracking-tight">Refine Results</h2>
@@ -661,74 +596,47 @@ function ProductsPage() {
             {FilterContent}
           </aside>
 
-          {/* Main Product Grid / Content Area */}
+          {/* Listing Grid */}
           <div className="space-y-6 overflow-hidden">
-            {sortedProducts.length > 0 ? (
+            {sortedListings.length > 0 ? (
               <>
-                {/* ═══════════════════════════════════════════════════════════════
-                    MOBILE VIEW (< md): 3 CARDS VISIBLE + HORIZONTAL SWIPE
-                ═══════════════════════════════════════════════════════════════ */}
-                <div className="block md:hidden space-y-6">
-                  {selectedCategories.length === 0 && !searchQuery ? (
-                    // When browsing all products on mobile, render categorized 3-card swipe carousels
-                    allCategories
-                      .filter((cat) => sortedProducts.some((p) => p.category === cat))
-                      .map((cat) => {
-                        const catProducts = sortedProducts.filter((p) => p.category === cat);
-                        return (
-                          <div key={cat} className="space-y-2">
-                            <div className="flex items-center justify-between px-1 gap-2">
-                              <h3 className="font-display font-bold text-sm text-foreground truncate">
-                                {cat}
-                              </h3>
-                              <span className="text-[10px] text-muted-foreground font-medium shrink-0">
-                                {catProducts.length} models ·{" "}
-                                <span className="text-primary">Swipe →</span>
-                              </span>
-                            </div>
-                            <div className="flex overflow-x-auto snap-x snap-mandatory scroll-px-4 gap-1.5 pb-2 pt-1 -mx-4 px-4 scrollbar-none touch-pan-x overscroll-x-contain">
-                              {catProducts.map((product) => (
-                                <div
-                                  key={product.id}
-                                  className="w-[calc((100vw-44px)/3)] min-w-22.5 max-w-35 shrink-0 snap-start flex flex-col"
-                                >
-                                  <ProductCard product={product} compact={true} />
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        );
-                      })
-                  ) : (
-                    // Filtered/Searched: Single continuous 3-card swipe carousel
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between px-1 text-xs text-muted-foreground gap-2">
-                        <span className="font-medium">{sortedProducts.length} results</span>
-                        <span className="text-primary font-medium text-[11px] shrink-0">
-                          ← Swipe models →
-                        </span>
-                      </div>
-                      <div className="flex overflow-x-auto snap-x snap-mandatory scroll-px-4 gap-1.5 pb-2 pt-1 -mx-4 px-4 scrollbar-none touch-pan-x overscroll-x-contain">
-                        {sortedProducts.map((product) => (
-                          <div
-                            key={product.id}
-                            className="w-[calc((100vw-44px)/3)] min-w-22.5 max-w-35 shrink-0 snap-start flex flex-col"
-                          >
-                            <ProductCard product={product} compact={true} />
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                {/* ═══════════════════════════════════════════════════════
+                    MOBILE: flat 3-card horizontal swipe (no category groups)
+                ═══════════════════════════════════════════════════════ */}
+                <div className="block md:hidden space-y-2">
+                  <div className="flex items-center justify-between px-1 text-xs text-muted-foreground gap-2">
+                    <span className="font-medium">{sortedListings.length} listings</span>
+                    <span className="text-primary font-medium text-[11px] shrink-0">
+                      ← Swipe →
+                    </span>
+                  </div>
+                  <div className="flex overflow-x-auto snap-x snap-mandatory scroll-px-4 gap-1.5 pb-2 pt-1 -mx-4 px-4 scrollbar-none touch-pan-x overscroll-x-contain">
+                    {sortedListings.map((listing) => {
+                      const product = productFor(listing.productId);
+                      if (!product) return null;
+                      return (
+                        <div
+                          key={listing.id}
+                          className="w-[calc((100vw-44px)/3)] min-w-22.5 max-w-35 shrink-0 snap-start flex flex-col"
+                        >
+                          <ListingCard listing={listing} product={product} compact={true} />
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
 
-                {/* ═══════════════════════════════════════════════════════════════
-                    DESKTOP & TABLET VIEW (>= md): 4 PRODUCTS PER ROW
-                ═══════════════════════════════════════════════════════════════ */}
+                {/* ═══════════════════════════════════════════════════════
+                    DESKTOP/TABLET: responsive listing grid
+                ═══════════════════════════════════════════════════════ */}
                 <div className="hidden md:grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-5 items-stretch auto-rows-fr">
-                  {sortedProducts.map((product) => (
-                    <ProductCard key={product.id} product={product} />
-                  ))}
+                  {sortedListings.map((listing) => {
+                    const product = productFor(listing.productId);
+                    if (!product) return null;
+                    return (
+                      <ListingCard key={listing.id} listing={listing} product={product} />
+                    );
+                  })}
                 </div>
               </>
             ) : (
@@ -737,11 +645,10 @@ function ProductsPage() {
                   <Search className="size-6 text-muted-foreground" />
                 </div>
                 <h3 className="text-base font-medium text-foreground mb-1">
-                  No matching models found
+                  No matching listings found
                 </h3>
                 <p className="text-xs text-muted-foreground max-w-sm mx-auto mb-6">
-                  We couldn&apos;t find any products matching your current combination of search and
-                  filters.
+                  We couldn&apos;t find any listings matching your current filters.
                 </p>
                 <Button onClick={clearAllFilters} size="sm" className="rounded-none gap-2">
                   <RotateCcw className="size-3.5" />

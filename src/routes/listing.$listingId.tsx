@@ -73,14 +73,16 @@ function ListingPage() {
           </Link>
           <span className="px-2">/</span>
           <Link
-            to="/product/$productId"
-            params={{ productId: product.id }}
+            to="/products"
+            search={{ q: undefined, category: undefined, brand: undefined }}
             className="hover:text-foreground"
           >
-            {product.name}
+            Products
           </Link>
           <span className="px-2">/</span>
-          <span className="text-foreground">Listing {listing.id}</span>
+          <span className="text-foreground">
+            {product.name} &middot; Grade {listing.grade}
+          </span>
         </nav>
 
         <div className="mt-8 grid gap-12 lg:grid-cols-[1.1fr_1fr]">
