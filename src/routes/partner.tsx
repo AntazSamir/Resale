@@ -23,6 +23,7 @@ import { SiteFooter, SiteHeader } from "@/components/site-header";
 import resaleLogo from "@/assets/resale-logo.png";
 import Lanyard from "@/components/lanyard/Lanyard";
 import partnerCardImg from "@/assets/lanyard/partner-card.png";
+import lanyardStripImg from "@/assets/lanyard/lanyard-strip.jpg";
 
 export const Route = createFileRoute("/partner")({
   head: () => ({
@@ -235,6 +236,8 @@ export default function PartnerPage() {
                 frontImage={partnerCardImg}
                 backImage={partnerCardImg}
                 imageFit="cover"
+                lanyardImage={lanyardStripImg}
+                lanyardWidth={0.8}
               />
             </div>
           </div>
