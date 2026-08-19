@@ -21,9 +21,6 @@ import {
 } from "lucide-react";
 import { SiteFooter, SiteHeader } from "@/components/site-header";
 import resaleLogo from "@/assets/resale-logo.png";
-import Lanyard from "@/components/lanyard/Lanyard";
-import partnerCardImg from "@/assets/lanyard/partner-card.png";
-import lanyardStripImg from "@/assets/lanyard/lanyard-strip.jpg";
 
 export const Route = createFileRoute("/partner")({
   head: () => ({
@@ -148,104 +145,49 @@ export default function PartnerPage() {
     <div className="min-h-screen bg-background flex flex-col">
       <SiteHeader />
 
-      {/* ── Hero Banner with 3D Lanyard ── */}
-      <section className="border-b border-border bg-card" style={{ overflow: "visible" }}>
-        <div className="mx-auto max-w-7xl px-5 py-10 md:py-14" style={{ overflow: "visible" }}>
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
-            {/* Left Column (7 cols) */}
-            <div className="lg:col-span-7 space-y-6 text-left">
-              <div className="flex flex-wrap items-center gap-3">
-                <Link
-                  to="/"
-                  className="inline-flex items-center gap-1.5 hover:opacity-90 transition-opacity"
-                >
-                  <img
-                    src={resaleLogo}
-                    alt="Resale logo"
-                    className="h-8 md:h-9 w-auto object-contain shrink-0"
-                  />
-                  <span className="font-display text-xl font-bold tracking-tight text-foreground">
-                    RESALE
-                  </span>
-                </Link>
-                <div className="inline-flex items-center gap-1.5 border border-[#ea580c]/30 bg-[#ea580c]/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-[#ea580c]">
-                  <Building2 className="size-3.5" />
-                  Official B2B Partner Program
-                </div>
-              </div>
-
-              <h1 className="text-3xl md:text-4xl lg:text-5xl font-display font-bold tracking-tight text-foreground leading-[1.1]">
-                Turn Your Excess &amp; Pre-Owned Inventory Into Guaranteed Revenue
-              </h1>
-
-              <p className="text-sm md:text-base text-subtle-foreground leading-relaxed">
-                Are you an authorized brand, distributor, retailer, refurbisher, or professional
-                seller in Bangladesh? Partner with Resale to instantly access thousands of verified
-                buyers nationwide, backed by 48-hour escrow protection and automated diagnostics.
-              </p>
-
-              {/* Value Highlights Grid */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-2">
-                <div className="border border-border/80 bg-background p-3 space-y-1">
-                  <span className="text-xs font-bold text-primary flex items-center gap-1">
-                    <ShieldCheck className="size-3.5" /> Verified ID
-                  </span>
-                  <p className="text-[11px] text-muted-foreground">
-                    Official Resale Partner badge &amp; credentials
-                  </p>
-                </div>
-                <div className="border border-border/80 bg-background p-3 space-y-1">
-                  <span className="text-xs font-bold text-emerald-600 flex items-center gap-1">
-                    <CheckCircle2 className="size-3.5" /> 64 Districts
-                  </span>
-                  <p className="text-[11px] text-muted-foreground">
-                    Doorstep pickup &amp; nationwide courier reach
-                  </p>
-                </div>
-                <div className="border border-border/80 bg-background p-3 space-y-1 col-span-2 sm:col-span-1">
-                  <span className="text-xs font-bold text-amber-600 flex items-center gap-1">
-                    <Sparkles className="size-3.5" /> Same-Day
-                  </span>
-                  <p className="text-[11px] text-muted-foreground">
-                    Bulk ingestion &amp; swift payout settlement
-                  </p>
-                </div>
-              </div>
-
-              <div className="pt-2 flex flex-wrap items-center gap-3">
-                <a
-                  href="#partner-form"
-                  className="bg-primary text-primary-foreground font-semibold text-xs uppercase tracking-wider px-6 py-3 hover:opacity-90 transition-opacity inline-flex items-center gap-2"
-                >
-                  Start Partner Application <Send className="size-3.5" />
-                </a>
-                <span className="text-xs text-muted-foreground">
-                  ⚡ 24–48 hour application review
-                </span>
-              </div>
-            </div>
-
-            {/* Right Column (5 cols): bare Lanyard, no box */}
-            <div
-              className="hidden lg:block lg:col-span-5"
-              style={{ height: "580px" }}
+      {/* ── Hero Banner ── */}
+      <section className="border-b border-border bg-card">
+        <div className="mx-auto max-w-5xl px-5 py-12 md:py-16 space-y-6 text-center">
+          <div className="flex justify-center">
+            <Link
+              to="/"
+              className="inline-flex items-center gap-1.5 hover:opacity-90 transition-opacity"
             >
-              <Lanyard
-                position={[0, 0, 20]}
-                gravity={[0, -40, 0]}
-                frontImage={partnerCardImg}
-                backImage={partnerCardImg}
-                imageFit="cover"
-                lanyardImage={lanyardStripImg}
-                lanyardWidth={0.8}
+              <img
+                src={resaleLogo}
+                alt="Resale logo"
+                className="h-10 md:h-12 w-auto object-contain shrink-0"
               />
-            </div>
+              <span className="font-display text-2xl font-bold tracking-tight text-foreground">
+                RESALE
+              </span>
+            </Link>
+          </div>
+
+          <div className="inline-flex items-center gap-2 border border-[#ea580c]/30 bg-[#ea580c]/10 px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-[#ea580c]">
+            <Building2 className="size-3.5" />
+            Official B2B Partner Program
+          </div>
+
+          <h1 className="text-3xl md:text-5xl font-display font-bold tracking-tight text-foreground max-w-4xl mx-auto">
+            Partner With Resale — Turn Your Excess &amp; Pre-Owned Electronics Into Revenue
+          </h1>
+
+          <p className="text-base md:text-lg text-subtle-foreground max-w-3xl mx-auto leading-relaxed">
+            Are you a brand, distributor, retailer, e-commerce business, or professional seller with
+            excess, returned, open-box, refurbished, or pre-owned electronics?
+          </p>
+
+          <div className="p-4 border border-border bg-muted/40 max-w-2xl mx-auto text-xs md:text-sm text-subtle-foreground">
+            Partner with Resale to reach buyers across Bangladesh and create a new channel for your
+            inventory. Fill out the application below and our partnership team will review your
+            business and get in touch within 24–48 hours.
           </div>
         </div>
       </section>
 
       {/* ── Main Form or Success View ── */}
-      <main id="partner-form" className="flex-1 mx-auto max-w-4xl px-5 py-12 w-full">
+      <main className="flex-1 mx-auto max-w-4xl px-5 py-12 w-full">
         {submitted ? (
           <div className="border-2 border-emerald-600 bg-emerald-50/30 dark:bg-emerald-950/20 p-8 md:p-12 space-y-8 text-center">
             <div className="size-16 bg-emerald-600 text-white flex items-center justify-center mx-auto">
