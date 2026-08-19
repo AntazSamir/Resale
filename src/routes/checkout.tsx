@@ -18,6 +18,7 @@ import { taka, listingFor, productFor } from "@/data/catalog";
 import { useCart } from "@/lib/cart-store";
 import { saveOrder, type OrderRecord } from "@/lib/order-store";
 import { placeOrderFn } from "@/lib/server-functions";
+import resaleLogo from "@/assets/resale-logo.png";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({
@@ -148,7 +149,19 @@ function CheckoutPage() {
         <main className="flex-1 flex items-center justify-center p-5">
           <Card className="w-full max-w-md text-center">
             <CardHeader>
-              <div className="mx-auto bg-success/10 p-3 rounded-full mb-4 w-fit">
+              <div className="flex justify-center mb-3">
+                <Link to="/" className="inline-flex items-center gap-1">
+                  <img
+                    src={resaleLogo}
+                    alt="Resale logo"
+                    className="h-10 w-auto object-contain shrink-0"
+                  />
+                  <span className="font-display text-xl font-bold tracking-tight text-foreground">
+                    RESALE
+                  </span>
+                </Link>
+              </div>
+              <div className="mx-auto bg-success/10 p-3 rounded-full mb-3 w-fit">
                 <CheckCircle2 className="size-8 text-success" />
               </div>
               <CardTitle className="text-2xl">Order Placed Successfully!</CardTitle>

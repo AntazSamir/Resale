@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { ShieldCheck, Truck, PackageCheck, AlertCircle, CheckCircle2, Clock } from "lucide-react";
 import { taka } from "@/data/catalog";
 import { getOrderById, type OrderRecord } from "@/lib/order-store";
+import resaleLogo from "@/assets/resale-logo.png";
 
 export const Route = createFileRoute("/account/orders/$orderId")({
   head: ({ params }) => ({
@@ -69,10 +70,23 @@ function OrderDetailsPage() {
           <span className="text-foreground">{order.id}</span>
         </nav>
 
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-          <div>
-            <h1 className="text-3xl font-display">Order #{order.id}</h1>
-            <p className="text-sm text-muted-foreground mt-1">Placed on {order.date}</p>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pb-6 border-b border-border">
+          <div className="flex items-center gap-4">
+            <Link to="/" className="inline-flex items-center gap-1 shrink-0">
+              <img
+                src={resaleLogo}
+                alt="Resale logo"
+                className="h-10 w-auto object-contain shrink-0"
+              />
+            </Link>
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-display font-bold text-foreground">
+                Order #{order.id}
+              </h1>
+              <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
+                Placed on {order.date} · Verified Resale.com Purchase
+              </p>
+            </div>
           </div>
           <Badge
             variant={
@@ -82,7 +96,7 @@ function OrderDetailsPage() {
                   ? "secondary"
                   : "outline"
             }
-            className="w-fit text-sm px-3 py-1"
+            className="w-fit text-xs sm:text-sm px-3 py-1"
           >
             Status: {order.status}
           </Badge>

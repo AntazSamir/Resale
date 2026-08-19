@@ -20,6 +20,7 @@ import {
   ArrowLeft,
 } from "lucide-react";
 import { SiteFooter, SiteHeader } from "@/components/site-header";
+import resaleLogo from "@/assets/resale-logo.png";
 
 export const Route = createFileRoute("/partner")({
   head: () => ({
@@ -147,6 +148,19 @@ export default function PartnerPage() {
       {/* ── Hero Banner ── */}
       <section className="border-b border-border bg-card">
         <div className="mx-auto max-w-5xl px-5 py-12 md:py-16 space-y-6 text-center">
+          <div className="flex justify-center">
+            <Link to="/" className="inline-flex items-center gap-1.5 hover:opacity-90 transition-opacity">
+              <img
+                src={resaleLogo}
+                alt="Resale logo"
+                className="h-10 md:h-12 w-auto object-contain shrink-0"
+              />
+              <span className="font-display text-2xl font-bold tracking-tight text-foreground">
+                RESALE
+              </span>
+            </Link>
+          </div>
+
           <div className="inline-flex items-center gap-2 border border-[#ea580c]/30 bg-[#ea580c]/10 px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-[#ea580c]">
             <Building2 className="size-3.5" />
             Official B2B Partner Program

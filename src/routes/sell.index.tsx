@@ -36,6 +36,7 @@ import {
   Layers,
   Sparkles,
 } from "lucide-react";
+import resaleLogo from "@/assets/resale-logo.png";
 
 export const Route = createFileRoute("/sell/")({
   head: () => ({
@@ -81,6 +82,18 @@ function SellWizardPage() {
         <div className="mx-auto max-w-5xl px-5 py-14 space-y-12">
           {/* Main Hero Header */}
           <div className="space-y-4 text-center max-w-3xl mx-auto">
+            <div className="flex justify-center mb-2">
+              <Link to="/" className="inline-flex items-center gap-1.5 hover:opacity-90 transition-opacity">
+                <img
+                  src={resaleLogo}
+                  alt="Resale logo"
+                  className="h-10 md:h-12 w-auto object-contain shrink-0"
+                />
+                <span className="font-display text-2xl font-bold tracking-tight text-foreground">
+                  RESALE
+                </span>
+              </Link>
+            </div>
             <div className="inline-flex items-center gap-2 border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-primary">
               <Building2 className="size-3.5" />
               For Brands, Retailers &amp; Businesses

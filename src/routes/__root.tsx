@@ -14,6 +14,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { SiteFooter, SiteHeader } from "@/components/site-header";
 import { CartProvider } from "@/lib/cart-store";
 import { AuthProvider } from "@/lib/auth-store";
+import resaleLogo from "@/assets/resale-logo.png";
 
 function NotFoundComponent() {
   return (
@@ -21,6 +22,18 @@ function NotFoundComponent() {
       <SiteHeader />
       <div className="flex flex-1 items-center justify-center px-5 py-24 md:py-32">
         <div className="max-w-md text-center">
+          <div className="flex justify-center mb-6">
+            <Link to="/" className="inline-flex items-center gap-1">
+              <img
+                src={resaleLogo}
+                alt="Resale logo"
+                className="h-12 w-auto object-contain shrink-0"
+              />
+              <span className="font-display text-2xl font-bold tracking-tight text-foreground">
+                RESALE
+              </span>
+            </Link>
+          </div>
           <h1 className="text-7xl font-bold font-display text-foreground tracking-tight">404</h1>
           <h2 className="mt-4 text-xl font-semibold text-foreground">Page not found</h2>
           <p className="mt-2 text-sm text-subtle-foreground">

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { LayoutDashboard, List, Wallet, Plus, Star } from "lucide-react";
 import { taka } from "@/data/catalog";
 import { ProtectedRoute } from "@/components/protected-route";
+import resaleLogo from "@/assets/resale-logo.png";
 
 export const Route = createFileRoute("/seller/dashboard")({
   head: () => ({
@@ -17,6 +18,17 @@ export function SellerSidebar({ active }: { active: "dashboard" | "listings" | "
   return (
     <aside className="w-64 shrink-0 hidden md:block">
       <nav className="space-y-2 sticky top-24">
+        <Link
+          to="/seller/dashboard"
+          className="flex items-center gap-2 px-4 py-2 mb-4 border-b border-border text-foreground hover:opacity-90 transition-opacity"
+        >
+          <img
+            src={resaleLogo}
+            alt="Resale logo"
+            className="h-7 w-auto object-contain shrink-0"
+          />
+          <span className="font-display font-bold text-sm tracking-tight">Seller Hub</span>
+        </Link>
         <Link
           to="/seller/dashboard"
           className={`flex items-center gap-3 px-4 py-3 rounded-md transition-colors ${active === "dashboard" ? "bg-primary text-primary-foreground" : "hover:bg-muted"}`}

@@ -3,6 +3,7 @@ import { SiteHeader, SiteFooter } from "@/components/site-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LayoutDashboard, Shield, Users, TrendingUp } from "lucide-react";
 import { ProtectedRoute } from "@/components/protected-route";
+import resaleLogo from "@/assets/resale-logo.png";
 
 export const Route = createFileRoute("/admin/")({
   head: () => ({
@@ -15,6 +16,17 @@ export function AdminSidebar({ active }: { active: "dashboard" | "moderation" | 
   return (
     <aside className="w-64 shrink-0 hidden md:block">
       <nav className="space-y-2 sticky top-24">
+        <Link
+          to="/admin"
+          className="flex items-center gap-2 px-4 py-2 mb-4 border-b border-border text-foreground hover:opacity-90 transition-opacity"
+        >
+          <img
+            src={resaleLogo}
+            alt="Resale logo"
+            className="h-7 w-auto object-contain shrink-0"
+          />
+          <span className="font-display font-bold text-sm tracking-tight">Admin Console</span>
+        </Link>
         <Link
           to="/admin"
           className={`flex items-center gap-3 px-4 py-3 rounded-md transition-colors ${active === "dashboard" ? "bg-primary text-primary-foreground" : "hover:bg-muted"}`}

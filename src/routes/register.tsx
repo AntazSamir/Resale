@@ -16,6 +16,7 @@ import {
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { sendOtpFn, verifyOtpFn } from "@/lib/server-functions";
 import { AlertCircle } from "lucide-react";
+import resaleLogo from "@/assets/resale-logo.png";
 
 export const Route = createFileRoute("/register")({
   head: () => ({
@@ -93,7 +94,19 @@ function RegisterPage() {
       <SiteHeader />
       <main className="flex-1 flex items-center justify-center p-5">
         <Card className="w-full max-w-md">
-          <CardHeader>
+          <CardHeader className="text-center">
+            <div className="flex justify-center mb-3">
+              <Link to="/" className="inline-flex items-center gap-1">
+                <img
+                  src={resaleLogo}
+                  alt="Resale logo"
+                  className="h-10 w-auto object-contain shrink-0"
+                />
+                <span className="font-display text-xl font-bold tracking-tight text-foreground">
+                  RESALE
+                </span>
+              </Link>
+            </div>
             <CardTitle className="text-2xl">Create an account</CardTitle>
             <CardDescription>
               {step === "details"
