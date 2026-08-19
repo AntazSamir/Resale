@@ -48,16 +48,37 @@ export function GradeSelector({
                   />
                   <span>
                     <span className="block">{option.label}</span>
-                    {option.cap && (
-                      <span className="block text-xs text-muted-foreground">
-                        Caps grade at {option.cap}
-                      </span>
-                    )}
                   </span>
                 </label>
               );
             })}
           </div>
+
+          {criterion.id === "repairs" &&
+            (answers["repairs"] === "official" || answers["repairs"] === "third-party") && (
+              <div className="mt-2 space-y-1.5 border border-border bg-background p-3">
+                <label className="text-xs font-semibold text-foreground block">
+                  Please specify what was repaired or replaced:{" "}
+                  <span className="text-destructive">*</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={answers["repairsDetail"] || ""}
+                  onChange={(e) =>
+                    onChange({
+                      ...answers,
+                      repairsDetail: e.target.value,
+                    })
+                  }
+                  placeholder="e.g. Screen replaced, battery changed, camera module..."
+                  className="w-full border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                />
+                <p className="text-[11px] text-muted-foreground">
+                  Provide clear details for moderation review and buyer confidence.
+                </p>
+              </div>
+            )}
         </fieldset>
       ))}
 

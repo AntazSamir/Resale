@@ -37,20 +37,21 @@ export const gradingCriteria: GradingCriterion[] = [
     help: "Scratches, burn-in, dead pixels or discolouration.",
     weight: 25,
     options: [
-      { value: "flawless", label: "Flawless, original panel", points: 25 },
+      { value: "original", label: "Original panel", points: 25 },
       { value: "micro", label: "Micro-scratches under light", points: 20, cap: "A" },
       { value: "scratches", label: "Visible scratches", points: 14, cap: "B" },
-      { value: "defect", label: "Burn-in, dead pixels or crack", points: 5, cap: "C" },
+      { value: "defect", label: "Dead pixels or crack", points: 5, cap: "C" },
+      { value: "replaced", label: "Display changed", points: 10, cap: "B" },
     ],
   },
   {
     id: "functionality",
     label: "Functionality",
     help: "Buttons, cameras, speakers, ports and connectivity.",
-    weight: 20,
+    weight: 25,
     options: [
-      { value: "full", label: "Everything works as expected", points: 20 },
-      { value: "minor-fault", label: "One minor fault, disclosed", points: 12, cap: "C" },
+      { value: "full", label: "Everything works as expected", points: 25 },
+      { value: "minor-fault", label: "One minor fault, disclosed", points: 15, cap: "C" },
       { value: "faults", label: "Multiple faults or limitations", points: 5, cap: "D" },
     ],
   },
@@ -58,12 +59,12 @@ export const gradingCriteria: GradingCriterion[] = [
     id: "battery",
     label: "Battery health",
     help: "Reported battery health percentage (or N/A for devices without a battery).",
-    weight: 12,
+    weight: 15,
     options: [
-      { value: "95", label: "95% or above / not applicable", points: 12 },
-      { value: "90", label: "90 – 94%", points: 10, cap: "A" },
-      { value: "80", label: "80 – 89%", points: 7, cap: "B" },
-      { value: "low", label: "Below 80%", points: 3, cap: "C" },
+      { value: "95", label: "95% or above / not applicable", points: 15 },
+      { value: "90", label: "90 – 94%", points: 12, cap: "A" },
+      { value: "80", label: "80 – 89%", points: 8, cap: "B" },
+      { value: "low", label: "Below 80%", points: 4, cap: "C" },
     ],
   },
   {
@@ -75,17 +76,6 @@ export const gradingCriteria: GradingCriterion[] = [
       { value: "none", label: "None — all original parts", points: 10 },
       { value: "official", label: "Official service repair, documented", points: 7, cap: "B" },
       { value: "third-party", label: "Third-party repair", points: 4, cap: "C" },
-    ],
-  },
-  {
-    id: "accessories",
-    label: "Box & accessories",
-    help: "What ships with the device.",
-    weight: 8,
-    options: [
-      { value: "complete", label: "Box and all original accessories", points: 8 },
-      { value: "partial", label: "Some original accessories", points: 5, cap: "A" },
-      { value: "device", label: "Device only", points: 3, cap: "A" },
     ],
   },
 ];
@@ -141,7 +131,12 @@ export function evaluateGrading(answers: GradingAnswers): GradingResult {
   return { complete, answered, conditionScore, grade, reasons };
 }
 
-export const answerLabel = (criterionId: string, value?: string) =>
-  gradingCriteria
-    .find((c) => c.id === criterionId)
-    ?.options.find((o) => o.value === value)?.label ?? "—";
+export const answerLabel = (criterionId: string, value?: string, detail?: string) => {
+  const label =
+    gradingCriteria.find((c) => c.id === criterionId)?.options.find((o) => o.value === value)
+      ?.label ?? "—";
+  if (criterionId === "repairs" && detail && value !== "none") {
+    return `${label}: ${detail}`;
+  }
+  return label;
+};

@@ -217,16 +217,6 @@ export function SiteHeader() {
           {/* Desktop Right: Actions */}
           <div className="ml-auto hidden md:flex items-center gap-5">
             <Link
-              to="/products"
-              search={{ q: undefined, category: undefined, brand: undefined }}
-              className="text-sm font-medium text-foreground hover:text-primary transition-colors"
-            >
-              Browse
-            </Link>
-            <Link to="/sell" className="text-sm font-medium text-primary hover:underline">
-              Sell an item
-            </Link>
-            <Link
               to="/login"
               aria-label="Account"
               className="text-subtle-foreground hover:text-foreground"
@@ -687,12 +677,17 @@ export function SiteFooter() {
             </ul>
           </div>
 
-          {/* Trust & Legal */}
+          {/* Company & Trust */}
           <div className="p-6 md:p-8 space-y-2.5">
             <h4 className="mb-1 text-[11px] font-semibold uppercase tracking-widest text-foreground/70">
-              Trust &amp; Legal
+              Company &amp; Trust
             </h4>
             <ul className="space-y-2 text-xs text-muted-foreground">
+              <li>
+                <Link to="/contact" className="hover:text-foreground transition-colors font-medium">
+                  About Us
+                </Link>
+              </li>
               <li>
                 <Link to="/contact" className="hover:text-foreground transition-colors">
                   Grading System (A+ – D)
@@ -839,13 +834,13 @@ export function SiteFooter() {
             )}
           </div>
 
-          {/* Trust & Legal */}
+          {/* Trust & Company */}
           <div>
             <button
               onClick={() => toggleAccordion("trust")}
               className="w-full py-4 flex items-center justify-between text-sm font-semibold text-foreground text-left"
             >
-              <span>Trust &amp; Legal</span>
+              <span>Trust &amp; Company</span>
               <ChevronDown
                 className={`size-4 text-muted-foreground transition-transform duration-200 ${
                   openAccordions.trust ? "rotate-180 text-foreground" : ""
@@ -854,6 +849,11 @@ export function SiteFooter() {
             </button>
             {openAccordions.trust && (
               <ul className="pb-4 space-y-2 text-xs text-subtle-foreground pl-2">
+                <li>
+                  <Link to="/contact" className="block py-1 font-semibold text-foreground">
+                    About Us
+                  </Link>
+                </li>
                 <li>
                   <Link to="/contact" className="block py-1">
                     Condition Grading (A+ – D)
@@ -969,8 +969,16 @@ export function SiteFooter() {
       {/* ── Global Bottom Bar ── */}
       <div className="border-t border-border bg-background py-5 text-xs text-muted-foreground">
         <div className="mx-auto max-w-7xl px-4 md:px-5 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
             <span>© 2026 Resale.com Limited</span>
+            <span>·</span>
+            <Link to="/contact" className="hover:text-foreground transition-colors font-medium">
+              About Us
+            </Link>
+            <span>·</span>
+            <Link to="/contact" className="hover:text-foreground transition-colors">
+              Contact
+            </Link>
             <span>·</span>
             <span className="font-medium text-foreground">🇧🇩 Bangladesh</span>
           </div>

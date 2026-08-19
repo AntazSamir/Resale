@@ -37,36 +37,84 @@ function SellerListingsPage() {
             <h1 className="text-3xl mb-8">My Listings</h1>
 
             <div className="space-y-4">
-              {drafts.map((draft) => (
-                <Card key={draft.id}>
-                  <CardHeader className="bg-muted/30 py-4 flex flex-row items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <Badge variant="outline">Pending Review</Badge>
-                      <span className="text-sm text-muted-foreground">
-                        Listing ID: {draft.id}
-                      </span>
-                    </div>
-                    <div className="font-display font-medium text-lg">{taka(draft.price)}</div>
-                  </CardHeader>
-                  <CardContent className="p-6">
-                    <div className="flex items-center gap-3 mb-2">
-                      <GradeBadge grade={draft.grade} />
-                    </div>
-                    <p className="font-medium">{draft.productLabel}</p>
-                    <p className="text-sm text-muted-foreground">
-                      Score: {draft.conditionScore}/100 — calculated from the grading checklist
-                    </p>
-                    <dl className="mt-3 grid gap-x-6 gap-y-1 sm:grid-cols-2 text-xs">
-                      {gradingCriteria.map((c) => (
-                        <div key={c.id} className="flex justify-between gap-3 border-b border-border/60 py-1">
-                          <dt className="text-muted-foreground">{c.label}</dt>
-                          <dd className="text-right">{answerLabel(c.id, draft.answers[c.id])}</dd>
+              {drafts.map((draft) => {
+                const dCategory = draft.answers["category"] ?? "";
+                const dProductName = draft.answers["productName"] ?? draft.productLabel;
+                const dDescription = draft.answers["description"] ?? "";
+                const dWarranty = draft.answers["warranty"] ?? "";
+                const dAccessories = draft.answers["accessoriesIncluded"] ?? "";
+
+                const warrantyLabel: Record<string, string> = {
+                  active: "Active Manufacturer Warranty",
+                  expired: "Expired",
+                  none: "No Warranty",
+                };
+
+                return (
+                  <Card key={draft.id}>
+                    <CardHeader className="bg-muted/30 py-4 flex flex-row items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <Badge variant="outline">Pending Review</Badge>
+                        {dCategory && (
+                          <Badge variant="secondary" className="text-xs">
+                            {dCategory}
+                          </Badge>
+                        )}
+                        <span className="text-sm text-muted-foreground">ID: {draft.id}</span>
+                      </div>
+                      <div className="font-display font-medium text-lg">{taka(draft.price)}</div>
+                    </CardHeader>
+                    <CardContent className="p-6 space-y-4">
+                      {/* Title row */}
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1 min-w-0">
+                          <p className="font-semibold text-base leading-tight">{dProductName}</p>
+                          {dDescription && (
+                            <p className="text-sm text-muted-foreground mt-1 leading-relaxed">
+                              {dDescription}
+                            </p>
+                          )}
                         </div>
-                      ))}
-                    </dl>
-                  </CardContent>
-                </Card>
-              ))}
+                        <GradeBadge grade={draft.grade} />
+                      </div>
+
+                      {/* Key specs row */}
+                      <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
+                        <span className="bg-muted rounded px-2 py-0.5">
+                          Score {draft.conditionScore}/100
+                        </span>
+                        {dWarranty && (
+                          <span className="bg-muted rounded px-2 py-0.5">
+                            {warrantyLabel[dWarranty] ?? dWarranty}
+                          </span>
+                        )}
+                        {dAccessories && (
+                          <span className="bg-muted rounded px-2 py-0.5">{dAccessories}</span>
+                        )}
+                      </div>
+
+                      {/* Grading breakdown */}
+                      <dl className="grid gap-x-6 gap-y-1 sm:grid-cols-2 text-xs border-t border-border pt-3">
+                        {gradingCriteria.map((c) => (
+                          <div
+                            key={c.id}
+                            className="flex justify-between gap-3 border-b border-border/60 py-1"
+                          >
+                            <dt className="text-muted-foreground">{c.label}</dt>
+                            <dd className="text-right">
+                              {answerLabel(
+                                c.id,
+                                draft.answers[c.id],
+                                draft.answers["repairsDetail"],
+                              )}
+                            </dd>
+                          </div>
+                        ))}
+                      </dl>
+                    </CardContent>
+                  </Card>
+                );
+              })}
 
               {myListings.map((listing) => (
                 <Card key={listing.id}>
@@ -75,7 +123,9 @@ function SellerListingsPage() {
                       <Badge variant={listing.grade === "A+" ? "default" : "secondary"}>
                         Approved
                       </Badge>
-                      <span className="text-sm text-muted-foreground">Listing ID: {listing.id}</span>
+                      <span className="text-sm text-muted-foreground">
+                        Listing ID: {listing.id}
+                      </span>
                     </div>
                     <div className="font-display font-medium text-lg">{taka(listing.price)}</div>
                   </CardHeader>
