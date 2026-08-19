@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useCart } from "@/lib/cart-store";
 import {
   Search,
