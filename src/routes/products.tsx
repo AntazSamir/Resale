@@ -592,19 +592,37 @@ function ProductsPage() {
           {/* Listing Grid */}
           <div className="space-y-6 overflow-hidden">
             {sortedListings.length > 0 ? (
-              /* ═══════════════════════════════════════════════════════
-                  RESPONSIVE VERTICAL LISTING GRID
-                  - Mobile: 2 items per row vertical scroll
-                  - Tablet: 3 items per row
-                  - Desktop: 3 to 4 items per row
-              ═══════════════════════════════════════════════════════ */
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-5 items-stretch auto-rows-fr">
-                {sortedListings.map((listing) => {
-                  const product = productFor(listing.productId);
-                  if (!product) return null;
-                  return <ListingCard key={listing.id} listing={listing} product={product} />;
-                })}
-              </div>
+              <>
+                {/* ═══════════════════════════════════════════════════════
+                    MOBILE: 2-card horizontal swipeable snap carousel
+                    Shows 2 cards at a time; swipe to reveal more.
+                    Hidden on md+ breakpoint.
+                ═══════════════════════════════════════════════════════ */}
+                <div className="flex md:hidden gap-3 overflow-x-auto scrollbar-none snap-x snap-mandatory pb-2 -mx-1 px-1">
+                  {sortedListings.map((listing) => {
+                    const product = productFor(listing.productId);
+                    if (!product) return null;
+                    return (
+                      <div key={listing.id} className="w-[calc(50%-6px)] shrink-0 snap-start">
+                        <ListingCard listing={listing} product={product} />
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* ═══════════════════════════════════════════════════════
+                    TABLET + DESKTOP: Responsive vertical grid
+                    - Tablet (md): 3 items per row
+                    - Desktop (lg/xl): 3–4 items per row
+                ═══════════════════════════════════════════════════════ */}
+                <div className="hidden md:grid md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-5 items-stretch auto-rows-fr">
+                  {sortedListings.map((listing) => {
+                    const product = productFor(listing.productId);
+                    if (!product) return null;
+                    return <ListingCard key={listing.id} listing={listing} product={product} />;
+                  })}
+                </div>
+              </>
             ) : (
               <div className="border border-dashed border-border bg-card p-12 text-center">
                 <div className="mx-auto size-12 bg-muted flex items-center justify-center mb-4">
