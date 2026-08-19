@@ -10,6 +10,7 @@ import {
   Tablet,
   Watch,
   Gamepad2,
+  Plug,
   ChevronRight,
   Layers,
   ArrowRight,
@@ -77,10 +78,17 @@ const categoryDirectory: CategoryMeta[] = [
   },
   {
     id: "smartwatches",
-    name: "Smartwatches",
+    name: "Smartwatches & Wearables",
     categoryQuery: "Smartwatches",
     icon: Watch,
-    popularBrands: ["Apple Watch", "Galaxy"],
+    popularBrands: ["Apple Watch", "Galaxy Watch"],
+  },
+  {
+    id: "accessories",
+    name: "Accessories & Chargers",
+    categoryQuery: "Accessories",
+    icon: Plug,
+    popularBrands: ["MagSafe", "Anker", "Apple Pencil"],
   },
   {
     id: "gaming",

@@ -17,6 +17,8 @@ import {
   ChevronRight,
   Check,
   Layers,
+  Sparkles,
+  RefreshCw,
 } from "lucide-react";
 import { SiteFooter, SiteHeader } from "@/components/site-header";
 import { ProductCard } from "@/components/product-card";
@@ -476,46 +478,160 @@ function Index() {
           ),
         },
       ].map((section) => (
-        <section key={section.id} id={section.id} className="py-6 px-4 md:px-5">
-          <div className="flex items-end justify-between border-b border-border pb-4 mb-6">
-            <div>
-              <h2 className="text-xl md:text-2xl font-display font-bold">{section.title}</h2>
-              <p className="text-xs text-muted-foreground">{section.subtitle}</p>
+        <div key={section.id}>
+          <section id={section.id} className="py-6 px-4 md:px-5">
+            <div className="flex items-end justify-between border-b border-border pb-4 mb-6">
+              <div>
+                <h2 className="text-xl md:text-2xl font-display font-bold">{section.title}</h2>
+                <p className="text-xs text-muted-foreground">{section.subtitle}</p>
+              </div>
+              <Link
+                to="/products"
+                search={{ q: undefined, category: section.category, brand: undefined }}
+                className="text-xs font-semibold text-primary hover:underline shrink-0 ml-4"
+              >
+                View {section.title.split(" ")[0]} →
+              </Link>
             </div>
-            <Link
-              to="/products"
-              search={{ q: undefined, category: section.category, brand: undefined }}
-              className="text-xs font-semibold text-primary hover:underline shrink-0 ml-4"
-            >
-              View {section.title.split(" ")[0]} →
-            </Link>
-          </div>
 
-          {/* Desktop 4-grid */}
-          <div className="hidden lg:grid hairline-grid grid-cols-4 bg-card">
-            {section.items.map((p) => (
-              <ProductCard key={p.id} product={p} />
-            ))}
-          </div>
-
-          {/* Tablet & Mobile: 3 visible per row in a horizontal swipeable carousel */}
-          <div className="block lg:hidden">
-            <div className="flex items-center justify-between px-1 text-xs text-muted-foreground mb-2">
-              <span>{section.items.length} models available</span>
-              <span className="text-primary font-medium text-[11px]">← Swipe →</span>
-            </div>
-            <div className="flex overflow-x-auto snap-x snap-mandatory scroll-px-4 gap-1.5 pb-2 pt-1 -mx-4 px-4 sm:-mx-5 sm:px-5 scrollbar-none touch-pan-x overscroll-x-contain">
+            {/* Desktop 4-grid */}
+            <div className="hidden lg:grid hairline-grid grid-cols-4 bg-card">
               {section.items.map((p) => (
-                <div
-                  key={p.id}
-                  className="w-[calc((100vw-44px)/3)] sm:w-[calc((100vw-56px)/3)] md:w-[calc((100vw-72px)/3)] min-w-25 max-w-60 shrink-0 snap-start flex flex-col"
-                >
-                  <ProductCard product={p} compact={true} />
-                </div>
+                <ProductCard key={p.id} product={p} />
               ))}
             </div>
-          </div>
-        </section>
+
+            {/* Tablet & Mobile: 3 visible per row in a horizontal swipeable carousel */}
+            <div className="block lg:hidden">
+              <div className="flex items-center justify-between px-1 text-xs text-muted-foreground mb-2">
+                <span>{section.items.length} models available</span>
+                <span className="text-primary font-medium text-[11px]">← Swipe →</span>
+              </div>
+              <div className="flex overflow-x-auto snap-x snap-mandatory scroll-px-4 gap-1.5 pb-2 pt-1 -mx-4 px-4 sm:-mx-5 sm:px-5 scrollbar-none touch-pan-x overscroll-x-contain">
+                {section.items.map((p) => (
+                  <div
+                    key={p.id}
+                    className="w-[calc((100vw-44px)/3)] sm:w-[calc((100vw-56px)/3)] md:w-[calc((100vw-72px)/3)] min-w-25 max-w-60 shrink-0 snap-start flex flex-col"
+                  >
+                    <ProductCard product={p} compact={true} />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* ════════════════════════════════════════════════════════════════
+              PROMOTIONAL & SERVICE BANNERS (Between Smartphones & Laptops)
+          ════════════════════════════════════════════════════════════════ */}
+          {section.id === "smartphones" && (
+            <section className="py-4 md:py-6 px-4 md:px-5">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">
+                {/* Banner 1: Sell / Trade-in Instant Valuation */}
+                <div className="relative border border-border bg-card p-5 sm:p-6 md:p-7 flex flex-col justify-between overflow-hidden group hover:border-primary/50 transition-colors">
+                  {/* Subtle Background Watermark */}
+                  <RefreshCw className="absolute -right-6 -bottom-6 size-36 text-muted/20 dark:text-muted/10 pointer-events-none stroke-1" />
+
+                  <div className="relative z-10">
+                    <div className="inline-flex items-center gap-1.5 bg-primary/10 text-primary border border-primary/20 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider mb-3">
+                      <Sparkles className="size-3.5" />
+                      <span>Sell &amp; Instant Cashout</span>
+                    </div>
+
+                    <h3 className="text-lg sm:text-xl md:text-2xl font-display font-bold text-foreground tracking-tight leading-snug">
+                      Upgrade your tech. Sell your old smartphone or laptop.
+                    </h3>
+
+                    <p className="text-xs sm:text-sm text-subtle-foreground mt-2 leading-relaxed">
+                      Get an instant algorithmic valuation, free doorstep pickup across 64
+                      districts, and same-day bKash or bank payout.
+                    </p>
+
+                    {/* Features list */}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-4 pb-5 border-y border-border my-4 text-[11px] font-medium text-muted-foreground">
+                      <div className="flex items-center gap-1.5">
+                        <Check className="size-3.5 text-emerald-600 shrink-0" />
+                        <span>Instant price quote</span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <Check className="size-3.5 text-emerald-600 shrink-0" />
+                        <span>Free doorstep pickup</span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <Check className="size-3.5 text-emerald-600 shrink-0" />
+                        <span>Same-day payout</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="relative z-10 flex items-center justify-between gap-3 pt-1">
+                    <Link
+                      to="/sell"
+                      className="inline-flex items-center gap-2 bg-primary text-primary-foreground text-xs sm:text-sm font-semibold px-4 sm:px-5 py-2.5 hover:opacity-90 transition-opacity"
+                    >
+                      <span>Sell Your Device</span>
+                      <ArrowRight className="size-3.5" />
+                    </Link>
+                    <span className="text-[11px] text-muted-foreground hidden sm:inline">
+                      15,000+ sellers paid
+                    </span>
+                  </div>
+                </div>
+
+                {/* Banner 2: Certified Resale Assurance & 48-Hour Return Protection */}
+                <div className="relative border border-border bg-card p-5 sm:p-6 md:p-7 flex flex-col justify-between overflow-hidden group hover:border-primary/50 transition-colors">
+                  {/* Subtle Background Watermark */}
+                  <ShieldCheck className="absolute -right-6 -bottom-6 size-36 text-muted/20 dark:text-muted/10 pointer-events-none stroke-1" />
+
+                  <div className="relative z-10">
+                    <div className="inline-flex items-center gap-1.5 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider mb-3">
+                      <ShieldCheck className="size-3.5 text-emerald-600" />
+                      <span>Resale Assurance &amp; Warranty</span>
+                    </div>
+
+                    <h3 className="text-lg sm:text-xl md:text-2xl font-display font-bold text-foreground tracking-tight leading-snug">
+                      Zero-risk pre-owned shopping. 32-point tested &amp; graded.
+                    </h3>
+
+                    <p className="text-xs sm:text-sm text-subtle-foreground mt-2 leading-relaxed">
+                      Every device undergoes objective diagnostic testing with transparent battery
+                      health, genuine parts verification, and 48-hr full return window.
+                    </p>
+
+                    {/* Features list */}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-4 pb-5 border-y border-border my-4 text-[11px] font-medium text-muted-foreground">
+                      <div className="flex items-center gap-1.5">
+                        <Check className="size-3.5 text-emerald-600 shrink-0" />
+                        <span>32-Point diagnostics</span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <Check className="size-3.5 text-emerald-600 shrink-0" />
+                        <span>48h Return guarantee</span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <Check className="size-3.5 text-emerald-600 shrink-0" />
+                        <span>Nationwide COD</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="relative z-10 flex items-center justify-between gap-3 pt-1">
+                    <Link
+                      to="/products"
+                      search={{ q: undefined, category: undefined, brand: undefined }}
+                      className="inline-flex items-center gap-2 bg-secondary text-secondary-foreground border border-border text-xs sm:text-sm font-semibold px-4 sm:px-5 py-2.5 hover:bg-muted transition-colors"
+                    >
+                      <span>Browse Verified Stock</span>
+                      <ArrowRight className="size-3.5" />
+                    </Link>
+                    <span className="text-[11px] text-muted-foreground hidden sm:inline">
+                      100% genuine verified
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </section>
+          )}
+        </div>
       ))}
 
       {/* ════════════════════════════════════════════════════════════════

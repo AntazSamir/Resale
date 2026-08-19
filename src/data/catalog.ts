@@ -309,13 +309,13 @@ export const products: Product[] = [
   // ── Audio ──
   {
     id: "sony-wh1000xm5",
-    name: "Sony WH-1000XM5",
+    name: "Sony WH-1000XM5 Wireless Headphones",
     brand: "Sony",
     category: "Audio",
     image: headphones,
     retail: 42000,
     specs: [
-      { label: "Type", value: "Over-ear ANC" },
+      { label: "Type", value: "Over-Ear Wireless ANC Headphones" },
       { label: "Battery", value: "30h playback" },
       { label: "Codec", value: "LDAC & Hi-Res Audio" },
     ],
@@ -328,47 +328,47 @@ export const products: Product[] = [
     image: headphones,
     retail: 46000,
     specs: [
+      { label: "Type", value: "Over-Ear ANC Headphones" },
       { label: "Audio", value: "CustomTune Spatial Audio" },
-      { label: "ANC", value: "World-Class Active Noise Cancelling" },
       { label: "Battery", value: "24 hours" },
     ],
   },
   {
     id: "apple-airpods-pro-2",
-    name: "Apple AirPods Pro 2 (USB-C)",
+    name: "Apple AirPods Pro 2 (USB-C) Earbuds",
     brand: "Apple",
     category: "Audio",
     image: headphones,
     retail: 29500,
     specs: [
+      { label: "Type", value: "Wireless In-Ear ANC Earbuds" },
       { label: "Chip", value: "Apple H2" },
       { label: "Features", value: "Adaptive Audio & Transparency" },
-      { label: "Case", value: "MagSafe USB-C with Speaker" },
     ],
   },
   {
     id: "samsung-galaxy-buds2-pro",
-    name: "Samsung Galaxy Buds2 Pro",
+    name: "Samsung Galaxy Buds2 Pro Earbuds",
     brand: "Samsung",
     category: "Audio",
     image: headphones,
     retail: 18500,
     specs: [
+      { label: "Type", value: "Hi-Fi Wireless ANC Earbuds" },
       { label: "Audio", value: "24-bit Hi-Fi Audio" },
-      { label: "ANC", value: "Intelligent Active Noise Cancelling" },
       { label: "Water Resistance", value: "IPX7" },
     ],
   },
   {
     id: "sony-wf1000xm5",
-    name: "Sony WF-1000XM5 ANC Earbuds",
+    name: "Sony WF-1000XM5 ANC Wireless Earbuds",
     brand: "Sony",
     category: "Audio",
     image: headphones,
     retail: 28000,
     specs: [
+      { label: "Type", value: "In-Ear ANC Wireless Earbuds" },
       { label: "Drivers", value: "Dynamic Driver X" },
-      { label: "Mics", value: "6 Microphones with Bone Conduction" },
       { label: "Battery", value: "8h + 16h Case" },
     ],
   },
@@ -380,9 +380,9 @@ export const products: Product[] = [
     image: headphones,
     retail: 17500,
     specs: [
+      { label: "Type", value: "Portable Bluetooth Speaker" },
       { label: "Power", value: "40W RMS Output" },
       { label: "Battery", value: "20 hours with Powerbank" },
-      { label: "Durability", value: "IP67 Waterproof & Dustproof" },
     ],
   },
 
@@ -428,6 +428,62 @@ export const products: Product[] = [
       { label: "Storage", value: "1TB Ultra-High Speed SSD" },
       { label: "Graphics", value: "Ray Tracing 4K 120Hz" },
       { label: "Controller", value: "DualSense Haptic Feedback" },
+    ],
+  },
+
+  // ── Accessories ──
+  {
+    id: "apple-magsafe-duo",
+    name: "Apple MagSafe Duo Wireless Fast Charger",
+    brand: "Apple",
+    category: "Accessories",
+    image: phone,
+    retail: 15000,
+    specs: [
+      { label: "Type", value: "Dual Wireless Charger" },
+      { label: "Compatibility", value: "iPhone & Apple Watch" },
+      { label: "Feature", value: "Foldable travel design" },
+    ],
+  },
+  {
+    id: "anker-737-powerbank",
+    name: "Anker 737 Power Bank (PowerCore 24K 140W)",
+    brand: "Anker",
+    category: "Accessories",
+    image: phone,
+    retail: 14500,
+    specs: [
+      { label: "Capacity", value: "24,000mAh" },
+      { label: "Output", value: "140W Ultra-Fast PD 3.1" },
+      { label: "Display", value: "Smart Digital Screen" },
+    ],
+  },
+  {
+    id: "apple-pencil-2",
+    name: "Apple Pencil (2nd Generation) Stylus",
+    brand: "Apple",
+    category: "Accessories",
+    image: phone,
+    retail: 13500,
+    specs: [
+      { label: "Type", value: "Active Stylus" },
+      { label: "Charging", value: "Magnetic Wireless Pairing" },
+      { label: "Compatibility", value: "iPad Pro, Air, Mini" },
+    ],
+  },
+
+  // ── Home Products ──
+  {
+    id: "google-nest-hub-2",
+    name: "Google Nest Hub (2nd Gen) Smart Home Speaker & Display",
+    brand: "Google",
+    category: "Home Products",
+    image: phone,
+    retail: 9500,
+    specs: [
+      { label: "Display", value: '7" Touchscreen' },
+      { label: "Voice", value: "Google Assistant Built-in" },
+      { label: "Audio", value: "Full-Range Enhanced Speaker" },
     ],
   },
 ];
@@ -1245,6 +1301,108 @@ export const listings: Listing[] = [
     physical: "Mint",
     screen: "N/A",
     seller: { name: "Shakawat Hossain", verified: true, rating: 5.0, sales: 34, district: "Dhaka" },
+  },
+
+  // ── Apple MagSafe Duo ──
+  {
+    id: "l-40",
+    productId: "apple-magsafe-duo",
+    conditionScore: 97,
+    listedAt: "2026-08-16",
+    sellerNote:
+      "Original Apple MagSafe Duo Charger. Minimal use, charges both iPhone and Watch fast.",
+    inspection: [
+      { component: "Coils", status: "Charges iPhone & Apple Watch simultaneously" },
+      { component: "Hinge", status: "Firm, like new" },
+      { component: "Cable", status: "Original USB-C to Lightning included" },
+    ],
+    price: 9500,
+    grade: "A+",
+    warrantyMonths: 3,
+    invoice: true,
+    accessories: "Box, original cable",
+    repairs: "None",
+    physical: "Like new",
+    screen: "N/A",
+    seller: { name: "Tanvir Ahmed", verified: true, rating: 4.9, sales: 15, district: "Dhaka" },
+  },
+
+  // ── Anker 737 Power Bank ──
+  {
+    id: "l-41",
+    productId: "anker-737-powerbank",
+    conditionScore: 96,
+    listedAt: "2026-08-17",
+    sellerNote:
+      "24,000mAh 140W beast. Charges MacBook Pro and phones simultaneously. Smart screen working 100%.",
+    inspection: [
+      { component: "Display", status: "OLED screen crisp and bright" },
+      { component: "Ports", status: "2x USB-C 140W + 1x USB-A tested" },
+      { component: "Battery", status: "100% capacity" },
+    ],
+    price: 9800,
+    grade: "A+",
+    warrantyMonths: 6,
+    invoice: true,
+    accessories: "Box, 140W USB-C cable, travel pouch",
+    repairs: "None",
+    physical: "Mint",
+    screen: "Flawless",
+    seller: {
+      name: "Rezaul Karim",
+      verified: true,
+      rating: 4.8,
+      sales: 12,
+      district: "Chattogram",
+    },
+  },
+
+  // ── Apple Pencil 2 ──
+  {
+    id: "l-42",
+    productId: "apple-pencil-2",
+    conditionScore: 98,
+    listedAt: "2026-08-18",
+    sellerNote:
+      "Apple Pencil 2nd Generation. Used occasionally for note-taking with iPad Pro. Tip is clean.",
+    inspection: [
+      { component: "Tip", status: "Original tip, zero wear" },
+      { component: "Bluetooth", status: "Instant magnetic pairing" },
+      { component: "Double-tap", status: "Responsive gesture" },
+    ],
+    price: 8900,
+    grade: "A+",
+    warrantyMonths: 3,
+    invoice: true,
+    accessories: "Box and manuals",
+    repairs: "None",
+    physical: "Like new",
+    screen: "N/A",
+    seller: { name: "Nafis Imtiaz", verified: true, rating: 5.0, sales: 9, district: "Sylhet" },
+  },
+
+  // ── Google Nest Hub 2 ──
+  {
+    id: "l-43",
+    productId: "google-nest-hub-2",
+    conditionScore: 95,
+    listedAt: "2026-08-18",
+    sellerNote:
+      "Chalk color. Great smart speaker and bedtime sleep tracker. Clean display and full bass.",
+    inspection: [
+      { component: "Screen", status: "No dead pixels, bright" },
+      { component: "Speaker", status: "Deep bass, loud and clear" },
+      { component: "Mics", status: "Far-field mics tested" },
+    ],
+    price: 6200,
+    grade: "A",
+    warrantyMonths: 3,
+    invoice: true,
+    accessories: "Original power adapter",
+    repairs: "None",
+    physical: "Excellent",
+    screen: "Clean",
+    seller: { name: "Faisal Mahmud", verified: true, rating: 4.9, sales: 18, district: "Dhaka" },
   },
 ];
 

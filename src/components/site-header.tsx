@@ -17,6 +17,101 @@ import {
 import { BangladeshMapSVG } from "./bangladesh-map";
 import resaleLogo from "@/assets/resale-logo.png";
 
+type NavItem = {
+  label: string;
+  to: "/" | "/products" | "/sell" | "/partner" | "/contact" | "/categories";
+  search?: {
+    q?: string;
+    category?: string;
+    brand?: string;
+  };
+};
+
+const desktopCategoryNav: NavItem[] = [
+  { label: "Home", to: "/" },
+  {
+    label: "Accessories",
+    to: "/products",
+    search: { category: "Accessories" },
+  },
+  {
+    label: "Earbuds",
+    to: "/products",
+    search: { q: "Earbuds" },
+  },
+  {
+    label: "Headphones",
+    to: "/products",
+    search: { q: "Headphones" },
+  },
+  {
+    label: "Home Products",
+    to: "/products",
+    search: { category: "Home Products" },
+  },
+  {
+    label: "Speakers",
+    to: "/products",
+    search: { q: "Speaker" },
+  },
+  {
+    label: "Tablets",
+    to: "/products",
+    search: { category: "Tablets" },
+  },
+  {
+    label: "Wearables",
+    to: "/products",
+    search: { category: "Smartwatches" },
+  },
+  { label: "Sell with us", to: "/sell" },
+  { label: "Partner Program", to: "/partner" },
+  { label: "Contact Us", to: "/contact" },
+];
+
+const mobileCategoryNav: NavItem[] = [
+  {
+    label: "Smartphones & iPhones",
+    to: "/products",
+    search: { category: "Smartphones" },
+  },
+  {
+    label: "Laptops & MacBooks",
+    to: "/products",
+    search: { category: "Laptops" },
+  },
+  {
+    label: "Cameras & Lenses",
+    to: "/products",
+    search: { category: "Cameras" },
+  },
+  {
+    label: "Earbuds & Audio",
+    to: "/products",
+    search: { category: "Audio" },
+  },
+  {
+    label: "Accessories",
+    to: "/products",
+    search: { category: "Accessories" },
+  },
+  {
+    label: "Tablets",
+    to: "/products",
+    search: { category: "Tablets" },
+  },
+  {
+    label: "Wearables & Watches",
+    to: "/products",
+    search: { category: "Smartwatches" },
+  },
+  {
+    label: "Gaming Consoles",
+    to: "/products",
+    search: { category: "Gaming Consoles" },
+  },
+];
+
 export function SiteHeader() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
@@ -52,10 +147,16 @@ export function SiteHeader() {
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      navigate({ to: "/products" as any, search: { q: searchQuery.trim() } as any });
+      navigate({
+        to: "/products",
+        search: { q: searchQuery.trim(), category: undefined, brand: undefined },
+      });
       setMobileSearchOpen(false);
     } else {
-      navigate({ to: "/products" as any });
+      navigate({
+        to: "/products",
+        search: { q: undefined, category: undefined, brand: undefined },
+      });
       setMobileSearchOpen(false);
     }
   };
@@ -116,7 +217,8 @@ export function SiteHeader() {
           {/* Desktop Right: Actions */}
           <div className="ml-auto hidden md:flex items-center gap-5">
             <Link
-              to="/products" search={{ q: undefined, category: undefined, brand: undefined }}
+              to="/products"
+              search={{ q: undefined, category: undefined, brand: undefined }}
               className="text-sm font-medium text-foreground hover:text-primary transition-colors"
             >
               Browse
@@ -230,7 +332,8 @@ export function SiteHeader() {
                   Home
                 </Link>
                 <Link
-                  to="/products" search={{ q: undefined, category: undefined, brand: undefined }}
+                  to="/products"
+                  search={{ q: undefined, category: undefined, brand: undefined }}
                   onClick={() => setMobileMenuOpen(false)}
                   className="block px-3 py-2 hover:bg-muted text-foreground"
                 >
@@ -265,18 +368,11 @@ export function SiteHeader() {
                   Categories
                 </span>
                 <div className="space-y-1 text-xs text-subtle-foreground">
-                  {[
-                    { label: "Smartphones & iPhones", to: "/" },
-                    { label: "Laptops & MacBooks", to: "/" },
-                    { label: "Cameras & Lenses", to: "/" },
-                    { label: "Audio & Wearables", to: "/" },
-                    { label: "Accessories", to: "/" },
-                    { label: "Tablets", to: "/" },
-                    { label: "Gaming Consoles", to: "/" },
-                  ].map((cat) => (
+                  {mobileCategoryNav.map((cat) => (
                     <Link
                       key={cat.label}
                       to={cat.to}
+                      search={cat.search}
                       onClick={() => setMobileMenuOpen(false)}
                       className="block px-3 py-2 hover:bg-muted hover:text-foreground"
                     >
@@ -343,36 +439,27 @@ export function SiteHeader() {
             aria-label="Category navigation"
           >
             <ul className="flex w-max items-center gap-0 text-[12px] font-medium whitespace-nowrap">
-            {[
-              { label: "Home", to: "/" },
-              { label: "Accessories", to: "/" },
-              { label: "Earbuds", to: "/" },
-              { label: "Headphones", to: "/" },
-              { label: "Home Products", to: "/" },
-              { label: "Speakers", to: "/" },
-              { label: "Tablets", to: "/" },
-              { label: "Wearables", to: "/" },
-              { label: "Sell with us", to: "/sell" },
-              { label: "Partner Program", to: "/partner" },
-              { label: "Contact Us", to: "/contact" },
-            ].map((item) => (
-              <li key={item.label} className="shrink-0 [scroll-snap-align:start]">
-                <Link
-                  to={item.to}
-                  className="flex min-h-11 items-center px-3 lg:px-3.5 text-subtle-foreground hover:text-foreground hover:bg-muted/60 transition-colors border-b-2 border-transparent hover:border-primary"
-                  activeProps={{ className: "text-primary border-b-2 border-primary bg-muted/40" }}
-                >
-                  {item.label}
-                </Link>
-              </li>
-            ))}
+              {desktopCategoryNav.map((item) => (
+                <li key={item.label} className="shrink-0 snap-start">
+                  <Link
+                    to={item.to}
+                    search={item.search}
+                    className="flex min-h-11 items-center px-3 lg:px-3.5 text-subtle-foreground hover:text-foreground hover:bg-muted/60 transition-colors border-b-2 border-transparent hover:border-primary"
+                    activeProps={{
+                      className: "text-primary border-b-2 border-primary bg-muted/40",
+                    }}
+                  >
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
           {catFade.left && (
-            <div className="pointer-events-none absolute inset-y-0 left-0 w-8 bg-gradient-to-r from-background to-transparent" />
+            <div className="pointer-events-none absolute inset-y-0 left-0 w-8 bg-linear-to-r from-background to-transparent" />
           )}
           {catFade.right && (
-            <div className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-background via-background/80 to-transparent" />
+            <div className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-linear-to-l from-background via-background/80 to-transparent" />
           )}
         </div>
       </nav>
