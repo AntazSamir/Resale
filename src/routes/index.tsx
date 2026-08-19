@@ -314,7 +314,7 @@ function Index() {
             {products.slice(0, 8).map((p) => (
               <div
                 key={p.id}
-                className="w-[calc((100vw-44px)/3)] sm:w-[calc((100vw-56px)/3)] md:w-[calc((100vw-72px)/3)] min-w-[100px] max-w-[240px] shrink-0 snap-start flex flex-col"
+                className="w-[calc((100vw-44px)/3)] sm:w-[calc((100vw-56px)/3)] md:w-[calc((100vw-72px)/3)] min-w-25 max-w-60 shrink-0 snap-start flex flex-col"
               >
                 <ProductCard product={p} compact={true} />
               </div>
@@ -397,7 +397,7 @@ function Index() {
               {section.items.map((p) => (
                 <div
                   key={p.id}
-                  className="w-[calc((100vw-44px)/3)] sm:w-[calc((100vw-56px)/3)] md:w-[calc((100vw-72px)/3)] min-w-[100px] max-w-[240px] shrink-0 snap-start flex flex-col"
+                  className="w-[calc((100vw-44px)/3)] sm:w-[calc((100vw-56px)/3)] md:w-[calc((100vw-72px)/3)] min-w-25 max-w-60 shrink-0 snap-start flex flex-col"
                 >
                   <ProductCard product={p} compact={true} />
                 </div>
