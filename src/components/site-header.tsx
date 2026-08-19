@@ -86,7 +86,14 @@ const desktopCategoryNav: (
   { label: "Partner Program", to: "/partner" },
 ];
 
-const mobileCategoryNav: NavItem[] = [
+type MobileCategoryItem =
+  | NavItem
+  | {
+      label: string;
+      dropdown: { label: string; q?: string; category?: string }[];
+    };
+
+const mobileCategoryNav: MobileCategoryItem[] = [
   {
     label: "Smartphones & iPhones",
     to: "/products",
@@ -103,24 +110,38 @@ const mobileCategoryNav: NavItem[] = [
     search: { category: "Cameras" },
   },
   {
-    label: "Earbuds & Audio",
-    to: "/products",
-    search: { category: "Audio" },
-  },
-  {
-    label: "Accessories",
-    to: "/products",
-    search: { category: "Accessories" },
-  },
-  {
-    label: "Tablets",
+    label: "Tablets & iPads",
     to: "/products",
     search: { category: "Tablets" },
   },
   {
-    label: "Wearables & Watches",
-    to: "/products",
-    search: { category: "Smartwatches" },
+    label: "Accessories",
+    dropdown: [
+      { label: "Chargers & Cables", q: "Charger" },
+      { label: "Power Banks", q: "Power Bank" },
+      { label: "Cases & Covers", q: "Case" },
+      { label: "Screen Protectors", q: "Screen Protector" },
+      { label: "Stylus & Pens", q: "Stylus" },
+      { label: "USB Hubs & Docks", q: "USB Hub" },
+      { label: "Memory Cards", q: "Memory Card" },
+      { label: "Mounts & Stands", q: "Stand" },
+      { label: "Keyboard & Mouse", q: "Keyboard" },
+      { label: "Camera Bags & Straps", q: "Camera Bag" },
+      { label: "All Accessories", category: "Accessories" },
+    ],
+  },
+  {
+    label: "Essentials",
+    dropdown: [
+      { label: "Smartwatches", q: "Smartwatch" },
+      { label: "Earbuds", q: "Earbuds" },
+      { label: "Headphones", q: "Headphones" },
+      { label: "Bluetooth Speakers", q: "Speaker" },
+      { label: "Soundbars", q: "Soundbar" },
+      { label: "Wearable Fitness Bands", q: "Fitness Band" },
+      { label: "Smart Home Devices", q: "Smart Home" },
+      { label: "Home Products", category: "Home Products" },
+    ],
   },
   {
     label: "Gaming Consoles",
@@ -132,6 +153,7 @@ const mobileCategoryNav: NavItem[] = [
 export function SiteHeader() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+  const [mobileExpandedCategory, setMobileExpandedCategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const dropdownRefs = useRef<Record<string, HTMLButtonElement | null>>({});
@@ -389,21 +411,63 @@ export function SiteHeader() {
                   Categories
                 </span>
                 <div className="space-y-1 text-xs text-subtle-foreground">
-                  {mobileCategoryNav.map((cat) => (
-                    <Link
-                      key={cat.label}
-                      to="/products"
-                      search={{
-                        category: cat.search?.category,
-                        q: cat.search?.q,
-                        brand: undefined,
-                      }}
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="block px-3 py-2 hover:bg-muted hover:text-foreground"
-                    >
-                      {cat.label}
-                    </Link>
-                  ))}
+                  {mobileCategoryNav.map((cat) => {
+                    if ("dropdown" in cat) {
+                      const isExpanded = mobileExpandedCategory === cat.label;
+                      return (
+                        <div key={cat.label} className="space-y-0.5">
+                          <button
+                            type="button"
+                            onClick={() => setMobileExpandedCategory(isExpanded ? null : cat.label)}
+                            className="flex w-full items-center justify-between px-3 py-2 text-left text-foreground hover:bg-muted font-medium transition-colors"
+                          >
+                            <span>{cat.label}</span>
+                            <ChevronDown
+                              className={`size-3.5 text-muted-foreground transition-transform duration-200 ${
+                                isExpanded ? "rotate-180 text-primary" : ""
+                              }`}
+                            />
+                          </button>
+                          {isExpanded && (
+                            <div className="pl-3 ml-3 border-l border-border/80 space-y-0.5 py-1">
+                              {cat.dropdown.map((sub) => (
+                                <Link
+                                  key={sub.label}
+                                  to="/products"
+                                  search={{
+                                    category: sub.category,
+                                    q: sub.q,
+                                    brand: undefined,
+                                  }}
+                                  onClick={() => setMobileMenuOpen(false)}
+                                  className="block px-2.5 py-1.5 hover:bg-muted hover:text-foreground text-muted-foreground transition-colors"
+                                >
+                                  {sub.label}
+                                </Link>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    }
+
+                    const navItem = cat as NavItem;
+                    return (
+                      <Link
+                        key={navItem.label}
+                        to="/products"
+                        search={{
+                          category: navItem.search?.category,
+                          q: navItem.search?.q,
+                          brand: undefined,
+                        }}
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="block px-3 py-2 hover:bg-muted hover:text-foreground"
+                      >
+                        {navItem.label}
+                      </Link>
+                    );
+                  })}
                 </div>
               </div>
 
