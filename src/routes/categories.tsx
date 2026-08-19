@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useMemo } from "react";
 import { SiteHeader, SiteFooter } from "@/components/site-header";
-import { products, listings, productFor, taka, cheapest } from "@/data/catalog";
+import { products } from "@/data/catalog";
 import {
   Smartphone,
   Laptop,
@@ -13,13 +13,9 @@ import {
   ChevronRight,
   Layers,
   ArrowRight,
-  ShieldCheck,
   Search,
-  Tag,
-  Package,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/categories")({
   head: () => ({
@@ -40,9 +36,7 @@ interface CategoryMeta {
   name: string;
   categoryQuery: string;
   icon: typeof Smartphone;
-  description: string;
   popularBrands: string[];
-  bannerHighlight: string;
 }
 
 const categoryDirectory: CategoryMeta[] = [
@@ -51,63 +45,49 @@ const categoryDirectory: CategoryMeta[] = [
     name: "Smartphones",
     categoryQuery: "Smartphones",
     icon: Smartphone,
-    description: "Flagship Apple iPhones, Samsung Galaxy, Google Pixel, OnePlus & Xiaomi devices.",
-    popularBrands: ["Apple", "Samsung", "Google", "OnePlus", "Xiaomi"],
-    bannerHighlight: "Save up to 45% off retail MRP",
+    popularBrands: ["Apple", "Samsung", "Pixel"],
   },
   {
     id: "laptops",
-    name: "Laptops & Computers",
+    name: "Laptops & MacBooks",
     categoryQuery: "Laptops",
     icon: Laptop,
-    description: "Apple MacBook Pro & Air, Dell XPS, Lenovo ThinkPad, HP EliteBook & ASUS ZenBook.",
-    popularBrands: ["Apple", "Dell", "Lenovo", "HP", "ASUS"],
-    bannerHighlight: "Battery health & thermals verified",
+    popularBrands: ["MacBook", "Dell", "ThinkPad"],
   },
   {
     id: "cameras",
     name: "Cameras & Photography",
     categoryQuery: "Cameras",
     icon: Camera,
-    description: "Fujifilm X100V, Sony Alpha mirrorless bodies, Canon EOS R & Nikon Z systems.",
-    popularBrands: ["Fujifilm", "Sony", "Canon", "Nikon"],
-    bannerHighlight: "Sensor inspection & low shutter count",
+    popularBrands: ["Fujifilm", "Sony", "Canon"],
   },
   {
     id: "audio",
     name: "Audio & Headphones",
     categoryQuery: "Audio",
     icon: Headphones,
-    description: "Sony WH-1000XM5, Bose QuietComfort Ultra, Apple AirPods Pro 2 & JBL speakers.",
-    popularBrands: ["Sony", "Bose", "Apple", "Samsung", "JBL"],
-    bannerHighlight: "Active Noise Cancelling tested",
+    popularBrands: ["Sony", "Bose", "AirPods"],
   },
   {
     id: "tablets",
     name: "Tablets & iPads",
     categoryQuery: "Tablets",
     icon: Tablet,
-    description: "Apple iPad Pro M2, iPad Air & Android high-performance creative tablets.",
-    popularBrands: ["Apple"],
-    bannerHighlight: "ProMotion display & stylus tested",
+    popularBrands: ["iPad Pro", "iPad Air"],
   },
   {
     id: "smartwatches",
-    name: "Smartwatches & Wearables",
+    name: "Smartwatches",
     categoryQuery: "Smartwatches",
     icon: Watch,
-    description: "Apple Watch Series 9, Galaxy Watches & fitness health monitoring gear.",
-    popularBrands: ["Apple"],
-    bannerHighlight: "ECG, battery & sensors verified",
+    popularBrands: ["Apple Watch", "Galaxy"],
   },
   {
     id: "gaming",
     name: "Gaming Consoles",
     categoryQuery: "Gaming Consoles",
     icon: Gamepad2,
-    description: "Sony PlayStation 5 Slim Disc Edition, Xbox Series X & gaming hardware.",
-    popularBrands: ["Sony"],
-    bannerHighlight: "DualSense controllers & 4K gaming",
+    popularBrands: ["PlayStation 5", "DualSense"],
   },
 ];
 
@@ -120,7 +100,6 @@ function CategoriesPage() {
     return categoryDirectory.filter(
       (c) =>
         c.name.toLowerCase().includes(q) ||
-        c.description.toLowerCase().includes(q) ||
         c.popularBrands.some((b) => b.toLowerCase().includes(q)),
     );
   }, [search]);
@@ -129,9 +108,9 @@ function CategoriesPage() {
     <div className="min-h-screen bg-background flex flex-col">
       <SiteHeader />
 
-      <main className="flex-1 w-full max-w-7xl mx-auto px-4 md:px-5 py-6 md:py-10">
+      <main className="flex-1 w-full max-w-7xl mx-auto px-4 md:px-5 py-5 md:py-8">
         {/* Breadcrumb */}
-        <nav className="text-xs text-muted-foreground mb-4 flex items-center gap-1.5">
+        <nav className="text-xs text-muted-foreground mb-3 flex items-center gap-1.5">
           <Link to="/" className="hover:text-foreground transition-colors">
             Home
           </Link>
@@ -139,159 +118,98 @@ function CategoriesPage() {
           <span className="text-foreground font-medium">All Categories</span>
         </nav>
 
-        {/* Header Hero */}
-        <div className="border-b border-border pb-8 mb-8">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-            <div className="max-w-2xl">
-              <div className="inline-flex items-center gap-1.5 bg-primary/10 text-primary px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wider mb-3">
-                <Layers className="size-3.5" />
-                <span>Marketplace Catalog</span>
-              </div>
-              <h1 className="text-3xl md:text-4xl font-display font-bold tracking-tight text-foreground">
-                All Product Categories
-              </h1>
-              <p className="text-sm md:text-base text-subtle-foreground mt-2 leading-relaxed">
-                Explore Bangladesh&apos;s verified pre-owned electronics catalog. Every category
-                includes condition-graded items backed by inspection reports and cash on delivery.
-              </p>
+        {/* Compact Header & Search Bar */}
+        <div className="border-b border-border pb-5 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <div className="inline-flex items-center gap-1.5 text-primary text-xs font-semibold uppercase tracking-wider mb-1">
+              <Layers className="size-3.5" />
+              <span>Catalog Directory</span>
             </div>
+            <h1 className="text-2xl sm:text-3xl font-display font-bold tracking-tight text-foreground">
+              All Categories
+            </h1>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Select a category to browse verified, condition-graded listings.
+            </p>
+          </div>
 
-            {/* Quick search input */}
-            <div className="w-full md:w-72 relative">
-              <Search className="size-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
-              <Input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Find a category or brand..."
-                className="pl-9 h-10 text-xs md:text-sm bg-card border-border rounded-none"
-              />
-            </div>
+          {/* Search bar */}
+          <div className="w-full sm:w-64 md:w-72 relative shrink-0">
+            <Search className="size-3.5 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
+            <Input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Filter categories..."
+              className="pl-8.5 h-9 text-xs bg-card border-border rounded-none"
+            />
           </div>
         </div>
 
-        {/* Categories Bento / Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 items-stretch">
+        {/* Compact Category Grid: 2-cols mobile, 3-cols tablet, 4-cols desktop */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-3.5 md:gap-4 items-stretch">
           {filteredCategories.map((cat) => {
             const Icon = cat.icon;
-            const catProducts = products.filter((p) =>
-              cat.categoryQuery === "Tablets"
-                ? p.category === "Tablets"
-                : p.category === cat.categoryQuery,
-            );
-            const catListings = listings.filter((l) => {
-              const prod = productFor(l.productId);
-              return prod && prod.category === cat.categoryQuery;
-            });
-
-            // Find lowest price
-            const minPrice = catProducts.reduce<number | null>((min, p) => {
-              const best = cheapest(p.id);
-              if (!best) return min;
-              return min === null ? best.price : Math.min(min, best.price);
-            }, null);
+            const modelCount = products.filter(
+              (p) => p.category === cat.categoryQuery,
+            ).length;
 
             return (
-              <div
+              <Link
                 key={cat.id}
-                className="group border border-border bg-card p-6 flex flex-col justify-between hover:border-primary/60 hover:shadow-sm transition-all relative overflow-hidden"
+                to="/products"
+                search={{
+                  category: cat.categoryQuery,
+                  q: undefined,
+                  brand: undefined,
+                }}
+                className="group border border-border bg-card p-3 sm:p-4 flex flex-col justify-between hover:bg-secondary/50 hover:border-primary/60 transition-all cursor-pointer relative"
               >
                 <div>
-                  {/* Top Bar with Icon & Badge */}
-                  <div className="flex items-start justify-between gap-3 mb-4">
-                    <div className="size-12 bg-muted flex items-center justify-center border border-border group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-                      <Icon className="size-6 text-foreground group-hover:text-primary-foreground transition-colors" />
+                  {/* Top: Icon + Model Count */}
+                  <div className="flex items-center justify-between gap-2 mb-2 sm:mb-2.5">
+                    <div className="size-8 sm:size-9 bg-muted flex items-center justify-center border border-border group-hover:bg-primary group-hover:text-primary-foreground transition-colors shrink-0">
+                      <Icon className="size-4 sm:size-4.5 text-foreground group-hover:text-primary-foreground transition-colors" />
                     </div>
-                    <span className="text-[11px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 px-2 py-0.5">
-                      {cat.bannerHighlight}
+                    <span className="text-[10px] sm:text-[11px] font-medium text-muted-foreground bg-muted/80 px-1.5 py-0.5 border border-border/40">
+                      {modelCount} {modelCount === 1 ? "model" : "models"}
                     </span>
                   </div>
 
-                  {/* Title & Description */}
-                  <h2 className="text-xl font-display font-bold text-foreground group-hover:text-primary transition-colors">
+                  {/* Category Name */}
+                  <h2 className="text-xs sm:text-sm font-display font-bold text-foreground group-hover:text-primary transition-colors line-clamp-1 leading-snug">
                     {cat.name}
                   </h2>
-                  <p className="text-xs text-muted-foreground mt-2 leading-relaxed line-clamp-2">
-                    {cat.description}
-                  </p>
 
-                  {/* Quick Brand Tags */}
-                  <div className="mt-4 pt-3 border-t border-border/60">
-                    <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold block mb-1.5">
-                      Popular Brands
-                    </span>
-                    <div className="flex flex-wrap gap-1.5">
-                      {cat.popularBrands.map((b) => (
-                        <Link
-                          key={b}
-                          to="/products"
-                          search={{ brand: b, category: cat.categoryQuery, q: undefined }}
-                          className="text-[11px] bg-secondary/80 hover:bg-primary hover:text-primary-foreground px-2 py-0.5 transition-colors border border-border/40"
-                        >
-                          {b}
-                        </Link>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Bottom Meta & Action */}
-                <div className="mt-6 pt-4 border-t border-border flex items-center justify-between">
-                  <div>
-                    {minPrice !== null ? (
-                      <div>
-                        <span className="text-[10px] text-muted-foreground block">
-                          Starting from
-                        </span>
-                        <span className="font-display text-base font-bold text-primary">
-                          {taka(minPrice)}
-                        </span>
-                      </div>
-                    ) : (
-                      <span className="text-xs text-muted-foreground">
-                        {catProducts.length} models
+                  {/* Popular Brand Tags */}
+                  <div className="mt-2 flex flex-wrap gap-1">
+                    {cat.popularBrands.map((b) => (
+                      <span
+                        key={b}
+                        className="text-[9.5px] sm:text-[10px] font-medium bg-secondary/80 text-muted-foreground px-1.5 py-0.5 border border-border/40 truncate max-w-full"
+                      >
+                        {b}
                       </span>
-                    )}
+                    ))}
                   </div>
-
-                  <Link
-                    to="/products"
-                    search={{ category: cat.categoryQuery, q: undefined, brand: undefined }}
-                    className="inline-flex items-center gap-1.5 bg-primary text-primary-foreground px-4 py-2 text-xs font-semibold hover:opacity-90 transition-opacity"
-                  >
-                    <span>Browse All</span>
-                    <ArrowRight className="size-3.5" />
-                  </Link>
                 </div>
-              </div>
+
+                {/* Bottom CTA */}
+                <div className="mt-3 pt-2 border-t border-border/40 flex items-center justify-between text-[11px] sm:text-xs font-semibold text-primary">
+                  <span>Browse</span>
+                  <ArrowRight className="size-3 group-hover:translate-x-0.5 transition-transform" />
+                </div>
+              </Link>
             );
           })}
         </div>
 
-        {/* Trust Guarantee Strip */}
-        <div className="mt-12 p-6 md:p-8 bg-card border border-border flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-4">
-            <div className="size-12 bg-primary text-primary-foreground flex items-center justify-center shrink-0">
-              <ShieldCheck className="size-6" />
-            </div>
-            <div>
-              <h3 className="font-display text-lg font-bold text-foreground">
-                All Categories Include Standardized Inspection
-              </h3>
-              <p className="text-xs text-muted-foreground mt-0.5 max-w-xl">
-                Regardless of the device type you choose, every listing has undergone physical,
-                functional, battery and components inspection before going live.
-              </p>
-            </div>
+        {filteredCategories.length === 0 && (
+          <div className="py-12 text-center border border-dashed border-border p-6 bg-card mt-4">
+            <p className="text-xs text-muted-foreground">
+              No categories match &ldquo;{search}&rdquo;.
+            </p>
           </div>
-          <Link
-            to="/products"
-            search={{ q: undefined, category: undefined, brand: undefined }}
-            className="inline-flex items-center gap-2 border border-border px-5 py-2.5 text-xs font-semibold uppercase tracking-wider hover:bg-secondary transition-colors shrink-0"
-          >
-            <Package className="size-4 text-primary" />
-            <span>Browse All Listings</span>
-          </Link>
-        </div>
+        )}
       </main>
 
       <SiteFooter />
