@@ -69,7 +69,7 @@ export default function Lanyard({
 
   if (!mounted) {
     return (
-      <div className="lanyard-wrapper flex flex-col items-center justify-center min-h-[500px]">
+      <div className="lanyard-wrapper flex flex-col items-center justify-center min-h-125">
         <div className="animate-pulse flex flex-col items-center space-y-4">
           <div className="w-48 h-72 rounded-2xl bg-muted/60 border border-border" />
           <p className="text-xs text-muted-foreground font-medium">Loading 3D Partner ID...</p>

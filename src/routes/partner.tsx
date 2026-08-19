@@ -226,7 +226,7 @@ export default function PartnerPage() {
 
             {/* Right Column (5 cols): 3D Physics Lanyard Card */}
             <div className="lg:col-span-5 flex flex-col items-center justify-center">
-              <div className="relative w-full h-[460px] md:h-[520px] rounded-2xl bg-gradient-to-b from-muted/30 via-background to-muted/20 border border-border/80 p-2 overflow-hidden shadow-inner flex flex-col">
+              <div className="relative w-full h-115 md:h-130 rounded-2xl bg-linear-to-b from-muted/30 via-background to-muted/20 border border-border/80 p-2 overflow-hidden shadow-inner flex flex-col">
                 <div className="absolute top-3 left-3 z-10 flex items-center gap-2">
                   <span className="relative flex h-2 w-2">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#ea580c] opacity-75"></span>
