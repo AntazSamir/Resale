@@ -309,8 +309,13 @@ export function SiteHeader() {
 
       {/* Desktop Secondary Category Navigation Bar (Hidden on mobile) */}
       <nav className="hidden md:block sticky top-16 z-30 border-b border-border bg-background/95 backdrop-blur shadow-none">
-        <div className="mx-auto max-w-7xl px-5 overflow-x-auto scrollbar-none">
-          <ul className="flex items-center gap-0 text-[12px] font-medium whitespace-nowrap">
+        <div className="relative mx-auto max-w-7xl">
+          <div
+            className="overflow-x-auto scrollbar-none px-3 lg:px-5 [scroll-snap-type:x_proximity]"
+            role="group"
+            aria-label="Category navigation"
+          >
+            <ul className="flex w-max items-center gap-0 text-[11px] lg:text-[12px] font-medium whitespace-nowrap">
             {[
               { label: "Home", to: "/" },
               { label: "Accessories", to: "/" },
@@ -324,17 +329,19 @@ export function SiteHeader() {
               { label: "Partner Program", to: "/partner" },
               { label: "Contact Us", to: "/contact" },
             ].map((item) => (
-              <li key={item.label}>
+              <li key={item.label} className="shrink-0 [scroll-snap-align:start]">
                 <Link
                   to={item.to}
-                  className="block px-3 py-2.5 text-subtle-foreground hover:text-foreground hover:bg-muted/60 transition-colors border-b-2 border-transparent hover:border-primary"
+                  className="block px-2.5 lg:px-3 py-2.5 text-subtle-foreground hover:text-foreground hover:bg-muted/60 transition-colors border-b-2 border-transparent hover:border-primary"
                   activeProps={{ className: "text-primary border-b-2 border-primary bg-muted/40" }}
                 >
                   {item.label}
                 </Link>
               </li>
             ))}
-          </ul>
+            </ul>
+          </div>
+          <div className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-background to-transparent lg:hidden" />
         </div>
       </nav>
     </div>
