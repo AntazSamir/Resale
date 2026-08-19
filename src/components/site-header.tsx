@@ -27,32 +27,24 @@ type NavItem = {
   };
 };
 
-const desktopCategoryNav: NavItem[] = [
+const desktopCategoryNav: (
+  NavItem | { label: string; dropdown: { label: string; q?: string; category?: string }[] }
+)[] = [
   { label: "Home", to: "/" },
   {
-    label: "Accessories",
+    label: "Smartphones",
     to: "/products",
-    search: { category: "Accessories" },
+    search: { category: "Smartphones" },
   },
   {
-    label: "Earbuds",
+    label: "Laptops",
     to: "/products",
-    search: { q: "Earbuds" },
+    search: { category: "Laptops" },
   },
   {
-    label: "Headphones",
+    label: "Cameras",
     to: "/products",
-    search: { q: "Headphones" },
-  },
-  {
-    label: "Home Products",
-    to: "/products",
-    search: { category: "Home Products" },
-  },
-  {
-    label: "Speakers",
-    to: "/products",
-    search: { q: "Speaker" },
+    search: { category: "Cameras" },
   },
   {
     label: "Tablets",
@@ -60,13 +52,37 @@ const desktopCategoryNav: NavItem[] = [
     search: { category: "Tablets" },
   },
   {
-    label: "Wearables",
-    to: "/products",
-    search: { category: "Smartwatches" },
+    label: "Accessories",
+    dropdown: [
+      { label: "Chargers & Cables", q: "Charger" },
+      { label: "Power Banks", q: "Power Bank" },
+      { label: "Cases & Covers", q: "Case" },
+      { label: "Screen Protectors", q: "Screen Protector" },
+      { label: "Stylus & Pens", q: "Stylus" },
+      { label: "USB Hubs & Docks", q: "USB Hub" },
+      { label: "Memory Cards", q: "Memory Card" },
+      { label: "Mounts & Stands", q: "Stand" },
+      { label: "Keyboard & Mouse", q: "Keyboard" },
+      { label: "Camera Bags & Straps", q: "Camera Bag" },
+      { label: "All Accessories", category: "Accessories" },
+    ],
   },
-  { label: "Sell with us", to: "/sell" },
+  {
+    label: "Essentials",
+    dropdown: [
+      { label: "Smartwatches", q: "Smartwatch" },
+      { label: "Earbuds", q: "Earbuds" },
+      { label: "Headphones", q: "Headphones" },
+      { label: "Bluetooth Speakers", q: "Speaker" },
+      { label: "Soundbars", q: "Soundbar" },
+      { label: "Wearable Fitness Bands", q: "Fitness Band" },
+      { label: "Smart Home Devices", q: "Smart Home" },
+      { label: "Home Products", category: "Home Products" },
+    ],
+  },
+  { label: "Gaming", to: "/products", search: { category: "Gaming Consoles" } },
+  { label: "Sell with Us", to: "/sell" },
   { label: "Partner Program", to: "/partner" },
-  { label: "Contact Us", to: "/contact" },
 ];
 
 const mobileCategoryNav: NavItem[] = [
@@ -116,6 +132,7 @@ export function SiteHeader() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const catScrollRef = useRef<HTMLDivElement | null>(null);
   const [catFade, setCatFade] = useState({ left: false, right: false });
 
@@ -423,7 +440,10 @@ export function SiteHeader() {
       )}
 
       {/* Desktop Secondary Category Navigation Bar (Hidden on mobile) */}
-      <nav className="hidden md:block sticky top-16 z-30 border-b border-border bg-background/95 backdrop-blur shadow-none">
+      <nav
+        className="hidden md:block sticky top-16 z-30 border-b border-border bg-background/95 backdrop-blur shadow-none"
+        onMouseLeave={() => setOpenDropdown(null)}
+      >
         <div className="relative mx-auto max-w-7xl">
           <div
             ref={catScrollRef}
@@ -433,36 +453,87 @@ export function SiteHeader() {
             aria-label="Category navigation"
           >
             <ul className="flex w-max items-center gap-0 text-[12px] font-medium whitespace-nowrap">
-              {desktopCategoryNav.map((item) => (
-                <li key={item.label} className="shrink-0 snap-start">
-                  {item.search ? (
-                    <Link
-                      to="/products"
-                      search={{
-                        category: item.search.category,
-                        q: item.search.q,
-                        brand: undefined,
-                      }}
-                      className="flex min-h-11 items-center px-3 lg:px-3.5 text-subtle-foreground hover:text-foreground hover:bg-muted/60 transition-colors border-b-2 border-transparent hover:border-primary"
-                      activeProps={{
-                        className: "text-primary border-b-2 border-primary bg-muted/40",
-                      }}
-                    >
-                      {item.label}
-                    </Link>
-                  ) : (
-                    <Link
-                      to={item.to}
-                      className="flex min-h-11 items-center px-3 lg:px-3.5 text-subtle-foreground hover:text-foreground hover:bg-muted/60 transition-colors border-b-2 border-transparent hover:border-primary"
-                      activeProps={{
-                        className: "text-primary border-b-2 border-primary bg-muted/40",
-                      }}
-                    >
-                      {item.label}
-                    </Link>
-                  )}
-                </li>
-              ))}
+              {desktopCategoryNav.map((item) => {
+                // Dropdown item
+                if ("dropdown" in item) {
+                  const isOpen = openDropdown === item.label;
+                  return (
+                    <li key={item.label} className="relative shrink-0 snap-start">
+                      <button
+                        onMouseEnter={() => setOpenDropdown(item.label)}
+                        onClick={() => setOpenDropdown(isOpen ? null : item.label)}
+                        className={`flex min-h-11 items-center gap-1 px-3 lg:px-3.5 transition-colors border-b-2 ${
+                          isOpen
+                            ? "text-primary border-primary bg-muted/40"
+                            : "text-subtle-foreground hover:text-foreground hover:bg-muted/60 border-transparent hover:border-primary"
+                        }`}
+                      >
+                        {item.label}
+                        <ChevronDown
+                          className={`size-3 transition-transform duration-200 ${
+                            isOpen ? "rotate-180" : ""
+                          }`}
+                        />
+                      </button>
+
+                      {isOpen && (
+                        <div className="absolute top-full left-0 z-50 min-w-[200px] bg-background border border-border shadow-lg py-1">
+                          {item.dropdown.map((sub) => (
+                            <Link
+                              key={sub.label}
+                              to="/products"
+                              search={{
+                                q: sub.q,
+                                category: sub.category,
+                                brand: undefined,
+                              }}
+                              onClick={() => setOpenDropdown(null)}
+                              className="flex items-center px-4 py-2 text-[12px] text-subtle-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
+                            >
+                              {sub.label}
+                            </Link>
+                          ))}
+                        </div>
+                      )}
+                    </li>
+                  );
+                }
+
+                // Regular nav item
+                const navItem = item as NavItem;
+                return (
+                  <li key={navItem.label} className="shrink-0 snap-start">
+                    {navItem.search ? (
+                      <Link
+                        to="/products"
+                        search={{
+                          category: navItem.search.category,
+                          q: navItem.search.q,
+                          brand: undefined,
+                        }}
+                        onMouseEnter={() => setOpenDropdown(null)}
+                        className="flex min-h-11 items-center px-3 lg:px-3.5 text-subtle-foreground hover:text-foreground hover:bg-muted/60 transition-colors border-b-2 border-transparent hover:border-primary"
+                        activeProps={{
+                          className: "text-primary border-b-2 border-primary bg-muted/40",
+                        }}
+                      >
+                        {navItem.label}
+                      </Link>
+                    ) : (
+                      <Link
+                        to={navItem.to}
+                        onMouseEnter={() => setOpenDropdown(null)}
+                        className="flex min-h-11 items-center px-3 lg:px-3.5 text-subtle-foreground hover:text-foreground hover:bg-muted/60 transition-colors border-b-2 border-transparent hover:border-primary"
+                        activeProps={{
+                          className: "text-primary border-b-2 border-primary bg-muted/40",
+                        }}
+                      >
+                        {navItem.label}
+                      </Link>
+                    )}
+                  </li>
+                );
+              })}
             </ul>
           </div>
           {catFade.left && (
