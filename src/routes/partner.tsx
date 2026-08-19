@@ -148,28 +148,11 @@ export default function PartnerPage() {
     <div className="min-h-screen bg-background flex flex-col">
       <SiteHeader />
 
-      {/* ── Hero Banner with 3D Lanyard hanging from secondary nav ── */}
-      <section className="relative border-b border-border bg-card">
-        {/* Absolute Lanyard — sits on the right, bleeds above section into secondary nav */}
-        <div
-          className="hidden lg:block absolute right-0 top-0 w-5/12"
-          style={{ height: '650px', marginTop: '-52px', zIndex: 1, pointerEvents: 'none' }}
-        >
-          <div style={{ pointerEvents: 'all', width: '100%', height: '100%' }}>
-            <Lanyard
-              position={[0, 0, 20]}
-              gravity={[0, -40, 0]}
-              frontImage={partnerCardImg}
-              backImage={partnerCardImg}
-              imageFit="cover"
-              lanyardImage={lanyardStripImg}
-              lanyardWidth={0.8}
-            />
-          </div>
-        </div>
-        <div className="mx-auto max-w-7xl px-5 py-10 md:py-14">
+      {/* ── Hero Banner with 3D Lanyard ── */}
+      <section className="border-b border-border bg-card" style={{ overflow: "visible" }}>
+        <div className="mx-auto max-w-7xl px-5 py-10 md:py-14" style={{ overflow: "visible" }}>
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
-            {/* Left Column (7 cols): Content & Highlights */}
+            {/* Left Column (7 cols) */}
             <div className="lg:col-span-7 space-y-6 text-left">
               <div className="flex flex-wrap items-center gap-3">
                 <Link
@@ -242,8 +225,21 @@ export default function PartnerPage() {
               </div>
             </div>
 
-            {/* Right Column spacer — keeps grid layout but lanyard is absolutely positioned */}
-            <div className="hidden lg:block lg:col-span-5" aria-hidden="true" />
+            {/* Right Column (5 cols): bare Lanyard, no box */}
+            <div
+              className="hidden lg:block lg:col-span-5"
+              style={{ height: "580px" }}
+            >
+              <Lanyard
+                position={[0, 0, 20]}
+                gravity={[0, -40, 0]}
+                frontImage={partnerCardImg}
+                backImage={partnerCardImg}
+                imageFit="cover"
+                lanyardImage={lanyardStripImg}
+                lanyardWidth={0.8}
+              />
+            </div>
           </div>
         </div>
       </section>

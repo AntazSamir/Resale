@@ -14,6 +14,11 @@ declare module "*.jpg" {
 }
 
 declare module "meshline" {
-  export const MeshLineGeometry: any;
-  export const MeshLineMaterial: any;
+  import { BufferGeometry, Material } from "three";
+  export class MeshLineGeometry extends BufferGeometry {
+    setPoints(points: import("three").Vector3[]): void;
+  }
+  export class MeshLineMaterial extends Material {
+    [key: string]: unknown;
+  }
 }
