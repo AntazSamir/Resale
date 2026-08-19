@@ -645,7 +645,7 @@ function Index() {
         </div>
 
         {/* Desktop 5-grid */}
-        <div className="hidden md:grid hairline-grid grid-cols-5 bg-card">
+        <div className="hidden lg:grid hairline-grid grid-cols-5 bg-card">
           <div className="p-6">
             <span className="inline-block bg-emerald-500 text-white font-bold text-xs px-2.5 py-1 mb-3">
               Grade A+
@@ -696,53 +696,88 @@ function Index() {
           </div>
         </div>
 
-        {/* Mobile Horizontal Scrolling Row */}
-        <div className="flex md:hidden gap-3 overflow-x-auto scrollbar-none snap-x snap-mandatory pb-2">
-          {[
-            {
-              grade: "Grade A+",
-              color: "bg-emerald-500",
-              name: "Like New",
-              desc: "Minimal or virtually no signs of use. Flawless original parts.",
-            },
-            {
-              grade: "Grade A",
-              color: "bg-blue-500",
-              name: "Excellent",
-              desc: "Very good condition with minor micro-scratches only visible up close.",
-            },
-            {
-              grade: "Grade B",
-              color: "bg-amber-500",
-              name: "Good",
-              desc: "Visible signs of normal use, while remaining 100% functional.",
-            },
-            {
-              grade: "Grade C",
-              color: "bg-orange-500",
-              name: "Fair",
-              desc: "More noticeable signs of use, clearly disclosed in listing.",
-            },
-            {
-              grade: "Grade D",
-              color: "bg-red-500",
-              name: "Heavy Wear",
-              desc: "Significant cosmetic signs of use sold with defect disclosures.",
-            },
-          ].map((item) => (
-            <div
-              key={item.grade}
-              className="w-45 shrink-0 snap-start border border-border bg-card p-4 space-y-2"
-            >
-              <span
-                className={`inline-block ${item.color} text-white font-bold text-[10px] px-2 py-0.5`}
-              >
-                {item.grade}
-              </span>
-              <h3 className="font-semibold text-xs text-foreground">{item.name}</h3>
-              <p className="text-[11px] text-muted-foreground leading-relaxed">{item.desc}</p>
+        {/* Mobile & Tablet Bento Grid */}
+        <div className="grid grid-cols-2 md:grid-cols-6 gap-2.5 sm:gap-3 lg:hidden">
+          {/* Grade A+ (Featured Top Bento Card) */}
+          <div className="col-span-2 md:col-span-3 border border-border bg-card p-4 sm:p-5 flex flex-col justify-between hover:bg-secondary/40 transition-colors">
+            <div>
+              <div className="flex items-center justify-between gap-2 mb-2.5">
+                <span className="inline-block bg-emerald-500 text-white font-bold text-xs px-2.5 py-1">
+                  Grade A+
+                </span>
+                <span className="text-[10px] sm:text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5">
+                  100% Original &bull; Factory Box
+                </span>
+              </div>
+              <h3 className="font-bold text-sm sm:text-base text-foreground mb-1">Like New</h3>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Flawless condition with zero signs of wear. 100% original parts, complete original
+                accessories &amp; full functional test passed.
+              </p>
             </div>
-          ))}
+          </div>
+
+          {/* Grade A */}
+          <div className="col-span-1 md:col-span-3 border border-border bg-card p-3.5 sm:p-5 flex flex-col justify-between hover:bg-secondary/40 transition-colors">
+            <div>
+              <div className="flex items-center gap-1.5 mb-2">
+                <span className="inline-block bg-blue-500 text-white font-bold text-[10px] sm:text-xs px-2 py-0.5">
+                  Grade A
+                </span>
+                <h3 className="font-bold text-xs sm:text-sm text-foreground">Excellent</h3>
+              </div>
+              <p className="text-[11px] sm:text-xs text-muted-foreground leading-relaxed">
+                Micro-scratches only visible under direct light. High battery health, zero functional
+                defects.
+              </p>
+            </div>
+          </div>
+
+          {/* Grade B */}
+          <div className="col-span-1 md:col-span-2 border border-border bg-card p-3.5 sm:p-4 flex flex-col justify-between hover:bg-secondary/40 transition-colors">
+            <div>
+              <div className="flex items-center gap-1.5 mb-2">
+                <span className="inline-block bg-amber-500 text-white font-bold text-[10px] sm:text-xs px-2 py-0.5">
+                  Grade B
+                </span>
+                <h3 className="font-bold text-xs sm:text-sm text-foreground">Good</h3>
+              </div>
+              <p className="text-[11px] text-muted-foreground leading-relaxed">
+                Normal cosmetic wear on body or frame. Fully functional; all repairs disclosed.
+              </p>
+            </div>
+          </div>
+
+          {/* Grade C */}
+          <div className="col-span-1 md:col-span-2 border border-border bg-card p-3.5 sm:p-4 flex flex-col justify-between hover:bg-secondary/40 transition-colors">
+            <div>
+              <div className="flex items-center gap-1.5 mb-2">
+                <span className="inline-block bg-orange-500 text-white font-bold text-[10px] sm:text-xs px-2 py-0.5">
+                  Grade C
+                </span>
+                <h3 className="font-bold text-xs sm:text-sm text-foreground">Fair</h3>
+              </div>
+              <p className="text-[11px] text-muted-foreground leading-relaxed">
+                Noticeable scratches or minor scuffs. Great value for budget buyers seeking 100%
+                functionality.
+              </p>
+            </div>
+          </div>
+
+          {/* Grade D */}
+          <div className="col-span-1 md:col-span-2 border border-border bg-card p-3.5 sm:p-4 flex flex-col justify-between hover:bg-secondary/40 transition-colors">
+            <div>
+              <div className="flex items-center gap-1.5 mb-2">
+                <span className="inline-block bg-red-500 text-white font-bold text-[10px] sm:text-xs px-2 py-0.5">
+                  Grade D
+                </span>
+                <h3 className="font-bold text-xs sm:text-sm text-foreground">Heavy Wear</h3>
+              </div>
+              <p className="text-[11px] text-muted-foreground leading-relaxed">
+                Heavy cosmetic wear or battery under 80%. Fully functional with deep discount pricing.
+              </p>
+            </div>
+          </div>
         </div>
       </section>
 
