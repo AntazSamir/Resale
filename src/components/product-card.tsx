@@ -86,44 +86,45 @@ export function ProductCard({ product, compact = false }: { product: Product; co
               </span>
             )}
           </div>
+        </div>
 
-          {/* Grade & District Meta */}
-          <div className="mt-1.5 flex items-center justify-between text-[9px] text-muted-foreground pt-1 border-t border-border/40 gap-1">
+        {/* Bottom meta & actions */}
+        <div className="mt-2 pt-1.5 space-y-1.5 border-t border-border/40">
+          <div className="flex items-center justify-between text-[9px] text-muted-foreground gap-1">
             <span className="truncate font-normal">{best.seller.district}</span>
             <span className="text-emerald-600 font-semibold shrink-0">Gr. {best.grade}</span>
           </div>
-        </div>
 
-        {/* Action Buttons: Add to Cart & Buy Now */}
-        <div className="mt-2 pt-1.5 flex flex-col gap-1 border-t border-border/40">
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={handleAddToCart}
-            className="h-6 px-1 text-[9.5px] rounded-none border-border font-medium flex items-center justify-center gap-1 hover:bg-muted w-full leading-none"
-          >
-            {inCart || justAdded ? (
-              <>
-                <Check className="size-2.5 text-success shrink-0" />
-                <span className="truncate">Added</span>
-              </>
-            ) : (
-              <>
-                <ShoppingBag className="size-2.5 shrink-0" />
-                <span className="truncate">Add to cart</span>
-              </>
-            )}
-          </Button>
-          <Button
-            type="button"
-            size="sm"
-            onClick={handleBuyNow}
-            className="h-6 px-1 text-[9.5px] rounded-none bg-primary text-primary-foreground font-semibold hover:opacity-90 flex items-center justify-center gap-1 w-full leading-none"
-          >
-            <Zap className="size-2.5 fill-current shrink-0" />
-            <span className="truncate">Buy now</span>
-          </Button>
+          <div className="flex flex-col gap-1">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handleAddToCart}
+              className="h-6 px-1 text-[9.5px] rounded-none border-border font-medium flex items-center justify-center gap-1 hover:bg-muted w-full leading-none"
+            >
+              {inCart || justAdded ? (
+                <>
+                  <Check className="size-2.5 text-success shrink-0" />
+                  <span className="truncate">Added</span>
+                </>
+              ) : (
+                <>
+                  <ShoppingBag className="size-2.5 shrink-0" />
+                  <span className="truncate">Add to cart</span>
+                </>
+              )}
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              onClick={handleBuyNow}
+              className="h-6 px-1 text-[9.5px] rounded-none bg-primary text-primary-foreground font-semibold hover:opacity-90 flex items-center justify-center gap-1 w-full leading-none"
+            >
+              <Zap className="size-2.5 fill-current shrink-0" />
+              <span className="truncate">Buy now</span>
+            </Button>
+          </div>
         </div>
       </div>
     );
@@ -177,46 +178,47 @@ export function ProductCard({ product, compact = false }: { product: Product; co
           <p className="font-display text-lg font-bold text-primary">{taka(best.price)}</p>
           <p className="text-xs text-muted-foreground line-through">{taka(product.retail)}</p>
         </div>
+      </div>
 
-        {/* Grade & Seller Meta */}
-        <div className="mt-2 flex items-center justify-between text-[11px] text-muted-foreground pt-2 border-t border-border/50">
+      {/* Bottom meta & actions */}
+      <div className="mt-3 pt-2.5 space-y-2 border-t border-border/50">
+        <div className="flex items-center justify-between text-[11px] text-muted-foreground">
           <span className="truncate">
             {best.seller.name} · {best.seller.district}
           </span>
           <span className="text-emerald-600 font-medium shrink-0 ml-2">Grade {best.grade}</span>
         </div>
-      </div>
 
-      {/* Action Buttons: Add to Cart & Buy Now */}
-      <div className="mt-3.5 pt-2 grid grid-cols-2 gap-1.5 border-t border-border/40">
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={handleAddToCart}
-          className="h-8 px-2 text-[11px] rounded-none border-border font-medium flex items-center justify-center gap-1 hover:bg-muted"
-        >
-          {inCart || justAdded ? (
-            <>
-              <Check className="size-3 text-success" />
-              <span>Added</span>
-            </>
-          ) : (
-            <>
-              <ShoppingBag className="size-3" />
-              <span>Add to cart</span>
-            </>
-          )}
-        </Button>
-        <Button
-          type="button"
-          size="sm"
-          onClick={handleBuyNow}
-          className="h-8 px-2 text-[11px] rounded-none bg-primary text-primary-foreground font-semibold hover:opacity-90 flex items-center justify-center gap-1"
-        >
-          <Zap className="size-3 fill-current" />
-          <span>Buy now</span>
-        </Button>
+        <div className="grid grid-cols-2 gap-1.5">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={handleAddToCart}
+            className="h-8 px-2 text-[11px] rounded-none border-border font-medium flex items-center justify-center gap-1 hover:bg-muted"
+          >
+            {inCart || justAdded ? (
+              <>
+                <Check className="size-3 text-success" />
+                <span>Added</span>
+              </>
+            ) : (
+              <>
+                <ShoppingBag className="size-3" />
+                <span>Add to cart</span>
+              </>
+            )}
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            onClick={handleBuyNow}
+            className="h-8 px-2 text-[11px] rounded-none bg-primary text-primary-foreground font-semibold hover:opacity-90 flex items-center justify-center gap-1"
+          >
+            <Zap className="size-3 fill-current" />
+            <span>Buy now</span>
+          </Button>
+        </div>
       </div>
     </div>
   );

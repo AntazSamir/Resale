@@ -574,7 +574,7 @@ function ProductsPage() {
         {/* Layout: Desktop sidebar + listing grid */}
         <div className="mt-8 grid grid-cols-1 lg:grid-cols-[240px_1fr] gap-8 items-start">
           {/* Desktop Sidebar */}
-          <aside className="hidden lg:block border border-border bg-card p-5 sticky top-20">
+          <aside className="hidden lg:block border border-border bg-card p-5">
             <div className="flex items-center justify-between pb-3 border-b border-border mb-5">
               <h2 className="font-display font-bold text-sm tracking-tight">Refine Results</h2>
               {activeFilterCount > 0 && (
