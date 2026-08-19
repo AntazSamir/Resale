@@ -149,9 +149,7 @@ function CategoriesPage() {
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-3.5 md:gap-4 items-stretch">
           {filteredCategories.map((cat) => {
             const Icon = cat.icon;
-            const modelCount = products.filter(
-              (p) => p.category === cat.categoryQuery,
-            ).length;
+            const modelCount = products.filter((p) => p.category === cat.categoryQuery).length;
 
             return (
               <Link
