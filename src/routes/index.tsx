@@ -104,7 +104,7 @@ function Index() {
             </p>
             <div className="mt-8 flex items-center gap-3">
               <Link
-                to="/products"
+                to="/products" search={{}}
                 className="inline-flex items-center gap-2 bg-primary px-6 py-3 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
               >
                 <Layers className="size-4" />
@@ -141,7 +141,7 @@ function Index() {
 
             <div className="pt-2">
               <Link
-                to="/products"
+                to="/products" search={{}}
                 className="inline-flex items-center gap-2 bg-primary text-primary-foreground text-xs font-semibold px-4 py-2.5 hover:opacity-90 transition-opacity"
               >
                 <Layers className="size-3.5" />
@@ -381,7 +381,7 @@ function Index() {
             <h2 className="text-xl md:text-2xl font-display font-bold">Popular Products</h2>
             <p className="text-xs text-muted-foreground">Compare all verified listings per model</p>
           </div>
-          <Link to="/products" className="text-xs font-semibold text-primary hover:underline">
+          <Link to="/products" search={{}} className="text-xs font-semibold text-primary hover:underline">
             View all →
           </Link>
         </div>
