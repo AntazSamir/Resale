@@ -99,7 +99,8 @@ function ProductPage() {
                 <p className="mt-6 font-display text-3xl">from {taka(best.price)}</p>
                 <p className="mt-1 text-sm text-muted-foreground">
                   {rows.length} seller listing{rows.length > 1 ? "s" : ""} · prices from{" "}
-                  {taka(best.price)}{high && high.id !== best.id ? ` to ${taka(high.price)}` : ""}
+                  {taka(best.price)}
+                  {high && high.id !== best.id ? ` to ${taka(high.price)}` : ""}
                 </p>
               </>
             ) : (

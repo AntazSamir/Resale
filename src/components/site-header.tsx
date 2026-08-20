@@ -991,8 +991,8 @@ export function SiteFooter() {
                   Never miss a Grade A+ open-box drop
                 </h3>
                 <p className="text-xs text-subtle-foreground mt-1 max-w-md leading-relaxed">
-                  Get notified when high-demand iPhones, MacBooks, and cameras are listed by
-                  NID Verified sellers — with full condition reports and grade transparency.
+                  Get notified when high-demand iPhones, MacBooks, and cameras are listed by NID
+                  Verified sellers — with full condition reports and grade transparency.
                 </p>
               </div>
               <div className="flex flex-col sm:flex-row w-full md:w-auto items-stretch sm:items-center gap-2 max-w-md">

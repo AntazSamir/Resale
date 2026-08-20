@@ -6,13 +6,7 @@ import { useCart } from "@/lib/cart-store";
 import { ShoppingBag, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-export function ProductCard({
-  product,
-  compact = false,
-}: {
-  product: Product;
-  compact?: boolean;
-}) {
+export function ProductCard({ product, compact = false }: { product: Product; compact?: boolean }) {
   const best = cheapest(product.id);
   const count = listingsFor(product.id).length;
   const { addToCart, isInCart } = useCart();
