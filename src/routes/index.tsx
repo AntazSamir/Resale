@@ -57,56 +57,56 @@ const popularCategories = [
     label: "Smartphones",
     icon: Smartphone,
     count: "iPhones & Galaxy",
-    discount: "Flagship Models",
+    tag: "Flagship Models",
   },
   {
     id: "Laptops",
     label: "Laptops",
     icon: Laptop,
     count: "MacBook & Windows",
-    discount: "High Performance",
+    tag: "High Performance",
   },
   {
     id: "Cameras",
     label: "Cameras",
     icon: Camera,
     count: "Fujifilm & Sony Alpha",
-    discount: "Pro Optics",
+    tag: "Pro Optics",
   },
   {
     id: "Audio",
     label: "Audio & Headphones",
     icon: Headphones,
     count: "ANC Earbuds & Over-ear",
-    discount: "Clean & Tested",
+    tag: "Clean & Tested",
   },
   {
     id: "Tablets",
     label: "Tablets",
     icon: Tablet,
     count: "iPad Pro & Air",
-    discount: "Like New Condition",
+    tag: "Like New Condition",
   },
   {
     id: "Smartwatches",
     label: "Smartwatches",
     icon: Watch,
     count: "Apple Watch & Bands",
-    discount: "Battery Graded",
+    tag: "Battery Graded",
   },
   {
     id: "Gaming Consoles",
     label: "Gaming",
     icon: Gamepad2,
     count: "PS5 & Handhelds",
-    discount: "Tested Hardware",
+    tag: "Tested Hardware",
   },
   {
     id: "Accessories",
     label: "Accessories",
     icon: Layers,
     count: "Chargers & Stylus",
-    discount: "OEM Verified",
+    tag: "OEM Verified",
   },
 ];
 
@@ -516,7 +516,7 @@ function Index() {
                       <Icon className="size-5" />
                     </div>
                     <span className="text-[10px] font-semibold text-muted-foreground bg-muted border border-border px-2 py-0.5">
-                      {cat.discount}
+                      {cat.tag}
                     </span>
                   </div>
                   <div>

@@ -6,7 +6,13 @@ import { useCart } from "@/lib/cart-store";
 import { ShoppingBag, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-export function ProductCard({ product, compact = false }: { product: Product; compact?: boolean }) {
+export function ProductCard({
+  product,
+  compact = false,
+}: {
+  product: Product;
+  compact?: boolean;
+}) {
   const best = cheapest(product.id);
   const count = listingsFor(product.id).length;
   const { addToCart, isInCart } = useCart();
@@ -16,7 +22,6 @@ export function ProductCard({ product, compact = false }: { product: Product; co
   if (!best) return null;
 
   const inCart = isInCart(best.id);
-  const discountPercent = Math.round(((product.retail - best.price) / product.retail) * 100);
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -37,13 +42,6 @@ export function ProductCard({ product, compact = false }: { product: Product; co
     return (
       <div className="group relative flex flex-col justify-between h-full bg-card border border-border p-2 transition-colors hover:bg-secondary/40 select-none overflow-hidden rounded-none">
         <div>
-          {/* Discount badge */}
-          {discountPercent > 0 && (
-            <div className="absolute top-1 left-1 bg-destructive text-destructive-foreground font-bold text-[8.5px] px-1 py-0.5 rounded-xs leading-none z-10 shadow-xs">
-              -{discountPercent}%
-            </div>
-          )}
-
           {/* Product Image Link → listing */}
           <Link
             to="/listing/$listingId"
@@ -80,11 +78,6 @@ export function ProductCard({ product, compact = false }: { product: Product; co
             <span className="font-display text-xs font-bold text-primary leading-tight">
               {taka(best.price)}
             </span>
-            {product.retail > best.price && (
-              <span className="text-[9px] text-muted-foreground line-through leading-tight mt-0.5">
-                {taka(product.retail)}
-              </span>
-            )}
           </div>
         </div>
 
@@ -131,13 +124,6 @@ export function ProductCard({ product, compact = false }: { product: Product; co
 
   return (
     <div className="group flex flex-col bg-card p-3.5 sm:p-4 transition-all hover:bg-secondary/40 relative overflow-hidden h-full">
-      {/* Discount badge */}
-      {discountPercent > 0 && (
-        <div className="absolute top-3 left-3 bg-red-600 text-white font-bold text-[10px] px-1.5 py-0.5 rounded shadow-sm z-10">
-          -{discountPercent}% OFF
-        </div>
-      )}
-
       {/* Product Image Link → listing */}
       <Link
         to="/listing/$listingId"
@@ -174,7 +160,6 @@ export function ProductCard({ product, compact = false }: { product: Product; co
       {/* Pricing */}
       <div className="mt-1 flex items-baseline gap-2">
         <p className="font-display text-lg font-bold text-primary">{taka(best.price)}</p>
-        <p className="text-xs text-muted-foreground line-through">{taka(product.retail)}</p>
       </div>
 
       {/* Bottom meta & actions */}

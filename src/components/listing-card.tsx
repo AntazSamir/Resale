@@ -24,10 +24,6 @@ export function ListingCard({
   const [justAdded, setJustAdded] = useState(false);
 
   const inCart = isInCart(listing.id);
-  const discountPercent =
-    product.retail > listing.price
-      ? Math.round(((product.retail - listing.price) / product.retail) * 100)
-      : 0;
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -49,12 +45,6 @@ export function ListingCard({
     return (
       <div className="group relative flex flex-col justify-between h-full bg-card border border-border p-2 transition-colors hover:bg-secondary/40 select-none overflow-hidden rounded-none">
         <div>
-          {discountPercent > 0 && (
-            <div className="absolute top-1 left-1 bg-destructive text-destructive-foreground font-bold text-[8.5px] px-1 py-0.5 rounded-xs leading-none z-10 shadow-xs">
-              -{discountPercent}%
-            </div>
-          )}
-
           {/* Image */}
           <Link
             to="/listing/$listingId"
@@ -91,11 +81,6 @@ export function ListingCard({
             <span className="font-display text-xs font-bold text-primary leading-tight">
               {taka(listing.price)}
             </span>
-            {discountPercent > 0 && (
-              <span className="text-[9px] text-muted-foreground line-through leading-tight mt-0.5">
-                {taka(product.retail)}
-              </span>
-            )}
           </div>
         </div>
 
@@ -144,12 +129,6 @@ export function ListingCard({
   if (layout === "list") {
     return (
       <div className="group flex flex-col sm:flex-row bg-card p-3 sm:p-4 transition-all hover:bg-secondary/40 relative overflow-hidden border border-border gap-4 items-center">
-        {discountPercent > 0 && (
-          <div className="absolute top-2 left-2 bg-destructive text-destructive-foreground font-bold text-[9px] px-1.5 py-0.5 shadow-sm z-10">
-            -{discountPercent}% OFF
-          </div>
-        )}
-
         {/* Image */}
         <Link
           to="/listing/$listingId"
@@ -207,11 +186,6 @@ export function ListingCard({
         <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center w-full sm:w-auto shrink-0 gap-3 pt-2 sm:pt-0 border-t sm:border-t-0 border-border">
           <div className="text-left sm:text-right">
             <div className="font-display text-xl font-bold text-primary">{taka(listing.price)}</div>
-            {discountPercent > 0 && (
-              <div className="text-xs text-muted-foreground line-through">
-                {taka(product.retail)}
-              </div>
-            )}
           </div>
 
           <div className="flex items-center gap-2">
@@ -252,12 +226,6 @@ export function ListingCard({
   return (
     <div className="group flex flex-col bg-card p-3.5 sm:p-4 transition-all hover:bg-secondary/40 relative overflow-hidden border border-border h-full justify-between">
       <div>
-        {discountPercent > 0 && (
-          <div className="absolute top-3 left-3 bg-destructive text-destructive-foreground font-bold text-[10px] px-1.5 py-0.5 shadow-sm z-10">
-            -{discountPercent}% OFF
-          </div>
-        )}
-
         {/* Image */}
         <Link
           to="/listing/$listingId"
@@ -294,9 +262,6 @@ export function ListingCard({
         {/* Price & Features */}
         <div className="mt-1 flex items-baseline gap-2">
           <p className="font-display text-lg font-bold text-primary">{taka(listing.price)}</p>
-          {discountPercent > 0 && (
-            <p className="text-xs text-muted-foreground line-through">{taka(product.retail)}</p>
-          )}
         </div>
 
         {/* Badges */}

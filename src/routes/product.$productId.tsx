@@ -49,18 +49,16 @@ function ProductPage() {
   const different = others.filter((p) => p.category !== product.category);
   const related = [...sameCategory, ...different].slice(0, 3);
 
-  // Best deal: product with highest discount % among products with listings
+  // Best value: product with lowest listing price among products with listings
   const productsWithListings = products.filter((p) => listingsFor(p.id).length > 0);
   const bestDealProduct =
     productsWithListings.length > 0
-      ? productsWithListings.reduce((best, p) => {
-          const c1 = cheapest(best.id);
+      ? productsWithListings.reduce((acc, p) => {
+          const c1 = cheapest(acc.id);
           const c2 = cheapest(p.id);
           if (!c1) return p;
-          if (!c2) return best;
-          const discountBest = (best.retail - c1.price) / best.retail;
-          const discountP = (p.retail - c2.price) / p.retail;
-          return discountP > discountBest ? p : best;
+          if (!c2) return acc;
+          return c2.price < c1.price ? p : acc;
         }, productsWithListings[0]!)
       : undefined;
 
@@ -100,16 +98,15 @@ function ProductPage() {
               <>
                 <p className="mt-6 font-display text-3xl">from {taka(best.price)}</p>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  {rows.length} seller listing{rows.length > 1 ? "s" : ""} · {taka(best.price)}
-                  {high && high.id !== best.id ? ` – ${taka(high.price)}` : ""} · new retail{" "}
-                  {taka(product.retail)}
+                  {rows.length} seller listing{rows.length > 1 ? "s" : ""} · prices from{" "}
+                  {taka(best.price)}{high && high.id !== best.id ? ` to ${taka(high.price)}` : ""}
                 </p>
               </>
             ) : (
               <div className="mt-6 p-4 rounded-md bg-muted/60 border border-border">
                 <p className="font-display text-xl text-muted-foreground">Currently Out of Stock</p>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  New retail price is {taka(product.retail)}. Have one to sell?{" "}
+                  No active listings for this item right now. Have one to sell?{" "}
                   <Link to="/sell" className="text-primary underline">
                     List yours here
                   </Link>
@@ -273,22 +270,19 @@ function ProductPage() {
               </Link>
             </div>
 
-            {/* Best deal banner */}
+            {/* Best value banner */}
             {bestDealProduct && bestDealCheapest && (
               <div className="mt-6 flex items-center gap-4 rounded-lg border border-amber-300 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-700 px-5 py-4">
                 <Tag className="size-5 shrink-0 text-amber-600" />
                 <div className="min-w-0 flex-1">
                   <p className="text-xs font-semibold uppercase tracking-widest text-amber-700 dark:text-amber-400">
-                    🔥 Best Deal Right Now
+                    🔥 Best Listed Price Right Now
                   </p>
                   <p className="mt-0.5 text-sm font-medium truncate">{bestDealProduct.name}</p>
                 </div>
                 <div className="text-right shrink-0">
                   <p className="font-display text-xl font-bold text-amber-700 dark:text-amber-400">
                     {taka(bestDealCheapest.price)}
-                  </p>
-                  <p className="text-xs text-muted-foreground line-through">
-                    {taka(bestDealProduct.retail)}
                   </p>
                 </div>
                 <Link

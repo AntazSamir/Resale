@@ -138,8 +138,8 @@ function ListingPage() {
             <h1 className="mt-4 text-3xl md:text-4xl">{product.name}</h1>
             <p className="mt-6 font-display text-4xl">{taka(listing.price)}</p>
             <p className="mt-1 text-sm text-muted-foreground">
-              New retail {taka(product.retail)} ·{" "}
-              {Math.round((1 - listing.price / product.retail) * 100)}% below retail
+              Condition score {listing.conditionScore}/100 · Grade {listing.grade} —{" "}
+              {gradeLabel[listing.grade]}
             </p>
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
