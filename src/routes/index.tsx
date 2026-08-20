@@ -1,33 +1,42 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useState, useMemo } from "react";
 import {
   ShieldCheck,
   CheckCircle2,
-  Package,
-  Truck,
   Lock,
   Zap,
-  Star,
   Smartphone,
   Laptop,
   Camera,
   Headphones,
-  Plug,
-  ArrowRight,
-  ChevronRight,
-  Check,
+  Tablet,
+  Watch,
+  Gamepad2,
   Layers,
+  ArrowRight,
+  Check,
+  Search,
+  FileCheck2,
   Sparkles,
-  RefreshCw,
+  ChevronDown,
 } from "lucide-react";
 import { SiteFooter, SiteHeader } from "@/components/site-header";
 import { ProductCard } from "@/components/product-card";
-import { products, listings, productFor, taka, cheapest, listingFor } from "@/data/catalog";
+import { ListingCard } from "@/components/listing-card";
+import {
+  products,
+  listings,
+  productFor,
+  taka,
+  listingFor,
+  inspectionFramework,
+  TOTAL_INSPECTION_CHECKS,
+} from "@/data/catalog";
 import hero from "@/assets/hero.jpg";
 
-const title = "Resale.com — Quality-checked pre-owned electronics in Bangladesh";
+const title = "Resale — Buy Used. Know Exactly What You're Getting.";
 const description =
-  "Buy and sell pre-owned, open-box and like-new electronics with objective condition grades, verified sellers, warranty status and cash on delivery.";
+  "Bangladesh's trusted marketplace for graded pre-owned electronics. Transparent 32-point inspection reports, NID verified sellers, battery health disclosure, and 48-hour buyer protection.";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -36,355 +45,870 @@ export const Route = createFileRoute("/")({
       { name: "description", content: description },
       { property: "og:title", content: title },
       { property: "og:description", content: description },
+      { property: "og:type", content: "website" },
     ],
   }),
   component: Index,
 });
 
-const trust = [
+const popularCategories = [
   {
-    k: "01",
-    t: "Objective grading",
-    d: "Every unit graded A+ to D against structured component checks — never a vague label.",
+    id: "Smartphones",
+    label: "Smartphones",
+    icon: Smartphone,
+    count: "iPhones & Galaxy",
+    discount: "Flagship Models",
   },
   {
-    k: "02",
-    t: "Verified sellers",
-    d: "NID-verified accounts, public reputation, and sales history on every listing.",
+    id: "Laptops",
+    label: "Laptops",
+    icon: Laptop,
+    count: "MacBook & Windows",
+    discount: "High Performance",
   },
   {
-    k: "03",
-    t: "Cash on delivery",
-    d: "Pay when it arrives. 48-hour dispute window backed by our resolution team.",
+    id: "Cameras",
+    label: "Cameras",
+    icon: Camera,
+    count: "Fujifilm & Sony Alpha",
+    discount: "Pro Optics",
+  },
+  {
+    id: "Audio",
+    label: "Audio & Headphones",
+    icon: Headphones,
+    count: "ANC Earbuds & Over-ear",
+    discount: "Clean & Tested",
+  },
+  {
+    id: "Tablets",
+    label: "Tablets",
+    icon: Tablet,
+    count: "iPad Pro & Air",
+    discount: "Like New Condition",
+  },
+  {
+    id: "Smartwatches",
+    label: "Smartwatches",
+    icon: Watch,
+    count: "Apple Watch & Bands",
+    discount: "Battery Graded",
+  },
+  {
+    id: "Gaming Consoles",
+    label: "Gaming",
+    icon: Gamepad2,
+    count: "PS5 & Handhelds",
+    discount: "Tested Hardware",
+  },
+  {
+    id: "Accessories",
+    label: "Accessories",
+    icon: Layers,
+    count: "Chargers & Stylus",
+    discount: "OEM Verified",
+  },
+];
+
+const whyResalePillars = [
+  {
+    num: "01",
+    title: "32-Point Standardized Inspection",
+    description:
+      "Every listed device is checked across physical chassis, functional diagnostics, wireless connectivity, security locks, and OEM authenticity.",
+    icon: FileCheck2,
+  },
+  {
+    num: "02",
+    title: "Resale Condition Grade (A+ to D)",
+    description:
+      "Objective algorithm-driven condition grades and transparent battery health percentages — never vague subjective descriptions.",
+    icon: ShieldCheck,
+  },
+  {
+    num: "03",
+    title: "NID Verified Sellers",
+    description:
+      "Every seller account is authenticated with government National ID verification, visible ratings, and verified transaction histories.",
+    icon: CheckCircle2,
+  },
+  {
+    num: "04",
+    title: "48-Hour Buyer Protection",
+    description:
+      "Inspect your device upon arrival. If undisclosed defects or non-matching specs exist, our Dhaka-based resolution team handles immediate returns and refunds.",
+    icon: Lock,
+  },
+];
+
+const faqs = [
+  {
+    q: "Is every device tested before purchase?",
+    a: "Yes. All listings require a standardized 32-point inspection covering physical condition, display integrity, battery diagnostics, camera sensors, biometric sensors, and connectivity before going live.",
+  },
+  {
+    q: "What does Resale Condition Grade A+ mean?",
+    a: "Grade A+ (Like New) represents devices with zero visible signs of use, 100% original factory components, complete original accessories, and verified battery health.",
+  },
+  {
+    q: "Are repaired devices allowed on Resale?",
+    a: "Yes, but repairs must be transparently disclosed. Sellers must report whether replacement parts (such as screens or batteries) are official OEM or third-party, and supporting documentation is verified.",
+  },
+  {
+    q: "How is battery health checked and reported?",
+    a: "For smartphones and laptops, sellers report the exact operating system battery health percentage and cycle count, which is verified during listing moderation.",
+  },
+  {
+    q: "How are sellers verified?",
+    a: "All sellers must verify their identity with a valid Bangladeshi National ID (NID) and phone OTP. Verified sellers receive a prominent 'NID Verified' badge on all listings.",
+  },
+  {
+    q: "What does the 48-Hour Buyer Protection cover?",
+    a: "It covers items significantly different from the listing report, undisclosed functional defects, wrong models or specifications, and undisclosed third-party repairs. You have 48 hours after delivery to inspect and report any discrepancy.",
+  },
+  {
+    q: "How does Cash on Delivery (COD) work?",
+    a: "You place an order and pay the courier upon delivery in cash or digital wallet (bKash/Nagad). Your payment is held securely during the 48-hour inspection window.",
   },
 ];
 
 function Index() {
-  const [activeTab, setActiveTab] = useState<"buyers" | "sellers">("buyers");
+  const [activeHowItWorksTab, setActiveHowItWorksTab] = useState<"buyers" | "sellers">("buyers");
+  const [activeInspectionTab, setActiveInspectionTab] = useState<string>("Physical");
+  const [faqSearch, setFaqSearch] = useState("");
+  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
+  const [homeSearchInput, setHomeSearchInput] = useState("");
+  const navigate = useNavigate();
+
+  const handleHomeSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (homeSearchInput.trim()) {
+      navigate({
+        to: "/products",
+        search: { q: homeSearchInput.trim(), category: undefined, brand: undefined },
+      });
+    } else {
+      navigate({
+        to: "/products",
+        search: { q: undefined, category: undefined, brand: undefined },
+      });
+    }
+  };
+
+  const filteredFaqs = useMemo(() => {
+    if (!faqSearch.trim()) return faqs;
+    const query = faqSearch.toLowerCase();
+    return faqs.filter(
+      (f) => f.q.toLowerCase().includes(query) || f.a.toLowerCase().includes(query),
+    );
+  }, [faqSearch]);
+
+  const featuredDealListing = listingFor("l-1");
+  const featuredDealProduct = featuredDealListing
+    ? productFor(featuredDealListing.productId)
+    : undefined;
+
+  // Curated subsets for product shelves with 0 duplication
+  const featuredProducts = useMemo(
+    () =>
+      [
+        products.find((p) => p.id === "iphone-15-pro-256")!,
+        products.find((p) => p.id === "macbook-pro-14-m3")!,
+        products.find((p) => p.id === "sony-a7-iv")!,
+        products.find((p) => p.id === "apple-ipad-pro-11-m2")!,
+      ].filter(Boolean),
+    [],
+  );
+
+  const smartphoneProducts = useMemo(
+    () => products.filter((p) => p.category === "Smartphones").slice(0, 8),
+    [],
+  );
+
+  const laptopProducts = useMemo(
+    () => products.filter((p) => p.category === "Laptops").slice(0, 8),
+    [],
+  );
+
+  const cameraAudioProducts = useMemo(
+    () =>
+      products.filter((p) => ["Cameras", "Audio", "Smartwatches"].includes(p.category)).slice(0, 8),
+    [],
+  );
+
+  const tabletGamingProducts = useMemo(
+    () =>
+      products
+        .filter((p) => ["Tablets", "Gaming Consoles", "Accessories"].includes(p.category))
+        .slice(0, 8),
+    [],
+  );
 
   return (
-    <div className="min-h-screen bg-background border-x border-border mx-auto max-w-7xl pb-16 md:pb-0">
+    <div className="min-h-screen bg-background border-x border-border mx-auto max-w-7xl pb-16 md:pb-0 overflow-x-hidden">
+      {/* ════════════════════════════════════════════════════════════════
+          1. TOP NAVIGATION & STANDARDIZED TRUST BAR
+      ════════════════════════════════════════════════════════════════ */}
       <SiteHeader />
 
       {/* ════════════════════════════════════════════════════════════════
-          1. HERO SECTION (Desktop 2-col vs Mobile 1-card)
+          2. HERO & QUICK DISCOVERY
       ════════════════════════════════════════════════════════════════ */}
-      {/* Desktop Hero (md+) */}
-      <section className="hidden md:block border-b border-border">
-        <div
-          className="relative flex items-center py-24 md:py-32 px-6 md:px-12 overflow-hidden"
-          style={{
-            backgroundImage: `url(${hero})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center right",
-          }}
-        >
-          <div className="relative z-10">
-            <p className="text-xs uppercase tracking-[0.25em] text-muted-foreground">
-              Pre-owned · Open-box · Like-new
-            </p>
-            <h1 className="mt-6 text-4xl leading-[1.05] md:text-6xl">
-              Buy used electronics
-              <br />
-              without the guesswork.
-            </h1>
-            <p className="mt-6 max-w-md text-subtle-foreground">
-              Bangladesh&apos;s marketplace where every listing carries a graded condition report,
-              warranty status and a verified seller behind it.
-            </p>
-            <div className="mt-8 flex items-center gap-3">
-              <Link
-                to="/products"
-                search={{ q: undefined, category: undefined, brand: undefined }}
-                className="inline-flex items-center gap-2 bg-primary px-6 py-3 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
-              >
-                <Layers className="size-4 text-orange-500" />
-                <span>Browse listings</span>
-              </Link>
-              <span className="text-sm text-muted-foreground">2,400+ graded units live</span>
+      <section className="border-b border-border bg-card">
+        {/* Desktop Hero */}
+        <div className="hidden md:grid md:grid-cols-[1.2fr_0.8fr] items-stretch">
+          <div className="p-8 md:p-12 lg:p-14 flex flex-col justify-between">
+            <div>
+              <div className="inline-flex items-center gap-2 bg-primary/10 text-primary border border-primary/20 px-3 py-1 text-xs font-bold uppercase tracking-wider mb-5">
+                <ShieldCheck className="size-4" />
+                <span>Bangladesh&apos;s Trusted Electronics Marketplace</span>
+              </div>
+              <h1 className="text-4xl lg:text-5xl font-display font-bold leading-[1.1] tracking-tight text-foreground">
+                Buy Used.
+                <br />
+                Know Exactly What You&apos;re Getting.
+              </h1>
+              <p className="mt-4 text-sm lg:text-base text-subtle-foreground max-w-xl leading-relaxed">
+                Verified pre-owned electronics with transparent condition reports, standardized
+                32-point inspections, battery health disclosures, and 48-hour buyer protection.
+              </p>
+
+              {/* Search input in hero */}
+              <form onSubmit={handleHomeSearch} className="mt-6 flex gap-2 max-w-lg">
+                <div className="flex-1 flex items-center gap-2 border border-border bg-background px-3.5 py-2.5 focus-within:border-foreground transition-colors">
+                  <Search className="size-4 text-muted-foreground shrink-0" />
+                  <input
+                    value={homeSearchInput}
+                    onChange={(e) => setHomeSearchInput(e.target.value)}
+                    placeholder="Search iPhone, MacBook, Sony camera, Audio..."
+                    className="w-full bg-transparent outline-none text-xs md:text-sm text-foreground placeholder:text-muted-foreground"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  className="bg-primary text-primary-foreground font-semibold px-5 py-2.5 text-xs md:text-sm hover:opacity-90 shrink-0"
+                >
+                  Search
+                </button>
+              </form>
+
+              {/* CTAs */}
+              <div className="mt-6 flex flex-wrap items-center gap-3">
+                <Link
+                  to="/products"
+                  search={{ q: undefined, category: undefined, brand: undefined }}
+                  className="inline-flex items-center gap-2 bg-primary px-5 py-2.5 text-xs md:text-sm font-semibold text-primary-foreground hover:opacity-90 transition-opacity"
+                >
+                  <Layers className="size-4 text-orange-500" />
+                  <span>Shop Devices</span>
+                </Link>
+                <Link
+                  to="/sell"
+                  className="inline-flex items-center gap-2 bg-secondary text-secondary-foreground border border-border px-5 py-2.5 text-xs md:text-sm font-semibold hover:bg-muted transition-colors"
+                >
+                  <span>Sell Your Device</span>
+                  <ArrowRight className="size-4" />
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          {/* Hero Side Visual */}
+          <div
+            className="hidden md:block relative bg-muted border-l border-border overflow-hidden"
+            style={{
+              backgroundImage: `url(${hero})`,
+              backgroundSize: "cover",
+              backgroundPosition: "center right",
+            }}
+          >
+            <div className="absolute inset-0 bg-linear-to-t from-background/90 via-background/30 to-transparent p-6 flex flex-col justify-end">
+              <div className="bg-card/95 backdrop-blur-xs border border-border p-4 space-y-2 max-w-xs">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="font-semibold text-foreground">Demo Inspection Report</span>
+                  <span className="bg-emerald-500/10 text-emerald-600 text-[10px] font-bold px-1.5 py-0.5 border border-emerald-500/20">
+                    31/32 Checks Passed
+                  </span>
+                </div>
+                <p className="text-[11px] text-muted-foreground">
+                  OEM Display &middot; 94% Battery Health &middot; Genuine Serial Match
+                </p>
+              </div>
             </div>
           </div>
         </div>
-      </section>
 
-      {/* Mobile Hero Card (<= 768px - Matching Mockup) */}
-      <section className="block md:hidden p-4">
-        <div className="relative border border-border bg-card overflow-hidden p-5 sm:p-6 flex flex-col justify-between min-h-85">
-          {/* Background image overlay */}
-          <div className="absolute top-0 right-0 w-3/5 h-full opacity-35 dark:opacity-20 pointer-events-none overflow-hidden">
-            <img
-              src={hero}
-              alt="Electronics background"
-              className="size-full object-cover object-center"
-            />
-          </div>
-
-          <div className="relative z-10 space-y-3">
-            <p className="text-[10px] sm:text-xs uppercase tracking-widest text-muted-foreground font-semibold">
-              PRE-OWNED • OPEN-BOX • LIKE-NEW
-            </p>
-            <h1 className="text-2xl sm:text-3xl font-display font-bold leading-tight text-foreground tracking-tight max-w-65">
-              Buy used electronics without the guesswork.
+        {/* Mobile Hero */}
+        <div className="block md:hidden p-4 pb-2">
+          <div className="relative border border-border bg-card p-5 space-y-4">
+            <div className="inline-flex items-center gap-1.5 bg-primary/10 text-primary border border-primary/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider">
+              <ShieldCheck className="size-3.5" />
+              <span>Verified Marketplace</span>
+            </div>
+            <h1 className="text-2xl font-display font-bold leading-tight text-foreground tracking-tight">
+              Buy Used.
+              <br />
+              Know Exactly What You&apos;re Getting.
             </h1>
-            <p className="text-xs text-subtle-foreground max-w-57.5 leading-relaxed">
-              Bangladesh&apos;s marketplace where every listing is graded, tested and verified.
+            <p className="text-xs text-subtle-foreground leading-relaxed">
+              Verified pre-owned electronics with transparent condition reports, 32-point inspection
+              checks, and 48-hour buyer protection.
             </p>
 
-            <div className="pt-2">
+            <form onSubmit={handleHomeSearch} className="flex gap-1.5">
+              <div className="flex-1 flex items-center gap-2 border border-border bg-background px-3 py-2">
+                <Search className="size-3.5 text-muted-foreground shrink-0" />
+                <input
+                  value={homeSearchInput}
+                  onChange={(e) => setHomeSearchInput(e.target.value)}
+                  placeholder="Search devices..."
+                  className="w-full bg-transparent outline-none text-xs text-foreground placeholder:text-muted-foreground"
+                />
+              </div>
+              <button
+                type="submit"
+                className="bg-primary text-primary-foreground font-semibold px-3.5 py-2 text-xs"
+              >
+                Go
+              </button>
+            </form>
+
+            <div className="flex flex-col gap-2 pt-1">
               <Link
                 to="/products"
                 search={{ q: undefined, category: undefined, brand: undefined }}
-                className="inline-flex items-center gap-2 bg-primary text-primary-foreground text-xs font-semibold px-4 py-2.5 hover:opacity-90 transition-opacity"
+                className="inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground text-xs font-semibold py-2.5 hover:opacity-90"
               >
                 <Layers className="size-3.5 text-orange-500" />
-                <span>Browse Products</span>
+                <span>Shop Devices</span>
+              </Link>
+              <Link
+                to="/sell"
+                className="inline-flex items-center justify-center gap-1.5 bg-secondary text-secondary-foreground border border-border text-xs font-semibold py-2 hover:bg-muted"
+              >
+                <span>Sell Your Device</span>
                 <ArrowRight className="size-3.5" />
               </Link>
             </div>
           </div>
-
-          {/* Carousel indicators dots */}
-          <div className="relative z-10 flex items-center gap-1.5 pt-6">
-            <span className="size-1.5 rounded-full bg-foreground" />
-            <span className="size-1.5 rounded-full bg-muted-foreground/40" />
-            <span className="size-1.5 rounded-full bg-muted-foreground/40" />
-          </div>
         </div>
-      </section>
 
-      {/* ════════════════════════════════════════════════════════════════
-          2. TRUST FEATURES STRIP (Desktop 3-Box vs Mobile Compact Strip)
-      ════════════════════════════════════════════════════════════════ */}
-      {/* Desktop Trust Pillars */}
-      <section className="hidden md:block py-8">
-        <div className="hairline-grid grid md:grid-cols-3 bg-card">
-          {trust.map((t) => (
-            <div key={t.k} className="p-8">
-              <p className="font-display text-xs text-muted-foreground">{t.k}</p>
-              <h2 className="mt-4 text-lg font-medium">{t.t}</h2>
-              <p className="mt-2 text-sm text-subtle-foreground">{t.d}</p>
+        {/* 4-Item Trust Feature Strip (Matching User Reference) */}
+        <div className="px-4 md:px-5 py-3 md:py-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-border border border-border bg-card text-center p-3 sm:p-5">
+            {/* Transparent Grading */}
+            <div className="flex flex-col items-center px-2 py-2 sm:py-0 space-y-1">
+              <ShieldCheck className="size-5 text-foreground mb-0.5" />
+              <h3 className="font-bold text-foreground text-xs sm:text-sm leading-tight">
+                Transparent Grading
+              </h3>
+              <p className="text-[10px] sm:text-xs text-muted-foreground leading-snug">
+                Every unit graded A+ to D.
+              </p>
             </div>
-          ))}
-        </div>
-      </section>
 
-      {/* Mobile Compact 3-Column Strip (<= 768px) */}
-      <section className="block md:hidden px-4 py-2">
-        <div className="grid grid-cols-3 divide-x divide-border border border-border bg-card text-center p-3 text-[10px]">
-          {/* Objective Grading */}
-          <div className="flex flex-col items-center px-1 space-y-1">
-            <ShieldCheck className="size-4 text-foreground mb-0.5" />
-            <h3 className="font-bold text-foreground leading-tight text-[11px]">
-              Objective Grading
-            </h3>
-            <p className="text-[10px] text-muted-foreground leading-snug">
-              Every unit graded A+ to D.
-            </p>
-          </div>
+            {/* NID Verified Sellers */}
+            <div className="flex flex-col items-center px-2 py-2 sm:py-0 space-y-1">
+              <CheckCircle2 className="size-5 text-foreground mb-0.5" />
+              <h3 className="font-bold text-foreground text-xs sm:text-sm leading-tight">
+                NID Verified Sellers
+              </h3>
+              <p className="text-[10px] sm:text-xs text-muted-foreground leading-snug">
+                NID-verified accounts only.
+              </p>
+            </div>
 
-          {/* Verified Sellers */}
-          <div className="flex flex-col items-center px-1 space-y-1">
-            <CheckCircle2 className="size-4 text-foreground mb-0.5" />
-            <h3 className="font-bold text-foreground leading-tight text-[11px]">
-              Verified Sellers
-            </h3>
-            <p className="text-[10px] text-muted-foreground leading-snug">
-              ND-verified accounts only.
-            </p>
-          </div>
+            {/* 32-Point Inspection */}
+            <div className="flex flex-col items-center px-2 py-2 sm:py-0 space-y-1">
+              <FileCheck2 className="size-5 text-foreground mb-0.5" />
+              <h3 className="font-bold text-foreground text-xs sm:text-sm leading-tight">
+                32-Point Inspection
+              </h3>
+              <p className="text-[10px] sm:text-xs text-muted-foreground leading-snug">
+                Comprehensive component test.
+              </p>
+            </div>
 
-          {/* Cash on Delivery */}
-          <div className="flex flex-col items-center px-1 space-y-1">
-            <Package className="size-4 text-foreground mb-0.5" />
-            <h3 className="font-bold text-foreground leading-tight text-[11px]">
-              Cash on Delivery
-            </h3>
-            <p className="text-[10px] text-muted-foreground leading-snug">Pay when it arrives.</p>
+            {/* 48h Buyer Protection */}
+            <div className="flex flex-col items-center px-2 py-2 sm:py-0 space-y-1">
+              <Lock className="size-5 text-foreground mb-0.5" />
+              <h3 className="font-bold text-foreground text-xs sm:text-sm leading-tight">
+                48h Buyer Protection
+              </h3>
+              <p className="text-[10px] sm:text-xs text-muted-foreground leading-snug">
+                Pay on arrival &amp; dispute window.
+              </p>
+            </div>
           </div>
         </div>
       </section>
 
       {/* ════════════════════════════════════════════════════════════════
-          3. EXPLORE BY CATEGORY (Desktop Grid vs Mobile/Tablet Icon Grid)
+          3. POPULAR CATEGORIES / TRENDING MODELS
       ════════════════════════════════════════════════════════════════ */}
-      <section id="categories" className="py-6 px-4 md:px-5">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xs uppercase tracking-[0.2em] text-muted-foreground font-bold">
-            EXPLORE BY CATEGORY
-          </h2>
-          <Link to="/categories" className="text-xs font-semibold text-primary hover:underline">
-            View all →
+      <section id="categories" className="py-6 sm:py-8 px-4 md:px-5">
+        {/* Mobile Header & 5-Card Row (Matching Reference Screenshot) */}
+        <div className="block md:hidden mb-2">
+          <div className="flex items-center justify-between pb-3 mb-3 border-b border-border">
+            <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground font-mono">
+              Explore by Category
+            </span>
+            <Link
+              to="/categories"
+              className="text-xs font-semibold text-foreground hover:text-primary transition-colors"
+            >
+              View all →
+            </Link>
+          </div>
+
+          <div className="flex gap-2.5 overflow-x-auto scrollbar-none snap-x snap-mandatory -mx-4 px-4 pb-1">
+            {popularCategories.map((cat) => {
+              const Icon = cat.icon;
+              const displayLabel =
+                cat.label === "Audio & Headphones"
+                  ? "Audio"
+                  : cat.label === "Gaming Consoles"
+                    ? "Gaming"
+                    : cat.label;
+              return (
+                <Link
+                  key={cat.id}
+                  to="/products"
+                  search={{ category: cat.id, q: undefined, brand: undefined }}
+                  className="w-20 xs:w-22 shrink-0 snap-start border border-border bg-card p-2.5 flex flex-col items-center justify-center text-center aspect-square hover:border-primary transition-colors group"
+                >
+                  <Icon className="size-5 text-foreground group-hover:text-primary mb-1.5 transition-colors" />
+                  <span className="text-[10px] font-semibold text-foreground truncate w-full leading-tight">
+                    {displayLabel}
+                  </span>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Desktop Header & Full 8-Grid */}
+        <div className="hidden md:block">
+          <div className="flex items-end justify-between border-b border-border pb-4 mb-6">
+            <div>
+              <h2 className="text-xl md:text-2xl font-display font-bold">Explore by Category</h2>
+              <p className="text-xs text-muted-foreground">
+                Browse graded pre-owned devices by electronics category
+              </p>
+            </div>
+            <Link to="/categories" className="text-xs font-semibold text-primary hover:underline">
+              View all categories →
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-4 hairline-grid bg-card">
+            {popularCategories.map((cat) => {
+              const Icon = cat.icon;
+              return (
+                <Link
+                  key={cat.id}
+                  to="/products"
+                  search={{ category: cat.id, q: undefined, brand: undefined }}
+                  className="group p-5 sm:p-6 flex flex-col justify-between h-36 sm:h-40 hover:bg-secondary/70 transition-all"
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="size-9 bg-muted border border-border flex items-center justify-center text-foreground group-hover:border-primary transition-colors">
+                      <Icon className="size-5" />
+                    </div>
+                    <span className="text-[10px] font-semibold text-muted-foreground bg-muted border border-border px-2 py-0.5">
+                      {cat.discount}
+                    </span>
+                  </div>
+                  <div>
+                    <h3 className="font-display text-base sm:text-lg font-bold group-hover:text-primary transition-colors">
+                      {cat.label}
+                    </h3>
+                    <p className="text-xs text-muted-foreground mt-0.5 truncate">{cat.count}</p>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ════════════════════════════════════════════════════════════════
+          4. FEATURED PRODUCTS (Curated Cross-Category Flagships)
+      ════════════════════════════════════════════════════════════════ */}
+      <section id="featured-products" className="py-8 px-4 md:px-5 border-t border-border">
+        <div className="flex items-end justify-between border-b border-border pb-4 mb-6">
+          <div>
+            <div className="inline-flex items-center gap-1.5 bg-primary/10 text-primary border border-primary/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider mb-1">
+              <span>Editor&apos;s Pick</span>
+            </div>
+            <h2 className="text-xl md:text-2xl font-display font-bold">Featured Products</h2>
+            <p className="text-xs text-muted-foreground">
+              Hand-curated top models across smartphones, MacBooks, audio, and cameras
+            </p>
+          </div>
+          <Link
+            to="/products"
+            search={{ q: undefined, category: undefined, brand: undefined }}
+            className="text-xs font-semibold text-primary hover:underline"
+          >
+            Browse all catalog →
           </Link>
         </div>
 
-        {/* Desktop 4-grid (md+) */}
-        <div className="hidden md:grid hairline-grid grid-cols-4 bg-card">
+        {/* Desktop 4-grid */}
+        <div className="hidden lg:grid hairline-grid grid-cols-4 bg-card">
+          {featuredProducts.map((p) => (
+            <ProductCard key={p.id} product={p} />
+          ))}
+        </div>
+
+        {/* Mobile Swipe */}
+        <div className="block lg:hidden">
+          <div className="flex gap-3 overflow-x-auto scrollbar-none snap-x snap-mandatory pb-2">
+            {featuredProducts.map((p) => (
+              <div
+                key={p.id}
+                className="w-55 shrink-0 snap-start border border-border bg-card flex flex-col"
+              >
+                <ProductCard product={p} />
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ════════════════════════════════════════════════════════════════
+          5. SMARTPHONES & FLAGSHIPS PRODUCT SHELF
+      ════════════════════════════════════════════════════════════════ */}
+      <section id="smartphones-shelf" className="py-8 px-4 md:px-5 border-t border-border">
+        <div className="flex items-end justify-between border-b border-border pb-4 mb-6">
+          <div>
+            <h2 className="text-xl md:text-2xl font-display font-bold">
+              Smartphones &amp; Flagships
+            </h2>
+            <p className="text-xs text-muted-foreground">
+              Apple iPhones, Samsung Galaxy S-Series, and Google Pixels with graded condition
+              reports
+            </p>
+          </div>
           <Link
             to="/products"
             search={{ category: "Smartphones", q: undefined, brand: undefined }}
-            className="p-6 transition-all cursor-pointer flex flex-col justify-between h-36 group hover:bg-secondary"
+            className="text-xs font-semibold text-primary hover:underline"
           >
-            <div>
-              <span className="font-display text-lg font-bold group-hover:text-primary transition-colors">
-                Smartphones
-              </span>
-              <p className="text-xs text-muted-foreground mt-1">
-                iPhones, Samsung Galaxy, Google Pixel
-              </p>
-            </div>
-            <span className="text-xs font-semibold text-primary">Min 30% Off MRP →</span>
-          </Link>
-
-          <Link
-            to="/products"
-            search={{ category: "Laptops", q: undefined, brand: undefined }}
-            className="p-6 transition-all cursor-pointer flex flex-col justify-between h-36 group hover:bg-secondary"
-          >
-            <div>
-              <span className="font-display text-lg font-bold group-hover:text-primary transition-colors">
-                Laptops
-              </span>
-              <p className="text-xs text-muted-foreground mt-1">
-                MacBook M1/M2/M3, Dell XPS, ThinkPad
-              </p>
-            </div>
-            <span className="text-xs font-semibold text-primary">Up to 45% Savings →</span>
-          </Link>
-
-          <Link
-            to="/products"
-            search={{ category: "Cameras", q: undefined, brand: undefined }}
-            className="p-6 transition-all cursor-pointer flex flex-col justify-between h-36 group hover:bg-secondary"
-          >
-            <div>
-              <span className="font-display text-lg font-bold group-hover:text-primary transition-colors">
-                Cameras
-              </span>
-              <p className="text-xs text-muted-foreground mt-1">
-                Fujifilm X100V, Sony Alpha, Canon
-              </p>
-            </div>
-            <span className="text-xs font-semibold text-primary">Certified Inspection →</span>
-          </Link>
-
-          <Link
-            to="/products"
-            search={{ category: "Audio", q: undefined, brand: undefined }}
-            className="p-6 transition-all cursor-pointer flex flex-col justify-between h-36 group hover:bg-secondary"
-          >
-            <div>
-              <span className="font-display text-lg font-bold group-hover:text-primary transition-colors">
-                Audio &amp; Wearables
-              </span>
-              <p className="text-xs text-muted-foreground mt-1">
-                AirPods Pro, Sony XM5, Galaxy Watch
-              </p>
-            </div>
-            <span className="text-xs font-semibold text-primary">Mint Condition →</span>
+            View all Smartphones →
           </Link>
         </div>
 
-        {/* Mobile & Tablet Horizontal Grid (<= 768px) */}
-        <div className="grid grid-cols-5 md:hidden gap-2">
-          {[
-            { label: "Smartphones", icon: Smartphone, category: "Smartphones" },
-            { label: "Laptops", icon: Laptop, category: "Laptops" },
-            { label: "Cameras", icon: Camera, category: "Cameras" },
-            { label: "Audio", icon: Headphones, category: "Audio" },
-            { label: "Tablets", icon: Plug, category: "Tablets" },
-          ].map((cat) => {
-            const Icon = cat.icon;
-            return (
-              <Link
-                key={cat.label}
-                to="/products"
-                search={{ category: cat.category, q: undefined, brand: undefined }}
-                className="flex flex-col items-center justify-center p-2.5 border border-border bg-card text-center hover:bg-secondary transition-colors"
+        {/* Desktop 4-grid */}
+        <div className="hidden lg:grid hairline-grid grid-cols-4 bg-card">
+          {smartphoneProducts.map((p) => (
+            <ProductCard key={p.id} product={p} />
+          ))}
+        </div>
+
+        {/* Mobile Swipe */}
+        <div className="block lg:hidden">
+          <div className="flex gap-3 overflow-x-auto scrollbar-none snap-x snap-mandatory pb-2">
+            {smartphoneProducts.map((p) => (
+              <div
+                key={p.id}
+                className="w-55 shrink-0 snap-start border border-border bg-card flex flex-col"
               >
-                <div className="size-8 flex items-center justify-center text-foreground mb-1.5">
-                  <Icon className="size-5" />
+                <ProductCard product={p} />
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ════════════════════════════════════════════════════════════════
+          6. BEST DEALS / BEST VALUE
+      ════════════════════════════════════════════════════════════════ */}
+      {featuredDealListing && featuredDealProduct && (
+        <section className="py-6 px-4 md:px-5 border-t border-border bg-card">
+          <div className="border border-border p-5 md:p-8 relative overflow-hidden bg-background">
+            <div className="flex items-center justify-between border-b border-border pb-3 mb-5">
+              <div className="inline-flex items-center gap-1.5 bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20 px-2.5 py-0.5 text-xs font-bold uppercase tracking-wider">
+                <Zap className="size-3.5 fill-current text-amber-600" />
+                <span>Featured Listing (Sample Demo)</span>
+              </div>
+              <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5">
+                Sample Catalog Data
+              </span>
+            </div>
+
+            <div className="flex flex-row items-center justify-between gap-3.5 sm:gap-6 md:gap-8">
+              <div className="space-y-2 sm:space-y-3.5 min-w-0 flex-1">
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  <span className="bg-emerald-500 text-white font-bold text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5">
+                    Grade {featuredDealListing.grade}
+                  </span>
+                  <span className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-wider font-semibold truncate">
+                    {featuredDealProduct.brand} &middot; {featuredDealProduct.category}
+                  </span>
                 </div>
-                <span className="text-[10px] font-semibold text-foreground leading-tight line-clamp-2">
-                  {cat.label}
-                </span>
-              </Link>
+
+                <h2 className="text-sm sm:text-xl md:text-3xl font-display font-bold text-foreground leading-tight line-clamp-2">
+                  {featuredDealProduct.name}
+                </h2>
+
+                <p className="text-[11px] sm:text-xs md:text-sm text-subtle-foreground line-clamp-2 sm:line-clamp-3 leading-relaxed">
+                  {featuredDealListing.sellerNote ||
+                    "32-point tested with original display, high battery health, and verified NID seller."}
+                </p>
+
+                {/* Price */}
+                <div className="flex flex-wrap items-baseline gap-1.5 sm:gap-2.5 pt-0.5 sm:pt-1">
+                  <span className="text-base sm:text-2xl md:text-3xl font-display font-bold text-primary">
+                    {taka(featuredDealListing.price)}
+                  </span>
+                  {featuredDealProduct.retail > featuredDealListing.price && (
+                    <span className="text-[10px] sm:text-xs text-muted-foreground">
+                      Ref. New: {taka(featuredDealProduct.retail)} (Sample)
+                    </span>
+                  )}
+                </div>
+
+                <div className="pt-1 sm:pt-2 flex flex-wrap items-center gap-2 sm:gap-3">
+                  <Link
+                    to="/listing/$listingId"
+                    params={{ listingId: featuredDealListing.id }}
+                    className="inline-flex items-center justify-center bg-primary text-primary-foreground font-semibold px-3 sm:px-5 py-2 sm:py-3 text-[11px] sm:text-xs md:text-sm uppercase tracking-wider hover:opacity-90 transition-opacity"
+                  >
+                    View Verified Listing →
+                  </Link>
+                  <Link
+                    to="/products"
+                    search={{
+                      category: featuredDealProduct.category,
+                      q: undefined,
+                      brand: undefined,
+                    }}
+                    className="hidden sm:inline-flex items-center justify-center bg-secondary text-secondary-foreground border border-border font-medium px-4 py-3 text-xs md:text-sm hover:bg-muted transition-colors"
+                  >
+                    Compare Similar Models
+                  </Link>
+                </div>
+              </div>
+
+              {/* Product Visual - Increased size on mobile with side-by-side presentation */}
+              <div className="relative w-36 xs:w-44 sm:w-64 md:w-80 lg:w-96 aspect-square border border-border bg-muted shrink-0 overflow-hidden flex items-center justify-center">
+                <img
+                  src={featuredDealProduct.image}
+                  alt={featuredDealProduct.name}
+                  className="size-full object-cover"
+                />
+                <div className="absolute top-2 right-2 sm:top-3 sm:right-3 bg-background/90 backdrop-blur-xs text-[10px] sm:text-xs font-semibold px-2 py-0.5 sm:px-2.5 sm:py-1 border border-border">
+                  32-Pt Inspected
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ════════════════════════════════════════════════════════════════
+          7. RECENTLY ADDED VERIFIED LISTINGS
+      ════════════════════════════════════════════════════════════════ */}
+      <section id="recent-listings" className="py-8 px-4 md:px-5 border-t border-border">
+        <div className="flex items-end justify-between border-b border-border pb-4 mb-6">
+          <div>
+            <h2 className="text-xl md:text-2xl font-display font-bold">
+              Recently Added Verified Units
+            </h2>
+            <p className="text-xs text-muted-foreground">
+              Individual units graded and listed by verified sellers across Bangladesh
+            </p>
+          </div>
+          <Link
+            to="/products"
+            search={{ q: undefined, category: undefined, brand: undefined }}
+            className="text-xs font-semibold text-primary hover:underline"
+          >
+            View all listings →
+          </Link>
+        </div>
+
+        {/* Desktop 4-grid */}
+        <div className="hidden lg:grid hairline-grid grid-cols-4 bg-card">
+          {listings.slice(0, 8).map((listing) => {
+            const product = productFor(listing.productId);
+            if (!product) return null;
+            return <ListingCard key={listing.id} listing={listing} product={product} />;
+          })}
+        </div>
+
+        {/* Mobile Swipe Carousel */}
+        <div className="block lg:hidden">
+          <div className="flex gap-3 overflow-x-auto scrollbar-none snap-x snap-mandatory pb-2">
+            {listings.slice(0, 8).map((listing) => {
+              const product = productFor(listing.productId);
+              if (!product) return null;
+              return (
+                <div
+                  key={listing.id}
+                  className="w-55 shrink-0 snap-start border border-border bg-card flex flex-col"
+                >
+                  <ListingCard listing={listing} product={product} />
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ════════════════════════════════════════════════════════════════
+          8. WHY RESALE IS DIFFERENT
+      ════════════════════════════════════════════════════════════════ */}
+      <section className="py-10 px-4 md:px-5 border-t border-border bg-card">
+        <div className="max-w-2xl mb-8">
+          <div className="inline-flex items-center gap-1.5 bg-primary/10 text-primary border border-primary/20 px-2.5 py-0.5 text-xs font-bold uppercase tracking-wider mb-2">
+            <span>Marketplace Transparency</span>
+          </div>
+          <h2 className="text-2xl md:text-3xl font-display font-bold">Why Resale Is Different</h2>
+          <p className="text-xs md:text-sm text-subtle-foreground mt-1">
+            Built from the ground up to eliminate fraud, hidden defects, and ambiguous grading in
+            Bangladesh electronics resale.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 hairline-grid bg-card">
+          {whyResalePillars.map((p) => {
+            const Icon = p.icon;
+            return (
+              <div
+                key={p.num}
+                className="p-6 md:p-7 flex flex-col justify-between space-y-4 hover:bg-secondary/40 transition-colors"
+              >
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="font-display font-bold text-xs text-muted-foreground">
+                      {p.num}
+                    </span>
+                    <Icon className="size-5 text-primary" />
+                  </div>
+                  <h3 className="text-base font-bold text-foreground leading-snug">{p.title}</h3>
+                  <p className="text-xs text-subtle-foreground leading-relaxed">{p.description}</p>
+                </div>
+              </div>
             );
           })}
         </div>
       </section>
 
       {/* ════════════════════════════════════════════════════════════════
-          3. SLASH DEAL OF THE DAY (Desktop vs Mobile)
+          9. LAPTOPS & MACBOOKS PRODUCT SHELF
       ════════════════════════════════════════════════════════════════ */}
-      <section className="py-4 md:py-6 px-4 md:px-5">
-        <div className="bg-card border border-border p-5 md:p-8 relative overflow-hidden">
-          {/* Top header bar */}
-          <div className="flex items-center justify-between border-b border-border pb-3 mb-4">
-            <div className="inline-flex items-center gap-1.5 bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20 px-2.5 py-0.5 text-xs font-bold uppercase tracking-wider">
-              <Zap className="size-3.5 fill-current text-amber-600" />
-              <span>SLASH DEAL OF THE DAY</span>
-            </div>
+      <section id="laptops-shelf" className="py-8 px-4 md:px-5 border-t border-border">
+        <div className="flex items-end justify-between border-b border-border pb-4 mb-6">
+          <div>
+            <h2 className="text-xl md:text-2xl font-display font-bold">Laptops &amp; MacBooks</h2>
+            <p className="text-xs text-muted-foreground">
+              Apple Silicon MacBooks, Dell XPS, and Lenovo ThinkPads tested for battery and thermals
+            </p>
+          </div>
+          <Link
+            to="/products"
+            search={{ category: "Laptops", q: undefined, brand: undefined }}
+            className="text-xs font-semibold text-primary hover:underline"
+          >
+            View all Laptops →
+          </Link>
+        </div>
+
+        {/* Desktop 4-grid */}
+        <div className="hidden lg:grid hairline-grid grid-cols-4 bg-card">
+          {laptopProducts.map((p) => (
+            <ProductCard key={p.id} product={p} />
+          ))}
+        </div>
+
+        {/* Mobile Swipe */}
+        <div className="block lg:hidden">
+          <div className="flex gap-3 overflow-x-auto scrollbar-none snap-x snap-mandatory pb-2">
+            {laptopProducts.map((p) => (
+              <div
+                key={p.id}
+                className="w-55 shrink-0 snap-start border border-border bg-card flex flex-col"
+              >
+                <ProductCard product={p} />
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ════════════════════════════════════════════════════════════════
+          10. RESALE 32-POINT INSPECTION SHOWCASE
+      ════════════════════════════════════════════════════════════════ */}
+      <section className="py-10 px-4 md:px-5 border-t border-border">
+        <div className="max-w-2xl mb-8">
+          <div className="inline-flex items-center gap-1.5 bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 px-2.5 py-0.5 text-xs font-bold uppercase tracking-wider mb-2">
+            <FileCheck2 className="size-3.5" />
+            <span>Standardized Checklist</span>
+          </div>
+          <h2 className="text-2xl md:text-3xl font-display font-bold">
+            Resale 32-Point Inspection
+          </h2>
+          <p className="text-xs md:text-sm text-subtle-foreground mt-1">
+            Every device listed on Resale is evaluated against our 5 core inspection categories.
+          </p>
+        </div>
+
+        <div className="border border-border bg-card p-5 md:p-8">
+          {/* Category Tabs */}
+          <div className="flex flex-wrap gap-2 border-b border-border pb-4 mb-6">
+            {inspectionFramework.map((cat) => (
+              <button
+                key={cat.name}
+                type="button"
+                onClick={() => setActiveInspectionTab(cat.name)}
+                className={`px-4 py-2 text-xs font-semibold uppercase tracking-wider transition-colors border ${
+                  activeInspectionTab === cat.name
+                    ? "bg-primary text-primary-foreground border-primary"
+                    : "bg-secondary text-subtle-foreground border-border hover:text-foreground"
+                }`}
+              >
+                {cat.name} Checks ({cat.checks.length})
+              </button>
+            ))}
           </div>
 
-          {/* Content Layout */}
+          {/* Active Checklist Items */}
           {(() => {
-            const dealListing = listingFor("l-1");
-            const dealProduct = dealListing ? productFor(dealListing.productId) : undefined;
-            if (!dealListing || !dealProduct) return null;
-
-            const saveAmount = dealProduct.retail - dealListing.price;
-            const savePercent = Math.round((saveAmount / dealProduct.retail) * 100);
-
+            const activeCategory = inspectionFramework.find((c) => c.name === activeInspectionTab);
+            if (!activeCategory) return null;
             return (
-              <div className="flex flex-row items-center justify-between gap-4 sm:gap-8">
-                <div className="space-y-2 sm:space-y-3.5 min-w-0 flex-1">
-                  <h2 className="text-base sm:text-xl md:text-3xl font-display font-bold tracking-tight text-foreground line-clamp-2">
-                    {dealProduct.name} (Grade {dealListing.grade})
-                  </h2>
-                  <div className="text-[11px] sm:text-xs text-subtle-foreground space-y-0.5">
-                    <p className="font-medium truncate">
-                      Mint Condition • Like New •{" "}
-                      {dealProduct.specs.find((s) => s.label === "Storage")?.value}
-                    </p>
-                    <p className="text-muted-foreground">
-                      {dealListing.warrantyMonths} months warranty remaining
-                    </p>
-                  </div>
-
-                  {/* Pricing */}
-                  <div className="flex flex-wrap items-baseline gap-1.5 sm:gap-2.5 pt-0.5 sm:pt-1">
-                    <span className="text-lg sm:text-2xl md:text-3xl font-display font-bold text-primary">
-                      {taka(dealListing.price)}
-                    </span>
-                    <span className="text-[11px] sm:text-xs md:text-sm text-muted-foreground line-through">
-                      {taka(dealProduct.retail)}
-                    </span>
-                    <span className="text-[10px] sm:text-[11px] bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 font-bold px-1.5 sm:px-2 py-0.5">
-                      Save {taka(saveAmount)} ({savePercent}% OFF)
-                    </span>
-                  </div>
-
-                  <div className="pt-1 sm:pt-2">
-                    <Link
-                      to="/listing/$listingId"
-                      params={{ listingId: dealListing.id }}
-                      className="inline-flex items-center justify-center bg-primary text-primary-foreground font-semibold px-3.5 sm:px-6 py-2 sm:py-3.5 text-[11px] sm:text-xs md:text-sm uppercase tracking-wider hover:opacity-90 w-auto"
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                  {activeCategory.checks.map((check) => (
+                    <div
+                      key={check}
+                      className="p-3 bg-secondary/70 border border-border flex items-start gap-2.5 text-xs"
                     >
-                      Claim Deal Before Sold →
-                    </Link>
-                  </div>
+                      <Check className="size-4 text-emerald-600 shrink-0 mt-0.5" />
+                      <div>
+                        <span className="font-semibold text-foreground block">{check}</span>
+                        <span className="text-[10px] text-muted-foreground">
+                          Standardized Inspection item
+                        </span>
+                      </div>
+                    </div>
+                  ))}
                 </div>
 
-                {/* Product image */}
-                <div className="relative w-40 sm:w-64 md:w-80 lg:w-96 aspect-square border border-border bg-muted shrink-0 overflow-hidden flex items-center justify-center">
-                  <img
-                    src={dealProduct.image}
-                    alt={dealProduct.name}
-                    className="size-full object-cover"
-                  />
-                  <div className="absolute top-2 right-2 bg-background/90 backdrop-blur-xs text-[10px] sm:text-xs font-semibold px-2 py-0.5 border border-border shadow-xs">
-                    Grade {dealListing.grade}
-                  </div>
+                <div className="pt-4 border-t border-border flex flex-wrap items-center justify-between gap-3 text-xs text-muted-foreground">
+                  <span>
+                    Inspection Framework: {TOTAL_INSPECTION_CHECKS} Total Component Checks
+                  </span>
+                  <Link
+                    to="/products"
+                    search={{ q: undefined, category: undefined, brand: undefined }}
+                    className="text-primary font-semibold hover:underline"
+                  >
+                    Explore inspected listings →
+                  </Link>
                 </div>
               </div>
             );
@@ -393,43 +917,43 @@ function Index() {
       </section>
 
       {/* ════════════════════════════════════════════════════════════════
-          4. POPULAR PRODUCTS (Desktop 4x2 Grid vs Tablet/Mobile 3-Card Carousel)
+          11. CAMERAS, AUDIO & WEARABLES PRODUCT SHELF
       ════════════════════════════════════════════════════════════════ */}
-      <section id="popular-products" className="py-6 px-4 md:px-5">
+      <section id="cameras-audio-shelf" className="py-8 px-4 md:px-5 border-t border-border">
         <div className="flex items-end justify-between border-b border-border pb-4 mb-6">
           <div>
-            <h2 className="text-xl md:text-2xl font-display font-bold">Popular Products</h2>
-            <p className="text-xs text-muted-foreground">Compare all verified listings per model</p>
+            <h2 className="text-xl md:text-2xl font-display font-bold">
+              Cameras, Audio &amp; Wearables
+            </h2>
+            <p className="text-xs text-muted-foreground">
+              Fujifilm &amp; Sony cameras, ANC headphones, and Apple Watches
+            </p>
           </div>
           <Link
             to="/products"
-            search={{ q: undefined, category: undefined, brand: undefined }}
+            search={{ q: undefined, category: "Audio", brand: undefined }}
             className="text-xs font-semibold text-primary hover:underline"
           >
-            View all →
+            View Audio &amp; Cameras →
           </Link>
         </div>
 
-        {/* Desktop 4-grid × 2 rows (8 products) */}
+        {/* Desktop 4-grid */}
         <div className="hidden lg:grid hairline-grid grid-cols-4 bg-card">
-          {products.slice(0, 8).map((p) => (
+          {cameraAudioProducts.map((p) => (
             <ProductCard key={p.id} product={p} />
           ))}
         </div>
 
-        {/* Tablet & Mobile: 3 visible per row in a horizontal swipeable carousel */}
+        {/* Mobile Swipe */}
         <div className="block lg:hidden">
-          <div className="flex items-center justify-between px-1 text-xs text-muted-foreground mb-2">
-            <span>8 models · Swipe to view</span>
-            <span className="text-primary font-medium text-[11px]">← Swipe →</span>
-          </div>
-          <div className="flex overflow-x-auto snap-x snap-mandatory scroll-px-4 gap-1.5 pb-2 pt-1 -mx-4 px-4 sm:-mx-5 sm:px-5 scrollbar-none touch-pan-x overscroll-x-contain">
-            {products.slice(0, 8).map((p) => (
+          <div className="flex gap-3 overflow-x-auto scrollbar-none snap-x snap-mandatory pb-2">
+            {cameraAudioProducts.map((p) => (
               <div
                 key={p.id}
-                className="w-[calc((100vw-44px)/3)] sm:w-[calc((100vw-56px)/3)] md:w-[calc((100vw-72px)/3)] min-w-25 max-w-60 shrink-0 snap-start flex flex-col"
+                className="w-55 shrink-0 snap-start border border-border bg-card flex flex-col"
               >
-                <ProductCard product={p} compact={true} />
+                <ProductCard product={p} />
               </div>
             ))}
           </div>
@@ -437,605 +961,32 @@ function Index() {
       </section>
 
       {/* ════════════════════════════════════════════════════════════════
-          5. PRODUCT TYPE SECTIONS (Smartphones, Laptops, Cameras, Audio, etc.)
+          12. HOW RESALE WORKS
       ════════════════════════════════════════════════════════════════ */}
-      {[
-        {
-          id: "smartphones",
-          title: "Smartphones",
-          subtitle: "Apple iPhones, Samsung Galaxy, Google Pixel & flagship Androids",
-          category: "Smartphones",
-          items: products.filter((p) => p.category === "Smartphones"),
-        },
-        {
-          id: "laptops",
-          title: "Laptops & MacBooks",
-          subtitle: "MacBook Air & Pro, Dell XPS, Lenovo ThinkPad & ASUS ZenBook",
-          category: "Laptops",
-          items: products.filter((p) => p.category === "Laptops"),
-        },
-        {
-          id: "cameras",
-          title: "Cameras & Photography",
-          subtitle: "Fujifilm X100V, Sony Alpha, Canon EOS R & Nikon mirrorless bodies",
-          category: "Cameras",
-          items: products.filter((p) => p.category === "Cameras"),
-        },
-        {
-          id: "audio",
-          title: "Audio & Headphones",
-          subtitle: "Sony WH-1000XM5, Bose QuietComfort Ultra, AirPods Pro 2 & JBL",
-          category: "Audio",
-          items: products.filter((p) => p.category === "Audio"),
-        },
-        {
-          id: "tablets-gaming",
-          title: "Tablets, Watches & Gaming",
-          subtitle: "Apple iPad Pro M2, Apple Watch Series 9 & PlayStation 5 Slim",
-          category: "Tablets",
-          items: products.filter((p) =>
-            ["Tablets", "Smartwatches", "Gaming Consoles"].includes(p.category),
-          ),
-        },
-      ].map((section) => (
-        <div key={section.id}>
-          <section id={section.id} className="py-6 px-4 md:px-5">
-            <div className="flex items-end justify-between border-b border-border pb-4 mb-6">
-              <div>
-                <h2 className="text-xl md:text-2xl font-display font-bold">{section.title}</h2>
-                <p className="text-xs text-muted-foreground">{section.subtitle}</p>
-              </div>
-              <Link
-                to="/products"
-                search={{ q: undefined, category: section.category, brand: undefined }}
-                className="text-xs font-semibold text-primary hover:underline shrink-0 ml-4"
-              >
-                View {section.title.split(" ")[0]} →
-              </Link>
-            </div>
-
-            {/* Desktop 4-grid */}
-            <div className="hidden lg:grid hairline-grid grid-cols-4 bg-card">
-              {section.items.map((p) => (
-                <ProductCard key={p.id} product={p} />
-              ))}
-            </div>
-
-            {/* Tablet & Mobile: Horizontal Snap Scroll matching Recently Added Listings */}
-            <div className="block lg:hidden">
-              <div className="flex items-center justify-between px-1 text-xs text-muted-foreground mb-2">
-                <span>{section.items.length} models available</span>
-                <span className="text-primary font-medium text-[11px]">← Swipe →</span>
-              </div>
-              <div className="flex gap-3 overflow-x-auto scrollbar-none snap-x snap-mandatory pb-2">
-                {section.items.map((p) => (
-                  <div
-                    key={p.id}
-                    className="w-55 shrink-0 snap-start border border-border bg-card flex flex-col"
-                  >
-                    <ProductCard product={p} />
-                  </div>
-                ))}
-              </div>
-            </div>
-          </section>
-
-          {/* ════════════════════════════════════════════════════════════════
-              PROMOTIONAL & SERVICE BANNERS (Between Smartphones & Laptops)
-          ════════════════════════════════════════════════════════════════ */}
-          {section.id === "smartphones" && (
-            <section className="py-4 md:py-6 px-4 md:px-5">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">
-                {/* Banner 1: Sell / Trade-in Instant Valuation */}
-                <div className="relative border border-border bg-card p-5 sm:p-6 md:p-7 flex flex-col justify-between overflow-hidden group hover:border-primary/50 transition-colors">
-                  {/* Subtle Background Watermark */}
-                  <RefreshCw className="absolute -right-6 -bottom-6 size-36 text-muted/20 dark:text-muted/10 pointer-events-none stroke-1" />
-
-                  <div className="relative z-10">
-                    <div className="inline-flex items-center gap-1.5 bg-primary/10 text-primary border border-primary/20 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider mb-3">
-                      <Sparkles className="size-3.5" />
-                      <span>Sell &amp; Instant Cashout</span>
-                    </div>
-
-                    <h3 className="text-lg sm:text-xl md:text-2xl font-display font-bold text-foreground tracking-tight leading-snug">
-                      Upgrade your tech. Sell your old smartphone or laptop.
-                    </h3>
-
-                    <p className="text-xs sm:text-sm text-subtle-foreground mt-2 leading-relaxed">
-                      Get an instant algorithmic valuation, free doorstep pickup across 64
-                      districts, and same-day bKash or bank payout.
-                    </p>
-
-                    {/* Features list */}
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-4 pb-5 border-y border-border my-4 text-[11px] font-medium text-muted-foreground">
-                      <div className="flex items-center gap-1.5">
-                        <Check className="size-3.5 text-emerald-600 shrink-0" />
-                        <span>Instant price quote</span>
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        <Check className="size-3.5 text-emerald-600 shrink-0" />
-                        <span>Free doorstep pickup</span>
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        <Check className="size-3.5 text-emerald-600 shrink-0" />
-                        <span>Same-day payout</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="relative z-10 flex items-center justify-between gap-3 pt-1">
-                    <Link
-                      to="/sell"
-                      className="inline-flex items-center gap-2 bg-primary text-primary-foreground text-xs sm:text-sm font-semibold px-4 sm:px-5 py-2.5 hover:opacity-90 transition-opacity"
-                    >
-                      <span>Sell Your Device</span>
-                      <ArrowRight className="size-3.5" />
-                    </Link>
-                    <span className="text-[11px] text-muted-foreground hidden sm:inline">
-                      15,000+ sellers paid
-                    </span>
-                  </div>
-                </div>
-
-                {/* Banner 2: Certified Resale Assurance & 48-Hour Return Protection */}
-                <div className="relative border border-border bg-card p-5 sm:p-6 md:p-7 flex flex-col justify-between overflow-hidden group hover:border-primary/50 transition-colors">
-                  {/* Subtle Background Watermark */}
-                  <ShieldCheck className="absolute -right-6 -bottom-6 size-36 text-muted/20 dark:text-muted/10 pointer-events-none stroke-1" />
-
-                  <div className="relative z-10">
-                    <div className="inline-flex items-center gap-1.5 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider mb-3">
-                      <ShieldCheck className="size-3.5 text-emerald-600" />
-                      <span>Resale Assurance &amp; Warranty</span>
-                    </div>
-
-                    <h3 className="text-lg sm:text-xl md:text-2xl font-display font-bold text-foreground tracking-tight leading-snug">
-                      Zero-risk pre-owned shopping. 32-point tested &amp; graded.
-                    </h3>
-
-                    <p className="text-xs sm:text-sm text-subtle-foreground mt-2 leading-relaxed">
-                      Every device undergoes objective diagnostic testing with transparent battery
-                      health, genuine parts verification, and 48-hr full return window.
-                    </p>
-
-                    {/* Features list */}
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-4 pb-5 border-y border-border my-4 text-[11px] font-medium text-muted-foreground">
-                      <div className="flex items-center gap-1.5">
-                        <Check className="size-3.5 text-emerald-600 shrink-0" />
-                        <span>32-Point diagnostics</span>
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        <Check className="size-3.5 text-emerald-600 shrink-0" />
-                        <span>48h Return guarantee</span>
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        <Check className="size-3.5 text-emerald-600 shrink-0" />
-                        <span>Nationwide COD</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="relative z-10 flex items-center justify-between gap-3 pt-1">
-                    <Link
-                      to="/products"
-                      search={{ q: undefined, category: undefined, brand: undefined }}
-                      className="inline-flex items-center gap-2 bg-secondary text-secondary-foreground border border-border text-xs sm:text-sm font-semibold px-4 sm:px-5 py-2.5 hover:bg-muted transition-colors"
-                    >
-                      <span>Browse Verified Stock</span>
-                      <ArrowRight className="size-3.5" />
-                    </Link>
-                    <span className="text-[11px] text-muted-foreground hidden sm:inline">
-                      100% genuine verified
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </section>
-          )}
-        </div>
-      ))}
-
-      {/* ════════════════════════════════════════════════════════════════
-          6. FEATURED BRANDS
-      ════════════════════════════════════════════════════════════════ */}
-      <section id="brands" className="py-8 px-4 md:px-5">
-        <div className="flex items-end justify-between border-b border-border pb-4 mb-6">
-          <div>
-            <h2 className="text-xl md:text-2xl font-display font-bold">Featured Brands</h2>
-            <p className="text-xs text-muted-foreground">
-              Explore verified pre-owned electronics from top global manufacturers
-            </p>
-          </div>
-          <Link
-            to="/products"
-            search={{ q: undefined, category: undefined, brand: undefined }}
-            className="text-xs font-semibold text-primary hover:underline shrink-0 ml-4"
-          >
-            All products →
-          </Link>
-        </div>
-
-        <div className="hairline-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 bg-card">
-          {[
-            { name: "Apple", tagline: "iPhones, MacBooks, iPads & Watches" },
-            { name: "Samsung", tagline: "Galaxy S-Series & Galaxy Buds" },
-            { name: "Sony", tagline: "Alpha Cameras, WH-Headphones & PS5" },
-            { name: "Dell", tagline: "XPS & Latitude Business Laptops" },
-            { name: "Google", tagline: "Pixel Smartphones & Tensor Chip" },
-            { name: "Fujifilm", tagline: "X-Series & Premium Compacts" },
-            { name: "Canon", tagline: "EOS R Full-Frame Mirrorless" },
-            { name: "Nikon", tagline: "Z-Series Mirrorless Systems" },
-            { name: "Bose", tagline: "QuietComfort ANC Headphones" },
-            { name: "Lenovo", tagline: "ThinkPad X1 & Carbon Ultrabooks" },
-            { name: "ASUS", tagline: "ZenBook OLED & ROG Hardware" },
-            { name: "HP", tagline: "EliteBook & ProBook Laptops" },
-            { name: "JBL", tagline: "Portable Bluetooth Speakers" },
-            { name: "OnePlus", tagline: "Fast Charging & ProXDR Flagships" },
-            { name: "Xiaomi", tagline: "Leica Optics & HyperOS Devices" },
-          ].map((b) => {
-            const count = products.filter((p) => p.brand === b.name).length;
-            return (
-              <Link
-                key={b.name}
-                to="/products"
-                search={{ brand: b.name, category: undefined, q: undefined }}
-                className="group p-4 md:p-5 flex flex-col justify-between hover:bg-secondary/60 transition-all"
-              >
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="font-display text-base font-bold group-hover:text-primary transition-colors">
-                      {b.name}
-                    </span>
-                    <span className="text-[10px] font-medium bg-muted px-1.5 py-0.5 text-muted-foreground">
-                      {count} {count === 1 ? "model" : "models"}
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-muted-foreground line-clamp-2 leading-relaxed">
-                    {b.tagline}
-                  </p>
-                </div>
-              </Link>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* ════════════════════════════════════════════════════════════════
-          6. TRUST & BENEFITS (4-Item Strip - Mobile & Desktop)
-      ════════════════════════════════════════════════════════════════ */}
-      <section className="py-6 px-4 md:px-5">
-        <div className="hairline-grid grid grid-cols-2 md:grid-cols-4 bg-card">
-          <div className="p-4 md:p-6 flex items-start gap-3">
-            <div className="bg-primary text-primary-foreground px-2 py-1 font-bold text-xs shrink-0">
-              ND
-            </div>
-            <div>
-              <h3 className="font-bold text-xs md:text-sm text-foreground">
-                Verified Seller Network
-              </h3>
-              <p className="text-[11px] text-muted-foreground mt-0.5">
-                Every seller&apos;s identity is verified.
-              </p>
-            </div>
-          </div>
-
-          <div className="p-4 md:p-6 flex items-start gap-3">
-            <div className="bg-primary text-primary-foreground px-2 py-1 font-bold text-xs shrink-0">
-              48h
-            </div>
-            <div>
-              <h3 className="font-bold text-xs md:text-sm text-foreground">
-                48-Hour Buyer Protection
-              </h3>
-              <p className="text-[11px] text-muted-foreground mt-0.5">
-                Full refund if not as described.
-              </p>
-            </div>
-          </div>
-
-          <div className="p-4 md:p-6 flex items-start gap-3">
-            <div className="bg-primary text-primary-foreground px-2 py-1 font-bold text-xs shrink-0">
-              COD
-            </div>
-            <div>
-              <h3 className="font-bold text-xs md:text-sm text-foreground">
-                Nationwide Cash on Delivery
-              </h3>
-              <p className="text-[11px] text-muted-foreground mt-0.5">
-                Shipped via reliable partners.
-              </p>
-            </div>
-          </div>
-
-          <div className="p-4 md:p-6 flex items-start gap-3">
-            <div className="bg-primary text-primary-foreground p-1.5 font-bold text-xs shrink-0 flex items-center justify-center">
-              <Lock className="size-3.5" />
-            </div>
-            <div>
-              <h3 className="font-bold text-xs md:text-sm text-foreground">Secure Payment</h3>
-              <p className="text-[11px] text-muted-foreground mt-0.5">100% safe &amp; encrypted.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ════════════════════════════════════════════════════════════════
-          7. RECENTLY ADDED LISTINGS (Desktop Grid vs Mobile Carousel)
-      ════════════════════════════════════════════════════════════════ */}
-      <section className="py-8 px-4 md:px-5">
-        <div className="flex items-end justify-between border-b border-border pb-4 mb-6">
-          <div>
-            <h2 className="text-xl md:text-2xl font-display font-bold">Recently added listings</h2>
-            <p className="text-xs text-muted-foreground">
-              Individual verified units ready for instant dispatch
-            </p>
-          </div>
-        </div>
-
-        {/* Desktop 4-grid */}
-        <div className="hidden md:grid hairline-grid grid-cols-4 bg-card">
-          {listings.slice(0, 4).map((listing) => {
-            const product = productFor(listing.productId);
-            return (
-              <Link
-                key={listing.id}
-                to="/listing/$listingId"
-                params={{ listingId: listing.id }}
-                className="group block h-full p-5 hover:bg-secondary transition-all"
-              >
-                <div className="flex flex-col h-full overflow-hidden">
-                  <div className="aspect-square bg-muted relative border border-border">
-                    <img
-                      src={product?.image}
-                      alt={product?.name}
-                      loading="lazy"
-                      className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500"
-                    />
-                    <div className="absolute top-3 left-3 bg-background text-xs font-medium px-2 py-1 border border-border">
-                      Grade {listing.grade}
-                    </div>
-                  </div>
-                  <div className="pt-4 flex flex-col flex-1">
-                    <h3 className="font-medium leading-tight mb-2 group-hover:underline">
-                      {product?.name}
-                    </h3>
-                    <p className="font-display text-xl mb-1.5 text-primary">
-                      {taka(listing.price)}
-                    </p>
-                    <p className="text-xs text-muted-foreground line-clamp-2 flex-1">
-                      {listing.sellerNote}
-                    </p>
-                    <div className="mt-2 pt-2 border-t border-border flex items-center justify-between text-xs text-muted-foreground">
-                      <span>{listing.seller.name}</span>
-                      <span>{listing.seller.district}</span>
-                    </div>
-                  </div>
-                </div>
-              </Link>
-            );
-          })}
-        </div>
-
-        {/* Mobile Horizontal Snap Scroll */}
-        <div className="flex md:hidden gap-3 overflow-x-auto scrollbar-none snap-x snap-mandatory pb-2">
-          {listings.slice(0, 4).map((listing) => {
-            const product = productFor(listing.productId);
-            return (
-              <Link
-                key={listing.id}
-                to="/listing/$listingId"
-                params={{ listingId: listing.id }}
-                className="w-55 shrink-0 snap-start border border-border bg-card p-3 flex flex-col justify-between"
-              >
-                <div className="aspect-square bg-muted relative border border-border mb-3 flex items-center justify-center p-2">
-                  <img
-                    src={product?.image}
-                    alt={product?.name}
-                    className="size-full object-contain"
-                  />
-                  <div className="absolute top-2 left-2 bg-background text-[10px] font-bold px-1.5 py-0.5 border border-border">
-                    Grade {listing.grade}
-                  </div>
-                </div>
-
-                <div className="space-y-1">
-                  <h3 className="font-semibold text-xs text-foreground line-clamp-1">
-                    {product?.name}
-                  </h3>
-                  <p className="font-display text-base font-bold text-primary">
-                    {taka(listing.price)}
-                  </p>
-                  <p className="text-[10px] text-muted-foreground line-clamp-2">
-                    {listing.sellerNote}
-                  </p>
-                  <div className="pt-2 border-t border-border flex items-center justify-between text-[10px] text-muted-foreground">
-                    <span>{listing.seller.name}</span>
-                    <span>{listing.seller.district}</span>
-                  </div>
-                </div>
-              </Link>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* ════════════════════════════════════════════════════════════════
-          8. CONDITION GRADING STANDARD (Desktop 5-col vs Mobile Swiper)
-      ════════════════════════════════════════════════════════════════ */}
-      <section className="bg-muted/40 border-t border-border py-12 md:py-16 px-4 md:px-5">
-        <div className="max-w-2xl mb-8">
-          <h2 className="text-2xl md:text-3xl font-display font-bold mb-2">
-            Our Condition Grading Standard
-          </h2>
-          <p className="text-subtle-foreground text-xs md:text-sm">
-            Every item is evaluated against standardized component criteria — never vague terms.
+      <section className="py-12 px-4 md:px-5 border-t border-border bg-card">
+        <div className="text-center max-w-2xl mx-auto mb-8">
+          <h2 className="text-2xl md:text-3xl font-display font-bold mb-2">How Resale Works</h2>
+          <p className="text-xs md:text-sm text-subtle-foreground">
+            A transparent 3-step process for safe buyer transactions and verified seller payouts.
           </p>
-        </div>
 
-        {/* Desktop 5-grid */}
-        <div className="hidden lg:grid hairline-grid grid-cols-5 bg-card">
-          <div className="p-6">
-            <span className="inline-block bg-emerald-500 text-white font-bold text-xs px-2.5 py-1 mb-3">
-              Grade A+
-            </span>
-            <h3 className="font-medium text-sm mb-1">Like New</h3>
-            <p className="text-xs text-muted-foreground">
-              Flawless condition with zero signs of wear. 100% original parts &amp; complete
-              original box.
-            </p>
-          </div>
-          <div className="p-6">
-            <span className="inline-block bg-blue-500 text-white font-bold text-xs px-2.5 py-1 mb-3">
-              Grade A
-            </span>
-            <h3 className="font-medium text-sm mb-1">Excellent</h3>
-            <p className="text-xs text-muted-foreground">
-              Micro-scratches only visible under direct light. High battery health, zero functional
-              defects.
-            </p>
-          </div>
-          <div className="p-6">
-            <span className="inline-block bg-amber-500 text-white font-bold text-xs px-2.5 py-1 mb-3">
-              Grade B
-            </span>
-            <h3 className="font-medium text-sm mb-1">Good</h3>
-            <p className="text-xs text-muted-foreground">
-              Normal cosmetic wear. Fully functional; any part repairs are explicitly listed.
-            </p>
-          </div>
-          <div className="p-6">
-            <span className="inline-block bg-orange-500 text-white font-bold text-xs px-2.5 py-1 mb-3">
-              Grade C
-            </span>
-            <h3 className="font-medium text-sm mb-1">Fair</h3>
-            <p className="text-xs text-muted-foreground">
-              Noticeable scratches or minor dents. Great value for budget buyers seeking 100%
-              functionality.
-            </p>
-          </div>
-          <div className="p-6">
-            <span className="inline-block bg-red-500 text-white font-bold text-xs px-2.5 py-1 mb-3">
-              Grade D
-            </span>
-            <h3 className="font-medium text-sm mb-1">Heavy Wear</h3>
-            <p className="text-xs text-muted-foreground">
-              Heavy cosmetic wear or battery under 80%. Fully functional with deep discount pricing.
-            </p>
-          </div>
-        </div>
-
-        {/* Mobile & Tablet Bento Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-6 gap-2.5 sm:gap-3 lg:hidden">
-          {/* Grade A+ (Featured Top Bento Card) */}
-          <div className="col-span-2 md:col-span-3 border border-border bg-card p-4 sm:p-5 flex flex-col justify-between hover:bg-secondary/40 transition-colors">
-            <div>
-              <div className="flex items-center justify-between gap-2 mb-2.5">
-                <span className="inline-block bg-emerald-500 text-white font-bold text-xs px-2.5 py-1">
-                  Grade A+
-                </span>
-                <span className="text-[10px] sm:text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5">
-                  100% Original &bull; Factory Box
-                </span>
-              </div>
-              <h3 className="font-bold text-sm sm:text-base text-foreground mb-1">Like New</h3>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Flawless condition with zero signs of wear. 100% original parts, complete original
-                accessories &amp; full functional test passed.
-              </p>
-            </div>
-          </div>
-
-          {/* Grade A */}
-          <div className="col-span-1 md:col-span-3 border border-border bg-card p-3.5 sm:p-5 flex flex-col justify-between hover:bg-secondary/40 transition-colors">
-            <div>
-              <div className="flex items-center gap-1.5 mb-2">
-                <span className="inline-block bg-blue-500 text-white font-bold text-[10px] sm:text-xs px-2 py-0.5">
-                  Grade A
-                </span>
-                <h3 className="font-bold text-xs sm:text-sm text-foreground">Excellent</h3>
-              </div>
-              <p className="text-[11px] sm:text-xs text-muted-foreground leading-relaxed">
-                Micro-scratches only visible under direct light. High battery health, zero
-                functional defects.
-              </p>
-            </div>
-          </div>
-
-          {/* Grade B */}
-          <div className="col-span-1 md:col-span-2 border border-border bg-card p-3.5 sm:p-4 flex flex-col justify-between hover:bg-secondary/40 transition-colors">
-            <div>
-              <div className="flex items-center gap-1.5 mb-2">
-                <span className="inline-block bg-amber-500 text-white font-bold text-[10px] sm:text-xs px-2 py-0.5">
-                  Grade B
-                </span>
-                <h3 className="font-bold text-xs sm:text-sm text-foreground">Good</h3>
-              </div>
-              <p className="text-[11px] text-muted-foreground leading-relaxed">
-                Normal cosmetic wear on body or frame. Fully functional; all repairs disclosed.
-              </p>
-            </div>
-          </div>
-
-          {/* Grade C */}
-          <div className="col-span-1 md:col-span-2 border border-border bg-card p-3.5 sm:p-4 flex flex-col justify-between hover:bg-secondary/40 transition-colors">
-            <div>
-              <div className="flex items-center gap-1.5 mb-2">
-                <span className="inline-block bg-orange-500 text-white font-bold text-[10px] sm:text-xs px-2 py-0.5">
-                  Grade C
-                </span>
-                <h3 className="font-bold text-xs sm:text-sm text-foreground">Fair</h3>
-              </div>
-              <p className="text-[11px] text-muted-foreground leading-relaxed">
-                Noticeable scratches or minor scuffs. Great value for budget buyers seeking 100%
-                functionality.
-              </p>
-            </div>
-          </div>
-
-          {/* Grade D */}
-          <div className="col-span-1 md:col-span-2 border border-border bg-card p-3.5 sm:p-4 flex flex-col justify-between hover:bg-secondary/40 transition-colors">
-            <div>
-              <div className="flex items-center gap-1.5 mb-2">
-                <span className="inline-block bg-red-500 text-white font-bold text-[10px] sm:text-xs px-2 py-0.5">
-                  Grade D
-                </span>
-                <h3 className="font-bold text-xs sm:text-sm text-foreground">Heavy Wear</h3>
-              </div>
-              <p className="text-[11px] text-muted-foreground leading-relaxed">
-                Heavy cosmetic wear or battery under 80%. Fully functional with deep discount
-                pricing.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ════════════════════════════════════════════════════════════════
-          9. HOW IT WORKS (Desktop 2-col vs Mobile Tabs)
-      ════════════════════════════════════════════════════════════════ */}
-      <section className="py-12 md:py-16 px-4 md:px-5 border-t border-border">
-        <h2 className="text-2xl md:text-3xl font-display font-bold text-center mb-8 md:mb-12">
-          How Resale.com Works
-        </h2>
-
-        {/* Mobile Tabs Switch */}
-        <div className="flex md:hidden justify-center mb-6">
-          <div className="inline-flex border border-border p-1 bg-muted">
+          <div className="inline-flex border border-border p-1 bg-muted mt-5">
             <button
-              onClick={() => setActiveTab("buyers")}
-              className={`px-4 py-2 text-xs font-semibold uppercase tracking-wider transition-colors ${
-                activeTab === "buyers"
+              onClick={() => setActiveHowItWorksTab("buyers")}
+              className={`px-5 py-2 text-xs font-semibold uppercase tracking-wider transition-colors ${
+                activeHowItWorksTab === "buyers"
                   ? "bg-primary text-primary-foreground"
-                  : "text-subtle-foreground"
+                  : "text-subtle-foreground hover:text-foreground"
               }`}
             >
               For Buyers
             </button>
             <button
-              onClick={() => setActiveTab("sellers")}
-              className={`px-4 py-2 text-xs font-semibold uppercase tracking-wider transition-colors ${
-                activeTab === "sellers"
+              onClick={() => setActiveHowItWorksTab("sellers")}
+              className={`px-5 py-2 text-xs font-semibold uppercase tracking-wider transition-colors ${
+                activeHowItWorksTab === "sellers"
                   ? "bg-primary text-primary-foreground"
-                  : "text-subtle-foreground"
+                  : "text-subtle-foreground hover:text-foreground"
               }`}
             >
               For Sellers
@@ -1043,169 +994,301 @@ function Index() {
           </div>
         </div>
 
-        {/* Desktop 2-Column Grid */}
-        <div className="hidden md:grid hairline-grid grid-cols-2 bg-card">
-          {/* For Buyers */}
-          <div className="p-8">
-            <h3 className="text-xl font-bold mb-6 text-primary">For Buyers</h3>
-            <ol className="space-y-6">
-              <li className="flex gap-4">
-                <span className="flex size-7 shrink-0 items-center justify-center bg-primary text-primary-foreground font-bold text-xs">
+        <div className="max-w-4xl mx-auto border border-border bg-background p-6 md:p-8">
+          {activeHowItWorksTab === "buyers" ? (
+            <ol className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <li className="space-y-2">
+                <span className="flex size-7 items-center justify-center bg-primary text-primary-foreground font-bold text-xs">
                   01
                 </span>
-                <div>
-                  <h4 className="font-medium text-sm">Compare Graded Listings</h4>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    Filter by condition score, seller location, and warranty status.
-                  </p>
-                </div>
+                <h4 className="font-bold text-sm text-foreground">Compare Graded Listings</h4>
+                <p className="text-xs text-subtle-foreground leading-relaxed">
+                  Review the 32-point inspection findings, battery health %, high-resolution angle
+                  photos, and seller NID status.
+                </p>
               </li>
-              <li className="flex gap-4">
-                <span className="flex size-7 shrink-0 items-center justify-center bg-primary text-primary-foreground font-bold text-xs">
+              <li className="space-y-2">
+                <span className="flex size-7 items-center justify-center bg-primary text-primary-foreground font-bold text-xs">
                   02
                 </span>
-                <div>
-                  <h4 className="font-medium text-sm">Order with Cash on Delivery</h4>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    Your money is protected until delivery. NID verification ensures safe
-                    transactions.
-                  </p>
-                </div>
+                <h4 className="font-bold text-sm text-foreground">Order with Cash on Delivery</h4>
+                <p className="text-xs text-subtle-foreground leading-relaxed">
+                  Pay upon delivery across Bangladesh. Funds are protected during your post-delivery
+                  inspection window.
+                </p>
               </li>
-              <li className="flex gap-4">
-                <span className="flex size-7 shrink-0 items-center justify-center bg-primary text-primary-foreground font-bold text-xs">
+              <li className="space-y-2">
+                <span className="flex size-7 items-center justify-center bg-primary text-primary-foreground font-bold text-xs">
                   03
                 </span>
-                <div>
-                  <h4 className="font-medium text-sm">48-Hour Inspection Window</h4>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    Test your device. If it doesn&apos;t match the report, raise a dispute for full
-                    refund.
-                  </p>
-                </div>
-              </li>
-            </ol>
-          </div>
-
-          {/* For Sellers */}
-          <div className="p-8">
-            <h3 className="text-xl font-bold mb-6">For Sellers</h3>
-            <ol className="space-y-6">
-              <li className="flex gap-4">
-                <span className="flex size-7 shrink-0 items-center justify-center bg-muted-foreground text-background font-bold text-xs">
-                  01
-                </span>
-                <div>
-                  <h4 className="font-medium text-sm">Complete Guided Checklist</h4>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    Provide honest details about battery, repairs, wear, and included accessories.
-                  </p>
-                </div>
-              </li>
-              <li className="flex gap-4">
-                <span className="flex size-7 shrink-0 items-center justify-center bg-muted-foreground text-background font-bold text-xs">
-                  02
-                </span>
-                <div>
-                  <h4 className="font-medium text-sm">Pass Human Moderation</h4>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    Our team verifies pricing and condition photos before your listing goes live.
-                  </p>
-                </div>
-              </li>
-              <li className="flex gap-4">
-                <span className="flex size-7 shrink-0 items-center justify-center bg-muted-foreground text-background font-bold text-xs">
-                  03
-                </span>
-                <div>
-                  <h4 className="font-medium text-sm">Ship &amp; Fast Payout</h4>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    Hand over to courier and receive cleared funds directly to bKash or Bank.
-                  </p>
-                </div>
-              </li>
-            </ol>
-          </div>
-        </div>
-
-        {/* Mobile Tab Content */}
-        <div className="block md:hidden border border-border bg-card p-5">
-          {activeTab === "buyers" ? (
-            <ol className="space-y-5">
-              <li className="flex gap-3">
-                <span className="flex size-6 shrink-0 items-center justify-center bg-primary text-primary-foreground font-bold text-[11px]">
-                  01
-                </span>
-                <div>
-                  <h4 className="font-bold text-xs text-foreground">Compare Graded Listings</h4>
-                  <p className="text-[11px] text-muted-foreground mt-0.5">
-                    Filter by condition score, location, and verified warranty status.
-                  </p>
-                </div>
-              </li>
-              <li className="flex gap-3">
-                <span className="flex size-6 shrink-0 items-center justify-center bg-primary text-primary-foreground font-bold text-[11px]">
-                  02
-                </span>
-                <div>
-                  <h4 className="font-bold text-xs text-foreground">Order with Cash on Delivery</h4>
-                  <p className="text-[11px] text-muted-foreground mt-0.5">
-                    Your money is protected until delivery with nationwide courier coverage.
-                  </p>
-                </div>
-              </li>
-              <li className="flex gap-3">
-                <span className="flex size-6 shrink-0 items-center justify-center bg-primary text-primary-foreground font-bold text-[11px]">
-                  03
-                </span>
-                <div>
-                  <h4 className="font-bold text-xs text-foreground">48-Hour Inspection Window</h4>
-                  <p className="text-[11px] text-muted-foreground mt-0.5">
-                    Test your device. Full refund resolution if condition report does not match.
-                  </p>
-                </div>
+                <h4 className="font-bold text-sm text-foreground">48-Hour Inspection Window</h4>
+                <p className="text-xs text-subtle-foreground leading-relaxed">
+                  Test every component. If any undisclosed fault or mismatch exists, initiate a
+                  dispute for a full refund.
+                </p>
               </li>
             </ol>
           ) : (
-            <ol className="space-y-5">
-              <li className="flex gap-3">
-                <span className="flex size-6 shrink-0 items-center justify-center bg-muted-foreground text-background font-bold text-[11px]">
+            <ol className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <li className="space-y-2">
+                <span className="flex size-7 items-center justify-center bg-muted-foreground text-background font-bold text-xs">
                   01
                 </span>
-                <div>
-                  <h4 className="font-bold text-xs text-foreground">Complete Guided Checklist</h4>
-                  <p className="text-[11px] text-muted-foreground mt-0.5">
-                    Provide honest details about battery, repairs, and condition photos.
-                  </p>
-                </div>
+                <h4 className="font-bold text-sm text-foreground">Guided 32-Point Listing</h4>
+                <p className="text-xs text-subtle-foreground leading-relaxed">
+                  Enter device model, upload clear angle photos, report battery health, and disclose
+                  any prior repairs honestly.
+                </p>
               </li>
-              <li className="flex gap-3">
-                <span className="flex size-6 shrink-0 items-center justify-center bg-muted-foreground text-background font-bold text-[11px]">
+              <li className="space-y-2">
+                <span className="flex size-7 items-center justify-center bg-muted-foreground text-background font-bold text-xs">
                   02
                 </span>
-                <div>
-                  <h4 className="font-bold text-xs text-foreground">Pass Moderation</h4>
-                  <p className="text-[11px] text-muted-foreground mt-0.5">
-                    Our team reviews listings within 24h to ensure accurate pricing.
-                  </p>
-                </div>
+                <h4 className="font-bold text-sm text-foreground">Human Moderation Check</h4>
+                <p className="text-xs text-subtle-foreground leading-relaxed">
+                  Our moderation team verifies condition photos, IMEI validity, and pricing realism
+                  before your listing goes live.
+                </p>
               </li>
-              <li className="flex gap-3">
-                <span className="flex size-6 shrink-0 items-center justify-center bg-muted-foreground text-background font-bold text-[11px]">
+              <li className="space-y-2">
+                <span className="flex size-7 items-center justify-center bg-muted-foreground text-background font-bold text-xs">
                   03
                 </span>
-                <div>
-                  <h4 className="font-bold text-xs text-foreground">Ship &amp; Fast Payout</h4>
-                  <p className="text-[11px] text-muted-foreground mt-0.5">
-                    Cleared funds sent directly to your bKash, Nagad or bank account.
-                  </p>
-                </div>
+                <h4 className="font-bold text-sm text-foreground">Dispatch &amp; Direct Payout</h4>
+                <p className="text-xs text-subtle-foreground leading-relaxed">
+                  Hand over the packaged device to our courier partner. Receive payout directly via
+                  bKash, Nagad, or Bank.
+                </p>
               </li>
             </ol>
           )}
         </div>
       </section>
 
+      {/* ════════════════════════════════════════════════════════════════
+          13. TABLETS, GAMING & ACCESSORIES PRODUCT SHELF
+      ════════════════════════════════════════════════════════════════ */}
+      <section id="tablets-gaming-shelf" className="py-8 px-4 md:px-5 border-t border-border">
+        <div className="flex items-end justify-between border-b border-border pb-4 mb-6">
+          <div>
+            <h2 className="text-xl md:text-2xl font-display font-bold">
+              Tablets, Gaming &amp; Accessories
+            </h2>
+            <p className="text-xs text-muted-foreground">
+              Apple iPad Pro &amp; Air, PlayStation 5 Slim, ROG Ally, and OEM accessories
+            </p>
+          </div>
+          <Link
+            to="/products"
+            search={{ category: "Tablets", q: undefined, brand: undefined }}
+            className="text-xs font-semibold text-primary hover:underline"
+          >
+            View Tablets &amp; Gaming →
+          </Link>
+        </div>
+
+        {/* Desktop 4-grid */}
+        <div className="hidden lg:grid hairline-grid grid-cols-4 bg-card">
+          {tabletGamingProducts.map((p) => (
+            <ProductCard key={p.id} product={p} />
+          ))}
+        </div>
+
+        {/* Mobile Swipe */}
+        <div className="block lg:hidden">
+          <div className="flex gap-3 overflow-x-auto scrollbar-none snap-x snap-mandatory pb-2">
+            {tabletGamingProducts.map((p) => (
+              <div
+                key={p.id}
+                className="w-55 shrink-0 snap-start border border-border bg-card flex flex-col"
+              >
+                <ProductCard product={p} />
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ════════════════════════════════════════════════════════════════
+          14. SELL YOUR DEVICE VALUATION BANNER
+      ════════════════════════════════════════════════════════════════ */}
+      <section className="py-8 px-4 md:px-5 border-t border-border">
+        <div className="border border-border bg-card p-6 md:p-10 flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="space-y-2 max-w-xl">
+            <div className="inline-flex items-center gap-1.5 bg-primary/10 text-primary border border-primary/20 px-2.5 py-0.5 text-xs font-bold uppercase tracking-wider">
+              <Sparkles className="size-3.5" />
+              <span>Seller Program</span>
+            </div>
+            <h3 className="text-2xl md:text-3xl font-display font-bold text-foreground">
+              Ready to resell your pre-owned smartphone or laptop?
+            </h3>
+            <p className="text-xs md:text-sm text-subtle-foreground leading-relaxed">
+              List your device in under 3 minutes with our structured condition grading tool. NID
+              verified buyers with direct digital payouts.
+            </p>
+          </div>
+
+          <div className="shrink-0 flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
+            <Link
+              to="/sell"
+              className="w-full sm:w-auto text-center inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground font-semibold px-6 py-3.5 text-xs md:text-sm uppercase tracking-wider hover:opacity-90"
+            >
+              <span>Start Selling Now</span>
+              <ArrowRight className="size-4" />
+            </Link>
+            <Link
+              to="/partner"
+              className="w-full sm:w-auto text-center inline-flex items-center justify-center bg-secondary text-secondary-foreground border border-border font-medium px-5 py-3.5 text-xs md:text-sm hover:bg-muted"
+            >
+              Partner Merchant Program
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ════════════════════════════════════════════════════════════════
+          15. WHAT BUYERS & SELLERS VALUE (SAMPLE DEMO)
+      ════════════════════════════════════════════════════════════════ */}
+      <section className="py-8 px-4 md:px-5 border-t border-border bg-card">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <div className="inline-flex items-center gap-1.5 bg-secondary text-subtle-foreground border border-border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider mb-1">
+              <span>Sample Community Feedback (Demo)</span>
+            </div>
+            <h2 className="text-xl md:text-2xl font-display font-bold">
+              What Buyers &amp; Sellers Value
+            </h2>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 hairline-grid bg-background">
+          <div className="p-6 space-y-3">
+            <div className="flex items-center gap-1 text-amber-500 text-xs">{"★".repeat(5)}</div>
+            <p className="text-xs text-subtle-foreground leading-relaxed">
+              &ldquo;The 32-point inspection matched the iPhone 15 Pro exactly. Battery health was
+              reported at 96% and diagnostics were 100% accurate.&rdquo;
+            </p>
+            <div className="text-[11px] pt-2 border-t border-border text-muted-foreground">
+              <span className="font-semibold text-foreground">Tanvir Ahmed</span> &middot; Dhaka
+              (Banani)
+            </div>
+          </div>
+
+          <div className="p-6 space-y-3">
+            <div className="flex items-center gap-1 text-amber-500 text-xs">{"★".repeat(5)}</div>
+            <p className="text-xs text-subtle-foreground leading-relaxed">
+              &ldquo;Sold my MacBook Air M2. The structured condition checklist removed all endless
+              bargaining. Buyer inspected and payout cleared smoothly.&rdquo;
+            </p>
+            <div className="text-[11px] pt-2 border-t border-border text-muted-foreground">
+              <span className="font-semibold text-foreground">Nusrat Jahan</span> &middot;
+              Chattogram (GEC)
+            </div>
+          </div>
+
+          <div className="p-6 space-y-3">
+            <div className="flex items-center gap-1 text-amber-500 text-xs">{"★".repeat(5)}</div>
+            <p className="text-xs text-subtle-foreground leading-relaxed">
+              &ldquo;Purchased a Fujifilm X100V with Cash on Delivery. 48-hour inspection window
+              gave total peace of mind to verify sensor cleanliness.&rdquo;
+            </p>
+            <div className="text-[11px] pt-2 border-t border-border text-muted-foreground">
+              <span className="font-semibold text-foreground">Shakil Hasan</span> &middot; Sylhet
+              (Zindabazar)
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ════════════════════════════════════════════════════════════════
+          16. FREQUENTLY ASKED QUESTIONS
+      ════════════════════════════════════════════════════════════════ */}
+      <section id="faq" className="py-12 px-4 md:px-5 border-t border-border">
+        <div className="max-w-2xl mx-auto text-center mb-8">
+          <h2 className="text-2xl md:text-3xl font-display font-bold mb-2">
+            Frequently Asked Questions
+          </h2>
+          <p className="text-xs md:text-sm text-subtle-foreground">
+            Clear, honest answers about our inspection, condition grading, and buyer protection.
+          </p>
+
+          <div className="mt-4 flex items-center gap-2 border border-border bg-card px-3 py-2 text-xs max-w-md mx-auto">
+            <Search className="size-3.5 text-muted-foreground shrink-0" />
+            <input
+              value={faqSearch}
+              onChange={(e) => setFaqSearch(e.target.value)}
+              placeholder="Filter questions (e.g. grading, COD, return)..."
+              className="w-full bg-transparent outline-none text-foreground placeholder:text-muted-foreground text-xs"
+            />
+          </div>
+        </div>
+
+        <div className="max-w-3xl mx-auto space-y-2">
+          {filteredFaqs.map((faq, idx) => {
+            const isOpen = openFaqIndex === idx;
+            return (
+              <div key={faq.q} className="border border-border bg-card transition-colors">
+                <button
+                  type="button"
+                  onClick={() => setOpenFaqIndex(isOpen ? null : idx)}
+                  className="w-full p-4 text-left flex items-center justify-between text-xs md:text-sm font-semibold text-foreground hover:bg-secondary/50"
+                >
+                  <span>{faq.q}</span>
+                  <ChevronDown
+                    className={`size-4 text-muted-foreground transition-transform duration-200 shrink-0 ml-3 ${
+                      isOpen ? "rotate-180 text-primary" : ""
+                    }`}
+                  />
+                </button>
+                {isOpen && (
+                  <div className="p-4 pt-0 text-xs text-subtle-foreground leading-relaxed border-t border-border/40 mt-1">
+                    {faq.a}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* ════════════════════════════════════════════════════════════════
+          17. BANGLADESH DISTRICT COVERAGE & DELIVERY INFO
+      ════════════════════════════════════════════════════════════════ */}
+      <section className="py-8 px-4 md:px-5 border-t border-border bg-card">
+        <div className="text-center max-w-2xl mx-auto space-y-2 mb-6">
+          <h3 className="text-lg md:text-xl font-display font-bold">
+            Delivering Across Bangladesh
+          </h3>
+          <p className="text-xs text-muted-foreground">
+            Standard delivery across all 8 administrative divisions with cash on delivery and
+            verified courier tracking.
+          </p>
+        </div>
+
+        <div className="flex flex-wrap items-center justify-center gap-2 max-w-3xl mx-auto text-xs">
+          {[
+            "Dhaka",
+            "Chattogram",
+            "Sylhet",
+            "Rajshahi",
+            "Khulna",
+            "Barishal",
+            "Rangpur",
+            "Mymensingh",
+          ].map((d) => (
+            <span
+              key={d}
+              className="bg-secondary border border-border px-3 py-1 text-foreground font-medium"
+            >
+              📍 {d}
+            </span>
+          ))}
+        </div>
+      </section>
+
+      {/* ════════════════════════════════════════════════════════════════
+          18. SITE FOOTER
+      ════════════════════════════════════════════════════════════════ */}
       <SiteFooter />
     </div>
   );

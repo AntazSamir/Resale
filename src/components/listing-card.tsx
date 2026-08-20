@@ -10,9 +10,15 @@ interface ListingCardProps {
   listing: Listing;
   product: Product;
   compact?: boolean;
+  layout?: "grid" | "list";
 }
 
-export function ListingCard({ listing, product, compact = false }: ListingCardProps) {
+export function ListingCard({
+  listing,
+  product,
+  compact = false,
+  layout = "grid",
+}: ListingCardProps) {
   const { addToCart, isInCart } = useCart();
   const navigate = useNavigate();
   const [justAdded, setJustAdded] = useState(false);
@@ -134,63 +140,187 @@ export function ListingCard({ listing, product, compact = false }: ListingCardPr
     );
   }
 
-  /* ── Full variant (desktop grid) ── */
-  return (
-    <div className="group flex flex-col bg-card p-3.5 sm:p-4 transition-all hover:bg-secondary/40 relative overflow-hidden border border-border h-full">
-      {discountPercent > 0 && (
-        <div className="absolute top-3 left-3 bg-red-600 text-white font-bold text-[10px] px-1.5 py-0.5 rounded shadow-sm z-10">
-          -{discountPercent}% OFF
-        </div>
-      )}
+  /* ── List Layout Variant ── */
+  if (layout === "list") {
+    return (
+      <div className="group flex flex-col sm:flex-row bg-card p-3 sm:p-4 transition-all hover:bg-secondary/40 relative overflow-hidden border border-border gap-4 items-center">
+        {discountPercent > 0 && (
+          <div className="absolute top-2 left-2 bg-destructive text-destructive-foreground font-bold text-[9px] px-1.5 py-0.5 shadow-sm z-10">
+            -{discountPercent}% OFF
+          </div>
+        )}
 
-      {/* Image */}
-      <Link
-        to="/listing/$listingId"
-        params={{ listingId: listing.id }}
-        className="block aspect-square overflow-hidden bg-muted rounded-none relative"
-      >
-        <img
-          src={product.image}
-          alt={product.name}
-          width={900}
-          height={900}
-          loading="lazy"
-          className="size-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
-        />
-        <div className="absolute bottom-2 right-2">
-          <GradeBadge grade={listing.grade} showLabel={false} />
-        </div>
-      </Link>
-
-      {/* Brand & Name */}
-      <div className="pt-2.5">
-        <p className="text-[11px] uppercase tracking-widest text-muted-foreground font-medium">
-          {product.brand}
-        </p>
+        {/* Image */}
         <Link
           to="/listing/$listingId"
           params={{ listingId: listing.id }}
-          className="mt-0.5 block text-sm font-medium leading-snug hover:underline line-clamp-1 text-foreground"
+          className="size-28 sm:size-32 bg-muted shrink-0 overflow-hidden relative border border-border"
         >
-          {product.name}
+          <img
+            src={product.image}
+            alt={product.name}
+            width={300}
+            height={300}
+            loading="lazy"
+            className="size-full object-cover transition-transform duration-300 group-hover:scale-105"
+          />
         </Link>
-      </div>
 
-      {/* Price */}
-      <div className="mt-1 flex items-baseline gap-2">
-        <p className="font-display text-lg font-bold text-primary">{taka(listing.price)}</p>
+        {/* Info */}
+        <div className="flex-1 min-w-0 space-y-1.5 w-full">
+          <div className="flex items-center gap-2">
+            <GradeBadge grade={listing.grade} />
+            <span className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">
+              {product.brand} · {product.category}
+            </span>
+          </div>
+
+          <Link
+            to="/listing/$listingId"
+            params={{ listingId: listing.id }}
+            className="text-base font-semibold text-foreground hover:underline block truncate"
+          >
+            {product.name}
+          </Link>
+
+          <p className="text-xs text-subtle-foreground line-clamp-1">
+            {listing.sellerNote ||
+              `Condition score: ${listing.conditionScore}/100 · 32-Point Inspected`}
+          </p>
+
+          <div className="flex flex-wrap items-center gap-2 pt-1 text-[11px] text-muted-foreground">
+            <span className="bg-secondary px-2 py-0.5 border border-border">
+              📍 {listing.seller.district}
+            </span>
+            {listing.battery && (
+              <span className="bg-emerald-500/10 text-emerald-600 px-2 py-0.5 border border-emerald-500/20 font-medium">
+                🔋 {listing.battery}% Battery
+              </span>
+            )}
+            <span className="bg-primary/10 text-primary px-2 py-0.5 border border-primary/20 font-medium">
+              ✓ NID Verified Seller
+            </span>
+          </div>
+        </div>
+
+        {/* Actions & Price */}
+        <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center w-full sm:w-auto shrink-0 gap-3 pt-2 sm:pt-0 border-t sm:border-t-0 border-border">
+          <div className="text-left sm:text-right">
+            <div className="font-display text-xl font-bold text-primary">{taka(listing.price)}</div>
+            {discountPercent > 0 && (
+              <div className="text-xs text-muted-foreground line-through">
+                {taka(product.retail)}
+              </div>
+            )}
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handleAddToCart}
+              className="h-8 px-3 text-xs rounded-none border-border font-medium"
+            >
+              {inCart || justAdded ? (
+                <>
+                  <Check className="size-3 text-success" />
+                  <span>Added</span>
+                </>
+              ) : (
+                <>
+                  <ShoppingBag className="size-3" />
+                  <span>Cart</span>
+                </>
+              )}
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              onClick={handleBuyNow}
+              className="h-8 px-3 text-xs rounded-none bg-primary text-primary-foreground font-semibold hover:opacity-90"
+            >
+              Buy now
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  /* ── Full Grid Variant (desktop default) ── */
+  return (
+    <div className="group flex flex-col bg-card p-3.5 sm:p-4 transition-all hover:bg-secondary/40 relative overflow-hidden border border-border h-full justify-between">
+      <div>
         {discountPercent > 0 && (
-          <p className="text-xs text-muted-foreground line-through">{taka(product.retail)}</p>
+          <div className="absolute top-3 left-3 bg-destructive text-destructive-foreground font-bold text-[10px] px-1.5 py-0.5 shadow-sm z-10">
+            -{discountPercent}% OFF
+          </div>
         )}
+
+        {/* Image */}
+        <Link
+          to="/listing/$listingId"
+          params={{ listingId: listing.id }}
+          className="block aspect-square overflow-hidden bg-muted rounded-none relative border border-border/40"
+        >
+          <img
+            src={product.image}
+            alt={product.name}
+            width={900}
+            height={900}
+            loading="lazy"
+            className="size-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+          />
+          <div className="absolute bottom-2 right-2">
+            <GradeBadge grade={listing.grade} showLabel={false} />
+          </div>
+        </Link>
+
+        {/* Brand & Name */}
+        <div className="pt-2.5">
+          <p className="text-[11px] uppercase tracking-widest text-muted-foreground font-medium">
+            {product.brand}
+          </p>
+          <Link
+            to="/listing/$listingId"
+            params={{ listingId: listing.id }}
+            className="mt-0.5 block text-sm font-medium leading-snug hover:underline line-clamp-1 text-foreground"
+          >
+            {product.name}
+          </Link>
+        </div>
+
+        {/* Price & Features */}
+        <div className="mt-1 flex items-baseline gap-2">
+          <p className="font-display text-lg font-bold text-primary">{taka(listing.price)}</p>
+          {discountPercent > 0 && (
+            <p className="text-xs text-muted-foreground line-through">{taka(product.retail)}</p>
+          )}
+        </div>
+
+        {/* Badges */}
+        <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[10px]">
+          {listing.battery && (
+            <span className="bg-emerald-500/10 text-emerald-600 px-1.5 py-0.5 border border-emerald-500/20 font-medium">
+              🔋 {listing.battery}%
+            </span>
+          )}
+          <span className="bg-secondary text-subtle-foreground px-1.5 py-0.5 border border-border">
+            32-Pt Inspected
+          </span>
+        </div>
       </div>
 
       {/* Bottom meta & actions */}
       <div className="mt-2.5 pt-2 space-y-2 border-t border-border/50">
         <div className="flex items-center justify-between text-[11px] text-muted-foreground">
-          <span className="truncate">
+          <span className="truncate font-medium text-foreground">
             {listing.seller.name} · {listing.seller.district}
           </span>
-          <span className="text-emerald-600 font-medium shrink-0 ml-2">Grade {listing.grade}</span>
+          <span className="text-primary font-semibold text-[10px] shrink-0 ml-1">
+            ✓ NID Verified
+          </span>
         </div>
 
         <div className="grid grid-cols-2 gap-1.5">

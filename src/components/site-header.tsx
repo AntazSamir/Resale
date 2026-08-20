@@ -14,9 +14,14 @@ import {
   Phone,
   HelpCircle,
   Package,
+  History,
+  Sparkles,
+  ArrowRight,
+  TrendingUp,
 } from "lucide-react";
 import { BangladeshMapSVG } from "./bangladesh-map";
 import resaleLogo from "@/assets/resale-logo.png";
+import { products, taka, cheapest } from "@/data/catalog";
 
 type NavItem = {
   label: string;
@@ -194,23 +199,82 @@ export function SiteHeader() {
     };
   }, [openDropdown]);
 
-  const { itemCount } = useCart();
   const navigate = useNavigate();
+  const { itemCount } = useCart();
+  const [searchFocused, setSearchFocused] = useState(false);
+  const [recentSearches, setRecentSearches] = useState<string[]>([]);
+  const searchContainerRef = useRef<HTMLDivElement | null>(null);
 
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("resale_recent_searches");
+      if (saved) setRecentSearches(JSON.parse(saved).slice(0, 5));
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  const saveRecentSearch = (query: string) => {
+    if (!query.trim()) return;
+    try {
+      const next = [
+        query.trim(),
+        ...recentSearches.filter((s) => s.toLowerCase() !== query.trim().toLowerCase()),
+      ].slice(0, 5);
+      setRecentSearches(next);
+      localStorage.setItem("resale_recent_searches", JSON.stringify(next));
+    } catch {
+      // ignore
+    }
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(e.target as Node)) {
+        setSearchFocused(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const popularSearches = [
+    "iPhone 15 Pro",
+    "MacBook Air M2",
+    "Sony Alpha A7 IV",
+    "Sony WH-1000XM5",
+    "Google Pixel 8 Pro",
+  ];
+
+  const matchingProducts = searchQuery.trim()
+    ? products
+        .filter(
+          (p) =>
+            p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            p.brand.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            p.category.toLowerCase().includes(searchQuery.toLowerCase()),
+        )
+        .slice(0, 4)
+    : [];
+
+  const handleSearchSubmit = (e?: React.FormEvent, customQuery?: string) => {
+    if (e) e.preventDefault();
+    const queryToUse = customQuery !== undefined ? customQuery : searchQuery;
+    if (queryToUse.trim()) {
+      saveRecentSearch(queryToUse.trim());
       navigate({
         to: "/products",
-        search: { q: searchQuery.trim(), category: undefined, brand: undefined },
+        search: { q: queryToUse.trim(), category: undefined, brand: undefined },
       });
       setMobileSearchOpen(false);
+      setSearchFocused(false);
     } else {
       navigate({
         to: "/products",
         search: { q: undefined, category: undefined, brand: undefined },
       });
       setMobileSearchOpen(false);
+      setSearchFocused(false);
     }
   };
 
@@ -220,13 +284,13 @@ export function SiteHeader() {
       <div className="bg-primary text-primary-foreground text-xs py-2 px-4 text-center font-medium tracking-wide flex items-center justify-center gap-6 overflow-hidden">
         <span>⚡ OPEN-BOX &amp; PRE-OWNED ELECTRONICS AT FACTORY PRICES</span>
         <span className="hidden md:inline font-normal opacity-80">|</span>
-        <span className="hidden md:inline">PASSES 13+ COMPONENT CHECKS</span>
+        <span className="hidden md:inline">32-POINT STANDARDIZED INSPECTION</span>
         <span className="hidden md:inline font-normal opacity-80">|</span>
-        <span className="hidden lg:inline">NID-VERIFIED SELLERS &amp; 48H BUYER PROTECTION</span>
+        <span className="hidden lg:inline">NID VERIFIED SELLERS &amp; 48H BUYER PROTECTION</span>
       </div>
 
       {/* Main Header Bar */}
-      <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur">
+      <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur">
         <div className="mx-auto flex h-14 md:h-16 max-w-7xl items-center justify-between md:justify-start gap-4 md:gap-6 px-4 md:px-5">
           {/* Mobile Left: Hamburger Button */}
           <div className="flex md:hidden items-center">
@@ -239,10 +303,10 @@ export function SiteHeader() {
             </button>
           </div>
 
-          {/* Brand Logo & Name (No Bangladesh map on header) */}
+          {/* Brand Logo & Name */}
           <Link
             to="/"
-            className="inline-flex items-center gap-0.5 font-display text-xl font-bold tracking-tight text-foreground"
+            className="inline-flex items-center gap-0.5 font-display text-xl font-bold tracking-tight text-foreground shrink-0"
           >
             <img
               src={resaleLogo}
@@ -252,20 +316,173 @@ export function SiteHeader() {
             <span className="leading-none flex items-center">RESALE</span>
           </Link>
 
-          {/* Desktop Center: Search Bar */}
-          <form
-            onSubmit={handleSearchSubmit}
-            className="ml-auto hidden flex-1 items-center gap-2 border border-border px-3 py-2 text-sm md:flex md:max-w-sm"
+          {/* Desktop Center: Search Bar with Autocomplete */}
+          <div
+            ref={searchContainerRef}
+            className="ml-auto hidden relative flex-1 md:flex md:max-w-md"
           >
-            <Search className="size-4 text-muted-foreground shrink-0" />
-            <input
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-transparent outline-none placeholder:text-muted-foreground"
-              placeholder="Search products, brands, models"
-              aria-label="Search listings"
-            />
-          </form>
+            <form
+              onSubmit={(e) => handleSearchSubmit(e)}
+              className="w-full flex items-center gap-2 border border-border bg-card px-3 py-2 text-sm focus-within:border-foreground transition-colors"
+            >
+              <Search className="size-4 text-muted-foreground shrink-0" />
+              <input
+                value={searchQuery}
+                onFocus={() => setSearchFocused(true)}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setSearchFocused(true);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Escape") setSearchFocused(false);
+                }}
+                className="w-full bg-transparent outline-none placeholder:text-muted-foreground text-foreground text-xs md:text-sm"
+                placeholder="Search iPhone, MacBook, Sony camera..."
+                aria-label="Search listings"
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery("")}
+                  className="text-muted-foreground hover:text-foreground text-xs"
+                >
+                  <X className="size-3.5" />
+                </button>
+              )}
+            </form>
+
+            {/* Desktop Autocomplete Popover */}
+            {searchFocused && (
+              <div className="absolute top-full left-0 right-0 mt-1.5 bg-card border border-border z-50 p-3 space-y-3">
+                {searchQuery.trim() ? (
+                  <div>
+                    <div className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-2 flex items-center justify-between">
+                      <span>Matching Devices</span>
+                      <span className="text-[10px] font-normal text-subtle-foreground">
+                        {matchingProducts.length} results
+                      </span>
+                    </div>
+                    {matchingProducts.length > 0 ? (
+                      <div className="space-y-1.5">
+                        {matchingProducts.map((p) => {
+                          const deal = cheapest(p.id);
+                          return deal ? (
+                            <Link
+                              key={p.id}
+                              to="/listing/$listingId"
+                              params={{ listingId: deal.id }}
+                              onClick={() => {
+                                saveRecentSearch(p.name);
+                                setSearchFocused(false);
+                              }}
+                              className="flex items-center justify-between p-2 hover:bg-secondary/70 transition-colors text-xs border border-transparent hover:border-border"
+                            >
+                              <div className="flex items-center gap-2.5 min-w-0">
+                                <img
+                                  src={p.image}
+                                  alt={p.name}
+                                  className="size-8 object-cover border border-border bg-muted shrink-0"
+                                />
+                                <div className="min-w-0">
+                                  <p className="font-semibold text-foreground truncate">{p.name}</p>
+                                  <p className="text-[10px] text-muted-foreground">
+                                    {p.category} · {p.brand}
+                                  </p>
+                                </div>
+                              </div>
+                              <span className="font-display font-bold text-primary shrink-0 ml-2">
+                                {taka(deal.price)}
+                              </span>
+                            </Link>
+                          ) : (
+                            <Link
+                              key={p.id}
+                              to="/products"
+                              search={{ q: p.name, category: undefined, brand: undefined }}
+                              onClick={() => {
+                                saveRecentSearch(p.name);
+                                setSearchFocused(false);
+                              }}
+                              className="flex items-center justify-between p-2 hover:bg-secondary/70 transition-colors text-xs border border-transparent hover:border-border"
+                            >
+                              <div className="flex items-center gap-2.5 min-w-0">
+                                <img
+                                  src={p.image}
+                                  alt={p.name}
+                                  className="size-8 object-cover border border-border bg-muted shrink-0"
+                                />
+                                <div className="min-w-0">
+                                  <p className="font-semibold text-foreground truncate">{p.name}</p>
+                                  <p className="text-[10px] text-muted-foreground">
+                                    {p.category} · {p.brand}
+                                  </p>
+                                </div>
+                              </div>
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    ) : null}
+                    <button
+                      type="button"
+                      onClick={() => handleSearchSubmit(undefined, searchQuery)}
+                      className="w-full text-center text-xs font-semibold text-primary pt-2 hover:underline block"
+                    >
+                      View all results for &ldquo;{searchQuery}&rdquo; →
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    {recentSearches.length > 0 && (
+                      <div>
+                        <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1.5 flex items-center gap-1.5">
+                          <History className="size-3 text-muted-foreground" />
+                          <span>Recent Searches</span>
+                        </div>
+                        <div className="flex flex-wrap gap-1.5">
+                          {recentSearches.map((s) => (
+                            <button
+                              key={s}
+                              type="button"
+                              onClick={() => {
+                                setSearchQuery(s);
+                                handleSearchSubmit(undefined, s);
+                              }}
+                              className="text-xs bg-muted hover:bg-secondary border border-border px-2.5 py-1 text-foreground transition-colors"
+                            >
+                              {s}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    <div>
+                      <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1.5 flex items-center gap-1.5">
+                        <TrendingUp className="size-3 text-primary" />
+                        <span>Popular Searches</span>
+                      </div>
+                      <div className="flex flex-wrap gap-1.5">
+                        {popularSearches.map((term) => (
+                          <button
+                            key={term}
+                            type="button"
+                            onClick={() => {
+                              setSearchQuery(term);
+                              handleSearchSubmit(undefined, term);
+                            }}
+                            className="text-xs bg-secondary/80 hover:bg-secondary border border-border px-2.5 py-1 text-foreground transition-colors"
+                          >
+                            {term}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
+          </div>
 
           {/* Desktop Right: Actions */}
           <div className="ml-auto hidden md:flex items-center gap-5">
@@ -310,11 +527,11 @@ export function SiteHeader() {
           </div>
         </div>
 
-        {/* Mobile Search Input Dropdown */}
+        {/* Mobile Search Input Overlay / Drawer */}
         {mobileSearchOpen && (
-          <div className="md:hidden border-t border-border bg-card p-3">
+          <div className="md:hidden border-t border-border bg-card p-3 space-y-3 animate-in fade-in slide-in-from-top-2 duration-150">
             <form
-              onSubmit={handleSearchSubmit}
+              onSubmit={(e) => handleSearchSubmit(e)}
               className="flex items-center gap-2 border border-border bg-background px-3 py-2 text-sm"
             >
               <Search className="size-4 text-muted-foreground shrink-0" />
@@ -322,10 +539,100 @@ export function SiteHeader() {
                 autoFocus
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search phones, laptops, brands..."
+                placeholder="Search iPhone, MacBook, Sony..."
                 className="w-full bg-transparent outline-none text-xs text-foreground"
               />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery("")}
+                  className="text-muted-foreground"
+                >
+                  <X className="size-3.5" />
+                </button>
+              )}
             </form>
+
+            {/* Mobile Popular / Matching suggestions */}
+            {searchQuery.trim() ? (
+              <div className="space-y-1 pt-1">
+                {matchingProducts.map((p) => {
+                  const deal = cheapest(p.id);
+                  return deal ? (
+                    <Link
+                      key={p.id}
+                      to="/listing/$listingId"
+                      params={{ listingId: deal.id }}
+                      onClick={() => {
+                        saveRecentSearch(p.name);
+                        setMobileSearchOpen(false);
+                      }}
+                      className="flex items-center justify-between p-2 hover:bg-muted text-xs border border-border/50"
+                    >
+                      <div className="flex items-center gap-2 truncate">
+                        <img
+                          src={p.image}
+                          alt={p.name}
+                          className="size-7 object-cover bg-muted shrink-0"
+                        />
+                        <span className="font-medium text-foreground truncate">{p.name}</span>
+                      </div>
+                      <span className="font-display font-bold text-primary shrink-0 ml-1.5">
+                        {taka(deal.price)}
+                      </span>
+                    </Link>
+                  ) : (
+                    <Link
+                      key={p.id}
+                      to="/products"
+                      search={{ q: p.name, category: undefined, brand: undefined }}
+                      onClick={() => {
+                        saveRecentSearch(p.name);
+                        setMobileSearchOpen(false);
+                      }}
+                      className="flex items-center justify-between p-2 hover:bg-muted text-xs border border-border/50"
+                    >
+                      <div className="flex items-center gap-2 truncate">
+                        <img
+                          src={p.image}
+                          alt={p.name}
+                          className="size-7 object-cover bg-muted shrink-0"
+                        />
+                        <span className="font-medium text-foreground truncate">{p.name}</span>
+                      </div>
+                    </Link>
+                  );
+                })}
+                <button
+                  type="button"
+                  onClick={() => handleSearchSubmit(undefined, searchQuery)}
+                  className="w-full text-center text-xs font-semibold text-primary py-2 hover:underline block"
+                >
+                  Search for &ldquo;{searchQuery}&rdquo; →
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-2 pt-1">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block">
+                  Popular Searches
+                </span>
+                <div className="flex flex-wrap gap-1.5">
+                  {popularSearches.map((term) => (
+                    <button
+                      key={term}
+                      type="button"
+                      onClick={() => {
+                        setSearchQuery(term);
+                        handleSearchSubmit(undefined, term);
+                      }}
+                      className="text-[11px] bg-secondary border border-border px-2.5 py-1 text-foreground"
+                    >
+                      {term}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </header>
@@ -752,9 +1059,9 @@ export function SiteFooter() {
               <span className="leading-none flex items-center">RESALE</span>
             </Link>
             <p className="text-xs text-subtle-foreground leading-relaxed max-w-sm">
-              Bangladesh&apos;s premier C2C marketplace for quality-checked pre-owned, open-box, and
-              like-new electronics. Powered by NID verification, objective 13-point condition
-              grading, and 48-hour buyer protection.
+              Bangladesh&apos;s premier marketplace for quality-checked pre-owned, open-box, and
+              like-new electronics. Powered by NID verification, objective 32-point standardized
+              inspection, and 48-hour buyer protection.
             </p>
 
             {/* Trust Badges */}
@@ -1097,8 +1404,8 @@ export function SiteFooter() {
             <span className="leading-none flex items-center">RESALE</span>
           </Link>
           <p className="text-xs text-subtle-foreground leading-relaxed">
-            Bangladesh&apos;s marketplace for quality-checked pre-owned electronics with 13+
-            component checks, NID verification, and 48-hour buyer protection.
+            Bangladesh&apos;s marketplace for quality-checked pre-owned electronics with 32-point
+            standardized inspection, NID verification, and 48-hour buyer protection.
           </p>
 
           <div className="flex flex-wrap items-center gap-1.5 pt-1 text-[11px]">

@@ -42,6 +42,12 @@ function SellerProfilePage() {
     <div className="min-h-screen bg-background flex flex-col">
       <SiteHeader />
       <main className="flex-1 mx-auto max-w-5xl px-5 py-10 w-full">
+        {/* Demo Data Notice */}
+        <div className="text-[11px] bg-muted/60 text-muted-foreground px-3 py-1.5 border border-border mb-4 flex items-center justify-between">
+          <span>Demo Seller Profile &middot; Sample Performance &amp; Metrics</span>
+          <span className="font-semibold">NID Verified Sample</span>
+        </div>
+
         {/* Profile Header */}
         <Card className="mb-10">
           <CardContent className="p-8 flex flex-col md:flex-row gap-8 items-center md:items-start">

@@ -11,7 +11,18 @@ import {
   taka,
   type Grade,
 } from "@/data/catalog";
-import { Search, SlidersHorizontal, X, ChevronRight, RotateCcw, Package } from "lucide-react";
+import {
+  Search,
+  SlidersHorizontal,
+  X,
+  ChevronRight,
+  RotateCcw,
+  Package,
+  LayoutGrid,
+  List,
+  Sparkles,
+  ShieldCheck,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -41,18 +52,19 @@ export const Route = createFileRoute("/products")({
   }),
   head: () => ({
     meta: [
-      { title: "Browse Listings | Resale.com" },
+      { title: "Browse Graded Electronics | Resale.com" },
       {
         name: "description",
         content:
-          "Browse all available graded pre-owned electronics from verified sellers in Bangladesh. Filter by brand, category, grade, price, and location.",
+          "Browse all available graded pre-owned electronics from verified sellers in Bangladesh. 32-point inspection, NID verification, and 48-hour buyer protection.",
       },
     ],
   }),
   component: ProductsPage,
 });
 
-type SortOption = "relevance" | "price-asc" | "price-desc" | "name-asc" | "newest";
+type SortOption =
+  "relevance" | "price-asc" | "price-desc" | "name-asc" | "newest" | "condition-desc";
 
 const MAX_CATALOG_PRICE = 300000;
 
@@ -69,8 +81,12 @@ function ProductsPage() {
   );
   const [selectedGrades, setSelectedGrades] = useState<Grade[]>([]);
   const [selectedDistricts, setSelectedDistricts] = useState<string[]>([]);
+  const [minBatteryHealth, setMinBatteryHealth] = useState<number | null>(null);
+  const [selectedStorage, setSelectedStorage] = useState<string[]>([]);
+  const [selectedRam, setSelectedRam] = useState<string[]>([]);
   const [priceMax, setPriceMax] = useState<number>(MAX_CATALOG_PRICE);
   const [sortBy, setSortBy] = useState<SortOption>("relevance");
+  const [viewLayout, setViewLayout] = useState<"grid" | "list">("grid");
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
 
   // Sync with URL query when it changes
@@ -80,13 +96,17 @@ function ProductsPage() {
     if (urlSearch.brand !== undefined) setSelectedBrands([urlSearch.brand]);
   }, [urlSearch.q, urlSearch.category, urlSearch.brand]);
 
-  // Facet value lists — categories/brands from product catalog, districts from actual listings
+  // Facet value lists
   const allCategories = useMemo(() => Array.from(new Set(products.map((p) => p.category))), []);
   const allBrands = useMemo(() => Array.from(new Set(products.map((p) => p.brand))), []);
   const allDistricts = useMemo(
     () => Array.from(new Set(listings.map((l) => l.seller.district))).sort(),
     [],
   );
+
+  // Dynamic available storage options based on catalog specs
+  const storageOptions = useMemo(() => ["128GB", "256GB", "512GB", "1TB"], []);
+  const ramOptions = useMemo(() => ["8GB", "12GB", "16GB", "18GB", "32GB"], []);
 
   // Toggle helpers
   const toggleCategory = (cat: string) =>
@@ -109,12 +129,23 @@ function ProductsPage() {
       prev.includes(district) ? prev.filter((d) => d !== district) : [...prev, district],
     );
 
+  const toggleStorage = (s: string) =>
+    setSelectedStorage((prev) =>
+      prev.includes(s) ? prev.filter((item) => item !== s) : [...prev, s],
+    );
+
+  const toggleRam = (r: string) =>
+    setSelectedRam((prev) => (prev.includes(r) ? prev.filter((item) => item !== r) : [...prev, r]));
+
   const clearAllFilters = () => {
     setSearchQuery("");
     setSelectedCategories([]);
     setSelectedBrands([]);
     setSelectedGrades([]);
     setSelectedDistricts([]);
+    setMinBatteryHealth(null);
+    setSelectedStorage([]);
+    setSelectedRam([]);
     setPriceMax(MAX_CATALOG_PRICE);
     setSortBy("relevance");
   };
@@ -125,11 +156,12 @@ function ProductsPage() {
     selectedBrands.length +
     selectedGrades.length +
     selectedDistricts.length +
+    (minBatteryHealth !== null ? 1 : 0) +
+    selectedStorage.length +
+    selectedRam.length +
     (priceMax < MAX_CATALOG_PRICE ? 1 : 0);
 
   // ── Listing filter engine ──────────────────────────────────────────────────
-  // We now iterate over individual listings, not products.
-  // Product fields (name, brand, category, specs) are joined for search/filter.
   const filteredListings = useMemo(() => {
     return listings.filter((listing) => {
       const product = productFor(listing.productId);
@@ -141,28 +173,74 @@ function ProductsPage() {
         const matchesName = product.name.toLowerCase().includes(q);
         const matchesBrand = product.brand.toLowerCase().includes(q);
         const matchesCategory = product.category.toLowerCase().includes(q);
+        const matchesSeller = listing.seller.name.toLowerCase().includes(q);
+        const matchesDistrict = listing.seller.district.toLowerCase().includes(q);
         const matchesSpecs = product.specs.some(
           (s) => s.label.toLowerCase().includes(q) || s.value.toLowerCase().includes(q),
         );
-        if (!matchesName && !matchesBrand && !matchesCategory && !matchesSpecs) return false;
+        if (
+          !matchesName &&
+          !matchesBrand &&
+          !matchesCategory &&
+          !matchesSeller &&
+          !matchesDistrict &&
+          !matchesSpecs
+        ) {
+          return false;
+        }
       }
 
       // 2. Category
-      if (selectedCategories.length > 0 && !selectedCategories.includes(product.category))
+      if (selectedCategories.length > 0 && !selectedCategories.includes(product.category)) {
         return false;
+      }
 
       // 3. Brand
-      if (selectedBrands.length > 0 && !selectedBrands.includes(product.brand)) return false;
-
-      // 4. Grade — now directly on the listing
-      if (selectedGrades.length > 0 && !selectedGrades.includes(listing.grade)) return false;
-
-      // 5. Price — listing's actual selling price
-      if (listing.price > priceMax) return false;
-
-      // 6. Seller district
-      if (selectedDistricts.length > 0 && !selectedDistricts.includes(listing.seller.district))
+      if (selectedBrands.length > 0 && !selectedBrands.includes(product.brand)) {
         return false;
+      }
+
+      // 4. Grade
+      if (selectedGrades.length > 0 && !selectedGrades.includes(listing.grade)) {
+        return false;
+      }
+
+      // 5. Price
+      if (listing.price > priceMax) {
+        return false;
+      }
+
+      // 6. District
+      if (selectedDistricts.length > 0 && !selectedDistricts.includes(listing.seller.district)) {
+        return false;
+      }
+
+      // 7. Battery Health
+      if (minBatteryHealth !== null) {
+        if (!listing.battery || listing.battery < minBatteryHealth) return false;
+      }
+
+      // 8. Storage Facet
+      if (selectedStorage.length > 0) {
+        const hasStorage = product.specs.some(
+          (s) =>
+            s.label.toLowerCase() === "storage" &&
+            selectedStorage.some((opt) => s.value.includes(opt)),
+        );
+        const nameHasStorage = selectedStorage.some((opt) => product.name.includes(opt));
+        if (!hasStorage && !nameHasStorage) return false;
+      }
+
+      // 9. RAM Facet
+      if (selectedRam.length > 0) {
+        const hasRam = product.specs.some(
+          (s) =>
+            (s.label.toLowerCase() === "memory" || s.label.toLowerCase() === "ram") &&
+            selectedRam.some((opt) => s.value.includes(opt)),
+        );
+        const nameHasRam = selectedRam.some((opt) => product.name.includes(opt));
+        if (!hasRam && !nameHasRam) return false;
+      }
 
       return true;
     });
@@ -172,12 +250,17 @@ function ProductsPage() {
     selectedBrands,
     selectedGrades,
     selectedDistricts,
+    minBatteryHealth,
+    selectedStorage,
+    selectedRam,
     priceMax,
   ]);
 
   // ── Sorting engine ─────────────────────────────────────────────────────────
   const sortedListings = useMemo(() => {
     const list = [...filteredListings];
+    const gradeWeight: Record<Grade, number> = { "A+": 5, A: 4, B: 3, C: 2, D: 1 };
+
     switch (sortBy) {
       case "price-asc":
         return list.sort((a, b) => a.price - b.price);
@@ -191,11 +274,19 @@ function ProductsPage() {
         });
       case "newest":
         return list.sort((a, b) => new Date(b.listedAt).getTime() - new Date(a.listedAt).getTime());
+      case "condition-desc":
+        return list.sort((a, b) => (gradeWeight[b.grade] || 0) - (gradeWeight[a.grade] || 0));
       case "relevance":
       default:
         return list;
     }
   }, [filteredListings, sortBy]);
+
+  // ── Category specific check ────────────────────────────────────────────────
+  const isSmartphoneOrLaptopBrowsing =
+    selectedCategories.length === 0 ||
+    selectedCategories.includes("Smartphones") ||
+    selectedCategories.includes("Laptops");
 
   // ── Filter panel (shared between desktop sidebar & mobile drawer) ──────────
   const FilterContent = (
@@ -205,7 +296,7 @@ function ProductsPage() {
         <h3 className="font-semibold text-xs uppercase tracking-wider text-muted-foreground mb-3">
           Category
         </h3>
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           {allCategories.map((cat) => {
             const count = listings.filter((l) => productFor(l.productId)?.category === cat).length;
             const checked = selectedCategories.includes(cat);
@@ -234,7 +325,7 @@ function ProductsPage() {
         <h3 className="font-semibold text-xs uppercase tracking-wider text-muted-foreground mb-3">
           Brand
         </h3>
-        <div className="space-y-2">
+        <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
           {allBrands.map((brand) => {
             const count = listings.filter((l) => productFor(l.productId)?.brand === brand).length;
             const checked = selectedBrands.includes(brand);
@@ -263,7 +354,7 @@ function ProductsPage() {
         <h3 className="font-semibold text-xs uppercase tracking-wider text-muted-foreground mb-3">
           Condition Grade
         </h3>
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           {grades.map((grade) => {
             const count = listings.filter((l) => l.grade === grade).length;
             const checked = selectedGrades.includes(grade);
@@ -288,6 +379,90 @@ function ProductsPage() {
         </div>
       </div>
 
+      {/* Category-specific: Battery Health Filter */}
+      {isSmartphoneOrLaptopBrowsing && (
+        <div className="border-t border-border pt-5">
+          <h3 className="font-semibold text-xs uppercase tracking-wider text-muted-foreground mb-3">
+            Battery Health
+          </h3>
+          <div className="space-y-1.5">
+            {[
+              { label: "90% or Higher", val: 90 },
+              { label: "85% or Higher", val: 85 },
+              { label: "80% or Higher", val: 80 },
+            ].map((opt) => (
+              <label
+                key={opt.val}
+                className="flex items-center justify-between cursor-pointer py-1 px-1.5 hover:bg-muted/60 transition-colors text-foreground"
+              >
+                <div className="flex items-center gap-2.5">
+                  <Checkbox
+                    checked={minBatteryHealth === opt.val}
+                    onCheckedChange={() =>
+                      setMinBatteryHealth(minBatteryHealth === opt.val ? null : opt.val)
+                    }
+                    id={`battery-${opt.val}`}
+                  />
+                  <span>{opt.label}</span>
+                </div>
+              </label>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Category-specific: Storage Capacity Filter */}
+      {isSmartphoneOrLaptopBrowsing && (
+        <div className="border-t border-border pt-5">
+          <h3 className="font-semibold text-xs uppercase tracking-wider text-muted-foreground mb-3">
+            Storage Capacity
+          </h3>
+          <div className="space-y-1.5">
+            {storageOptions.map((s) => (
+              <label
+                key={s}
+                className="flex items-center justify-between cursor-pointer py-1 px-1.5 hover:bg-muted/60 transition-colors text-foreground"
+              >
+                <div className="flex items-center gap-2.5">
+                  <Checkbox
+                    checked={selectedStorage.includes(s)}
+                    onCheckedChange={() => toggleStorage(s)}
+                    id={`storage-${s}`}
+                  />
+                  <span>{s}</span>
+                </div>
+              </label>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Category-specific: RAM Filter */}
+      {selectedCategories.includes("Laptops") && (
+        <div className="border-t border-border pt-5">
+          <h3 className="font-semibold text-xs uppercase tracking-wider text-muted-foreground mb-3">
+            RAM / Unified Memory
+          </h3>
+          <div className="space-y-1.5">
+            {ramOptions.map((r) => (
+              <label
+                key={r}
+                className="flex items-center justify-between cursor-pointer py-1 px-1.5 hover:bg-muted/60 transition-colors text-foreground"
+              >
+                <div className="flex items-center gap-2.5">
+                  <Checkbox
+                    checked={selectedRam.includes(r)}
+                    onCheckedChange={() => toggleRam(r)}
+                    id={`ram-${r}`}
+                  />
+                  <span>{r}</span>
+                </div>
+              </label>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Max Price */}
       <div className="border-t border-border pt-5">
         <div className="flex items-center justify-between mb-3">
@@ -298,7 +473,7 @@ function ProductsPage() {
         </div>
         <input
           type="range"
-          min={10000}
+          min={5000}
           max={MAX_CATALOG_PRICE}
           step={5000}
           value={priceMax}
@@ -306,7 +481,7 @@ function ProductsPage() {
           className="w-full accent-primary cursor-pointer"
         />
         <div className="flex justify-between text-[11px] text-muted-foreground mt-1.5">
-          <span>৳10k</span>
+          <span>৳5k</span>
           <span>৳150k</span>
           <span>৳300k</span>
         </div>
@@ -317,7 +492,7 @@ function ProductsPage() {
         <h3 className="font-semibold text-xs uppercase tracking-wider text-muted-foreground mb-3">
           Seller District
         </h3>
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           {allDistricts.map((district) => {
             const count = listings.filter((l) => l.seller.district === district).length;
             const checked = selectedDistricts.includes(district);
@@ -364,8 +539,8 @@ function ProductsPage() {
               Browse Listings
             </h1>
             <p className="text-xs md:text-sm text-subtle-foreground mt-1">
-              Individual verified units from sellers across Bangladesh — each card is a specific
-              offer.
+              Individual verified units from NID verified sellers across Bangladesh — each card is
+              an authentic offer with 32-point inspection data.
             </p>
           </div>
           <div className="text-xs text-muted-foreground flex items-center gap-2 shrink-0">
@@ -379,13 +554,13 @@ function ProductsPage() {
 
         {/* Search & Controls Bar */}
         <div className="mt-6 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-card border border-border p-3">
-          {/* Search */}
+          {/* Search Input */}
           <div className="relative flex-1">
             <Search className="size-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
             <Input
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search by model, brand, or specs..."
+              placeholder="Search by model, brand, seller, or specs..."
               className="pl-9 pr-8 text-xs md:text-sm border-border bg-background h-9 rounded-none"
             />
             {searchQuery && (
@@ -442,10 +617,40 @@ function ProductsPage() {
               </SheetContent>
             </Sheet>
 
-            {/* Sort */}
+            {/* Layout Toggle (Grid / List) */}
+            <div className="hidden sm:flex items-center border border-border bg-background">
+              <button
+                type="button"
+                onClick={() => setViewLayout("grid")}
+                className={`p-2 transition-colors ${
+                  viewLayout === "grid"
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+                title="Grid view"
+                aria-label="Grid view"
+              >
+                <LayoutGrid className="size-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewLayout("list")}
+                className={`p-2 transition-colors ${
+                  viewLayout === "list"
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+                title="List view"
+                aria-label="List view"
+              >
+                <List className="size-4" />
+              </button>
+            </div>
+
+            {/* Sort Select */}
             <div className="flex items-center gap-2 shrink-0">
               <span className="hidden sm:inline text-xs text-muted-foreground font-medium">
-                Sort by:
+                Sort:
               </span>
               <Select value={sortBy} onValueChange={(val) => setSortBy(val as SortOption)}>
                 <SelectTrigger className="w-40 md:w-44 h-9 text-xs rounded-none border-border bg-background">
@@ -453,10 +658,11 @@ function ProductsPage() {
                 </SelectTrigger>
                 <SelectContent className="rounded-none border-border bg-card">
                   <SelectItem value="relevance">Featured</SelectItem>
+                  <SelectItem value="condition-desc">Best Condition Grade</SelectItem>
                   <SelectItem value="price-asc">Price: Low to High</SelectItem>
                   <SelectItem value="price-desc">Price: High to Low</SelectItem>
-                  <SelectItem value="name-asc">Model Name (A–Z)</SelectItem>
                   <SelectItem value="newest">Newest Listed</SelectItem>
+                  <SelectItem value="name-asc">Model (A–Z)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -532,13 +738,43 @@ function ProductsPage() {
               </Badge>
             ))}
 
+            {minBatteryHealth !== null && (
+              <Badge variant="secondary" className="text-xs font-normal gap-1 rounded-none py-1">
+                <span>Battery &ge; {minBatteryHealth}%</span>
+                <button
+                  onClick={() => setMinBatteryHealth(null)}
+                  className="hover:text-destructive"
+                  aria-label="Remove battery filter"
+                >
+                  <X className="size-3" />
+                </button>
+              </Badge>
+            )}
+
+            {selectedStorage.map((s) => (
+              <Badge
+                key={s}
+                variant="secondary"
+                className="text-xs font-normal gap-1 rounded-none py-1"
+              >
+                <span>Storage: {s}</span>
+                <button
+                  onClick={() => toggleStorage(s)}
+                  className="hover:text-destructive"
+                  aria-label={`Remove storage ${s} filter`}
+                >
+                  <X className="size-3" />
+                </button>
+              </Badge>
+            ))}
+
             {selectedDistricts.map((dist) => (
               <Badge
                 key={dist}
                 variant="secondary"
                 className="text-xs font-normal gap-1 rounded-none py-1"
               >
-                <span>Location: {dist}</span>
+                <span>📍 {dist}</span>
                 <button
                   onClick={() => toggleDistrict(dist)}
                   className="hover:text-destructive"
@@ -571,10 +807,10 @@ function ProductsPage() {
           </div>
         )}
 
-        {/* Layout: Desktop sidebar + listing grid */}
+        {/* Layout: Desktop sidebar + listing grid/list */}
         <div className="mt-8 grid grid-cols-1 lg:grid-cols-[240px_1fr] gap-8 items-start">
           {/* Desktop Sidebar */}
-          <aside className="hidden lg:block border border-border bg-card p-5">
+          <aside className="hidden lg:block border border-border bg-card p-5 sticky top-20">
             <div className="flex items-center justify-between pb-3 border-b border-border mb-5">
               <h2 className="font-display font-bold text-sm tracking-tight">Refine Results</h2>
               {activeFilterCount > 0 && (
@@ -589,31 +825,56 @@ function ProductsPage() {
             {FilterContent}
           </aside>
 
-          {/* Listing Grid */}
+          {/* Listings Container */}
           <div className="space-y-6 overflow-hidden">
             {sortedListings.length > 0 ? (
-              /* Responsive grid — all screen sizes */
-              <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-5 items-stretch auto-rows-fr">
-                {sortedListings.map((listing) => {
-                  const product = productFor(listing.productId);
-                  if (!product) return null;
-                  return <ListingCard key={listing.id} listing={listing} product={product} />;
-                })}
-              </div>
+              viewLayout === "grid" ? (
+                /* Grid view */
+                <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-3 gap-3 sm:gap-4 md:gap-5 items-stretch auto-rows-fr">
+                  {sortedListings.map((listing) => {
+                    const product = productFor(listing.productId);
+                    if (!product) return null;
+                    return (
+                      <ListingCard
+                        key={listing.id}
+                        listing={listing}
+                        product={product}
+                        layout="grid"
+                      />
+                    );
+                  })}
+                </div>
+              ) : (
+                /* List view */
+                <div className="space-y-3">
+                  {sortedListings.map((listing) => {
+                    const product = productFor(listing.productId);
+                    if (!product) return null;
+                    return (
+                      <ListingCard
+                        key={listing.id}
+                        listing={listing}
+                        product={product}
+                        layout="list"
+                      />
+                    );
+                  })}
+                </div>
+              )
             ) : (
               <div className="border border-dashed border-border bg-card p-12 text-center">
-                <div className="mx-auto size-12 bg-muted flex items-center justify-center mb-4">
+                <div className="mx-auto size-12 bg-muted flex items-center justify-center mb-4 border border-border">
                   <Search className="size-6 text-muted-foreground" />
                 </div>
-                <h3 className="text-base font-medium text-foreground mb-1">
-                  No matching listings found
+                <h3 className="text-base font-semibold text-foreground mb-1">
+                  No devices match your filters
                 </h3>
                 <p className="text-xs text-muted-foreground max-w-sm mx-auto mb-6">
-                  We couldn&apos;t find any listings matching your current filters.
+                  Try clearing some filter options or search for another model.
                 </p>
                 <Button onClick={clearAllFilters} size="sm" className="rounded-none gap-2">
                   <RotateCcw className="size-3.5" />
-                  <span>Reset All Filters</span>
+                  <span>Clear All Filters</span>
                 </Button>
               </div>
             )}
