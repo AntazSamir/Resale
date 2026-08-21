@@ -1,9 +1,24 @@
 import { useState } from "react";
 import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
-import { Check, Lock, ShieldCheck, Star, Truck } from "lucide-react";
+import {
+  Check,
+  Truck,
+  AlertTriangle,
+  Layers,
+  ShieldCheck,
+  CheckCircle2,
+  FileText,
+  Battery,
+  Box,
+} from "lucide-react";
 import { SiteFooter, SiteHeader } from "@/components/site-header";
 import { useCart } from "@/lib/cart-store";
 import { GradeBadge } from "@/components/grade-badge";
+import { InspectionReport } from "@/components/inspection-report";
+import { RepairHistoryCard } from "@/components/repair-history";
+import { DeviceVerificationCard } from "@/components/device-verification";
+import { WhatsIncludedCard } from "@/components/whats-included";
+import { SellerTrustLine } from "@/components/seller-trust-card";
 import {
   galleryShots,
   gradeCriteria,
@@ -49,64 +64,79 @@ function ListingPage() {
   const navigate = useNavigate();
   const inCart = isInCart(listing.id);
 
-  const transparency = [
-    ["Overall condition", `${listing.grade} — ${gradeLabel[listing.grade]}`],
-    ["Physical", listing.physical],
-    ["Screen", listing.screen],
-    ["Battery", listing.battery ? `${listing.battery}%` : "Not applicable"],
-    ["Repairs", listing.repairs],
-    ["Accessories", listing.accessories],
-    ["Invoice", listing.invoice ? "Available" : "Not available"],
-    [
-      "Warranty",
-      listing.warrantyMonths > 0 ? `${listing.warrantyMonths} months remaining` : "Expired",
-    ],
-  ] as const;
+  // Check if there are known defects/issues to disclose
+  const hasKnownIssues =
+    (Array.isArray(listing.knownIssues) && listing.knownIssues.length > 0) ||
+    (Boolean(listing.repairs) && listing.repairs.trim().toLowerCase() !== "none");
+
+  // Format listing date
+  const listedDate = new Date(listing.listedAt).toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background text-foreground">
       <SiteHeader />
-      <div className="mx-auto max-w-7xl px-5 py-10">
-        <nav className="text-xs text-muted-foreground">
-          <Link to="/" className="hover:text-foreground">
+
+      <main className="mx-auto max-w-7xl px-4 sm:px-6 py-6 sm:py-8 space-y-12 sm:space-y-16">
+        {/* Breadcrumb Navigation */}
+        <nav
+          aria-label="Breadcrumb"
+          className="text-xs text-muted-foreground flex flex-wrap items-center gap-1.5"
+        >
+          <Link to="/" className="hover:text-foreground transition-colors">
             Home
           </Link>
-          <span className="px-2">/</span>
+          <span>/</span>
           <Link
             to="/products"
             search={{ q: undefined, category: undefined, brand: undefined }}
-            className="hover:text-foreground"
+            className="hover:text-foreground transition-colors"
           >
             Products
           </Link>
-          <span className="px-2">/</span>
-          <span className="text-foreground">
-            {product.name} &middot; Grade {listing.grade}
-          </span>
+          <span>/</span>
+          <Link
+            to="/product/$productId"
+            params={{ productId: product.id }}
+            className="hover:text-foreground transition-colors"
+          >
+            {product.name}
+          </Link>
+          <span>/</span>
+          <span className="text-foreground font-medium truncate">Listing {listing.id}</span>
         </nav>
 
-        <div className="mt-8 grid gap-12 lg:grid-cols-[1.1fr_1fr]">
-          {/* Gallery */}
-          <div>
-            <div className="bg-muted">
+        {/* ── Above the Fold: Main Product Layout ── */}
+        <div className="grid gap-8 lg:gap-12 lg:grid-cols-[1fr_1.15fr] items-start">
+          {/* LEFT: Product Gallery Area */}
+          <div className="space-y-3 lg:sticky lg:top-24">
+            <div className="bg-muted/40 border border-border/70 overflow-hidden relative group aspect-square">
               <img
                 src={product.image}
-                alt={`${product.name} — ${active.label.toLowerCase()} view of the unit sold by ${listing.seller.name}`}
+                alt={`${product.name} — ${active.label.toLowerCase()} view`}
                 width={900}
                 height={900}
-                className="aspect-square w-full object-cover"
+                className="w-full h-full object-cover transition-transform duration-300"
                 style={{ objectPosition: active.position }}
               />
             </div>
-            <div className="mt-3 grid grid-cols-4 gap-3">
+
+            {/* Thumbnail Buttons */}
+            <div className="grid grid-cols-4 gap-2.5">
               {galleryShots.map((g, i) => (
                 <button
                   key={g.label}
+                  type="button"
                   onClick={() => setShot(i)}
                   aria-label={`Show ${g.label} photo`}
                   aria-pressed={i === shot}
-                  className={`border p-px transition-colors ${
-                    i === shot ? "border-primary" : "border-border hover:border-primary/40"
+                  className={`border p-1 bg-card transition-all text-left ${
+                    i === shot
+                      ? "border-primary ring-1 ring-primary shadow-xs"
+                      : "border-border/70 hover:border-primary/40 opacity-80 hover:opacity-100"
                   }`}
                 >
                   <img
@@ -116,176 +146,320 @@ function ListingPage() {
                     style={{ objectPosition: g.position }}
                     loading="lazy"
                   />
-                  <span className="block py-1.5 text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+                  <span className="block pt-1 text-[9.5px] uppercase tracking-wider text-muted-foreground truncate text-center font-medium">
                     {g.label}
                   </span>
                 </button>
               ))}
             </div>
-            <p className="mt-3 text-xs text-muted-foreground">
-              Photos are of this exact unit, uploaded by the seller and checked in moderation.
+
+            <p className="text-[11.5px] text-muted-foreground leading-relaxed pt-1">
+              Photos represent this exact catalog unit, checked in seller moderation.
             </p>
           </div>
 
-          {/* Buy box */}
-          <div>
-            <div className="flex items-center gap-4">
-              <GradeBadge grade={listing.grade} />
-              <span className="text-xs uppercase tracking-[0.25em] text-muted-foreground">
+          {/* RIGHT: Progressive Information Column */}
+          <div className="space-y-6">
+            {/* 1. Seller Identity Line */}
+            <div className="pb-1 border-b border-border/40">
+              <SellerTrustLine seller={listing.seller} />
+            </div>
+
+            {/* 2. Brand & 3. Product Title */}
+            <div className="space-y-1">
+              <span className="text-[11px] uppercase tracking-[0.2em] font-semibold text-muted-foreground block">
                 {product.brand}
               </span>
-            </div>
-            <h1 className="mt-4 text-3xl md:text-4xl">{product.name}</h1>
-            <p className="mt-6 font-display text-4xl">{taka(listing.price)}</p>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Condition score {listing.conditionScore}/100 · Grade {listing.grade} —{" "}
-              {gradeLabel[listing.grade]}
-            </p>
-
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <button
-                onClick={() => {
-                  addToCart(listing.id);
-                  navigate({ to: "/cart" });
-                }}
-                className="flex-1 bg-primary px-6 py-3.5 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
-              >
-                Buy now
-              </button>
-              <button
-                onClick={() => {
-                  addToCart(listing.id);
-                  setAddedToCart(true);
-                }}
-                className="flex-1 border border-primary px-6 py-3.5 text-sm font-medium transition-colors hover:bg-primary hover:text-primary-foreground flex items-center justify-center gap-2"
-              >
-                {inCart || addedToCart ? (
-                  <>
-                    <Check className="size-4" /> Added to cart
-                  </>
-                ) : (
-                  "Add to cart"
-                )}
-              </button>
+              <h1 className="font-display text-2xl sm:text-3xl lg:text-3.5xl font-bold text-foreground tracking-tight leading-snug">
+                {product.name}
+              </h1>
             </div>
 
-            <p className="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
-              <Truck className="size-4" /> Cash on delivery available · ships from{" "}
-              {listing.seller.district}
-            </p>
-
-            <div className="mt-8 border border-border p-5">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="flex items-center gap-2 font-medium">
-                    {listing.seller.name}
-                    {listing.seller.verified && (
-                      <ShieldCheck className="size-4 text-success" aria-label="Verified seller" />
-                    )}
-                  </p>
-                  <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
-                    <Star className="size-3.5 fill-current" />
-                    {listing.seller.rating} · {listing.seller.sales} completed sales
-                  </p>
-                </div>
-                <span className="text-sm text-muted-foreground">{listing.seller.district}</span>
-              </div>
-            </div>
-
-            {/* 13.3 transparency block */}
-            <section className="mt-10">
-              <div className="flex items-end justify-between">
-                <h2 className="text-lg">Condition report</h2>
-                <span className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
-                  Score {listing.conditionScore}/100
+            {/* 4. Grade & 5. Warranty Row */}
+            <div className="flex flex-wrap items-center gap-3 pt-0.5">
+              <div className="flex items-center gap-2">
+                <GradeBadge grade={listing.grade} size="md" />
+                <span className="text-xs font-semibold text-foreground">
+                  {gradeLabel[listing.grade]} Condition
+                </span>
+                <span className="text-xs text-muted-foreground">
+                  (Score: {listing.conditionScore}/100)
                 </span>
               </div>
-              <div className="mt-3 h-px w-full bg-border">
-                <div className="h-px bg-primary" style={{ width: `${listing.conditionScore}%` }} />
+
+              {listing.warrantyMonths > 0 && (
+                <div className="flex items-center gap-1 px-2.5 py-0.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-xs font-medium">
+                  <ShieldCheck className="size-3.5" />
+                  <span>{listing.warrantyMonths} Months Warranty</span>
+                </div>
+              )}
+            </div>
+
+            {/* 6. Quick Listing Details Strip */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 p-3 bg-secondary/30 border border-border/60 text-xs">
+              <div>
+                <span className="text-[10.5px] text-muted-foreground uppercase tracking-wider block font-medium">
+                  Condition
+                </span>
+                <span className="font-semibold text-foreground">Grade {listing.grade}</span>
               </div>
-              <dl className="mt-4 border-t border-border">
-                {transparency.map(([label, value]) => (
-                  <div
-                    key={label}
-                    className="flex justify-between gap-6 border-b border-border py-3 text-sm"
-                  >
-                    <dt className="text-muted-foreground">{label}</dt>
-                    <dd className="text-right">{value}</dd>
-                  </div>
-                ))}
-              </dl>
-              <p className="mt-3 flex items-start gap-2 text-xs text-muted-foreground">
-                <Lock className="mt-0.5 size-3.5 shrink-0" />
-                IMEI and serial number are collected at listing time and shared with the buyer after
-                purchase only.
+
+              {typeof listing.battery === "number" && (
+                <div>
+                  <span className="text-[10.5px] text-muted-foreground uppercase tracking-wider block font-medium flex items-center gap-1">
+                    <Battery className="size-3 text-emerald-500" /> Battery
+                  </span>
+                  <span className="font-semibold text-foreground">{listing.battery}% Health</span>
+                </div>
+              )}
+
+              {listing.warrantyMonths > 0 ? (
+                <div>
+                  <span className="text-[10.5px] text-muted-foreground uppercase tracking-wider block font-medium">
+                    Warranty
+                  </span>
+                  <span className="font-semibold text-foreground">
+                    {listing.warrantyMonths} Mo. Remaining
+                  </span>
+                </div>
+              ) : (
+                <div>
+                  <span className="text-[10.5px] text-muted-foreground uppercase tracking-wider block font-medium">
+                    Warranty
+                  </span>
+                  <span className="text-muted-foreground">Expired / None</span>
+                </div>
+              )}
+
+              <div>
+                <span className="text-[10.5px] text-muted-foreground uppercase tracking-wider block font-medium flex items-center gap-1">
+                  <FileText className="size-3 text-primary" /> Invoice
+                </span>
+                <span className="font-semibold text-foreground">
+                  {listing.invoice ? "Available" : "Not available"}
+                </span>
+              </div>
+            </div>
+
+            {/* 7. What's Included */}
+            <div className="pt-1">
+              <WhatsIncludedCard
+                accessories={listing.accessories}
+                includedItems={listing.includedItems}
+              />
+            </div>
+
+            {/* 8. Repair History */}
+            <div className="pt-1">
+              <RepairHistoryCard repairs={listing.repairs} repairHistory={listing.repairHistory} />
+            </div>
+
+            {/* 9. Seller's Note */}
+            <div className="space-y-1.5 pt-1">
+              <span className="text-xs font-semibold text-foreground block">
+                Seller&apos;s Note
+              </span>
+              <blockquote className="border-l-2 border-primary bg-secondary/30 px-3.5 py-2.5 text-xs text-foreground italic leading-relaxed">
+                &ldquo;{listing.sellerNote}&rdquo;
+              </blockquote>
+              <p className="text-[11px] text-muted-foreground">
+                — Listed by {listing.seller.name} on {listedDate} · Reference: {listing.id}
               </p>
-            </section>
+            </div>
+
+            {/* 10. Known Issues / Defect Disclosure (Before Price & CTA) */}
+            <div className="pt-1">
+              {hasKnownIssues ? (
+                <div className="border border-amber-500/30 bg-amber-500/5 p-3.5 space-y-2 text-xs">
+                  <div className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400 font-semibold">
+                    <AlertTriangle className="size-4 shrink-0" />
+                    <span>Known Issues &amp; Defect Disclosure</span>
+                  </div>
+                  <ul className="space-y-1 list-disc list-inside text-foreground pl-1">
+                    {Array.isArray(listing.knownIssues) && listing.knownIssues.length > 0 ? (
+                      listing.knownIssues.map((issue, i) => <li key={i}>{issue}</li>)
+                    ) : (
+                      <li>{listing.repairs}</li>
+                    )}
+                  </ul>
+                </div>
+              ) : (
+                <div className="border border-border/60 bg-secondary/30 p-3 space-y-1 text-xs">
+                  <div className="flex items-center gap-1.5 font-medium text-foreground">
+                    <CheckCircle2 className="size-3.5 text-emerald-500 shrink-0" />
+                    <span>No known issues reported by seller</span>
+                  </div>
+                  <p className="text-[11px] text-muted-foreground pl-5">
+                    Cosmetic &amp; functional report confirmed in listing moderation.
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* 11. Price & 12. Purchase CTAs */}
+            <div className="pt-3 border-t border-border/60 space-y-4">
+              <div>
+                <p className="font-display text-3xl sm:text-4xl font-bold text-primary">
+                  {taka(listing.price)}
+                </p>
+                <p className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <Truck className="size-3.5 text-muted-foreground shrink-0" />
+                  <span>Cash on delivery available · ships from {listing.seller.district}</span>
+                </p>
+              </div>
+
+              {/* Purchase Buttons */}
+              <div className="flex flex-col sm:flex-row gap-3 pt-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    addToCart(listing.id);
+                    navigate({ to: "/cart" });
+                  }}
+                  className="flex-1 bg-primary text-primary-foreground font-semibold px-6 py-3.5 text-sm transition-opacity hover:opacity-90 shadow-sm cursor-pointer text-center"
+                >
+                  Buy now
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    addToCart(listing.id);
+                    setAddedToCart(true);
+                    setTimeout(() => setAddedToCart(false), 2000);
+                  }}
+                  className="flex-1 border border-border bg-card hover:bg-secondary text-foreground font-semibold px-6 py-3.5 text-sm transition-colors flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  {inCart || addedToCart ? (
+                    <>
+                      <Check className="size-4 text-emerald-500" /> Added to cart
+                    </>
+                  ) : (
+                    "Add to cart"
+                  )}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Component-level inspection */}
-        <section className="mt-20 grid gap-12 lg:grid-cols-[1.1fr_1fr]">
-          <div>
-            <h2 className="text-2xl">Component inspection</h2>
-            <p className="mt-2 max-w-xl text-sm text-muted-foreground">
-              Every listing is graded against a fixed checklist for its category, so the letter
-              grade is always backed by structured data.
-            </p>
-            <dl className="mt-8 border-t border-border">
-              {listing.inspection.map((item) => (
-                <div
-                  key={item.component}
-                  className="grid gap-1 border-b border-border py-4 sm:grid-cols-[200px_1fr]"
-                >
-                  <dt className="text-sm text-muted-foreground">{item.component}</dt>
-                  <dd className="text-sm">
-                    {item.status}
-                    {item.notes && (
-                      <span className="mt-1 block text-xs text-subtle-foreground">
-                        {item.notes}
+        {/* ── Below the Fold: Structured Full-Width Content Sections ── */}
+        <div className="space-y-10 sm:space-y-12 border-t border-border/60 pt-10 sm:pt-14">
+          {/* Section 16 & 17 & 18: 32-Point Standardized Inspection */}
+          <section id="inspection-report">
+            <InspectionReport inspection={listing.inspection} />
+          </section>
+
+          {/* Section 19: Device Verification */}
+          <section id="device-verification">
+            <DeviceVerificationCard
+              deviceVerification={listing.deviceVerification}
+              inspection={listing.inspection}
+            />
+          </section>
+
+          {/* Section 20: Grade Criteria & Standards */}
+          <section id="grade-criteria" className="border border-border/80 bg-card p-6 space-y-5">
+            <div className="flex items-center gap-2 border-b border-border/60 pb-4">
+              <Layers className="size-5 text-primary" />
+              <div>
+                <h2 className="font-display text-xl font-bold text-foreground">
+                  Grade Standards &amp; Criteria
+                </h2>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Standardized definitions for used device cosmetic &amp; functional tiers
+                </p>
+              </div>
+            </div>
+
+            <ul className="divide-y divide-border/40 border border-border/60 bg-background/50 text-xs">
+              {grades.map((g) => {
+                const isCurrent = g === listing.grade;
+                return (
+                  <li
+                    key={g}
+                    className={`p-3.5 transition-colors ${
+                      isCurrent
+                        ? "bg-primary/5 border-l-3 border-l-primary"
+                        : "opacity-60 hover:opacity-100"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={`grade-chip size-5.5 text-[10.5px] ${
+                          isCurrent ? "font-bold" : ""
+                        }`}
+                      >
+                        {g}
                       </span>
-                    )}
-                  </dd>
-                </div>
-              ))}
-            </dl>
-          </div>
-
-          <div>
-            <h2 className="text-2xl">Seller notes</h2>
-            <p className="mt-6 border-l border-primary pl-5 text-sm leading-relaxed">
-              {listing.sellerNote}
-            </p>
-            <p className="mt-4 text-xs text-muted-foreground">
-              Listed on{" "}
-              {new Date(listing.listedAt).toLocaleDateString("en-GB", {
-                day: "numeric",
-                month: "long",
-                year: "numeric",
-              })}{" "}
-              · Listing {listing.id}
-            </p>
-
-            <h3 className="mt-12 text-lg">How grades are assigned</h3>
-            <ul className="mt-4 border-t border-border">
-              {grades.map((g) => (
-                <li
-                  key={g}
-                  className={`grid gap-3 border-b border-border py-3 sm:grid-cols-[auto_1fr] ${
-                    g === listing.grade ? "" : "opacity-55"
-                  }`}
-                >
-                  <span className="grade-chip size-6 text-[11px]">{g}</span>
-                  <span className="text-xs">
-                    <span className="mr-2 font-medium">{gradeLabel[g]}</span>
-                    <span className="text-muted-foreground">{gradeCriteria[g]}</span>
-                  </span>
-                </li>
-              ))}
+                      <span className="font-semibold text-foreground text-sm">
+                        {gradeLabel[g]}
+                        {isCurrent && (
+                          <span className="ml-2 text-xs text-primary font-semibold">
+                            (This Listing)
+                          </span>
+                        )}
+                      </span>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1.5 pl-7.5 leading-relaxed">
+                      {gradeCriteria[g]}
+                    </p>
+                  </li>
+                );
+              })}
             </ul>
-          </div>
-        </section>
-      </div>
+          </section>
+
+          {/* Section 21: Full Technical Specifications */}
+          <section
+            id="technical-specifications"
+            className="border border-border/80 bg-card p-6 space-y-6"
+          >
+            <div className="border-b border-border/60 pb-4">
+              <h2 className="font-display text-xl font-bold text-foreground">
+                Technical Specifications
+              </h2>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Standard manufacturer specifications for {product.name}
+              </p>
+            </div>
+
+            {Array.isArray(product.fullSpecs) && product.fullSpecs.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                {product.fullSpecs.map((group) => (
+                  <div
+                    key={group.group}
+                    className="border border-border/60 bg-background/50 p-4 space-y-3"
+                  >
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-primary border-b border-border/40 pb-2">
+                      {group.group}
+                    </h3>
+                    <dl className="space-y-2 text-xs">
+                      {group.items.map((item, idx) => (
+                        <div key={idx} className="flex flex-col gap-0.5">
+                          <dt className="text-[11px] text-muted-foreground font-medium">
+                            {item.label}
+                          </dt>
+                          <dd className="text-xs text-foreground font-semibold">{item.value}</dd>
+                        </div>
+                      ))}
+                    </dl>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <dl className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 text-xs">
+                {product.specs.map((spec, i) => (
+                  <div key={i} className="p-3.5 border border-border/60 bg-background/50">
+                    <dt className="text-muted-foreground font-medium">{spec.label}</dt>
+                    <dd className="mt-1 font-semibold text-foreground">{spec.value}</dd>
+                  </div>
+                ))}
+              </dl>
+            )}
+          </section>
+        </div>
+      </main>
+
       <SiteFooter />
     </div>
   );
