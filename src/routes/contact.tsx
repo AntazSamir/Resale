@@ -655,59 +655,109 @@ export default function ContactPage() {
             </p>
           </div>
 
-          {/* 5 Beliefs Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 text-left pt-4">
-            <div className="border border-border p-5 bg-background space-y-2">
-              <div className="flex items-center gap-2 font-display font-bold text-sm text-foreground">
-                <span>🤝</span>
-                <span>Trust Over Guesswork</span>
+          {/* 5 Beliefs Bento Grid */}
+          <div className="grid grid-cols-2 md:grid-cols-6 gap-3 sm:gap-4 text-left pt-4">
+            {/* Bento Card 1: Trust Over Guesswork */}
+            <div className="col-span-2 md:col-span-3 border border-border bg-background p-5 sm:p-6 flex flex-col justify-between space-y-3 group hover:border-primary/40 transition-all duration-200 relative overflow-hidden">
+              <div className="flex items-center justify-between">
+                <span className="size-9 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center text-lg shrink-0">
+                  🤝
+                </span>
+                <span className="text-[10px] font-mono font-bold tracking-widest text-primary uppercase">
+                  01 / Foundation
+                </span>
               </div>
-              <p className="text-xs text-subtle-foreground leading-relaxed">
-                We believe buyers deserve clear information before making a purchase.
-              </p>
+              <div className="space-y-1.5 pt-2">
+                <h3 className="font-display font-bold text-base sm:text-lg text-foreground tracking-tight">
+                  Trust Over Guesswork
+                </h3>
+                <p className="text-xs sm:text-sm text-subtle-foreground leading-relaxed">
+                  We believe buyers deserve clear information before making a purchase.
+                </p>
+              </div>
             </div>
 
-            <div className="border border-border p-5 bg-background space-y-2">
-              <div className="flex items-center gap-2 font-display font-bold text-sm text-foreground">
-                <span>🔍</span>
-                <span>Transparency Over Vague Descriptions</span>
+            {/* Bento Card 2: Transparency Over Vague Descriptions */}
+            <div className="col-span-2 md:col-span-3 border border-border bg-background p-5 sm:p-6 flex flex-col justify-between space-y-3 group hover:border-primary/40 transition-all duration-200 relative overflow-hidden">
+              <div className="flex items-center justify-between">
+                <span className="size-9 rounded-lg bg-muted border border-border flex items-center justify-center text-lg shrink-0">
+                  🔍
+                </span>
+                <span className="text-[10px] font-mono font-bold tracking-widest text-muted-foreground uppercase">
+                  02 / Clarity
+                </span>
               </div>
-              <p className="text-xs text-subtle-foreground leading-relaxed">
-                Every product should tell its own story — condition, specs, warranty, repairs, and
-                accessories.
-              </p>
+              <div className="space-y-1.5 pt-2">
+                <h3 className="font-display font-bold text-base sm:text-lg text-foreground tracking-tight">
+                  Transparency Over Vague Descriptions
+                </h3>
+                <p className="text-xs sm:text-sm text-subtle-foreground leading-relaxed">
+                  Every product should tell its own story — condition, specs, warranty, repairs, and
+                  accessories.
+                </p>
+              </div>
             </div>
 
-            <div className="border border-border p-5 bg-background space-y-2">
-              <div className="flex items-center gap-2 font-display font-bold text-sm text-foreground">
-                <span>💰</span>
-                <span>Fair Value</span>
+            {/* Bento Card 3: Fair Value */}
+            <div className="col-span-1 md:col-span-2 border border-border bg-background p-4 sm:p-5 flex flex-col justify-between space-y-3 group hover:border-primary/40 transition-all duration-200">
+              <div className="flex items-center justify-between">
+                <span className="size-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-base shrink-0">
+                  💰
+                </span>
+                <span className="text-[10px] font-mono font-bold tracking-widest text-emerald-600 dark:text-emerald-400 uppercase">
+                  03
+                </span>
               </div>
-              <p className="text-xs text-subtle-foreground leading-relaxed">
-                Buyers want a good deal. Sellers want a fair price. Resale brings both sides
-                together.
-              </p>
+              <div className="space-y-1 pt-1">
+                <h3 className="font-display font-bold text-sm sm:text-base text-foreground tracking-tight">
+                  Fair Value
+                </h3>
+                <p className="text-[11px] sm:text-xs text-subtle-foreground leading-relaxed">
+                  Buyers want a good deal. Sellers want a fair price. Resale brings both sides
+                  together.
+                </p>
+              </div>
             </div>
 
-            <div className="border border-border p-5 bg-background space-y-2">
-              <div className="flex items-center gap-2 font-display font-bold text-sm text-foreground">
-                <span>♻️</span>
-                <span>More Than One Life</span>
+            {/* Bento Card 4: More Than One Life */}
+            <div className="col-span-1 md:col-span-2 border border-border bg-background p-4 sm:p-5 flex flex-col justify-between space-y-3 group hover:border-primary/40 transition-all duration-200">
+              <div className="flex items-center justify-between">
+                <span className="size-8 rounded-lg bg-teal-500/10 border border-teal-500/20 flex items-center justify-center text-base shrink-0">
+                  ♻️
+                </span>
+                <span className="text-[10px] font-mono font-bold tracking-widest text-teal-600 dark:text-teal-400 uppercase">
+                  04
+                </span>
               </div>
-              <p className="text-xs text-subtle-foreground leading-relaxed">
-                A device doesn&apos;t stop being useful just because its first owner has upgraded.
-              </p>
+              <div className="space-y-1 pt-1">
+                <h3 className="font-display font-bold text-sm sm:text-base text-foreground tracking-tight">
+                  More Than One Life
+                </h3>
+                <p className="text-[11px] sm:text-xs text-subtle-foreground leading-relaxed">
+                  A device doesn&apos;t stop being useful just because its first owner has upgraded.
+                </p>
+              </div>
             </div>
 
-            <div className="border border-border p-5 bg-background space-y-2 sm:col-span-2 lg:col-span-2">
-              <div className="flex items-center gap-2 font-display font-bold text-sm text-foreground">
-                <span>🚀</span>
-                <span>Better Resale Experience</span>
+            {/* Bento Card 5: Better Resale Experience */}
+            <div className="col-span-2 md:col-span-2 border border-border bg-background p-4 sm:p-5 flex flex-col justify-between space-y-3 group hover:border-primary/40 transition-all duration-200">
+              <div className="flex items-center justify-between">
+                <span className="size-8 rounded-lg bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-base shrink-0">
+                  🚀
+                </span>
+                <span className="text-[10px] font-mono font-bold tracking-widest text-[#ea580c] uppercase">
+                  05 / Vision
+                </span>
               </div>
-              <p className="text-xs text-subtle-foreground leading-relaxed">
-                We&apos;re building resale to feel like modern e-commerce — not an old-fashioned
-                classifieds marketplace.
-              </p>
+              <div className="space-y-1 pt-1">
+                <h3 className="font-display font-bold text-sm sm:text-base text-foreground tracking-tight">
+                  Better Resale Experience
+                </h3>
+                <p className="text-[11px] sm:text-xs text-subtle-foreground leading-relaxed">
+                  We&apos;re building resale to feel like modern e-commerce — not an old-fashioned
+                  classifieds marketplace.
+                </p>
+              </div>
             </div>
           </div>
         </div>

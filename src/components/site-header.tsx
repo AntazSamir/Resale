@@ -279,7 +279,7 @@ export function SiteHeader() {
   };
 
   return (
-    <div>
+    <div className="sticky top-0 z-40 w-full bg-background">
       {/* Announcement Bar */}
       <div className="bg-primary text-primary-foreground text-xs py-2 px-4 text-center font-medium tracking-wide flex items-center justify-center gap-6 overflow-hidden">
         <span>⚡ OPEN-BOX &amp; PRE-OWNED ELECTRONICS AT FACTORY PRICES</span>
@@ -290,8 +290,8 @@ export function SiteHeader() {
       </div>
 
       {/* Main Header Bar */}
-      <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur">
-        <div className="mx-auto flex h-14 md:h-16 max-w-7xl items-center justify-between md:justify-start gap-4 md:gap-6 px-4 md:px-5">
+      <header className="relative z-20 border-b border-border bg-background/95 backdrop-blur">
+        <div className="relative mx-auto flex h-14 md:h-16 max-w-7xl items-center justify-between md:justify-start gap-4 md:gap-6 px-4 md:px-5">
           {/* Mobile Left: Hamburger Button */}
           <div className="flex md:hidden items-center">
             <button
@@ -306,13 +306,13 @@ export function SiteHeader() {
           {/* Brand Logo */}
           <Link
             to="/"
-            className="inline-flex items-center shrink-0 hover:opacity-90 transition-opacity ml-1.5 md:ml-3 mr-1"
+            className="inline-flex items-center shrink-0 hover:opacity-90 transition-opacity absolute left-1/2 -translate-x-1/2 md:static md:translate-x-0 md:ml-3 md:mr-1"
             aria-label="Resale Home"
           >
             <img
               src={resaleLogo}
               alt="Resale logo"
-              className="h-7.5 md:h-8.5 w-auto object-contain shrink-0"
+              className="h-9 md:h-11 w-auto object-contain shrink-0"
             />
           </Link>
 
@@ -353,7 +353,7 @@ export function SiteHeader() {
 
             {/* Desktop Autocomplete Popover */}
             {searchFocused && (
-              <div className="absolute top-full left-0 right-0 mt-1.5 bg-card border border-border z-50 p-3 space-y-3">
+              <div className="absolute top-full left-0 right-0 mt-1.5 bg-card border border-border z-50 p-3 space-y-3 shadow-xl">
                 {searchQuery.trim() ? (
                   <div>
                     <div className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-2 flex items-center justify-between">
@@ -660,7 +660,7 @@ export function SiteHeader() {
                   <img
                     src={resaleLogo}
                     alt="Resale logo"
-                    className="h-7.5 w-auto object-contain shrink-0"
+                    className="h-9 w-auto object-contain shrink-0"
                   />
                 </Link>
                 <button
@@ -826,7 +826,7 @@ export function SiteHeader() {
 
       {/* Desktop Secondary Category Navigation Bar (Hidden on mobile) */}
       <nav
-        className="hidden md:block sticky top-16 z-30 border-b border-border bg-background/95 backdrop-blur shadow-none"
+        className="relative z-10 hidden md:block border-b border-border bg-background/95 backdrop-blur shadow-none"
         onMouseLeave={() => setOpenDropdown(null)}
       >
         <div className="relative mx-auto max-w-7xl">
