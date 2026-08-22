@@ -247,11 +247,23 @@ function AdminOrdersPage() {
                           </Badge>
                         </td>
                         <td className="px-4 py-3.5 text-right">
-                          <Button size="sm" variant="ghost" asChild className="text-xs">
-                            <Link to="/account/orders/$orderId" params={{ orderId: order.id }}>
-                              Audit Log <ChevronRight className="size-3 ml-1" />
-                            </Link>
-                          </Button>
+                          <div className="flex items-center justify-end gap-1.5">
+                            {["DISPUTED", "REFUND_REQUESTED"].includes(order.orderStatus) && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                asChild
+                                className="text-[11px] h-7 px-2 border-amber-500/40 text-amber-700 dark:text-amber-300 hover:bg-amber-500/10"
+                              >
+                                <Link to="/admin/disputes">Mediate</Link>
+                              </Button>
+                            )}
+                            <Button size="sm" variant="ghost" asChild className="text-xs h-7 px-2">
+                              <Link to="/account/orders/$orderId" params={{ orderId: order.id }}>
+                                Audit <ChevronRight className="size-3 ml-0.5" />
+                              </Link>
+                            </Button>
+                          </div>
                         </td>
                       </tr>
                     ))}

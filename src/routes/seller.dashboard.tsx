@@ -14,6 +14,7 @@ import {
   Store,
   Sparkles,
   UploadCloud,
+  ShieldAlert,
 } from "lucide-react";
 import { taka } from "@/data/catalog";
 import { ProtectedRoute } from "@/components/protected-route";
@@ -32,7 +33,14 @@ export function SellerSidebar({
   active,
 }: {
   active:
-    "dashboard" | "orders" | "listings" | "payouts" | "storefront" | "creator" | "bulk-import";
+    | "dashboard"
+    | "orders"
+    | "disputes"
+    | "listings"
+    | "payouts"
+    | "storefront"
+    | "creator"
+    | "bulk-import";
 }) {
   return (
     <aside className="w-64 shrink-0 hidden md:block">
@@ -55,6 +63,12 @@ export function SellerSidebar({
           className={`flex items-center gap-3 px-4 py-2.5 text-xs font-medium rounded-md transition-colors ${active === "orders" ? "bg-primary text-primary-foreground font-semibold" : "hover:bg-muted"}`}
         >
           <Package className="size-4" /> Orders &amp; Fulfillment
+        </Link>
+        <Link
+          to="/seller/disputes"
+          className={`flex items-center gap-3 px-4 py-2.5 text-xs font-medium rounded-md transition-colors ${active === "disputes" ? "bg-primary text-primary-foreground font-semibold" : "hover:bg-muted"}`}
+        >
+          <ShieldAlert className="size-4" /> Disputes &amp; Claims
         </Link>
         <Link
           to="/seller/listings"

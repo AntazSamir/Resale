@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteHeader, SiteFooter } from "@/components/site-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { LayoutDashboard, Shield, Users, TrendingUp, Package } from "lucide-react";
+import { LayoutDashboard, Shield, Users, TrendingUp, Package, ShieldAlert } from "lucide-react";
 import { ProtectedRoute } from "@/components/protected-route";
 import resaleLogo from "@/assets/resale-logo.svg";
 
@@ -15,7 +15,7 @@ export const Route = createFileRoute("/admin/")({
 export function AdminSidebar({
   active,
 }: {
-  active: "dashboard" | "orders" | "moderation" | "identity";
+  active: "dashboard" | "orders" | "disputes" | "moderation" | "identity";
 }) {
   return (
     <aside className="w-64 shrink-0 hidden md:block">
@@ -38,6 +38,12 @@ export function AdminSidebar({
           className={`flex items-center gap-3 px-4 py-3 rounded-md transition-colors ${active === "orders" ? "bg-primary text-primary-foreground" : "hover:bg-muted"}`}
         >
           <Package className="size-4" /> Transactions &amp; Orders
+        </Link>
+        <Link
+          to="/admin/disputes"
+          className={`flex items-center gap-3 px-4 py-3 rounded-md transition-colors ${active === "disputes" ? "bg-primary text-primary-foreground" : "hover:bg-muted"}`}
+        >
+          <ShieldAlert className="size-4" /> Dispute Mediation
         </Link>
         <Link
           to="/admin/moderation"

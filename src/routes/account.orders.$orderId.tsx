@@ -25,6 +25,7 @@ import {
   type OrderRecord,
   type OrderStatus,
 } from "@/lib/order-store";
+import { getDisputeByOrderId, isOrderEligibleForDispute } from "@/lib/dispute-store";
 import resaleLogo from "@/assets/resale-logo.svg";
 
 import { ProtectedRoute } from "@/components/protected-route";
@@ -491,7 +492,7 @@ function OrderDetailsPage() {
               </CardContent>
             </Card>
 
-            {/* Buyer Protection Card */}
+            {/* Buyer Protection & Disputes Card */}
             <Card className="border-border/80 shadow-xs">
               <CardHeader className="pb-3 border-b border-border/60">
                 <CardTitle className="text-xs uppercase tracking-wider text-muted-foreground font-semibold flex items-center gap-1.5">
@@ -499,17 +500,66 @@ function OrderDetailsPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3 pt-3 text-xs">
-                <p className="text-muted-foreground text-[11px] leading-relaxed">
-                  Every device is protected by the Resale condition guarantee. If the physical item
-                  received does not match the documented 32-point inspection report, you have a
-                  48-hour return window.
-                </p>
-                <Button variant="outline" size="sm" asChild className="w-full text-xs">
-                  <Link to="/account/disputes">
-                    <AlertCircle className="size-3.5 mr-1.5 text-primary" /> Resolution &amp;
-                    Disputes Center
-                  </Link>
-                </Button>
+                {(() => {
+                  const existingDispute = getDisputeByOrderId(order.id);
+                  if (existingDispute) {
+                    return (
+                      <div className="p-3 bg-amber-500/10 border border-amber-500/20 text-amber-800 dark:text-amber-300 space-y-2">
+                        <div className="flex items-center gap-1.5 font-bold">
+                          <AlertCircle className="size-4 text-amber-600 shrink-0" />
+                          <span>Active Dispute #{existingDispute.id}</span>
+                        </div>
+                        <p className="text-[11px] leading-relaxed">
+                          Status: <strong>{existingDispute.status.replace(/_/g, " ")}</strong>.
+                          Order payout is placed on simulated escrow hold.
+                        </p>
+                        <Button variant="outline" size="sm" asChild className="w-full text-xs">
+                          <Link to="/account/disputes">Open Dispute Mediation Hub</Link>
+                        </Button>
+                      </div>
+                    );
+                  }
+
+                  const elig = isOrderEligibleForDispute(order);
+                  return (
+                    <>
+                      <p className="text-muted-foreground text-[11px] leading-relaxed">
+                        Every device is protected by the Resale condition guarantee. If the physical
+                        item received does not match the documented 32-point inspection report, you
+                        have a 48-hour return window.
+                      </p>
+
+                      {elig.eligible ? (
+                        <div className="p-2.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-300 text-[11px] space-y-1">
+                          <div className="flex items-center gap-1.5 font-semibold">
+                            <Clock className="size-3.5 text-emerald-600" />
+                            <span>48h Inspection Window Active</span>
+                          </div>
+                          <span>
+                            {elig.hoursRemaining}h {elig.minutesRemaining}m remaining to report
+                            condition discrepancies.
+                          </span>
+                        </div>
+                      ) : elig.expired ? (
+                        <div className="p-2.5 bg-muted text-muted-foreground text-[11px] border border-border">
+                          48-Hour Inspection Window has expired.
+                        </div>
+                      ) : null}
+
+                      <Button
+                        variant={elig.eligible ? "default" : "outline"}
+                        size="sm"
+                        asChild
+                        className="w-full text-xs"
+                      >
+                        <Link to="/account/disputes">
+                          <AlertCircle className="size-3.5 mr-1.5" />
+                          {elig.eligible ? "Report Issue / Open Dispute" : "Resolution Center"}
+                        </Link>
+                      </Button>
+                    </>
+                  );
+                })()}
               </CardContent>
             </Card>
           </div>

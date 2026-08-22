@@ -22,6 +22,7 @@ import { Route as RegisterRouteImport } from './routes/register'
 import { Route as AccountDisputesRouteImport } from './routes/account.disputes'
 import { Route as AccountOrdersRouteImport } from './routes/account.orders'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as AdminDisputesRouteImport } from './routes/admin.disputes'
 import { Route as AdminIdentityRouteImport } from './routes/admin.identity'
 import { Route as AdminModerationRouteImport } from './routes/admin.moderation'
 import { Route as AdminOrdersRouteImport } from './routes/admin.orders'
@@ -33,6 +34,7 @@ import { Route as SellIndexRouteImport } from './routes/sell.index'
 import { Route as SellerSellerIdRouteImport } from './routes/seller.$sellerId'
 import { Route as SellerCreatorProfileRouteImport } from './routes/seller.creator-profile'
 import { Route as SellerDashboardRouteImport } from './routes/seller.dashboard'
+import { Route as SellerDisputesRouteImport } from './routes/seller.disputes'
 import { Route as SellerListingsRouteImport } from './routes/seller.listings'
 import { Route as SellerOrdersRouteImport } from './routes/seller.orders'
 import { Route as SellerPayoutsRouteImport } from './routes/seller.payouts'
@@ -106,6 +108,11 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/admin/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminDisputesRoute = AdminDisputesRouteImport.update({
+  id: '/admin/disputes',
+  path: '/admin/disputes',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminIdentityRoute = AdminIdentityRouteImport.update({
   id: '/admin/identity',
   path: '/admin/identity',
@@ -161,6 +168,11 @@ const SellerDashboardRoute = SellerDashboardRouteImport.update({
   path: '/seller/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SellerDisputesRoute = SellerDisputesRouteImport.update({
+  id: '/seller/disputes',
+  path: '/seller/disputes',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SellerListingsRoute = SellerListingsRouteImport.update({
   id: '/seller/listings',
   path: '/seller/listings',
@@ -210,6 +222,7 @@ export interface FileRoutesByFullPath {
   '/register': typeof RegisterRoute
   '/account/disputes': typeof AccountDisputesRoute
   '/account/orders': typeof AccountOrdersRouteWithChildren
+  '/admin/disputes': typeof AdminDisputesRoute
   '/admin/identity': typeof AdminIdentityRoute
   '/admin/moderation': typeof AdminModerationRoute
   '/admin/orders': typeof AdminOrdersRoute
@@ -220,6 +233,7 @@ export interface FileRoutesByFullPath {
   '/seller/$sellerId': typeof SellerSellerIdRoute
   '/seller/creator-profile': typeof SellerCreatorProfileRoute
   '/seller/dashboard': typeof SellerDashboardRoute
+  '/seller/disputes': typeof SellerDisputesRoute
   '/seller/listings': typeof SellerListingsRoute
   '/seller/orders': typeof SellerOrdersRoute
   '/seller/payouts': typeof SellerPayoutsRoute
@@ -243,6 +257,7 @@ export interface FileRoutesByTo {
   '/register': typeof RegisterRoute
   '/account/disputes': typeof AccountDisputesRoute
   '/account/orders': typeof AccountOrdersRouteWithChildren
+  '/admin/disputes': typeof AdminDisputesRoute
   '/admin/identity': typeof AdminIdentityRoute
   '/admin/moderation': typeof AdminModerationRoute
   '/admin/orders': typeof AdminOrdersRoute
@@ -253,6 +268,7 @@ export interface FileRoutesByTo {
   '/seller/$sellerId': typeof SellerSellerIdRoute
   '/seller/creator-profile': typeof SellerCreatorProfileRoute
   '/seller/dashboard': typeof SellerDashboardRoute
+  '/seller/disputes': typeof SellerDisputesRoute
   '/seller/listings': typeof SellerListingsRoute
   '/seller/orders': typeof SellerOrdersRoute
   '/seller/payouts': typeof SellerPayoutsRoute
@@ -277,6 +293,7 @@ export interface FileRoutesById {
   '/register': typeof RegisterRoute
   '/account/disputes': typeof AccountDisputesRoute
   '/account/orders': typeof AccountOrdersRouteWithChildren
+  '/admin/disputes': typeof AdminDisputesRoute
   '/admin/identity': typeof AdminIdentityRoute
   '/admin/moderation': typeof AdminModerationRoute
   '/admin/orders': typeof AdminOrdersRoute
@@ -287,6 +304,7 @@ export interface FileRoutesById {
   '/seller/$sellerId': typeof SellerSellerIdRoute
   '/seller/creator-profile': typeof SellerCreatorProfileRoute
   '/seller/dashboard': typeof SellerDashboardRoute
+  '/seller/disputes': typeof SellerDisputesRoute
   '/seller/listings': typeof SellerListingsRoute
   '/seller/orders': typeof SellerOrdersRoute
   '/seller/payouts': typeof SellerPayoutsRoute
@@ -312,6 +330,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/account/disputes'
     | '/account/orders'
+    | '/admin/disputes'
     | '/admin/identity'
     | '/admin/moderation'
     | '/admin/orders'
@@ -322,6 +341,7 @@ export interface FileRouteTypes {
     | '/seller/$sellerId'
     | '/seller/creator-profile'
     | '/seller/dashboard'
+    | '/seller/disputes'
     | '/seller/listings'
     | '/seller/orders'
     | '/seller/payouts'
@@ -345,6 +365,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/account/disputes'
     | '/account/orders'
+    | '/admin/disputes'
     | '/admin/identity'
     | '/admin/moderation'
     | '/admin/orders'
@@ -355,6 +376,7 @@ export interface FileRouteTypes {
     | '/seller/$sellerId'
     | '/seller/creator-profile'
     | '/seller/dashboard'
+    | '/seller/disputes'
     | '/seller/listings'
     | '/seller/orders'
     | '/seller/payouts'
@@ -378,6 +400,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/account/disputes'
     | '/account/orders'
+    | '/admin/disputes'
     | '/admin/identity'
     | '/admin/moderation'
     | '/admin/orders'
@@ -388,6 +411,7 @@ export interface FileRouteTypes {
     | '/seller/$sellerId'
     | '/seller/creator-profile'
     | '/seller/dashboard'
+    | '/seller/disputes'
     | '/seller/listings'
     | '/seller/orders'
     | '/seller/payouts'
@@ -412,6 +436,7 @@ export interface RootRouteChildren {
   RegisterRoute: typeof RegisterRoute
   AccountDisputesRoute: typeof AccountDisputesRoute
   AccountOrdersRoute: typeof AccountOrdersRouteWithChildren
+  AdminDisputesRoute: typeof AdminDisputesRoute
   AdminIdentityRoute: typeof AdminIdentityRoute
   AdminModerationRoute: typeof AdminModerationRoute
   AdminOrdersRoute: typeof AdminOrdersRoute
@@ -422,6 +447,7 @@ export interface RootRouteChildren {
   SellerSellerIdRoute: typeof SellerSellerIdRoute
   SellerCreatorProfileRoute: typeof SellerCreatorProfileRoute
   SellerDashboardRoute: typeof SellerDashboardRoute
+  SellerDisputesRoute: typeof SellerDisputesRoute
   SellerListingsRoute: typeof SellerListingsRoute
   SellerOrdersRoute: typeof SellerOrdersRoute
   SellerPayoutsRoute: typeof SellerPayoutsRoute
@@ -525,6 +551,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/disputes': {
+      id: '/admin/disputes'
+      path: '/admin/disputes'
+      fullPath: '/admin/disputes'
+      preLoaderRoute: typeof AdminDisputesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/identity': {
       id: '/admin/identity'
       path: '/admin/identity'
@@ -600,6 +633,13 @@ declare module '@tanstack/react-router' {
       path: '/seller/dashboard'
       fullPath: '/seller/dashboard'
       preLoaderRoute: typeof SellerDashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/seller/disputes': {
+      id: '/seller/disputes'
+      path: '/seller/disputes'
+      fullPath: '/seller/disputes'
+      preLoaderRoute: typeof SellerDisputesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/seller/listings': {
@@ -679,6 +719,7 @@ const rootRouteChildren: RootRouteChildren = {
   RegisterRoute: RegisterRoute,
   AccountDisputesRoute: AccountDisputesRoute,
   AccountOrdersRoute: AccountOrdersRouteWithChildren,
+  AdminDisputesRoute: AdminDisputesRoute,
   AdminIdentityRoute: AdminIdentityRoute,
   AdminModerationRoute: AdminModerationRoute,
   AdminOrdersRoute: AdminOrdersRoute,
@@ -689,6 +730,7 @@ const rootRouteChildren: RootRouteChildren = {
   SellerSellerIdRoute: SellerSellerIdRoute,
   SellerCreatorProfileRoute: SellerCreatorProfileRoute,
   SellerDashboardRoute: SellerDashboardRoute,
+  SellerDisputesRoute: SellerDisputesRoute,
   SellerListingsRoute: SellerListingsRoute,
   SellerOrdersRoute: SellerOrdersRoute,
   SellerPayoutsRoute: SellerPayoutsRoute,

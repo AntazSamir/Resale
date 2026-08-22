@@ -211,10 +211,25 @@ Phase 3.4 integrated professional merchant storefronts, tech reviewer creator hu
 
 ---
 
-### ⚖️ 3.6 Automated Dispute Mediation & Fraud Shield
+### ⚖️ 3.6 Dispute Mediation Hub & Fraud Shield (Completed)
 
-- **Structured Dispute Resolution Center (`/account/disputes`)**: Evidence upload portal (photo/video unboxing), SLA timers, and one-click admin arbitration.
-- **Seller Strike & Anti-Fraud Engine**: Automated trust score degradation and serial deduplication.
+- **Structured Dispute Resolution Center (`/account/disputes`)**:
+  - Enforced 48-hour buyer inspection guarantee eligibility window with real-time countdown badges.
+  - 32-point inspection defect checklist targeting specific component mismatches (display scratches, battery degradation, missing accessories).
+  - Drag-and-drop evidence dropzone supporting high-resolution photos and video clips with strict file size/quota protection (max 5MB/photo, max 15MB/video).
+  - Quick sample proof generators for instant testing of condition discrepancies.
+  - PII Masking: Sensitive buyer and seller phones and NID numbers are securely masked (`017****1234`, `****-****-9201`).
+- **Seller Dispute & Claims Hub (`/seller/disputes`)**:
+  - 24-hour response SLA countdown timer with automatic escalation to admin review upon expiry.
+  - "Accept Return & Authorize Full Refund (Simulation)" one-click seller agreement flow.
+  - Contest and counter-evidence uploader (dispatch packaging photos, IMEI serial match proof).
+- **Admin Mediation Workbench (`/admin/disputes`)**:
+  - Side-by-side comparison matrix: Original 32-Point Listing Baseline vs. Buyer Claim & Evidence vs. Seller Counter-Evidence.
+  - Deterministic rule-based Risk Assessment score (0–100 scale, higher = higher risk) and separate Evidence Consistency Confidence metric (0–100%).
+  - Trust factors and risk flags breakdown with audit guidance.
+  - Binding simulated verdict console: Approve Full Refund, Approve Return & Reverse Courier Pickup (`#REV-XXXXX`), or Reject Claim & Release Seller Payout.
+- **Truthfulness & Safety Standards**:
+  - Escrow hold, payment release, and courier pickup are clearly marked and executed as simulated local marketplace state updates without false external API claims.
 
 ---
 
@@ -226,10 +241,10 @@ Phase 3.4 integrated professional merchant storefronts, tech reviewer creator hu
 | **Phase 2**   | Trust & Inspection UX        | 32-Point Inspection, Condition Gauge, Seller Trust Line, Device Verification, Product Multi-Seller Page                                                                           | ✅ Completed |
 | **Phase 3.1** | Order & Transaction Backbone | Decoupled Lifecycle State Machine, Payment Abstraction (COD Active), Mandatory Auth & Redirect, Buyer Timeline & Cancellation, Seller Fulfillment Hub, Admin Oversight            | ✅ Completed |
 | **Phase 3.4** | Creator & Pro Storefronts    | Public Branded Storefronts (`/store/:slug`), Verified Creator Profiles (`/creator/:slug`), Hands-on Product Video Reviews, Exact-Unit Review Badging, Bulk CSV Inventory Importer | ✅ Completed |
+| **Phase 3.6** | Dispute Mediation Hub        | 48h Inspection Window, 24h Seller SLA, Evidence Dropzone, Side-by-Side Admin Workbench, Deterministic Risk Analyzer, Simulated Payout Holds & Reverse Logistcs                    | ✅ Completed |
 | **Phase 3.2** | Courier Logistics            | Steadfast/Pathao API integration, live tracking webhooks, automated COD reconciliation                                                                                            |  📋 Planned  |
 | **Phase 3.3** | Automated Diagnostics        | Live IMEI verification API, device hardware test runner, certified badges                                                                                                         |  📋 Planned  |
 | **Phase 3.5** | AI Valuation Engine          | Real-time price recommender, price history graphs, "Fair Deal" badges                                                                                                             |  📋 Planned  |
-| **Phase 3.6** | Dispute Mediation Hub        | Evidence upload portal, SLA timers, admin dispute workbench, fraud scoring                                                                                                        |  📋 Planned  |
 
 ---
 
