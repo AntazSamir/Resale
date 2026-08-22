@@ -86,8 +86,12 @@ function CheckoutPage() {
   const [nid, setNid] = useState("");
 
   useEffect(() => {
-    if (user?.name && !address.name) {
-      setAddress((prev) => ({ ...prev, name: user.name || "", phone: user.phone || "" }));
+    if (user?.name) {
+      setAddress((prev) => ({
+        ...prev,
+        name: prev.name || user.name || "",
+        phone: prev.phone || user.phone || "",
+      }));
     }
   }, [user]);
 
@@ -117,12 +121,14 @@ function CheckoutPage() {
       conditionScore: listing.conditionScore,
       price: listing.price,
       image: product.image,
-      sellerId: listing.sellerId,
+      sellerId: listing.seller.name
+        ? `seller-${listing.seller.name.toLowerCase().replace(/\s+/g, "-")}`
+        : undefined,
       sellerName: listing.seller.name,
       sellerDistrict: listing.seller.district,
       warrantyMonths: listing.warrantyMonths,
       accessories: listing.accessories,
-      includedItems: listing.includedItems,
+      includedItems: listing.includedItems ?? undefined,
     }));
 
     const now = new Date().toISOString();
@@ -300,7 +306,9 @@ function CheckoutPage() {
             {user && (
               <div className="flex items-center gap-1.5 text-xs text-muted-foreground bg-secondary/80 px-3 py-1.5 border border-border/60">
                 <UserCheck className="size-3.5 text-emerald-500 shrink-0" />
-                <span>Signed in as <strong>{user.name || user.phone}</strong></span>
+                <span>
+                  Signed in as <strong>{user.name || user.phone}</strong>
+                </span>
               </div>
             )}
           </div>
@@ -360,7 +368,9 @@ function CheckoutPage() {
                       </div>
                     </div>
                     <div className="space-y-1.5">
-                      <Label htmlFor="addressLine">Full Delivery Address (Street / House / Flat)</Label>
+                      <Label htmlFor="addressLine">
+                        Full Delivery Address (Street / House / Flat)
+                      </Label>
                       <Input
                         id="addressLine"
                         required
@@ -382,7 +392,8 @@ function CheckoutPage() {
               <CardHeader>
                 <CardTitle className="text-base sm:text-lg">2. Identity Verification</CardTitle>
                 <CardDescription className="text-xs">
-                  Per marketplace safety standards, all buyers provide an NID number for high-value secondhand electronics orders.
+                  Per marketplace safety standards, all buyers provide an NID number for high-value
+                  secondhand electronics orders.
                 </CardDescription>
               </CardHeader>
               {step === "identity" && (
@@ -444,7 +455,8 @@ function CheckoutPage() {
                         </span>
                       </div>
                       <p className="text-xs text-muted-foreground leading-relaxed">
-                        Pay in cash upon doorstep delivery after inspecting package condition. Payment is pending until delivery is completed.
+                        Pay in cash upon doorstep delivery after inspecting package condition.
+                        Payment is pending until delivery is completed.
                       </p>
                     </div>
 
@@ -452,7 +464,8 @@ function CheckoutPage() {
                     <div className="flex items-start gap-2 p-3 bg-secondary/40 border border-border/50 text-xs text-muted-foreground">
                       <AlertCircle className="size-4 shrink-0 text-muted-foreground mt-0.5" />
                       <span>
-                        Digital payment gateways (bKash, Nagad, Cards) and escrow protection are currently in development for Phase 3.
+                        Digital payment gateways (bKash, Nagad, Cards) and escrow protection are
+                        currently in development for Phase 3.
                       </span>
                     </div>
 
@@ -481,14 +494,19 @@ function CheckoutPage() {
               {cartItems.length > 0 ? (
                 <div className="space-y-3 divide-y divide-border/40">
                   {cartItems.map((item) => (
-                    <div key={item.listing.id} className="pt-2 first:pt-0 flex justify-between gap-2">
+                    <div
+                      key={item.listing.id}
+                      className="pt-2 first:pt-0 flex justify-between gap-2"
+                    >
                       <div>
                         <p className="font-semibold text-foreground">{item.product.name}</p>
                         <p className="text-[11px] text-muted-foreground">
                           Grade {item.listing.grade} · Sold by {item.listing.seller.name}
                         </p>
                       </div>
-                      <span className="font-medium text-foreground shrink-0">{taka(item.listing.price)}</span>
+                      <span className="font-medium text-foreground shrink-0">
+                        {taka(item.listing.price)}
+                      </span>
                     </div>
                   ))}
                 </div>

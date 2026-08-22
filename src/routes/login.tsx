@@ -19,13 +19,16 @@ import { AlertCircle, Lock } from "lucide-react";
 import resaleLogo from "@/assets/resale-logo.png";
 
 interface LoginSearch {
-  redirect?: string;
+  redirect?: string | undefined;
 }
 
 export const Route = createFileRoute("/login")({
-  validateSearch: (search: Record<string, unknown>): LoginSearch => ({
-    redirect: typeof search.redirect === "string" ? search.redirect : undefined,
-  }),
+  validateSearch: (search: Record<string, unknown>): LoginSearch => {
+    const raw = search["redirect"];
+    return {
+      redirect: typeof raw === "string" ? raw : undefined,
+    };
+  },
   head: () => ({
     meta: [{ title: "Login | Resale.com" }],
   }),
@@ -161,7 +164,11 @@ function LoginPage() {
                     </InputOTPGroup>
                   </InputOTP>
                 </div>
-                <Button type="submit" className="w-full font-semibold" disabled={otp.length !== 6 || loading}>
+                <Button
+                  type="submit"
+                  className="w-full font-semibold"
+                  disabled={otp.length !== 6 || loading}
+                >
                   {loading ? "Verifying…" : "Verify & Sign In"}
                 </Button>
                 <div className="text-center">
@@ -182,13 +189,19 @@ function LoginPage() {
           <CardFooter className="justify-center border-t border-border/60 p-5">
             <p className="text-xs text-muted-foreground">
               Don&apos;t have an account?{" "}
-              <Link
-                to="/register"
-                search={search.redirect ? { redirect: search.redirect } : undefined}
-                className="text-primary hover:underline font-semibold"
-              >
-                Register here
-              </Link>
+              {search.redirect ? (
+                <Link
+                  to="/register"
+                  search={{ redirect: search.redirect }}
+                  className="text-primary hover:underline font-semibold"
+                >
+                  Register here
+                </Link>
+              ) : (
+                <Link to="/register" className="text-primary hover:underline font-semibold">
+                  Register here
+                </Link>
+              )}
             </p>
           </CardFooter>
         </Card>

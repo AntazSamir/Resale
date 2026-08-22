@@ -19,7 +19,12 @@ import {
 } from "lucide-react";
 import { taka } from "@/data/catalog";
 import { ProtectedRoute } from "@/components/protected-route";
-import { getOrders, type OrderRecord, type OrderStatus, type PaymentStatus } from "@/lib/order-store";
+import {
+  getOrders,
+  type OrderRecord,
+  type OrderStatus,
+  type PaymentStatus,
+} from "@/lib/order-store";
 
 export const Route = createFileRoute("/admin/orders")({
   head: () => ({
@@ -40,10 +45,14 @@ function AdminOrdersPage() {
 
   const totalGMV = orders.reduce((sum, o) => sum + o.total, 0);
   const activeOrdersCount = orders.filter((o) =>
-    ["PENDING", "CONFIRMED", "PROCESSING", "READY_TO_SHIP", "SHIPPED"].includes(o.orderStatus)
+    ["PENDING", "CONFIRMED", "PROCESSING", "READY_TO_SHIP", "SHIPPED"].includes(o.orderStatus),
   ).length;
-  const deliveredCount = orders.filter((o) => ["DELIVERED", "COMPLETED"].includes(o.orderStatus)).length;
-  const disputeCount = orders.filter((o) => ["DISPUTED", "REFUND_REQUESTED"].includes(o.orderStatus)).length;
+  const deliveredCount = orders.filter((o) =>
+    ["DELIVERED", "COMPLETED"].includes(o.orderStatus),
+  ).length;
+  const disputeCount = orders.filter((o) =>
+    ["DISPUTED", "REFUND_REQUESTED"].includes(o.orderStatus),
+  ).length;
 
   const filteredOrders = orders.filter((order) => {
     const matchesSearch =
@@ -83,8 +92,12 @@ function AdminOrdersPage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-display font-bold text-primary">{taka(totalGMV)}</div>
-                  <p className="text-[11px] text-muted-foreground mt-0.5">{orders.length} total orders</p>
+                  <div className="text-2xl font-display font-bold text-primary">
+                    {taka(totalGMV)}
+                  </div>
+                  <p className="text-[11px] text-muted-foreground mt-0.5">
+                    {orders.length} total orders
+                  </p>
                 </CardContent>
               </Card>
 

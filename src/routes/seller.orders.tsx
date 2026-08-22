@@ -36,44 +36,65 @@ function getStatusBadge(status: OrderStatus) {
   switch (status) {
     case "PENDING":
       return (
-        <Badge variant="outline" className="bg-secondary text-foreground border-border gap-1 text-xs">
+        <Badge
+          variant="outline"
+          className="bg-secondary text-foreground border-border gap-1 text-xs"
+        >
           <Clock className="size-3 text-amber-500" /> Pending Confirmation
         </Badge>
       );
     case "CONFIRMED":
       return (
-        <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 gap-1 font-semibold text-xs">
+        <Badge
+          variant="outline"
+          className="bg-primary/10 text-primary border-primary/20 gap-1 font-semibold text-xs"
+        >
           <CheckCircle2 className="size-3 text-primary" /> Confirmed
         </Badge>
       );
     case "PROCESSING":
       return (
-        <Badge variant="outline" className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20 gap-1 text-xs">
+        <Badge
+          variant="outline"
+          className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20 gap-1 text-xs"
+        >
           <Package className="size-3" /> Processing / Packing
         </Badge>
       );
     case "READY_TO_SHIP":
       return (
-        <Badge variant="outline" className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20 gap-1 text-xs">
+        <Badge
+          variant="outline"
+          className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20 gap-1 text-xs"
+        >
           <Clock className="size-3" /> Ready for Courier Handover
         </Badge>
       );
     case "SHIPPED":
       return (
-        <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 gap-1 font-semibold text-xs">
+        <Badge
+          variant="outline"
+          className="bg-primary/10 text-primary border-primary/20 gap-1 font-semibold text-xs"
+        >
           <Truck className="size-3 text-primary" /> Dispatched / In Transit
         </Badge>
       );
     case "DELIVERED":
     case "COMPLETED":
       return (
-        <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 gap-1 font-semibold text-xs">
+        <Badge
+          variant="outline"
+          className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 gap-1 font-semibold text-xs"
+        >
           <CheckCircle2 className="size-3" /> {status === "COMPLETED" ? "Completed" : "Delivered"}
         </Badge>
       );
     case "CANCELLED":
       return (
-        <Badge variant="outline" className="bg-destructive/10 text-destructive border-destructive/20 gap-1 text-xs">
+        <Badge
+          variant="outline"
+          className="bg-destructive/10 text-destructive border-destructive/20 gap-1 text-xs"
+        >
           <XCircle className="size-3" /> Cancelled
         </Badge>
       );
@@ -84,7 +105,9 @@ function getStatusBadge(status: OrderStatus) {
 
 function SellerOrdersPage() {
   const [orders, setOrders] = useState<OrderRecord[]>([]);
-  const [filter, setFilter] = useState<"ALL" | "PENDING" | "IN_PROGRESS" | "SHIPPED" | "COMPLETED" | "CANCELLED">("ALL");
+  const [filter, setFilter] = useState<
+    "ALL" | "PENDING" | "IN_PROGRESS" | "SHIPPED" | "COMPLETED" | "CANCELLED"
+  >("ALL");
   const [actionFeedback, setActionFeedback] = useState<string | null>(null);
 
   const refresh = () => {
@@ -108,7 +131,8 @@ function SellerOrdersPage() {
 
   const filteredOrders = orders.filter((order) => {
     if (filter === "PENDING") return order.orderStatus === "PENDING";
-    if (filter === "IN_PROGRESS") return ["CONFIRMED", "PROCESSING", "READY_TO_SHIP"].includes(order.orderStatus);
+    if (filter === "IN_PROGRESS")
+      return ["CONFIRMED", "PROCESSING", "READY_TO_SHIP"].includes(order.orderStatus);
     if (filter === "SHIPPED") return order.orderStatus === "SHIPPED";
     if (filter === "COMPLETED") return ["DELIVERED", "COMPLETED"].includes(order.orderStatus);
     if (filter === "CANCELLED") return ["CANCELLED", "REFUNDED"].includes(order.orderStatus);
@@ -129,7 +153,8 @@ function SellerOrdersPage() {
                   Order Management &amp; Fulfillment
                 </h1>
                 <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
-                  Confirm orders, prepare packages, and advance lifecycle stages through courier dispatch
+                  Confirm orders, prepare packages, and advance lifecycle stages through courier
+                  dispatch
                 </p>
               </div>
             </div>
@@ -216,7 +241,11 @@ function SellerOrdersPage() {
                             <div className="flex items-start gap-3">
                               <div className="size-10 bg-muted border border-border/60 flex items-center justify-center shrink-0 overflow-hidden">
                                 {item.image ? (
-                                  <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                                  <img
+                                    src={item.image}
+                                    alt={item.name}
+                                    className="w-full h-full object-cover"
+                                  />
                                 ) : (
                                   <Package className="size-4 text-muted-foreground" />
                                 )}
@@ -228,7 +257,9 @@ function SellerOrdersPage() {
                                 </p>
                               </div>
                             </div>
-                            <span className="font-display font-bold text-foreground">{taka(item.price)}</span>
+                            <span className="font-display font-bold text-foreground">
+                              {taka(item.price)}
+                            </span>
                           </div>
                         ))}
                       </div>
@@ -236,15 +267,24 @@ function SellerOrdersPage() {
                       {/* Delivery & Payment details summary */}
                       <div className="grid sm:grid-cols-2 gap-3 p-3 bg-secondary/30 border border-border/50 text-xs">
                         <div>
-                          <span className="text-muted-foreground block text-[11px]">Shipping Destination:</span>
+                          <span className="text-muted-foreground block text-[11px]">
+                            Shipping Destination:
+                          </span>
                           <span className="font-medium text-foreground">
-                            {order.shippingAddress?.district}, {order.shippingAddress?.division} (Recipient: {order.shippingAddress?.name || "Buyer"})
+                            {order.shippingAddress?.district}, {order.shippingAddress?.division}{" "}
+                            (Recipient: {order.shippingAddress?.name || "Buyer"})
                           </span>
                         </div>
                         <div>
-                          <span className="text-muted-foreground block text-[11px]">Payment Collection:</span>
+                          <span className="text-muted-foreground block text-[11px]">
+                            Payment Collection:
+                          </span>
                           <span className="font-medium text-foreground">
-                            {order.paymentMethod} ({order.paymentStatus === "PAID" ? "Settled" : "Pending Courier Doorstep Collection"})
+                            {order.paymentMethod} (
+                            {order.paymentStatus === "PAID"
+                              ? "Settled"
+                              : "Pending Courier Doorstep Collection"}
+                            )
                           </span>
                         </div>
                       </div>
@@ -254,7 +294,8 @@ function SellerOrdersPage() {
                         <div className="text-[11px] text-muted-foreground">
                           {order.timeline.length > 0 && (
                             <span>
-                              Latest event: <strong>{order.timeline[order.timeline.length - 1]?.title}</strong>
+                              Latest event:{" "}
+                              <strong>{order.timeline[order.timeline.length - 1]?.title}</strong>
                             </span>
                           )}
                         </div>
@@ -276,7 +317,9 @@ function SellerOrdersPage() {
                           {order.orderStatus === "CONFIRMED" && (
                             <Button
                               size="sm"
-                              onClick={() => handleTransition(order.id, "PROCESSING", "Processing & Packing")}
+                              onClick={() =>
+                                handleTransition(order.id, "PROCESSING", "Processing & Packing")
+                              }
                               className="font-semibold"
                             >
                               <Package className="size-3.5 mr-1.5" /> Start Packing Device
@@ -286,7 +329,9 @@ function SellerOrdersPage() {
                           {order.orderStatus === "PROCESSING" && (
                             <Button
                               size="sm"
-                              onClick={() => handleTransition(order.id, "READY_TO_SHIP", "Ready for Courier")}
+                              onClick={() =>
+                                handleTransition(order.id, "READY_TO_SHIP", "Ready for Courier")
+                              }
                               className="font-semibold"
                             >
                               <Clock className="size-3.5 mr-1.5" /> Mark Ready for Courier
@@ -296,7 +341,9 @@ function SellerOrdersPage() {
                           {order.orderStatus === "READY_TO_SHIP" && (
                             <Button
                               size="sm"
-                              onClick={() => handleTransition(order.id, "SHIPPED", "Handed over to Courier")}
+                              onClick={() =>
+                                handleTransition(order.id, "SHIPPED", "Handed over to Courier")
+                              }
                               className="font-semibold"
                             >
                               <Truck className="size-3.5 mr-1.5" /> Hand to Courier (Dispatched)

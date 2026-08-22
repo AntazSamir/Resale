@@ -48,62 +48,92 @@ function getOrderStatusBadge(status: OrderStatus) {
   switch (status) {
     case "PENDING":
       return (
-        <Badge variant="outline" className="bg-secondary text-foreground border-border gap-1 font-medium text-xs">
+        <Badge
+          variant="outline"
+          className="bg-secondary text-foreground border-border gap-1 font-medium text-xs"
+        >
           <Clock className="size-3 text-amber-500" /> Pending Confirmation
         </Badge>
       );
     case "CONFIRMED":
       return (
-        <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 gap-1 font-semibold text-xs">
+        <Badge
+          variant="outline"
+          className="bg-primary/10 text-primary border-primary/20 gap-1 font-semibold text-xs"
+        >
           <CheckCircle2 className="size-3 text-primary" /> Confirmed
         </Badge>
       );
     case "PROCESSING":
       return (
-        <Badge variant="outline" className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20 gap-1 font-medium text-xs">
+        <Badge
+          variant="outline"
+          className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20 gap-1 font-medium text-xs"
+        >
           <Package className="size-3" /> Processing
         </Badge>
       );
     case "READY_TO_SHIP":
       return (
-        <Badge variant="outline" className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20 gap-1 font-medium text-xs">
+        <Badge
+          variant="outline"
+          className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20 gap-1 font-medium text-xs"
+        >
           <Clock className="size-3" /> Ready for Courier
         </Badge>
       );
     case "SHIPPED":
       return (
-        <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 gap-1 font-semibold text-xs">
+        <Badge
+          variant="outline"
+          className="bg-primary/10 text-primary border-primary/20 gap-1 font-semibold text-xs"
+        >
           <Truck className="size-3 text-primary" /> In Transit / Shipped
         </Badge>
       );
     case "DELIVERED":
       return (
-        <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 gap-1 font-semibold text-xs">
+        <Badge
+          variant="outline"
+          className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 gap-1 font-semibold text-xs"
+        >
           <CheckCircle2 className="size-3" /> Delivered
         </Badge>
       );
     case "COMPLETED":
       return (
-        <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 gap-1 font-semibold text-xs">
+        <Badge
+          variant="outline"
+          className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 gap-1 font-semibold text-xs"
+        >
           <CheckCircle2 className="size-3" /> Completed
         </Badge>
       );
     case "CANCELLED":
       return (
-        <Badge variant="outline" className="bg-destructive/10 text-destructive border-destructive/20 gap-1 font-medium text-xs">
+        <Badge
+          variant="outline"
+          className="bg-destructive/10 text-destructive border-destructive/20 gap-1 font-medium text-xs"
+        >
           <XCircle className="size-3" /> Cancelled
         </Badge>
       );
     case "REFUND_REQUESTED":
     case "DISPUTED":
       return (
-        <Badge variant="outline" className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20 gap-1 font-medium text-xs">
+        <Badge
+          variant="outline"
+          className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20 gap-1 font-medium text-xs"
+        >
           <AlertCircle className="size-3" /> In Review / Dispute
         </Badge>
       );
     case "REFUNDED":
       return (
-        <Badge variant="outline" className="bg-secondary text-muted-foreground border-border gap-1 font-medium text-xs">
+        <Badge
+          variant="outline"
+          className="bg-secondary text-muted-foreground border-border gap-1 font-medium text-xs"
+        >
           Refunded
         </Badge>
       );
@@ -128,7 +158,8 @@ function OrderDetailsPage() {
     e.preventDefault();
     if (!order) return;
     setCancelling(true);
-    const finalReason = cancelReason === "Other" ? customReason.trim() || "Other reason" : cancelReason;
+    const finalReason =
+      cancelReason === "Other" ? customReason.trim() || "Other reason" : cancelReason;
     const res = cancelOrder(order.id, finalReason, "BUYER");
     if (res.success && res.order) {
       setOrder(res.order);
@@ -175,9 +206,13 @@ function OrderDetailsPage() {
       <main className="flex-1 mx-auto max-w-5xl px-4 sm:px-6 py-6 sm:py-10 w-full space-y-6">
         {/* Breadcrumb */}
         <nav className="text-xs text-muted-foreground flex items-center gap-1.5">
-          <Link to="/" className="hover:text-foreground">Home</Link>
+          <Link to="/" className="hover:text-foreground">
+            Home
+          </Link>
           <span>/</span>
-          <Link to="/account/orders" className="hover:text-foreground">My Orders</Link>
+          <Link to="/account/orders" className="hover:text-foreground">
+            My Orders
+          </Link>
           <span>/</span>
           <span className="text-foreground font-mono font-medium">{order.id}</span>
         </nav>
@@ -185,7 +220,11 @@ function OrderDetailsPage() {
         {/* Top Header Card */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-border/80">
           <div className="flex items-center gap-3">
-            <img src={resaleLogo} alt="Resale logo" className="h-9 w-auto object-contain shrink-0" />
+            <img
+              src={resaleLogo}
+              alt="Resale logo"
+              className="h-9 w-auto object-contain shrink-0"
+            />
             <div>
               <div className="flex flex-wrap items-center gap-2">
                 <h1 className="text-xl sm:text-2xl font-display font-bold text-foreground">
@@ -203,9 +242,7 @@ function OrderDetailsPage() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            {getOrderStatusBadge(order.orderStatus)}
-          </div>
+          <div className="flex items-center gap-2">{getOrderStatusBadge(order.orderStatus)}</div>
         </div>
 
         {/* Cancellation Notice if Cancelled */}
@@ -227,7 +264,9 @@ function OrderDetailsPage() {
             {/* Items Snapshot Card */}
             <Card className="border-border/80 shadow-xs">
               <CardHeader className="pb-3 border-b border-border/60">
-                <CardTitle className="text-base font-bold">Purchased Items &amp; Condition Snapshot</CardTitle>
+                <CardTitle className="text-base font-bold">
+                  Purchased Items &amp; Condition Snapshot
+                </CardTitle>
                 <CardDescription className="text-xs">
                   Listing data preserved as documented at time of order placement
                 </CardDescription>
@@ -239,7 +278,11 @@ function OrderDetailsPage() {
                       <div className="flex items-start gap-3">
                         <div className="size-12 bg-muted border border-border/60 flex items-center justify-center shrink-0 overflow-hidden">
                           {item.image ? (
-                            <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                            <img
+                              src={item.image}
+                              alt={item.name}
+                              className="w-full h-full object-cover"
+                            />
                           ) : (
                             <Package className="size-5 text-muted-foreground" />
                           )}
@@ -295,7 +338,9 @@ function OrderDetailsPage() {
             {/* Dynamic Event Timeline */}
             <Card className="border-border/80 shadow-xs">
               <CardHeader className="pb-3 border-b border-border/60">
-                <CardTitle className="text-base font-bold">Order Lifecycle &amp; Event Timeline</CardTitle>
+                <CardTitle className="text-base font-bold">
+                  Order Lifecycle &amp; Event Timeline
+                </CardTitle>
                 <CardDescription className="text-xs">
                   Audited timeline of verified application events for this transaction
                 </CardDescription>
@@ -326,12 +371,18 @@ function OrderDetailsPage() {
                           </div>
                           <div className="space-y-0.5">
                             <div className="flex flex-wrap items-center justify-between gap-2">
-                              <p className={`font-semibold text-sm ${isLast ? "text-primary" : "text-foreground"}`}>
+                              <p
+                                className={`font-semibold text-sm ${isLast ? "text-primary" : "text-foreground"}`}
+                              >
                                 {evt.title}
                               </p>
-                              <span className="text-[11px] text-muted-foreground font-mono">{dateStr}</span>
+                              <span className="text-[11px] text-muted-foreground font-mono">
+                                {dateStr}
+                              </span>
                             </div>
-                            <p className="text-muted-foreground leading-relaxed">{evt.description}</p>
+                            <p className="text-muted-foreground leading-relaxed">
+                              {evt.description}
+                            </p>
                             <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium block pt-0.5">
                               Logged by {evt.actor}
                             </span>
@@ -365,7 +416,9 @@ function OrderDetailsPage() {
                 </div>
                 <div>
                   <span className="text-muted-foreground block text-[11px]">Phone</span>
-                  <span className="text-foreground">{order.shippingAddress?.phone || order.buyerContact?.phone}</span>
+                  <span className="text-foreground">
+                    {order.shippingAddress?.phone || order.buyerContact?.phone}
+                  </span>
                 </div>
                 <div>
                   <span className="text-muted-foreground block text-[11px]">Address</span>
@@ -380,12 +433,21 @@ function OrderDetailsPage() {
                   </p>
                   <p>
                     <strong>Payment Status:</strong>{" "}
-                    <span className={order.paymentStatus === "PAID" ? "text-emerald-600 font-semibold" : "text-amber-600 font-semibold"}>
-                      {order.paymentStatus === "PAID" ? "Paid / Settled" : "Pending Doorstep Collection"}
+                    <span
+                      className={
+                        order.paymentStatus === "PAID"
+                          ? "text-emerald-600 font-semibold"
+                          : "text-amber-600 font-semibold"
+                      }
+                    >
+                      {order.paymentStatus === "PAID"
+                        ? "Paid / Settled"
+                        : "Pending Doorstep Collection"}
                     </span>
                   </p>
                   <p>
-                    <strong>Buyer NID Verified:</strong> {order.buyerContact?.nidNumber || order.nidNumber || "Verified on registration"}
+                    <strong>Buyer NID Verified:</strong>{" "}
+                    {order.buyerContact?.nidNumber || order.nidNumber || "Verified on registration"}
                   </p>
                 </div>
               </CardContent>
@@ -402,7 +464,8 @@ function OrderDetailsPage() {
                 {isCancellable ? (
                   <div className="space-y-2">
                     <p className="text-muted-foreground text-[11px] leading-relaxed">
-                      You can cancel this order while it is in pending or confirmed stage before physical dispatch.
+                      You can cancel this order while it is in pending or confirmed stage before
+                      physical dispatch.
                     </p>
                     <Button
                       variant="outline"
@@ -419,7 +482,8 @@ function OrderDetailsPage() {
                       <p className="text-destructive font-medium">This order has been cancelled.</p>
                     ) : (
                       <p>
-                        Cancellation is locked because the order has progressed past the confirmation stage ({order.orderStatus}).
+                        Cancellation is locked because the order has progressed past the
+                        confirmation stage ({order.orderStatus}).
                       </p>
                     )}
                   </div>
@@ -436,11 +500,14 @@ function OrderDetailsPage() {
               </CardHeader>
               <CardContent className="space-y-3 pt-3 text-xs">
                 <p className="text-muted-foreground text-[11px] leading-relaxed">
-                  Every device is protected by the Resale condition guarantee. If the physical item received does not match the documented 32-point inspection report, you have a 48-hour return window.
+                  Every device is protected by the Resale condition guarantee. If the physical item
+                  received does not match the documented 32-point inspection report, you have a
+                  48-hour return window.
                 </p>
                 <Button variant="outline" size="sm" asChild className="w-full text-xs">
                   <Link to="/account/disputes">
-                    <AlertCircle className="size-3.5 mr-1.5 text-primary" /> Resolution &amp; Disputes Center
+                    <AlertCircle className="size-3.5 mr-1.5 text-primary" /> Resolution &amp;
+                    Disputes Center
                   </Link>
                 </Button>
               </CardContent>
@@ -470,9 +537,15 @@ function OrderDetailsPage() {
                       className="w-full border border-border bg-background px-3 py-2 text-xs rounded-none"
                     >
                       <option value="Change of mind">Change of mind</option>
-                      <option value="Found alternative / better price">Found alternative / better price</option>
-                      <option value="Incorrect shipping address entered">Incorrect shipping address entered</option>
-                      <option value="Estimated delivery duration too long">Estimated delivery duration too long</option>
+                      <option value="Found alternative / better price">
+                        Found alternative / better price
+                      </option>
+                      <option value="Incorrect shipping address entered">
+                        Incorrect shipping address entered
+                      </option>
+                      <option value="Estimated delivery duration too long">
+                        Estimated delivery duration too long
+                      </option>
                       <option value="Other">Other reason</option>
                     </select>
                   </div>
@@ -492,7 +565,8 @@ function OrderDetailsPage() {
                   )}
 
                   <div className="p-3 bg-destructive/5 border border-destructive/20 text-[11px] text-destructive leading-relaxed">
-                    This action will update the order status to <strong>CANCELLED</strong> and record this event in the transaction audit log.
+                    This action will update the order status to <strong>CANCELLED</strong> and
+                    record this event in the transaction audit log.
                   </div>
                 </CardContent>
                 <div className="p-4 bg-muted/30 border-t border-border/60 flex justify-end gap-2">
@@ -505,12 +579,7 @@ function OrderDetailsPage() {
                   >
                     Keep Order
                   </Button>
-                  <Button
-                    type="submit"
-                    variant="destructive"
-                    size="sm"
-                    disabled={cancelling}
-                  >
+                  <Button type="submit" variant="destructive" size="sm" disabled={cancelling}>
                     {cancelling ? "Cancelling…" : "Confirm Cancellation"}
                   </Button>
                 </div>

@@ -4,24 +4,26 @@ import { useAuth } from "@/lib/auth-store";
 
 interface ProtectedRouteProps {
   children: ReactNode;
-  requireAdmin?: boolean;
-  redirect?: string;
+  requireAdmin?: boolean | undefined;
+  redirect?: string | undefined;
 }
 
-export function ProtectedRoute({
-  children,
-  requireAdmin = false,
-  redirect,
-}: ProtectedRouteProps) {
+export function ProtectedRoute({ children, requireAdmin = false, redirect }: ProtectedRouteProps) {
   const { isLoggedIn, user } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
     if (!isLoggedIn) {
-      navigate({
-        to: "/login",
-        search: redirect ? { redirect } : undefined,
-      });
+      if (redirect) {
+        navigate({
+          to: "/login",
+          search: { redirect },
+        });
+      } else {
+        navigate({
+          to: "/login",
+        });
+      }
     }
   }, [isLoggedIn, navigate, redirect]);
 

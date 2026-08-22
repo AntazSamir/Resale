@@ -12,12 +12,7 @@ export type OrderStatus =
   | "DISPUTED";
 
 export type PaymentStatus =
-  | "PENDING"
-  | "AUTHORIZED"
-  | "PAID"
-  | "FAILED"
-  | "REFUND_PENDING"
-  | "REFUNDED";
+  "PENDING" | "AUTHORIZED" | "PAID" | "FAILED" | "REFUND_PENDING" | "REFUNDED";
 
 export type PaymentMethod = "COD" | "BKASH" | "NAGAD" | "SSLCOMMERZ" | "CARD";
 
@@ -26,15 +21,15 @@ export interface OrderItemSnapshot {
   productId: string;
   name: string;
   grade: string;
-  conditionScore?: number;
+  conditionScore?: number | undefined;
   price: number;
-  image?: string;
-  sellerId?: string;
-  sellerName?: string;
-  sellerDistrict?: string;
-  warrantyMonths?: number;
-  accessories?: string;
-  includedItems?: string[];
+  image?: string | undefined;
+  sellerId?: string | undefined;
+  sellerName?: string | undefined;
+  sellerDistrict?: string | undefined;
+  warrantyMonths?: number | undefined;
+  accessories?: string | undefined;
+  includedItems?: string[] | undefined;
 }
 
 // Backward-compatible alias
@@ -376,16 +371,31 @@ export function getOrders(): OrderRecord[] {
       const legacyRaw = window.localStorage.getItem(LEGACY_STORAGE_KEY);
       if (legacyRaw) {
         try {
-          const parsedLegacy = JSON.parse(legacyRaw) as any[];
+          const parsedLegacy = JSON.parse(legacyRaw) as Record<string, unknown>[];
           if (Array.isArray(parsedLegacy) && parsedLegacy.length > 0) {
             const upgraded: OrderRecord[] = parsedLegacy.map((leg) => ({
-              id: leg.id || `ORD-${Date.now().toString(36).toUpperCase().slice(-6)}`,
-              date: leg.date || new Date().toISOString().split("T")[0] || "",
-              orderStatus: (leg.status || "PENDING") as OrderStatus,
-              status: (leg.status || "PENDING") as OrderStatus,
-              paymentStatus: (leg.paymentStatus || "PENDING") as PaymentStatus,
-              paymentMethod: (leg.paymentMethod?.toUpperCase() === "BKASH" ? "BKASH" : "COD") as PaymentMethod,
-              items: Array.isArray(leg.items) ? leg.items : [],
+              id:
+                typeof leg["id"] === "string"
+                  ? leg["id"]
+                  : `ORD-${Date.now().toString(36).toUpperCase().slice(-6)}`,
+              date:
+                typeof leg["date"] === "string"
+                  ? leg["date"]
+                  : new Date().toISOString().split("T")[0] || "",
+              orderStatus: (typeof leg["status"] === "string"
+                ? leg["status"]
+                : "PENDING") as OrderStatus,
+              status: (typeof leg["status"] === "string"
+                ? leg["status"]
+                : "PENDING") as OrderStatus,
+              paymentStatus: (typeof leg["paymentStatus"] === "string"
+                ? leg["paymentStatus"]
+                : "PENDING") as PaymentStatus,
+              paymentMethod: (typeof leg["paymentMethod"] === "string" &&
+              leg["paymentMethod"].toUpperCase() === "BKASH"
+                ? "BKASH"
+                : "COD") as PaymentMethod,
+              items: Array.isArray(leg["items"]) ? (leg["items"] as OrderItemSnapshot[]) : [],
               subtotal: leg.subtotal || 0,
               deliveryFee: leg.deliveryFee || DEFAULT_DELIVERY_FEE,
               discount: leg.discount || 0,
@@ -464,7 +474,10 @@ export function saveOrder(order: OrderRecord): void {
 /**
  * Updates an existing order record in storage
  */
-export function updateOrder(orderId: string, updater: (order: OrderRecord) => OrderRecord): OrderRecord | undefined {
+export function updateOrder(
+  orderId: string,
+  updater: (order: OrderRecord) => OrderRecord,
+): OrderRecord | undefined {
   if (typeof window === "undefined") return;
   try {
     const existing = getOrders();

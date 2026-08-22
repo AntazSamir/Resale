@@ -201,8 +201,6 @@ function ListingPage() {
               )}
             </div>
 
-
-
             {/* 7. What's Included */}
             <div className="pt-1">
               <WhatsIncludedCard

@@ -4,7 +4,15 @@ import { SiteHeader, SiteFooter } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Package, Truck, CheckCircle2, Clock, XCircle, AlertCircle, ShieldCheck } from "lucide-react";
+import {
+  Package,
+  Truck,
+  CheckCircle2,
+  Clock,
+  XCircle,
+  AlertCircle,
+  ShieldCheck,
+} from "lucide-react";
 import { taka } from "@/data/catalog";
 import { getOrders, type OrderRecord, type OrderStatus } from "@/lib/order-store";
 
@@ -29,62 +37,92 @@ function getOrderStatusBadge(status: OrderStatus) {
   switch (status) {
     case "PENDING":
       return (
-        <Badge variant="outline" className="bg-secondary/80 text-foreground border-border gap-1 font-medium text-xs">
+        <Badge
+          variant="outline"
+          className="bg-secondary/80 text-foreground border-border gap-1 font-medium text-xs"
+        >
           <Clock className="size-3 text-amber-500" /> Pending Confirmation
         </Badge>
       );
     case "CONFIRMED":
       return (
-        <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 gap-1 font-semibold text-xs">
+        <Badge
+          variant="outline"
+          className="bg-primary/10 text-primary border-primary/20 gap-1 font-semibold text-xs"
+        >
           <CheckCircle2 className="size-3 text-primary" /> Confirmed
         </Badge>
       );
     case "PROCESSING":
       return (
-        <Badge variant="outline" className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20 gap-1 font-medium text-xs">
+        <Badge
+          variant="outline"
+          className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20 gap-1 font-medium text-xs"
+        >
           <Package className="size-3" /> Processing / Packing
         </Badge>
       );
     case "READY_TO_SHIP":
       return (
-        <Badge variant="outline" className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20 gap-1 font-medium text-xs">
+        <Badge
+          variant="outline"
+          className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20 gap-1 font-medium text-xs"
+        >
           <Clock className="size-3" /> Ready for Courier
         </Badge>
       );
     case "SHIPPED":
       return (
-        <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 gap-1 font-semibold text-xs">
+        <Badge
+          variant="outline"
+          className="bg-primary/10 text-primary border-primary/20 gap-1 font-semibold text-xs"
+        >
           <Truck className="size-3 text-primary" /> In Transit / Shipped
         </Badge>
       );
     case "DELIVERED":
       return (
-        <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 gap-1 font-semibold text-xs">
+        <Badge
+          variant="outline"
+          className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 gap-1 font-semibold text-xs"
+        >
           <CheckCircle2 className="size-3" /> Delivered
         </Badge>
       );
     case "COMPLETED":
       return (
-        <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 gap-1 font-semibold text-xs">
+        <Badge
+          variant="outline"
+          className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 gap-1 font-semibold text-xs"
+        >
           <CheckCircle2 className="size-3" /> Completed
         </Badge>
       );
     case "CANCELLED":
       return (
-        <Badge variant="outline" className="bg-destructive/10 text-destructive border-destructive/20 gap-1 font-medium text-xs">
+        <Badge
+          variant="outline"
+          className="bg-destructive/10 text-destructive border-destructive/20 gap-1 font-medium text-xs"
+        >
           <XCircle className="size-3" /> Cancelled
         </Badge>
       );
     case "REFUND_REQUESTED":
     case "DISPUTED":
       return (
-        <Badge variant="outline" className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20 gap-1 font-medium text-xs">
+        <Badge
+          variant="outline"
+          className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20 gap-1 font-medium text-xs"
+        >
           <AlertCircle className="size-3" /> In Review / Dispute
         </Badge>
       );
     case "REFUNDED":
       return (
-        <Badge variant="outline" className="bg-secondary text-muted-foreground border-border gap-1 font-medium text-xs">
+        <Badge
+          variant="outline"
+          className="bg-secondary text-muted-foreground border-border gap-1 font-medium text-xs"
+        >
           Refunded
         </Badge>
       );
@@ -103,7 +141,9 @@ function OrdersPage() {
 
   const filteredOrders = orders.filter((order) => {
     if (filter === "ACTIVE") {
-      return ["PENDING", "CONFIRMED", "PROCESSING", "READY_TO_SHIP", "SHIPPED"].includes(order.orderStatus);
+      return ["PENDING", "CONFIRMED", "PROCESSING", "READY_TO_SHIP", "SHIPPED"].includes(
+        order.orderStatus,
+      );
     }
     if (filter === "COMPLETED") {
       return ["DELIVERED", "COMPLETED"].includes(order.orderStatus);
@@ -120,13 +160,17 @@ function OrdersPage() {
       <main className="flex-1 mx-auto max-w-5xl px-4 sm:px-6 py-8 sm:py-10 w-full space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-display font-bold text-foreground">My Orders</h1>
+            <h1 className="text-2xl sm:text-3xl font-display font-bold text-foreground">
+              My Orders
+            </h1>
             <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
               Track status, delivery timelines, and device condition records
             </p>
           </div>
           <Button variant="outline" asChild size="sm">
-            <Link to="/products">Browse Catalog</Link>
+            <Link to="/products" search={{}}>
+              Browse Catalog
+            </Link>
           </Button>
         </div>
 
@@ -143,7 +187,9 @@ function OrdersPage() {
                   : "bg-secondary/60 text-muted-foreground hover:text-foreground hover:bg-secondary"
               }`}
             >
-              {tab === "ALL" ? `All Orders (${orders.length})` : tab.charAt(0) + tab.slice(1).toLowerCase()}
+              {tab === "ALL"
+                ? `All Orders (${orders.length})`
+                : tab.charAt(0) + tab.slice(1).toLowerCase()}
             </button>
           ))}
         </div>
@@ -152,7 +198,9 @@ function OrdersPage() {
           <Card className="p-12 text-center border-border/70">
             <p className="text-muted-foreground mb-4 text-sm">No orders found in this category.</p>
             <Button asChild size="sm">
-              <Link to="/products">Browse Available Listings</Link>
+              <Link to="/products" search={{}}>
+                Browse Available Listings
+              </Link>
             </Button>
           </Card>
         ) : (
@@ -197,22 +245,32 @@ function OrdersPage() {
                       <div key={i} className="flex items-start gap-3 text-xs">
                         <div className="size-10 bg-muted border border-border/60 flex items-center justify-center shrink-0 overflow-hidden">
                           {item.image ? (
-                            <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                            <img
+                              src={item.image}
+                              alt={item.name}
+                              className="w-full h-full object-cover"
+                            />
                           ) : (
                             <Package className="size-4 text-muted-foreground" />
                           )}
                         </div>
                         <div className="min-w-0 flex-1">
-                          <p className="font-semibold text-foreground text-sm truncate">{item.name}</p>
+                          <p className="font-semibold text-foreground text-sm truncate">
+                            {item.name}
+                          </p>
                           <p className="text-muted-foreground text-[11px] mt-0.5">
-                            Grade {item.grade} · Sold by {item.sellerName || "Verified Seller"} · {taka(item.price)}
+                            Grade {item.grade} · Sold by {item.sellerName || "Verified Seller"} ·{" "}
+                            {taka(item.price)}
                           </p>
                         </div>
                       </div>
                     ))}
 
                     <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground pt-1">
-                      <span>Payment: <strong>{order.paymentMethod}</strong> ({order.paymentStatus === "PAID" ? "Paid" : "Pending on Delivery"})</span>
+                      <span>
+                        Payment: <strong>{order.paymentMethod}</strong> (
+                        {order.paymentStatus === "PAID" ? "Paid" : "Pending on Delivery"})
+                      </span>
                       <span>·</span>
                       <span>Delivery: {order.shippingAddress?.district || "Dhaka"}</span>
                       {order.timeline.length > 0 && (

@@ -19,13 +19,16 @@ import { AlertCircle, Lock } from "lucide-react";
 import resaleLogo from "@/assets/resale-logo.png";
 
 interface RegisterSearch {
-  redirect?: string;
+  redirect?: string | undefined;
 }
 
 export const Route = createFileRoute("/register")({
-  validateSearch: (search: Record<string, unknown>): RegisterSearch => ({
-    redirect: typeof search.redirect === "string" ? search.redirect : undefined,
-  }),
+  validateSearch: (search: Record<string, unknown>): RegisterSearch => {
+    const raw = search["redirect"];
+    return {
+      redirect: typeof raw === "string" ? raw : undefined,
+    };
+  },
   head: () => ({
     meta: [{ title: "Register | Resale.com" }],
   }),
@@ -132,7 +135,9 @@ function RegisterPage() {
             {search.redirect && (
               <div className="mb-4 p-2.5 bg-primary/10 border border-primary/20 text-xs text-primary flex items-center gap-2">
                 <Lock className="size-3.5 shrink-0" />
-                <span>NID-verified registration protects buyer purchase &amp; warranty claims.</span>
+                <span>
+                  NID-verified registration protects buyer purchase &amp; warranty claims.
+                </span>
               </div>
             )}
 
@@ -201,7 +206,11 @@ function RegisterPage() {
                     </InputOTPGroup>
                   </InputOTP>
                 </div>
-                <Button type="submit" className="w-full font-semibold" disabled={otp.length !== 6 || loading}>
+                <Button
+                  type="submit"
+                  className="w-full font-semibold"
+                  disabled={otp.length !== 6 || loading}
+                >
                   {loading ? "Verifying…" : "Complete Registration"}
                 </Button>
                 <div className="text-center">
@@ -222,13 +231,19 @@ function RegisterPage() {
           <CardFooter className="justify-center border-t border-border/60 p-5">
             <p className="text-xs text-muted-foreground">
               Already have an account?{" "}
-              <Link
-                to="/login"
-                search={search.redirect ? { redirect: search.redirect } : undefined}
-                className="text-primary hover:underline font-semibold"
-              >
-                Sign in here
-              </Link>
+              {search.redirect ? (
+                <Link
+                  to="/login"
+                  search={{ redirect: search.redirect }}
+                  className="text-primary hover:underline font-semibold"
+                >
+                  Sign in here
+                </Link>
+              ) : (
+                <Link to="/login" className="text-primary hover:underline font-semibold">
+                  Sign in here
+                </Link>
+              )}
             </p>
           </CardFooter>
         </Card>

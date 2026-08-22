@@ -17,7 +17,11 @@ export const Route = createFileRoute("/seller/dashboard")({
   component: SellerDashboardPage,
 });
 
-export function SellerSidebar({ active }: { active: "dashboard" | "orders" | "listings" | "payouts" }) {
+export function SellerSidebar({
+  active,
+}: {
+  active: "dashboard" | "orders" | "listings" | "payouts";
+}) {
   return (
     <aside className="w-64 shrink-0 hidden md:block">
       <nav className="space-y-2 sticky top-24">
@@ -77,7 +81,7 @@ function SellerDashboardPage() {
     .reduce((acc, o) => acc + o.total, 0);
 
   const pendingOrdersCount = orders.filter((o) =>
-    ["PENDING", "CONFIRMED", "PROCESSING", "READY_TO_SHIP"].includes(o.orderStatus)
+    ["PENDING", "CONFIRMED", "PROCESSING", "READY_TO_SHIP"].includes(o.orderStatus),
   ).length;
 
   return (
