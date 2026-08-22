@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+﻿import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useMemo } from "react";
 import { SiteHeader, SiteFooter } from "@/components/site-header";
 import { products } from "@/data/catalog";
@@ -15,6 +15,8 @@ import {
   Layers,
   ArrowRight,
   Search,
+  Home,
+  ChevronDown,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
@@ -25,22 +27,34 @@ export const Route = createFileRoute("/categories")({
       {
         name: "description",
         content:
-          "Browse all electronics categories on Resale.com: Smartphones, Laptops, Cameras, Audio, Tablets, Smartwatches, and Gaming Consoles with condition reports and cash on delivery.",
+          "Browse all electronics categories on Resale.com: Smartphones, Laptops, Cameras, Audio, Tablets, Smartwatches, Home Products, Accessories, and Gaming Consoles with condition reports and cash on delivery.",
       },
     ],
   }),
   component: CategoriesPage,
 });
 
-interface CategoryMeta {
-  id: string;
-  name: string;
-  categoryQuery: string;
-  icon: typeof Smartphone;
-  popularBrands: string[];
+interface SubCategory {
+  label: string;
+  q?: string;
+  category?: string;
 }
 
-const categoryDirectory: CategoryMeta[] = [
+interface CategoryGroup {
+  id: string;
+  name: string;
+  categoryQuery?: string;
+  icon: typeof Smartphone;
+  popularBrands: string[];
+  subcategories?: SubCategory[];
+}
+
+/**
+ * Full category directory — all catalog categories + subcategory groupings
+ * that mirror the secondary header nav dropdowns.
+ * Model counts are derived dynamically from catalog data (never hardcoded).
+ */
+const categoryDirectory: CategoryGroup[] = [
   {
     id: "smartphones",
     name: "Smartphones",
@@ -63,18 +77,25 @@ const categoryDirectory: CategoryMeta[] = [
     popularBrands: ["Fujifilm", "Sony", "Canon"],
   },
   {
-    id: "audio",
-    name: "Audio & Headphones",
-    categoryQuery: "Audio",
-    icon: Headphones,
-    popularBrands: ["Sony", "Bose", "AirPods"],
-  },
-  {
     id: "tablets",
     name: "Tablets & iPads",
     categoryQuery: "Tablets",
     icon: Tablet,
     popularBrands: ["iPad Pro", "iPad Air"],
+  },
+  // Essentials group — mirrors header "Essentials" dropdown
+  {
+    id: "audio",
+    name: "Audio & Headphones",
+    categoryQuery: "Audio",
+    icon: Headphones,
+    popularBrands: ["Sony", "Bose", "AirPods"],
+    subcategories: [
+      { label: "Earbuds", q: "Earbuds" },
+      { label: "Headphones", q: "Headphones" },
+      { label: "Bluetooth Speakers", q: "Speaker" },
+      { label: "Soundbars", q: "Soundbar" },
+    ],
   },
   {
     id: "smartwatches",
@@ -82,13 +103,41 @@ const categoryDirectory: CategoryMeta[] = [
     categoryQuery: "Smartwatches",
     icon: Watch,
     popularBrands: ["Apple Watch", "Galaxy Watch"],
+    subcategories: [
+      { label: "Smartwatches", q: "Smartwatch" },
+      { label: "Fitness Bands", q: "Fitness Band" },
+    ],
   },
+  {
+    id: "home-products",
+    name: "Home Products",
+    categoryQuery: "Home Products",
+    icon: Home,
+    popularBrands: ["Google Nest", "Amazon Echo", "TP-Link"],
+    subcategories: [
+      { label: "Smart Home Devices", q: "Smart Home" },
+      { label: "All Home Products", category: "Home Products" },
+    ],
+  },
+  // Accessories group — mirrors header "Accessories" dropdown
   {
     id: "accessories",
     name: "Accessories & Chargers",
     categoryQuery: "Accessories",
     icon: Plug,
     popularBrands: ["MagSafe", "Anker", "Apple Pencil"],
+    subcategories: [
+      { label: "Chargers & Cables", q: "Charger" },
+      { label: "Power Banks", q: "Power Bank" },
+      { label: "Cases & Covers", q: "Case" },
+      { label: "Screen Protectors", q: "Screen Protector" },
+      { label: "Stylus & Pens", q: "Stylus" },
+      { label: "USB Hubs & Docks", q: "USB Hub" },
+      { label: "Memory Cards", q: "Memory Card" },
+      { label: "Mounts & Stands", q: "Stand" },
+      { label: "Keyboard & Mouse", q: "Keyboard" },
+      { label: "Camera Bags & Straps", q: "Camera Bag" },
+    ],
   },
   {
     id: "gaming",
@@ -101,6 +150,16 @@ const categoryDirectory: CategoryMeta[] = [
 
 function CategoriesPage() {
   const [search, setSearch] = useState("");
+  const [expandedSubcats, setExpandedSubcats] = useState<Set<string>>(new Set());
+
+  const toggleSubcats = (id: string) => {
+    setExpandedSubcats((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
 
   const filteredCategories = useMemo(() => {
     if (!search.trim()) return categoryDirectory;
@@ -108,7 +167,8 @@ function CategoriesPage() {
     return categoryDirectory.filter(
       (c) =>
         c.name.toLowerCase().includes(q) ||
-        c.popularBrands.some((b) => b.toLowerCase().includes(q)),
+        c.popularBrands.some((b) => b.toLowerCase().includes(q)) ||
+        c.subcategories?.some((s) => s.label.toLowerCase().includes(q)),
     );
   }, [search]);
 
@@ -153,58 +213,102 @@ function CategoriesPage() {
           </div>
         </div>
 
-        {/* Compact Category Grid: 2-cols mobile, 3-cols tablet, 4-cols desktop */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-3.5 md:gap-4 items-stretch">
+        {/* Category Grid: 2-cols mobile, 3-cols tablet, 4-cols desktop */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-3.5 md:gap-4 items-start">
           {filteredCategories.map((cat) => {
             const Icon = cat.icon;
-            const modelCount = products.filter((p) => p.category === cat.categoryQuery).length;
+            const modelCount = cat.categoryQuery
+              ? products.filter((p) => p.category === cat.categoryQuery).length
+              : 0;
+            const isExpanded = expandedSubcats.has(cat.id);
+            const hasSubcats = cat.subcategories && cat.subcategories.length > 0;
 
             return (
-              <Link
+              <div
                 key={cat.id}
-                to="/products"
-                search={{
-                  category: cat.categoryQuery,
-                  q: undefined,
-                  brand: undefined,
-                }}
-                className="group border border-border bg-card p-3 sm:p-4 flex flex-col justify-between hover:bg-secondary/50 hover:border-primary/60 transition-all cursor-pointer relative"
+                className="border border-border bg-card flex flex-col hover:border-primary/40 transition-colors"
               >
-                <div>
-                  {/* Top: Icon + Model Count */}
-                  <div className="flex items-center justify-between gap-2 mb-2 sm:mb-2.5">
-                    <div className="size-8 sm:size-9 bg-muted flex items-center justify-center border border-border group-hover:bg-primary group-hover:text-primary-foreground transition-colors shrink-0">
-                      <Icon className="size-4 sm:size-4.5 text-foreground group-hover:text-primary-foreground transition-colors" />
-                    </div>
-                    <span className="text-[10px] sm:text-[11px] font-medium text-muted-foreground bg-muted/80 px-1.5 py-0.5 border border-border/40">
-                      {modelCount} {modelCount === 1 ? "model" : "models"}
-                    </span>
-                  </div>
-
-                  {/* Category Name */}
-                  <h2 className="text-xs sm:text-sm font-display font-bold text-foreground group-hover:text-primary transition-colors line-clamp-1 leading-snug">
-                    {cat.name}
-                  </h2>
-
-                  {/* Popular Brand Tags */}
-                  <div className="mt-2 flex flex-wrap gap-1">
-                    {cat.popularBrands.map((b) => (
-                      <span
-                        key={b}
-                        className="text-[9.5px] sm:text-[10px] font-medium bg-secondary/80 text-muted-foreground px-1.5 py-0.5 border border-border/40 truncate max-w-full"
-                      >
-                        {b}
+                {/* Main category link */}
+                <Link
+                  to="/products"
+                  search={{
+                    category: cat.categoryQuery,
+                    q: undefined,
+                    brand: undefined,
+                  }}
+                  className="group p-3 sm:p-4 flex flex-col justify-between hover:bg-secondary/50 transition-all cursor-pointer"
+                >
+                  <div>
+                    {/* Icon + Model Count */}
+                    <div className="flex items-center justify-between gap-2 mb-2 sm:mb-2.5">
+                      <div className="size-8 sm:size-9 bg-muted flex items-center justify-center border border-border group-hover:bg-primary group-hover:text-primary-foreground transition-colors shrink-0">
+                        <Icon className="size-4 sm:size-4.5 text-foreground group-hover:text-primary-foreground transition-colors" />
+                      </div>
+                      <span className="text-[10px] sm:text-[11px] font-medium text-muted-foreground bg-muted/80 px-1.5 py-0.5 border border-border/40">
+                        {modelCount} {modelCount === 1 ? "model" : "models"}
                       </span>
-                    ))}
-                  </div>
-                </div>
+                    </div>
 
-                {/* Bottom CTA */}
-                <div className="mt-3 pt-2 border-t border-border/40 flex items-center justify-between text-[11px] sm:text-xs font-semibold text-primary">
-                  <span>Browse</span>
-                  <ArrowRight className="size-3 group-hover:translate-x-0.5 transition-transform" />
-                </div>
-              </Link>
+                    {/* Category Name */}
+                    <h2 className="text-xs sm:text-sm font-display font-bold text-foreground group-hover:text-primary transition-colors line-clamp-1 leading-snug">
+                      {cat.name}
+                    </h2>
+
+                    {/* Popular Brand Tags */}
+                    <div className="mt-2 flex flex-wrap gap-1">
+                      {cat.popularBrands.map((b) => (
+                        <span
+                          key={b}
+                          className="text-[9.5px] sm:text-[10px] font-medium bg-secondary/80 text-muted-foreground px-1.5 py-0.5 border border-border/40 truncate max-w-full"
+                        >
+                          {b}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Bottom CTA */}
+                  <div className="mt-3 pt-2 border-t border-border/40 flex items-center justify-between text-[11px] sm:text-xs font-semibold text-primary">
+                    <span>Browse</span>
+                    <ArrowRight className="size-3 group-hover:translate-x-0.5 transition-transform" />
+                  </div>
+                </Link>
+
+                {/* Subcategory toggle */}
+                {hasSubcats && (
+                  <>
+                    <button
+                      onClick={() => toggleSubcats(cat.id)}
+                      className="w-full flex items-center justify-between px-3 sm:px-4 py-1.5 border-t border-border/50 text-[10px] sm:text-[11px] font-semibold text-muted-foreground hover:text-foreground hover:bg-muted/40 transition-colors"
+                    >
+                      <span>Subcategories ({cat.subcategories!.length})</span>
+                      <ChevronDown
+                        className={`size-3 transition-transform ${isExpanded ? "rotate-180" : ""}`}
+                      />
+                    </button>
+
+                    {isExpanded && (
+                      <div className="border-t border-border/30 px-3 sm:px-4 py-2 flex flex-col gap-0.5 bg-muted/20">
+                        {cat.subcategories!.map((sub) => (
+                          <Link
+                            key={sub.label}
+                            to="/products"
+                            search={{
+                              q: sub.q,
+                              category: sub.category,
+                              brand: undefined,
+                            }}
+                            className="text-[10px] sm:text-xs text-muted-foreground hover:text-primary hover:underline py-0.5 flex items-center gap-1 transition-colors"
+                          >
+                            <ChevronRight className="size-2.5 shrink-0" />
+                            {sub.label}
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
             );
           })}
         </div>
