@@ -151,16 +151,14 @@ export default function PartnerPage() {
           <div className="flex justify-center">
             <Link
               to="/"
-              className="inline-flex items-center gap-1.5 hover:opacity-90 transition-opacity"
+              className="inline-flex items-center hover:opacity-90 transition-opacity"
+              aria-label="Resale Home"
             >
               <img
                 src={resaleLogo}
                 alt="Resale logo"
-                className="h-10 md:h-12 w-auto object-contain shrink-0"
+                className="h-8 md:h-9 w-auto object-contain shrink-0"
               />
-              <span className="font-display text-2xl font-bold tracking-tight text-foreground">
-                RESALE
-              </span>
             </Link>
           </div>
 

@@ -111,15 +111,16 @@ function RegisterPage() {
         <Card className="w-full max-w-md shadow-md border-border/80">
           <CardHeader className="text-center">
             <div className="flex justify-center mb-3">
-              <Link to="/" className="inline-flex items-center gap-1">
+              <Link
+                to="/"
+                className="inline-flex items-center hover:opacity-90 transition-opacity"
+                aria-label="Resale Home"
+              >
                 <img
                   src={resaleLogo}
                   alt="Resale logo"
-                  className="h-10 w-auto object-contain shrink-0"
+                  className="h-8 w-auto object-contain shrink-0"
                 />
-                <span className="font-display text-xl font-bold tracking-tight text-foreground">
-                  RESALE
-                </span>
               </Link>
             </div>
             <CardTitle className="text-2xl font-display font-bold">Create an account</CardTitle>

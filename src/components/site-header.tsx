@@ -303,17 +303,17 @@ export function SiteHeader() {
             </button>
           </div>
 
-          {/* Brand Logo & Name */}
+          {/* Brand Logo */}
           <Link
             to="/"
-            className="inline-flex items-center gap-0.5 font-display text-xl font-bold tracking-tight text-foreground shrink-0"
+            className="inline-flex items-center shrink-0 hover:opacity-90 transition-opacity"
+            aria-label="Resale Home"
           >
             <img
               src={resaleLogo}
               alt="Resale logo"
-              className="h-8 md:h-10 w-auto object-contain shrink-0"
+              className="h-6 md:h-7 w-auto object-contain shrink-0"
             />
-            <span className="leading-none flex items-center">RESALE</span>
           </Link>
 
           {/* Desktop Center: Search Bar with Autocomplete */}
@@ -654,14 +654,14 @@ export function SiteHeader() {
                 <Link
                   to="/"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="inline-flex items-center gap-1 font-display text-lg font-bold tracking-tight"
+                  className="inline-flex items-center shrink-0 hover:opacity-90 transition-opacity"
+                  aria-label="Resale Home"
                 >
                   <img
                     src={resaleLogo}
                     alt="Resale logo"
-                    className="h-8 w-auto object-contain shrink-0"
+                    className="h-6.5 w-auto object-contain shrink-0"
                   />
-                  <span className="leading-none flex items-center">RESALE</span>
                 </Link>
                 <button
                   onClick={() => setMobileMenuOpen(false)}
@@ -1049,14 +1049,14 @@ export function SiteFooter() {
           <div className="col-span-1 lg:col-span-2 p-6 md:p-8 space-y-4">
             <Link
               to="/"
-              className="inline-flex items-center gap-0.5 font-display text-2xl font-bold tracking-tight text-foreground"
+              className="inline-flex items-center shrink-0 hover:opacity-90 transition-opacity"
+              aria-label="Resale Home"
             >
               <img
                 src={resaleLogo}
                 alt="Resale logo"
-                className="h-11 w-auto object-contain shrink-0"
+                className="h-8 w-auto object-contain shrink-0"
               />
-              <span className="leading-none flex items-center">RESALE</span>
             </Link>
             <p className="text-xs text-subtle-foreground leading-relaxed max-w-sm">
               Bangladesh&apos;s premier marketplace for quality-checked pre-owned, open-box, and
@@ -1394,14 +1394,14 @@ export function SiteFooter() {
         <div className="pt-4 space-y-3">
           <Link
             to="/"
-            className="inline-flex items-center gap-0.5 font-display text-xl font-bold tracking-tight text-foreground"
+            className="inline-flex items-center shrink-0 hover:opacity-90 transition-opacity"
+            aria-label="Resale Home"
           >
             <img
               src={resaleLogo}
               alt="Resale logo"
-              className="h-8 w-auto object-contain shrink-0"
+              className="h-6.5 w-auto object-contain shrink-0"
             />
-            <span className="leading-none flex items-center">RESALE</span>
           </Link>
           <p className="text-xs text-subtle-foreground leading-relaxed">
             Bangladesh&apos;s marketplace for quality-checked pre-owned electronics with 32-point

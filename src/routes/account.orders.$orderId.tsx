@@ -223,7 +223,7 @@ function OrderDetailsPage() {
             <img
               src={resaleLogo}
               alt="Resale logo"
-              className="h-9 w-auto object-contain shrink-0"
+              className="h-7.5 w-auto object-contain shrink-0"
             />
             <div>
               <div className="flex flex-wrap items-center gap-2">

@@ -205,15 +205,16 @@ function CheckoutPage() {
           <Card className="w-full max-w-lg text-center border-border/80 shadow-md">
             <CardHeader className="space-y-3">
               <div className="flex justify-center">
-                <Link to="/" className="inline-flex items-center gap-1.5">
+                <Link
+                  to="/"
+                  className="inline-flex items-center hover:opacity-90 transition-opacity"
+                  aria-label="Resale Home"
+                >
                   <img
                     src={resaleLogo}
                     alt="Resale logo"
-                    className="h-9 w-auto object-contain shrink-0"
+                    className="h-7.5 w-auto object-contain shrink-0"
                   />
-                  <span className="font-display text-xl font-bold tracking-tight text-foreground">
-                    RESALE
-                  </span>
                 </Link>
               </div>
               <div className="mx-auto bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 p-3 rounded-full w-fit">

@@ -24,7 +24,7 @@ export function AdminSidebar({
           to="/admin"
           className="flex items-center gap-2 px-4 py-2 mb-4 border-b border-border text-foreground hover:opacity-90 transition-opacity"
         >
-          <img src={resaleLogo} alt="Resale logo" className="h-7 w-auto object-contain shrink-0" />
+          <img src={resaleLogo} alt="Resale logo" className="h-6 w-auto object-contain shrink-0" />
           <span className="font-display font-bold text-sm tracking-tight">Admin Console</span>
         </Link>
         <Link

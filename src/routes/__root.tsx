@@ -23,15 +23,16 @@ function NotFoundComponent() {
       <div className="flex flex-1 items-center justify-center px-5 py-24 md:py-32">
         <div className="max-w-md text-center">
           <div className="flex justify-center mb-6">
-            <Link to="/" className="inline-flex items-center gap-1">
+            <Link
+              to="/"
+              className="inline-flex items-center hover:opacity-90 transition-opacity"
+              aria-label="Resale Home"
+            >
               <img
                 src={resaleLogo}
                 alt="Resale logo"
-                className="h-12 w-auto object-contain shrink-0"
+                className="h-9 w-auto object-contain shrink-0"
               />
-              <span className="font-display text-2xl font-bold tracking-tight text-foreground">
-                RESALE
-              </span>
             </Link>
           </div>
           <h1 className="text-7xl font-bold font-display text-foreground tracking-tight">404</h1>
