@@ -104,7 +104,7 @@ function LoginPage() {
                 <img
                   src={resaleLogo}
                   alt="Resale logo"
-                  className="h-8 w-auto object-contain shrink-0"
+                  className="h-9 w-auto object-contain shrink-0"
                 />
               </Link>
             </div>

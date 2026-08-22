@@ -213,7 +213,7 @@ function CheckoutPage() {
                   <img
                     src={resaleLogo}
                     alt="Resale logo"
-                    className="h-7.5 w-auto object-contain shrink-0"
+                    className="h-8.5 w-auto object-contain shrink-0"
                   />
                 </Link>
               </div>

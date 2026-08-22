@@ -306,13 +306,13 @@ export function SiteHeader() {
           {/* Brand Logo */}
           <Link
             to="/"
-            className="inline-flex items-center shrink-0 hover:opacity-90 transition-opacity"
+            className="inline-flex items-center shrink-0 hover:opacity-90 transition-opacity ml-1.5 md:ml-3 mr-1"
             aria-label="Resale Home"
           >
             <img
               src={resaleLogo}
               alt="Resale logo"
-              className="h-6 md:h-7 w-auto object-contain shrink-0"
+              className="h-7.5 md:h-8.5 w-auto object-contain shrink-0"
             />
           </Link>
 
@@ -654,13 +654,13 @@ export function SiteHeader() {
                 <Link
                   to="/"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="inline-flex items-center shrink-0 hover:opacity-90 transition-opacity"
+                  className="inline-flex items-center shrink-0 hover:opacity-90 transition-opacity pl-1"
                   aria-label="Resale Home"
                 >
                   <img
                     src={resaleLogo}
                     alt="Resale logo"
-                    className="h-6.5 w-auto object-contain shrink-0"
+                    className="h-7.5 w-auto object-contain shrink-0"
                   />
                 </Link>
                 <button
@@ -1055,7 +1055,7 @@ export function SiteFooter() {
               <img
                 src={resaleLogo}
                 alt="Resale logo"
-                className="h-8 w-auto object-contain shrink-0"
+                className="h-9 md:h-10 w-auto object-contain shrink-0"
               />
             </Link>
             <p className="text-xs text-subtle-foreground leading-relaxed max-w-sm">
@@ -1400,7 +1400,7 @@ export function SiteFooter() {
             <img
               src={resaleLogo}
               alt="Resale logo"
-              className="h-6.5 w-auto object-contain shrink-0"
+              className="h-7.5 w-auto object-contain shrink-0"
             />
           </Link>
           <p className="text-xs text-subtle-foreground leading-relaxed">
