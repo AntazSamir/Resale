@@ -3,7 +3,7 @@ import { SiteHeader, SiteFooter } from "@/components/site-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LayoutDashboard, Shield, Users, TrendingUp, Package } from "lucide-react";
 import { ProtectedRoute } from "@/components/protected-route";
-import resaleLogo from "@/assets/resale-logo.png";
+import resaleLogo from "@/assets/resale-logo.svg";
 
 export const Route = createFileRoute("/admin/")({
   head: () => ({

@@ -25,7 +25,7 @@ import {
   type OrderRecord,
   type OrderStatus,
 } from "@/lib/order-store";
-import resaleLogo from "@/assets/resale-logo.png";
+import resaleLogo from "@/assets/resale-logo.svg";
 
 import { ProtectedRoute } from "@/components/protected-route";
 

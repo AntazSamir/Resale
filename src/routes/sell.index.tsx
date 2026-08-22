@@ -40,7 +40,7 @@ import {
   X,
   Plus,
 } from "lucide-react";
-import resaleLogo from "@/assets/resale-logo.png";
+import resaleLogo from "@/assets/resale-logo.svg";
 
 export const Route = createFileRoute("/sell/")({
   head: () => ({

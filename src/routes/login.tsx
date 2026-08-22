@@ -16,7 +16,7 @@ import {
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { sendOtpFn, verifyOtpFn } from "@/lib/server-functions";
 import { AlertCircle, Lock } from "lucide-react";
-import resaleLogo from "@/assets/resale-logo.png";
+import resaleLogo from "@/assets/resale-logo.svg";
 
 interface LoginSearch {
   redirect?: string | undefined;

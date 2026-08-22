@@ -8,7 +8,7 @@ import { taka } from "@/data/catalog";
 import { ProtectedRoute } from "@/components/protected-route";
 import { getOrders, type OrderRecord } from "@/lib/order-store";
 import { Badge } from "@/components/ui/badge";
-import resaleLogo from "@/assets/resale-logo.png";
+import resaleLogo from "@/assets/resale-logo.svg";
 
 export const Route = createFileRoute("/seller/dashboard")({
   head: () => ({

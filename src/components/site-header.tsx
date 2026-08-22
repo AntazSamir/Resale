@@ -20,7 +20,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { BangladeshMapSVG } from "./bangladesh-map";
-import resaleLogo from "@/assets/resale-logo.png";
+import resaleLogo from "@/assets/resale-logo.svg";
 import { products, taka, cheapest } from "@/data/catalog";
 
 type NavItem = {

@@ -20,7 +20,7 @@ import {
   ArrowLeft,
 } from "lucide-react";
 import { SiteFooter, SiteHeader } from "@/components/site-header";
-import resaleLogo from "@/assets/resale-logo.png";
+import resaleLogo from "@/assets/resale-logo.svg";
 
 export const Route = createFileRoute("/partner")({
   head: () => ({

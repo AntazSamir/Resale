@@ -26,7 +26,7 @@ import {
   type OrderItemSnapshot,
 } from "@/lib/order-store";
 import { placeOrderFn } from "@/lib/server-functions";
-import resaleLogo from "@/assets/resale-logo.png";
+import resaleLogo from "@/assets/resale-logo.svg";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({
