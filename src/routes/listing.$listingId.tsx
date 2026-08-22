@@ -14,6 +14,7 @@ import {
 import { SiteFooter, SiteHeader } from "@/components/site-header";
 import { useCart } from "@/lib/cart-store";
 import { GradeBadge } from "@/components/grade-badge";
+import { ConditionScore } from "@/components/condition-score";
 import { InspectionReport } from "@/components/inspection-report";
 import { RepairHistoryCard } from "@/components/repair-history";
 import { DeviceVerificationCard } from "@/components/device-verification";
@@ -175,71 +176,32 @@ function ListingPage() {
               </h1>
             </div>
 
-            {/* 4. Grade & 5. Warranty Row */}
-            <div className="flex flex-wrap items-center gap-3 pt-0.5">
-              <div className="flex items-center gap-2">
-                <GradeBadge grade={listing.grade} size="md" />
-                <span className="text-xs font-semibold text-foreground">
-                  {gradeLabel[listing.grade]} Condition
-                </span>
-                <span className="text-xs text-muted-foreground">
-                  (Score: {listing.conditionScore}/100)
-                </span>
-              </div>
+            {/* 4. Condition Score — full gauge matching brand design */}
+            <ConditionScore score={listing.conditionScore} grade={listing.grade} />
 
+            {/* 5. Quick trust pills — warranty, battery, invoice */}
+            <div className="flex flex-wrap items-center gap-2 text-xs">
               {listing.warrantyMonths > 0 && (
-                <div className="flex items-center gap-1 px-2.5 py-0.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-xs font-medium">
+                <div className="flex items-center gap-1 px-2.5 py-1 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 font-medium">
                   <ShieldCheck className="size-3.5" />
-                  <span>{listing.warrantyMonths} Months Warranty</span>
+                  <span>{listing.warrantyMonths} mo warranty</span>
                 </div>
               )}
-            </div>
-
-            {/* 6. Quick Listing Details Strip */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 p-3 bg-secondary/30 border border-border/60 text-xs">
-              <div>
-                <span className="text-[10.5px] text-muted-foreground uppercase tracking-wider block font-medium">
-                  Condition
-                </span>
-                <span className="font-semibold text-foreground">Grade {listing.grade}</span>
-              </div>
-
               {typeof listing.battery === "number" && (
-                <div>
-                  <span className="text-[10.5px] text-muted-foreground uppercase tracking-wider block font-medium flex items-center gap-1">
-                    <Battery className="size-3 text-emerald-500" /> Battery
-                  </span>
-                  <span className="font-semibold text-foreground">{listing.battery}% Health</span>
+                <div className="flex items-center gap-1 px-2.5 py-1 bg-secondary/60 border border-border/60 text-foreground font-medium">
+                  <Battery className="size-3.5 text-emerald-500" />
+                  <span>{listing.battery}% battery</span>
                 </div>
               )}
-
-              {listing.warrantyMonths > 0 ? (
-                <div>
-                  <span className="text-[10.5px] text-muted-foreground uppercase tracking-wider block font-medium">
-                    Warranty
-                  </span>
-                  <span className="font-semibold text-foreground">
-                    {listing.warrantyMonths} Mo. Remaining
-                  </span>
-                </div>
-              ) : (
-                <div>
-                  <span className="text-[10.5px] text-muted-foreground uppercase tracking-wider block font-medium">
-                    Warranty
-                  </span>
-                  <span className="text-muted-foreground">Expired / None</span>
+              {listing.invoice && (
+                <div className="flex items-center gap-1 px-2.5 py-1 bg-secondary/60 border border-border/60 text-foreground font-medium">
+                  <FileText className="size-3.5 text-primary" />
+                  <span>Invoice included</span>
                 </div>
               )}
-
-              <div>
-                <span className="text-[10.5px] text-muted-foreground uppercase tracking-wider block font-medium flex items-center gap-1">
-                  <FileText className="size-3 text-primary" /> Invoice
-                </span>
-                <span className="font-semibold text-foreground">
-                  {listing.invoice ? "Available" : "Not available"}
-                </span>
-              </div>
             </div>
+
+
 
             {/* 7. What's Included */}
             <div className="pt-1">
