@@ -25,7 +25,7 @@ import { products, taka, cheapest } from "@/data/catalog";
 
 type NavItem = {
   label: string;
-  to: "/" | "/products" | "/sell" | "/partner" | "/contact" | "/categories";
+  to: "/" | "/products" | "/sell" | "/partner" | "/contact" | "/categories" | "/about";
   search?: {
     q?: string;
     category?: string;
@@ -704,6 +704,13 @@ export function SiteHeader() {
                   Partner With Resale
                 </Link>
                 <Link
+                  to="/about"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block px-3 py-2 hover:bg-muted text-foreground"
+                >
+                  About Us
+                </Link>
+                <Link
                   to="/contact"
                   onClick={() => setMobileMenuOpen(false)}
                   className="block px-3 py-2 hover:bg-muted text-foreground"
@@ -1082,32 +1089,56 @@ export function SiteFooter() {
             </h4>
             <ul className="space-y-2 text-xs text-muted-foreground">
               <li>
-                <Link to="/" className="hover:text-foreground transition-colors">
+                <Link
+                  to="/products"
+                  search={{ category: "Smartphones", q: undefined, brand: undefined }}
+                  className="hover:text-foreground transition-colors"
+                >
                   Smartphones &amp; iPhones
                 </Link>
               </li>
               <li>
-                <Link to="/" className="hover:text-foreground transition-colors">
+                <Link
+                  to="/products"
+                  search={{ category: "Laptops", q: undefined, brand: undefined }}
+                  className="hover:text-foreground transition-colors"
+                >
                   Laptops &amp; MacBooks
                 </Link>
               </li>
               <li>
-                <Link to="/" className="hover:text-foreground transition-colors">
+                <Link
+                  to="/products"
+                  search={{ category: "Cameras", q: undefined, brand: undefined }}
+                  className="hover:text-foreground transition-colors"
+                >
                   Cameras &amp; Lenses
                 </Link>
               </li>
               <li>
-                <Link to="/" className="hover:text-foreground transition-colors">
+                <Link
+                  to="/products"
+                  search={{ q: "Earbuds", category: undefined, brand: undefined }}
+                  className="hover:text-foreground transition-colors"
+                >
                   Audio &amp; Earbuds
                 </Link>
               </li>
               <li>
-                <Link to="/" className="hover:text-foreground transition-colors">
+                <Link
+                  to="/products"
+                  search={{ q: "Smartwatch", category: undefined, brand: undefined }}
+                  className="hover:text-foreground transition-colors"
+                >
                   Smartwatches
                 </Link>
               </li>
               <li>
-                <Link to="/" className="hover:text-foreground transition-colors">
+                <Link
+                  to="/products"
+                  search={{ category: "Gaming Consoles", q: undefined, brand: undefined }}
+                  className="hover:text-foreground transition-colors"
+                >
                   Gaming Consoles
                 </Link>
               </li>
@@ -1161,7 +1192,7 @@ export function SiteFooter() {
             </h4>
             <ul className="space-y-2 text-xs text-muted-foreground">
               <li>
-                <Link to="/contact" className="hover:text-foreground transition-colors font-medium">
+                <Link to="/about" className="hover:text-foreground transition-colors font-medium">
                   About Us
                 </Link>
               </li>
@@ -1226,8 +1257,9 @@ export function SiteFooter() {
           {/* Explore Categories */}
           <div>
             <button
+              type="button"
               onClick={() => toggleAccordion("categories")}
-              className="w-full py-4 flex items-center justify-between text-sm font-semibold text-foreground text-left"
+              className="w-full py-4 flex items-center justify-between text-sm font-semibold text-foreground text-left cursor-pointer touch-manipulation"
             >
               <span>Explore Categories</span>
               <ChevronDown
@@ -1239,28 +1271,57 @@ export function SiteFooter() {
             {openAccordions.categories && (
               <ul className="pb-4 space-y-2 text-xs text-subtle-foreground pl-2">
                 <li>
-                  <Link to="/" className="block py-1">
+                  <Link
+                    to="/products"
+                    search={{ category: "Smartphones", q: undefined, brand: undefined }}
+                    className="block py-1.5 hover:text-foreground transition-colors"
+                  >
                     Smartphones &amp; iPhones
                   </Link>
                 </li>
                 <li>
-                  <Link to="/" className="block py-1">
+                  <Link
+                    to="/products"
+                    search={{ category: "Laptops", q: undefined, brand: undefined }}
+                    className="block py-1.5 hover:text-foreground transition-colors"
+                  >
                     Laptops &amp; MacBooks
                   </Link>
                 </li>
                 <li>
-                  <Link to="/" className="block py-1">
+                  <Link
+                    to="/products"
+                    search={{ category: "Cameras", q: undefined, brand: undefined }}
+                    className="block py-1.5 hover:text-foreground transition-colors"
+                  >
                     Cameras &amp; Lenses
                   </Link>
                 </li>
                 <li>
-                  <Link to="/" className="block py-1">
+                  <Link
+                    to="/products"
+                    search={{ q: "Earbuds", category: undefined, brand: undefined }}
+                    className="block py-1.5 hover:text-foreground transition-colors"
+                  >
                     Audio &amp; Earbuds
                   </Link>
                 </li>
                 <li>
-                  <Link to="/" className="block py-1">
+                  <Link
+                    to="/products"
+                    search={{ q: "Smartwatch", category: undefined, brand: undefined }}
+                    className="block py-1.5 hover:text-foreground transition-colors"
+                  >
                     Smartwatches &amp; Accessories
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/products"
+                    search={{ category: "Gaming Consoles", q: undefined, brand: undefined }}
+                    className="block py-1.5 hover:text-foreground transition-colors"
+                  >
+                    Gaming Consoles
                   </Link>
                 </li>
               </ul>
@@ -1270,8 +1331,9 @@ export function SiteFooter() {
           {/* For Sellers */}
           <div>
             <button
+              type="button"
               onClick={() => toggleAccordion("sellers")}
-              className="w-full py-4 flex items-center justify-between text-sm font-semibold text-foreground text-left"
+              className="w-full py-4 flex items-center justify-between text-sm font-semibold text-foreground text-left cursor-pointer touch-manipulation"
             >
               <span>For Sellers</span>
               <ChevronDown
@@ -1283,27 +1345,27 @@ export function SiteFooter() {
             {openAccordions.sellers && (
               <ul className="pb-4 space-y-2 text-xs text-subtle-foreground pl-2">
                 <li>
-                  <Link to="/sell" className="block py-1 font-semibold text-primary">
+                  <Link to="/sell" className="block py-1.5 font-semibold text-primary">
                     List an Item
                   </Link>
                 </li>
                 <li>
-                  <Link to="/partner" className="block py-1 font-bold text-[#ea580c]">
+                  <Link to="/partner" className="block py-1.5 font-bold text-[#ea580c]">
                     Partner with Resale (B2B)
                   </Link>
                 </li>
                 <li>
-                  <Link to="/seller/dashboard" className="block py-1">
+                  <Link to="/seller/dashboard" className="block py-1.5 hover:text-foreground">
                     Seller Dashboard
                   </Link>
                 </li>
                 <li>
-                  <Link to="/seller/listings" className="block py-1">
+                  <Link to="/seller/listings" className="block py-1.5 hover:text-foreground">
                     My Listings
                   </Link>
                 </li>
                 <li>
-                  <Link to="/seller/payouts" className="block py-1">
+                  <Link to="/seller/payouts" className="block py-1.5 hover:text-foreground">
                     Payouts &amp; Earnings
                   </Link>
                 </li>
@@ -1314,8 +1376,9 @@ export function SiteFooter() {
           {/* Trust & Company */}
           <div>
             <button
+              type="button"
               onClick={() => toggleAccordion("trust")}
-              className="w-full py-4 flex items-center justify-between text-sm font-semibold text-foreground text-left"
+              className="w-full py-4 flex items-center justify-between text-sm font-semibold text-foreground text-left cursor-pointer touch-manipulation"
             >
               <span>Trust &amp; Company</span>
               <ChevronDown
@@ -1327,22 +1390,22 @@ export function SiteFooter() {
             {openAccordions.trust && (
               <ul className="pb-4 space-y-2 text-xs text-subtle-foreground pl-2">
                 <li>
-                  <Link to="/contact" className="block py-1 font-semibold text-foreground">
+                  <Link to="/about" className="block py-1.5 font-semibold text-foreground">
                     About Us
                   </Link>
                 </li>
                 <li>
-                  <Link to="/contact" className="block py-1">
+                  <Link to="/contact" className="block py-1.5 hover:text-foreground">
                     Condition Grading (A+ – D)
                   </Link>
                 </li>
                 <li>
-                  <Link to="/account/disputes" className="block py-1">
+                  <Link to="/account/disputes" className="block py-1.5 hover:text-foreground">
                     48-Hour Dispute Policy
                   </Link>
                 </li>
                 <li>
-                  <Link to="/contact" className="block py-1">
+                  <Link to="/contact" className="block py-1.5 hover:text-foreground">
                     Moderation Standards
                   </Link>
                 </li>
@@ -1353,8 +1416,9 @@ export function SiteFooter() {
           {/* Help & Support */}
           <div>
             <button
+              type="button"
               onClick={() => toggleAccordion("support")}
-              className="w-full py-4 flex items-center justify-between text-sm font-semibold text-foreground text-left"
+              className="w-full py-4 flex items-center justify-between text-sm font-semibold text-foreground text-left cursor-pointer touch-manipulation"
             >
               <span>Help &amp; Support</span>
               <ChevronDown
@@ -1366,7 +1430,7 @@ export function SiteFooter() {
             {openAccordions.support && (
               <ul className="pb-4 space-y-2 text-xs text-subtle-foreground pl-2">
                 <li>
-                  <Link to="/contact" className="block py-1">
+                  <Link to="/contact" className="block py-1.5 hover:text-foreground">
                     Contact Helpdesk
                   </Link>
                 </li>
@@ -1375,13 +1439,13 @@ export function SiteFooter() {
                     href="https://wa.me/8801700000000"
                     target="_blank"
                     rel="noreferrer"
-                    className="block py-1 text-emerald-600 font-medium"
+                    className="block py-1.5 text-emerald-600 font-medium"
                   >
                     WhatsApp Support (+880 1700-000000)
                   </a>
                 </li>
                 <li>
-                  <Link to="/contact" className="block py-1">
+                  <Link to="/contact" className="block py-1.5 hover:text-foreground">
                     Frequently Asked Questions
                   </Link>
                 </li>
@@ -1449,7 +1513,7 @@ export function SiteFooter() {
           <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
             <span>© 2026 Resale.com Limited</span>
             <span>·</span>
-            <Link to="/contact" className="hover:text-foreground transition-colors font-medium">
+            <Link to="/about" className="hover:text-foreground transition-colors font-medium">
               About Us
             </Link>
             <span>·</span>
