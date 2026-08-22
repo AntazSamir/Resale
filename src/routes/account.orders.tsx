@@ -168,7 +168,7 @@ function OrdersPage() {
             </p>
           </div>
           <Button variant="outline" asChild size="sm">
-            <Link to="/products" search={{}}>
+            <Link to="/products" search={{ q: undefined, category: undefined, brand: undefined }}>
               Browse Catalog
             </Link>
           </Button>
@@ -198,7 +198,7 @@ function OrdersPage() {
           <Card className="p-12 text-center border-border/70">
             <p className="text-muted-foreground mb-4 text-sm">No orders found in this category.</p>
             <Button asChild size="sm">
-              <Link to="/products" search={{}}>
+              <Link to="/products" search={{ q: undefined, category: undefined, brand: undefined }}>
                 Browse Available Listings
               </Link>
             </Button>

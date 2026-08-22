@@ -44,8 +44,14 @@ import {
   SheetClose,
 } from "@/components/ui/sheet";
 
+interface ProductsSearch {
+  q?: string | undefined;
+  category?: string | undefined;
+  brand?: string | undefined;
+}
+
 export const Route = createFileRoute("/products")({
-  validateSearch: (search: Record<string, unknown>) => ({
+  validateSearch: (search: Record<string, unknown>): ProductsSearch => ({
     q: typeof search["q"] === "string" ? search["q"] : undefined,
     category: typeof search["category"] === "string" ? search["category"] : undefined,
     brand: typeof search["brand"] === "string" ? search["brand"] : undefined,

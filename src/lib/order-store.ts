@@ -62,7 +62,7 @@ export interface OrderTimelineEvent {
   description: string;
   timestamp: string;
   actor: "BUYER" | "SELLER" | "ADMIN" | "COURIER" | "SYSTEM";
-  metadata?: Record<string, unknown>;
+  metadata?: Record<string, unknown> | undefined;
 }
 
 export interface OrderRecord {
@@ -79,24 +79,28 @@ export interface OrderRecord {
   total: number;
   currency: "BDT";
   shippingAddress: ShippingAddress;
-  buyerContact: {
-    name: string;
-    phone: string;
-    nidNumber: string;
-  };
-  nidNumber: string; // Legacy compatibility alias
+  buyerContact?:
+    | {
+        name: string;
+        phone: string;
+        nidNumber?: string | undefined;
+      }
+    | undefined;
+  nidNumber?: string | undefined; // Legacy compatibility alias
   timeline: OrderTimelineEvent[];
-  cancellation?: {
-    reason: string;
-    actor: "BUYER" | "SELLER" | "ADMIN";
-    timestamp: string;
-    previousStatus: OrderStatus;
-  };
-  refundStatus?: "NONE" | "REQUESTED" | "PROCESSING" | "REFUNDED" | "REJECTED";
-  isSampleData?: boolean;
+  cancellation?:
+    | {
+        reason: string;
+        actor: "BUYER" | "SELLER" | "ADMIN";
+        timestamp: string;
+        previousStatus: OrderStatus;
+      }
+    | undefined;
+  refundStatus?: ("NONE" | "REQUESTED" | "PROCESSING" | "REFUNDED" | "REJECTED") | undefined;
+  isSampleData?: boolean | undefined;
   createdAt: string;
   updatedAt: string;
-  completedAt?: string;
+  completedAt?: string | undefined;
 }
 
 const STORAGE_KEY = "resale.orders.v3";
@@ -371,65 +375,112 @@ export function getOrders(): OrderRecord[] {
       const legacyRaw = window.localStorage.getItem(LEGACY_STORAGE_KEY);
       if (legacyRaw) {
         try {
-          const parsedLegacy = JSON.parse(legacyRaw) as Record<string, unknown>[];
+          const parsedLegacy = JSON.parse(legacyRaw);
           if (Array.isArray(parsedLegacy) && parsedLegacy.length > 0) {
-            const upgraded: OrderRecord[] = parsedLegacy.map((leg) => ({
-              id:
+            const upgraded: OrderRecord[] = parsedLegacy.map((item: unknown) => {
+              const leg =
+                typeof item === "object" && item !== null ? (item as Record<string, unknown>) : {};
+              const id =
                 typeof leg["id"] === "string"
                   ? leg["id"]
-                  : `ORD-${Date.now().toString(36).toUpperCase().slice(-6)}`,
-              date:
+                  : `ORD-${Date.now().toString(36).toUpperCase().slice(-6)}`;
+              const date =
                 typeof leg["date"] === "string"
                   ? leg["date"]
-                  : new Date().toISOString().split("T")[0] || "",
-              orderStatus: (typeof leg["status"] === "string"
-                ? leg["status"]
-                : "PENDING") as OrderStatus,
-              status: (typeof leg["status"] === "string"
-                ? leg["status"]
-                : "PENDING") as OrderStatus,
-              paymentStatus: (typeof leg["paymentStatus"] === "string"
-                ? leg["paymentStatus"]
-                : "PENDING") as PaymentStatus,
-              paymentMethod: (typeof leg["paymentMethod"] === "string" &&
-              leg["paymentMethod"].toUpperCase() === "BKASH"
-                ? "BKASH"
-                : "COD") as PaymentMethod,
-              items: Array.isArray(leg["items"]) ? (leg["items"] as OrderItemSnapshot[]) : [],
-              subtotal: leg.subtotal || 0,
-              deliveryFee: leg.deliveryFee || DEFAULT_DELIVERY_FEE,
-              discount: leg.discount || 0,
-              total: leg.total || (leg.subtotal || 0) + (leg.deliveryFee || DEFAULT_DELIVERY_FEE),
-              currency: "BDT",
-              shippingAddress: leg.shippingAddress || {
-                name: "Customer",
-                phone: "",
-                division: "Dhaka",
-                district: "Dhaka",
-                area: "",
-                address: "",
-              },
-              buyerContact: {
-                name: leg.shippingAddress?.name || "Customer",
-                phone: leg.shippingAddress?.phone || "",
-                nidNumber: leg.nidNumber || "",
-              },
-              nidNumber: leg.nidNumber || "",
-              timeline: Array.isArray(leg.timeline)
-                ? leg.timeline
+                  : new Date().toISOString().split("T")[0] || "";
+              const statusVal =
+                typeof leg["status"] === "string" ? (leg["status"] as OrderStatus) : "PENDING";
+              const paymentStatusVal =
+                typeof leg["paymentStatus"] === "string"
+                  ? (leg["paymentStatus"] as PaymentStatus)
+                  : "PENDING";
+              const paymentMethodVal: PaymentMethod =
+                typeof leg["paymentMethod"] === "string" &&
+                leg["paymentMethod"].toUpperCase() === "BKASH"
+                  ? "BKASH"
+                  : "COD";
+              const itemsVal = Array.isArray(leg["items"])
+                ? (leg["items"] as OrderItemSnapshot[])
+                : [];
+              const subtotalVal = typeof leg["subtotal"] === "number" ? leg["subtotal"] : 0;
+              const deliveryFeeVal =
+                typeof leg["deliveryFee"] === "number" ? leg["deliveryFee"] : DEFAULT_DELIVERY_FEE;
+              const discountVal = typeof leg["discount"] === "number" ? leg["discount"] : 0;
+              const totalVal =
+                typeof leg["total"] === "number"
+                  ? leg["total"]
+                  : subtotalVal + deliveryFeeVal - discountVal;
+
+              const rawAddress =
+                typeof leg["shippingAddress"] === "object" && leg["shippingAddress"] !== null
+                  ? (leg["shippingAddress"] as Record<string, unknown>)
+                  : null;
+              const shippingAddress: ShippingAddress = {
+                name:
+                  rawAddress && typeof rawAddress["name"] === "string"
+                    ? rawAddress["name"]
+                    : "Customer",
+                phone:
+                  rawAddress && typeof rawAddress["phone"] === "string" ? rawAddress["phone"] : "",
+                division:
+                  rawAddress && typeof rawAddress["division"] === "string"
+                    ? rawAddress["division"]
+                    : "Dhaka",
+                district:
+                  rawAddress && typeof rawAddress["district"] === "string"
+                    ? rawAddress["district"]
+                    : "Dhaka",
+                area:
+                  rawAddress && typeof rawAddress["area"] === "string" ? rawAddress["area"] : "",
+                address:
+                  rawAddress && typeof rawAddress["address"] === "string"
+                    ? rawAddress["address"]
+                    : "",
+              };
+
+              const buyerContact = {
+                name: shippingAddress.name,
+                phone: shippingAddress.phone,
+                nidNumber: typeof leg["nidNumber"] === "string" ? leg["nidNumber"] : undefined,
+              };
+
+              const createdAt =
+                typeof leg["createdAt"] === "string" ? leg["createdAt"] : new Date().toISOString();
+
+              const timeline: OrderTimelineEvent[] = Array.isArray(leg["timeline"])
+                ? (leg["timeline"] as OrderTimelineEvent[])
                 : [
                     {
-                      id: `evt-legacy-${leg.id}`,
+                      id: `evt-legacy-${id}`,
                       type: "ORDER_CREATED",
                       title: "Order Placed",
-                      description: `Order placed via ${leg.paymentMethod || "COD"}`,
-                      timestamp: leg.createdAt || new Date().toISOString(),
+                      description: `Order placed via ${paymentMethodVal}`,
+                      timestamp: createdAt,
                       actor: "BUYER",
                     },
-                  ],
-              createdAt: leg.createdAt || new Date().toISOString(),
-              updatedAt: leg.createdAt || new Date().toISOString(),
-            }));
+                  ];
+
+              return {
+                id,
+                date,
+                orderStatus: statusVal,
+                status: statusVal,
+                paymentStatus: paymentStatusVal,
+                paymentMethod: paymentMethodVal,
+                items: itemsVal,
+                subtotal: subtotalVal,
+                deliveryFee: deliveryFeeVal,
+                discount: discountVal,
+                total: totalVal,
+                currency: "BDT",
+                shippingAddress,
+                buyerContact,
+                nidNumber: typeof leg["nidNumber"] === "string" ? leg["nidNumber"] : undefined,
+                timeline,
+                createdAt,
+                updatedAt: createdAt,
+              };
+            });
             window.localStorage.setItem(STORAGE_KEY, JSON.stringify(upgraded));
             return upgraded;
           }
@@ -503,9 +554,9 @@ export function updateOrder(
 export function transitionOrderStatus(
   orderId: string,
   nextStatus: OrderStatus,
-  actor: OrderTimelineEvent["actor"],
+  actor: OrderTimelineEvent["actor"] = "SELLER",
   note?: string,
-): { success: boolean; order?: OrderRecord; error?: string } {
+): { success: boolean; order?: OrderRecord | undefined; error?: string | undefined } {
   const order = getOrderById(orderId);
   if (!order) return { success: false, error: `Order #${orderId} not found.` };
 
@@ -594,7 +645,7 @@ export function cancelOrder(
   orderId: string,
   reason: string,
   actor: "BUYER" | "SELLER" | "ADMIN",
-): { success: boolean; order?: OrderRecord; error?: string } {
+): { success: boolean; order?: OrderRecord | undefined; error?: string | undefined } {
   const order = getOrderById(orderId);
   if (!order) return { success: false, error: `Order #${orderId} not found.` };
 
