@@ -245,7 +245,7 @@ function Index() {
   );
 
   return (
-    <div className="min-h-screen bg-background border-x border-border mx-auto max-w-7xl pb-16 md:pb-0 overflow-x-hidden">
+    <div className="min-h-screen bg-background border-x border-border mx-auto max-w-7xl pb-16 md:pb-0">
       {/* ════════════════════════════════════════════════════════════════
           1. TOP NAVIGATION & STANDARDIZED TRUST BAR
       ════════════════════════════════════════════════════════════════ */}

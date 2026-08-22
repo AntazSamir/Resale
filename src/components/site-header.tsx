@@ -278,10 +278,25 @@ export function SiteHeader() {
     }
   };
 
+  const [showAnnouncement, setShowAnnouncement] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowAnnouncement(false);
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <div className="sticky top-0 z-40 w-full bg-background">
-      {/* Announcement Bar */}
-      <div className="bg-primary text-primary-foreground text-xs py-2 px-4 text-center font-medium tracking-wide flex items-center justify-center gap-6 overflow-hidden">
+      {/* Announcement Bar (Shows for 3 seconds, then smoothly closes) */}
+      <div
+        className={`bg-primary text-primary-foreground text-xs text-center font-medium tracking-wide flex items-center justify-center gap-6 overflow-hidden transition-all duration-500 ease-in-out ${
+          showAnnouncement
+            ? "max-h-12 py-2 px-4 opacity-100"
+            : "max-h-0 py-0 px-4 opacity-0 border-0 pointer-events-none"
+        }`}
+      >
         <span>⚡ OPEN-BOX &amp; PRE-OWNED ELECTRONICS AT FACTORY PRICES</span>
         <span className="hidden md:inline font-normal opacity-80">|</span>
         <span className="hidden md:inline">32-POINT STANDARDIZED INSPECTION</span>
@@ -831,7 +846,7 @@ export function SiteHeader() {
         </div>
       )}
 
-      {/* Desktop Secondary Category Navigation Bar (Hidden on mobile) */}
+      {/* Secondary Category Navigation Bar (Hidden on mobile, desktop only) */}
       <nav
         className="relative z-10 hidden md:block border-b border-border bg-background/95 backdrop-blur shadow-none"
         onMouseLeave={() => setOpenDropdown(null)}
@@ -844,7 +859,7 @@ export function SiteHeader() {
             role="group"
             aria-label="Category navigation"
           >
-            <ul className="flex w-max items-center gap-0 text-[12px] font-medium whitespace-nowrap">
+            <ul className="flex w-max items-center gap-0 text-[11px] md:text-[12px] font-medium whitespace-nowrap">
               {desktopCategoryNav.map((item) => {
                 // Dropdown item
                 if ("dropdown" in item) {
@@ -852,12 +867,13 @@ export function SiteHeader() {
                   return (
                     <li key={item.label} className="shrink-0 snap-start">
                       <button
+                        type="button"
                         ref={(el) => {
                           dropdownRefs.current[item.label] = el;
                         }}
                         onMouseEnter={() => setOpenDropdown(item.label)}
                         onClick={() => setOpenDropdown(isOpen ? null : item.label)}
-                        className={`flex min-h-11 items-center gap-1 px-3 lg:px-3.5 transition-colors border-b-2 ${
+                        className={`flex min-h-10 md:min-h-11 items-center gap-1 px-2.5 sm:px-3 lg:px-3.5 transition-colors border-b-2 ${
                           isOpen
                             ? "text-primary border-primary bg-muted/40"
                             : "text-subtle-foreground hover:text-foreground hover:bg-muted/60 border-transparent hover:border-primary"
@@ -887,7 +903,7 @@ export function SiteHeader() {
                           brand: undefined,
                         }}
                         onMouseEnter={() => setOpenDropdown(null)}
-                        className="flex min-h-11 items-center px-3 lg:px-3.5 text-subtle-foreground hover:text-foreground hover:bg-muted/60 transition-colors border-b-2 border-transparent hover:border-primary"
+                        className="flex min-h-10 md:min-h-11 items-center px-2.5 sm:px-3 lg:px-3.5 text-subtle-foreground hover:text-foreground hover:bg-muted/60 transition-colors border-b-2 border-transparent hover:border-primary"
                         activeProps={{
                           className: "text-primary border-b-2 border-primary bg-muted/40",
                         }}
@@ -898,7 +914,7 @@ export function SiteHeader() {
                       <Link
                         to={navItem.to}
                         onMouseEnter={() => setOpenDropdown(null)}
-                        className="flex min-h-11 items-center px-3 lg:px-3.5 text-subtle-foreground hover:text-foreground hover:bg-muted/60 transition-colors border-b-2 border-transparent hover:border-primary"
+                        className="flex min-h-10 md:min-h-11 items-center px-2.5 sm:px-3 lg:px-3.5 text-subtle-foreground hover:text-foreground hover:bg-muted/60 transition-colors border-b-2 border-transparent hover:border-primary"
                         activeProps={{
                           className: "text-primary border-b-2 border-primary bg-muted/40",
                         }}
