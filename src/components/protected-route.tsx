@@ -5,17 +5,25 @@ import { useAuth } from "@/lib/auth-store";
 interface ProtectedRouteProps {
   children: ReactNode;
   requireAdmin?: boolean;
+  redirect?: string;
 }
 
-export function ProtectedRoute({ children, requireAdmin = false }: ProtectedRouteProps) {
+export function ProtectedRoute({
+  children,
+  requireAdmin = false,
+  redirect,
+}: ProtectedRouteProps) {
   const { isLoggedIn, user } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
     if (!isLoggedIn) {
-      navigate({ to: "/login" });
+      navigate({
+        to: "/login",
+        search: redirect ? { redirect } : undefined,
+      });
     }
-  }, [isLoggedIn, navigate]);
+  }, [isLoggedIn, navigate, redirect]);
 
   if (!isLoggedIn) {
     return null;

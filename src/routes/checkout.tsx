@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { SiteHeader, SiteFooter } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,9 +12,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { CheckCircle2, ShieldCheck, Truck, Clock, AlertCircle } from "lucide-react";
+import { CheckCircle2, ShieldCheck, Truck, Clock, AlertCircle, UserCheck } from "lucide-react";
 import { taka, listingFor, productFor } from "@/data/catalog";
 import { useCart } from "@/lib/cart-store";
+import { useAuth } from "@/lib/auth-store";
+import { ProtectedRoute } from "@/components/protected-route";
 import {
   saveOrder,
   calculateOrderTotals,
@@ -30,11 +32,19 @@ export const Route = createFileRoute("/checkout")({
   head: () => ({
     meta: [{ title: "Checkout | Resale.com" }],
   }),
-  component: CheckoutPage,
+  component: CheckoutPageWrapper,
 });
 
 function generateOrderId() {
   return `ORD-${Date.now().toString(36).toUpperCase().slice(-6)}`;
+}
+
+function CheckoutPageWrapper() {
+  return (
+    <ProtectedRoute redirect="/checkout">
+      <CheckoutPage />
+    </ProtectedRoute>
+  );
 }
 
 function CheckoutPage() {
@@ -43,6 +53,7 @@ function CheckoutPage() {
   const [submitting, setSubmitting] = useState(false);
   const navigate = useNavigate();
   const { items, clearCart } = useCart();
+  const { user } = useAuth();
 
   const cartItems = items
     .map((item) => {
@@ -62,10 +73,10 @@ function CheckoutPage() {
     deliveryFee: DEFAULT_DELIVERY_FEE,
   });
 
-  // Address State
+  // Address State (prefill from logged-in user if available)
   const [address, setAddress] = useState({
-    name: "",
-    phone: "",
+    name: user?.name || "",
+    phone: user?.phone || "",
     division: "Dhaka",
     district: "Dhaka",
     addressLine: "",
@@ -73,6 +84,12 @@ function CheckoutPage() {
 
   // Identity State
   const [nid, setNid] = useState("");
+
+  useEffect(() => {
+    if (user?.name && !address.name) {
+      setAddress((prev) => ({ ...prev, name: user.name || "", phone: user.phone || "" }));
+    }
+  }, [user]);
 
   const handleAddressSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -113,7 +130,7 @@ function CheckoutPage() {
     const initialEvent = createOrderTimelineEvent(
       "ORDER_CREATED",
       "Order Placed (Cash on Delivery)",
-      `Order #${id} placed. Payment of ${taka(totals.total)} is due in cash upon delivery and inspection.`,
+      `Order #${id} placed by ${address.name} (${user?.phone || address.phone}). Payment of ${taka(totals.total)} is due in cash upon delivery and inspection.`,
       "BUYER",
       { total: totals.total, itemsCount: orderItems.length },
     );
@@ -207,6 +224,13 @@ function CheckoutPage() {
 
             <CardContent className="space-y-4 text-left border-y border-border/60 py-4 bg-muted/20 text-xs">
               <div className="flex justify-between items-center">
+                <span className="text-muted-foreground">Account:</span>
+                <span className="font-medium text-foreground flex items-center gap-1">
+                  <UserCheck className="size-3 text-emerald-500" />
+                  {user?.name || "Verified Buyer"} ({user?.phone})
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
                 <span className="text-muted-foreground">Payment Method:</span>
                 <span className="font-semibold text-foreground">Cash on Delivery (COD)</span>
               </div>
@@ -269,9 +293,17 @@ function CheckoutPage() {
       <main className="flex-1 mx-auto max-w-5xl px-5 py-8 sm:py-10 w-full grid lg:grid-cols-[1fr_350px] gap-8">
         {/* Checkout Form */}
         <div>
-          <h1 className="text-2xl sm:text-3xl font-display font-bold text-foreground mb-6">
-            Checkout
-          </h1>
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-6">
+            <h1 className="text-2xl sm:text-3xl font-display font-bold text-foreground">
+              Checkout
+            </h1>
+            {user && (
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground bg-secondary/80 px-3 py-1.5 border border-border/60">
+                <UserCheck className="size-3.5 text-emerald-500 shrink-0" />
+                <span>Signed in as <strong>{user.name || user.phone}</strong></span>
+              </div>
+            )}
+          </div>
 
           <div className="space-y-6">
             {/* Step 1: Address */}

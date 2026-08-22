@@ -8,12 +8,22 @@ import { Package, Truck, CheckCircle2, Clock, XCircle, AlertCircle, ShieldCheck 
 import { taka } from "@/data/catalog";
 import { getOrders, type OrderRecord, type OrderStatus } from "@/lib/order-store";
 
+import { ProtectedRoute } from "@/components/protected-route";
+
 export const Route = createFileRoute("/account/orders")({
   head: () => ({
     meta: [{ title: "My Orders | Resale.com" }],
   }),
-  component: OrdersPage,
+  component: OrdersPageWrapper,
 });
+
+function OrdersPageWrapper() {
+  return (
+    <ProtectedRoute redirect="/account/orders">
+      <OrdersPage />
+    </ProtectedRoute>
+  );
+}
 
 function getOrderStatusBadge(status: OrderStatus) {
   switch (status) {

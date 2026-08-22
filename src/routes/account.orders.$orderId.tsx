@@ -27,12 +27,22 @@ import {
 } from "@/lib/order-store";
 import resaleLogo from "@/assets/resale-logo.png";
 
+import { ProtectedRoute } from "@/components/protected-route";
+
 export const Route = createFileRoute("/account/orders/$orderId")({
   head: ({ params }) => ({
     meta: [{ title: `Order #${params.orderId} Details | Resale.com` }],
   }),
-  component: OrderDetailsPage,
+  component: OrderDetailsPageWrapper,
 });
+
+function OrderDetailsPageWrapper() {
+  return (
+    <ProtectedRoute redirect="/account/orders">
+      <OrderDetailsPage />
+    </ProtectedRoute>
+  );
+}
 
 function getOrderStatusBadge(status: OrderStatus) {
   switch (status) {

@@ -15,10 +15,17 @@ import {
 } from "@/components/ui/card";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { sendOtpFn, verifyOtpFn } from "@/lib/server-functions";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Lock } from "lucide-react";
 import resaleLogo from "@/assets/resale-logo.png";
 
+interface LoginSearch {
+  redirect?: string;
+}
+
 export const Route = createFileRoute("/login")({
+  validateSearch: (search: Record<string, unknown>): LoginSearch => ({
+    redirect: typeof search.redirect === "string" ? search.redirect : undefined,
+  }),
   head: () => ({
     meta: [{ title: "Login | Resale.com" }],
   }),
@@ -26,6 +33,7 @@ export const Route = createFileRoute("/login")({
 });
 
 function LoginPage() {
+  const search = Route.useSearch();
   const [step, setStep] = useState<"phone" | "otp">("phone");
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
@@ -62,7 +70,11 @@ function LoginPage() {
       const res = await verifyOtpFn({ data: { phone, otp } });
       if (res && res.success && res.user) {
         signIn(res.user);
-        navigate({ to: "/" });
+        if (search.redirect) {
+          navigate({ to: search.redirect });
+        } else {
+          navigate({ to: "/" });
+        }
       } else {
         setError(res?.error || "Invalid verification code. Please try again.");
       }
@@ -78,7 +90,7 @@ function LoginPage() {
     <div className="min-h-screen bg-background flex flex-col">
       <SiteHeader />
       <main className="flex-1 flex items-center justify-center p-5">
-        <Card className="w-full max-w-md">
+        <Card className="w-full max-w-md shadow-md border-border/80">
           <CardHeader className="text-center">
             <div className="flex justify-center mb-3">
               <Link to="/" className="inline-flex items-center gap-1">
@@ -92,16 +104,25 @@ function LoginPage() {
                 </span>
               </Link>
             </div>
-            <CardTitle className="text-2xl">Welcome back</CardTitle>
-            <CardDescription>
-              {step === "phone"
-                ? "Enter your phone number to sign in to your account."
-                : `We sent a 6-digit code to ${phone}. (Enter 123456 in dev/testing)`}
+            <CardTitle className="text-2xl font-display font-bold">Welcome back</CardTitle>
+            <CardDescription className="text-xs sm:text-sm">
+              {search.redirect?.includes("checkout")
+                ? "Please sign in to proceed with your order checkout."
+                : step === "phone"
+                  ? "Enter your phone number to sign in to your account."
+                  : `We sent a 6-digit code to ${phone}. (Enter 123456 in dev/testing)`}
             </CardDescription>
           </CardHeader>
           <CardContent>
+            {search.redirect && (
+              <div className="mb-4 p-2.5 bg-primary/10 border border-primary/20 text-xs text-primary flex items-center gap-2">
+                <Lock className="size-3.5 shrink-0" />
+                <span>Account login required for order placement &amp; buyer protection.</span>
+              </div>
+            )}
+
             {error && (
-              <div className="mb-4 p-3 bg-destructive/10 border border-destructive/20 rounded-md text-destructive text-sm flex items-center gap-2">
+              <div className="mb-4 p-3 bg-destructive/10 border border-destructive/20 text-destructive text-xs flex items-center gap-2">
                 <AlertCircle className="size-4 shrink-0" />
                 <span>{error}</span>
               </div>
@@ -121,7 +142,7 @@ function LoginPage() {
                     title="Valid Bangladesh mobile number starting with 01"
                   />
                 </div>
-                <Button type="submit" className="w-full" disabled={loading}>
+                <Button type="submit" className="w-full font-semibold" disabled={loading}>
                   {loading ? "Sending OTP…" : "Send OTP"}
                 </Button>
               </form>
@@ -140,7 +161,7 @@ function LoginPage() {
                     </InputOTPGroup>
                   </InputOTP>
                 </div>
-                <Button type="submit" className="w-full" disabled={otp.length !== 6 || loading}>
+                <Button type="submit" className="w-full font-semibold" disabled={otp.length !== 6 || loading}>
                   {loading ? "Verifying…" : "Verify & Sign In"}
                 </Button>
                 <div className="text-center">
@@ -150,7 +171,7 @@ function LoginPage() {
                       setStep("phone");
                       setError(null);
                     }}
-                    className="text-sm text-primary hover:underline"
+                    className="text-xs text-primary hover:underline cursor-pointer"
                   >
                     Change phone number
                   </button>
@@ -158,10 +179,14 @@ function LoginPage() {
               </form>
             )}
           </CardContent>
-          <CardFooter className="justify-center border-t p-6">
-            <p className="text-sm text-muted-foreground">
-              Don't have an account?{" "}
-              <Link to="/register" className="text-primary hover:underline">
+          <CardFooter className="justify-center border-t border-border/60 p-5">
+            <p className="text-xs text-muted-foreground">
+              Don&apos;t have an account?{" "}
+              <Link
+                to="/register"
+                search={search.redirect ? { redirect: search.redirect } : undefined}
+                className="text-primary hover:underline font-semibold"
+              >
                 Register here
               </Link>
             </p>
