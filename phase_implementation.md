@@ -136,7 +136,43 @@ Phase 3.1 established the core transaction and order lifecycle backbone, decoupl
 
 ---
 
-## 🚀 Upcoming Strategic & Engineering Roadmap (Phase 3.2 – 3.6)
+## ✅ Phase 3.4: Creator & Pro Storefronts
+
+**Status:** `COMPLETED` · **Target Scope Delivered**
+
+Phase 3.4 integrated professional merchant storefronts, tech reviewer creator hubs, video-linked product diagnostics, exact-unit review badges, and high-throughput bulk inventory ingestion.
+
+### 1. Professional Branded Storefronts (`/store/$storeSlug`)
+
+- **Public Merchant Hubs**: Dedicated store pages featuring custom branding, hero banner covers, logo avatars, verified store badges, business operating hours, physical outlet addresses, and direct WhatsApp/Phone support channels.
+- **Store Policies & Warranty Modal**: Popover/dialog detailing official shop warranty terms, return windows, and inspection disclosures.
+- **Store-Filtered Inventory Grid**: Real-time searchable and category/grade filtered catalog displaying exclusively listings owned by the store.
+- **Merchant Storefront Studio (`/seller/storefront`)**: Integrated self-service dashboard for pro sellers to customize store profiles, generate verified URL slugs, preview live storefronts, and manage customer service contacts.
+- **Store Identity Integration**: `StoreBadge` embedded throughout product comparison rows, listing pages, and seller trust lines.
+
+### 2. Verified Tech Creator Hubs (`/creator/$creatorSlug`)
+
+- **Creator Profiles**: Dedicated reviewer hub displaying channel branding, reviewer bios, verification badges, and social media channel links (YouTube, Facebook, TikTok).
+- **Reviewed Electronics Portfolio**: Comprehensive grid of all hands-on video teardowns and tests published by the creator.
+- **Creator Management Studio (`/seller/creator-profile`)**: Portal for tech reviewers to manage creator handles, link external review videos, categorize review types (`FULL_REVIEW`, `BATTERY_TEST`, `CAMERA_COMPARISON`, `UNBOXING`, `LONG_TERM`), and optionally attach active physical units for sale.
+
+### 3. Video-Linked Product Reviews & Exact-Unit Badging
+
+- **Master Product Review Deck (`CreatorReviewStrip`)**: Embedded above multi-seller comparison tables on canonical product pages (`/product/$productId`), surfacing hands-on diagnostic videos without disrupting purchase flows.
+- **Exact-Unit Verified Badge**: When a reviewer sells the exact device tested on camera, the listing (`/listing/$listingId`) renders an exclusive **"Featured in Creator Review (Exact Unit Tested)"** callout banner with an instant sandboxed video player modal.
+- **Sandboxed Video Player (`CreatorVideoModal`)**: Zero-cookie YouTube embed with restricted permissions preventing tracking and popup injection.
+
+### 4. High-Throughput Bulk CSV Inventory Importer (`/seller/inventory/import`)
+
+- **Drag-and-Drop Ingestion**: Interactive upload zone with pre-formatted downloadable sample spreadsheet templates.
+- **CSV Formula Injection Defense**: Sanitizes leading `=, +, -, @` formula prefixes to neutralize spreadsheet injection vulnerabilities.
+- **Intelligent Catalog Matching**: Fuzzy and exact ID/Name matcher resolving batch items against canonical master products.
+- **Inspection Integrity & Grade Validation**: Validates condition grades (`A+` to `D`), price thresholds (min ৳500), battery health ranges (50%–100%), and warranty limits. Does **not** fabricate 32-point inspection results, preserving honest platform trust.
+- **Validation Preview & Error Quarantining**: Interactive validation table displaying error chips for malformed rows while enabling one-click publishing for valid inventory units.
+
+---
+
+## 🚀 Upcoming Strategic & Engineering Roadmap (Phase 3.2, 3.3, 3.5, 3.6)
 
 **Status:** `PLANNED` · **Target Milestones**
 
@@ -144,11 +180,11 @@ Phase 3.1 established the core transaction and order lifecycle backbone, decoupl
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │                             UPCOMING ROADMAP                                │
 ├───────────────────────┬─────────────────────────┬───────────────────────────┤
-│   3.2 Logistics &     │   3.3 Automated         │   3.4 Creator &           │
-│   Courier APIs        │   Diagnostics           │   Business Storefronts    │
+│   3.2 Logistics &     │   3.3 Automated         │   3.5 AI Valuation &      │
+│   Courier APIs        │   Diagnostics           │   Smart Pricing           │
 ├───────────────────────┼─────────────────────────┼───────────────────────────┤
-│   3.5 AI Valuation &  │   3.6 Dispute &         │   Future Payment Gateways │
-│   Smart Pricing       │   Fraud Shield          │   (bKash/Nagad/Escrow)    │
+│   3.6 Dispute &       │   Future Payment        │   Escrow Settlement       │
+│   Fraud Shield        │   Gateways (bKash/Nagad)│   Architecture            │
 └───────────────────────┴─────────────────────────┴───────────────────────────┘
 ```
 
@@ -168,13 +204,6 @@ Phase 3.1 established the core transaction and order lifecycle backbone, decoupl
 
 ---
 
-### 🏪 3.4 Professional & Creator Reseller Storefronts
-
-- **Creator / Reviewer Verified Listings**: Embedded YouTube/TikTok review unit links.
-- **Professional Shop Accounts**: Tiered subscriptions, branded storefront profiles, and bulk CSV inventory upload.
-
----
-
 ### 🤖 3.5 AI-Powered Smart Pricing & Valuation Engine
 
 - **Fair-Market Price Recommendation**: Machine learning model based on historical completed sales.
@@ -191,16 +220,16 @@ Phase 3.1 established the core transaction and order lifecycle backbone, decoupl
 
 ## 📊 Summary Milestone Table
 
-| Milestone     | Key Focus Area               | Deliverables                                                                                                                                                           |    Status    |
-| ------------- | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------: |
-| **Phase 1**   | Marketplace Core & Catalog   | Alternating Homepage, Catalog Filters, Cart, COD Checkout, NID Auth, Seller Wizard                                                                                     | ✅ Completed |
-| **Phase 2**   | Trust & Inspection UX        | 32-Point Inspection, Condition Gauge, Seller Trust Line, Device Verification, Product Multi-Seller Page                                                                | ✅ Completed |
-| **Phase 3.1** | Order & Transaction Backbone | Decoupled Lifecycle State Machine, Payment Abstraction (COD Active), Mandatory Auth & Redirect, Buyer Timeline & Cancellation, Seller Fulfillment Hub, Admin Oversight | ✅ Completed |
-| **Phase 3.2** | Courier Logistics            | Steadfast/Pathao API integration, live tracking webhooks, automated COD reconciliation                                                                                 |  📋 Planned  |
-| **Phase 3.3** | Automated Diagnostics        | Live IMEI verification API, device hardware test runner, certified badges                                                                                              |  📋 Planned  |
-| **Phase 3.4** | Creator & Pro Storefronts    | Video-linked review units, custom shop profiles, bulk inventory uploader                                                                                               |  📋 Planned  |
-| **Phase 3.5** | AI Valuation Engine          | Real-time price recommender, price history graphs, "Fair Deal" badges                                                                                                  |  📋 Planned  |
-| **Phase 3.6** | Dispute Mediation Hub        | Evidence upload portal, SLA timers, admin dispute workbench, fraud scoring                                                                                             |  📋 Planned  |
+| Milestone     | Key Focus Area               | Deliverables                                                                                                                                                                      |    Status    |
+| ------------- | ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------: |
+| **Phase 1**   | Marketplace Core & Catalog   | Alternating Homepage, Catalog Filters, Cart, COD Checkout, NID Auth, Seller Wizard                                                                                                | ✅ Completed |
+| **Phase 2**   | Trust & Inspection UX        | 32-Point Inspection, Condition Gauge, Seller Trust Line, Device Verification, Product Multi-Seller Page                                                                           | ✅ Completed |
+| **Phase 3.1** | Order & Transaction Backbone | Decoupled Lifecycle State Machine, Payment Abstraction (COD Active), Mandatory Auth & Redirect, Buyer Timeline & Cancellation, Seller Fulfillment Hub, Admin Oversight            | ✅ Completed |
+| **Phase 3.4** | Creator & Pro Storefronts    | Public Branded Storefronts (`/store/:slug`), Verified Creator Profiles (`/creator/:slug`), Hands-on Product Video Reviews, Exact-Unit Review Badging, Bulk CSV Inventory Importer | ✅ Completed |
+| **Phase 3.2** | Courier Logistics            | Steadfast/Pathao API integration, live tracking webhooks, automated COD reconciliation                                                                                            |  📋 Planned  |
+| **Phase 3.3** | Automated Diagnostics        | Live IMEI verification API, device hardware test runner, certified badges                                                                                                         |  📋 Planned  |
+| **Phase 3.5** | AI Valuation Engine          | Real-time price recommender, price history graphs, "Fair Deal" badges                                                                                                             |  📋 Planned  |
+| **Phase 3.6** | Dispute Mediation Hub        | Evidence upload portal, SLA timers, admin dispute workbench, fraud scoring                                                                                                        |  📋 Planned  |
 
 ---
 

@@ -8,6 +8,8 @@ export type GradedDraft = {
   grade: Grade;
   conditionScore: number;
   answers: GradingAnswers;
+  storeId?: string | undefined;
+  storeName?: string | undefined;
   createdAt: string;
 };
 

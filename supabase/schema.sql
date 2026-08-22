@@ -78,6 +78,64 @@ CREATE TABLE IF NOT EXISTS public.disputes (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+-- 7. Stores Table (Phase 3.4 Pro Storefronts)
+CREATE TABLE IF NOT EXISTS public.stores (
+  id TEXT PRIMARY KEY,
+  owner_id TEXT NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  slug TEXT UNIQUE NOT NULL,
+  tagline TEXT,
+  description TEXT,
+  logo_url TEXT,
+  banner_url TEXT,
+  district TEXT NOT NULL,
+  area TEXT,
+  address TEXT,
+  phone TEXT,
+  email TEXT,
+  business_hours TEXT,
+  return_policy TEXT,
+  warranty_policy TEXT,
+  verified BOOLEAN NOT NULL DEFAULT FALSE,
+  social_links JSONB NOT NULL DEFAULT '{}'::jsonb,
+  rating NUMERIC(3,2) NOT NULL DEFAULT 5.0,
+  total_sales INTEGER NOT NULL DEFAULT 0,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- 8. Creator Profiles Table (Phase 3.4 Creator Hub)
+CREATE TABLE IF NOT EXISTS public.creator_profiles (
+  id TEXT PRIMARY KEY,
+  user_id TEXT UNIQUE NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
+  handle TEXT UNIQUE NOT NULL,
+  display_name TEXT NOT NULL,
+  avatar_url TEXT,
+  banner_url TEXT,
+  bio TEXT,
+  verified BOOLEAN NOT NULL DEFAULT FALSE,
+  channels JSONB NOT NULL DEFAULT '{}'::jsonb,
+  total_reviews INTEGER NOT NULL DEFAULT 0,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- 9. Product Videos Table (Phase 3.4 Video Reviews)
+CREATE TABLE IF NOT EXISTS public.product_videos (
+  id TEXT PRIMARY KEY,
+  product_id TEXT NOT NULL REFERENCES public.products(id) ON DELETE CASCADE,
+  creator_id TEXT NOT NULL REFERENCES public.creator_profiles(id) ON DELETE CASCADE,
+  listing_id TEXT REFERENCES public.listings(id) ON DELETE SET NULL,
+  platform TEXT NOT NULL CHECK (platform IN ('YOUTUBE', 'TIKTOK', 'FACEBOOK')),
+  video_url TEXT NOT NULL,
+  video_id TEXT NOT NULL,
+  title TEXT NOT NULL,
+  thumbnail_url TEXT,
+  review_type TEXT NOT NULL DEFAULT 'FULL_REVIEW',
+  published_date TEXT,
+  is_verified_review_unit BOOLEAN NOT NULL DEFAULT FALSE,
+  status TEXT NOT NULL DEFAULT 'APPROVED' CHECK (status IN ('APPROVED', 'PENDING_MODERATION', 'REJECTED')),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 -- Indexes for high performance
 CREATE INDEX IF NOT EXISTS idx_products_category ON public.products(category);
 CREATE INDEX IF NOT EXISTS idx_products_brand ON public.products(brand);
@@ -86,6 +144,10 @@ CREATE INDEX IF NOT EXISTS idx_listings_seller_id ON public.listings(seller_id);
 CREATE INDEX IF NOT EXISTS idx_listings_status ON public.listings(status);
 CREATE INDEX IF NOT EXISTS idx_orders_buyer_id ON public.orders(buyer_id);
 CREATE INDEX IF NOT EXISTS idx_orders_listing_id ON public.orders(listing_id);
+CREATE INDEX IF NOT EXISTS idx_stores_slug ON public.stores(slug);
+CREATE INDEX IF NOT EXISTS idx_creator_handle ON public.creator_profiles(handle);
+CREATE INDEX IF NOT EXISTS idx_product_videos_product ON public.product_videos(product_id);
+CREATE INDEX IF NOT EXISTS idx_product_videos_creator ON public.product_videos(creator_id);
 
 -- Enable Row Level Security (RLS)
 ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
@@ -94,16 +156,22 @@ ALTER TABLE public.listings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.inspection_items ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.orders ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.disputes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.stores ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.creator_profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.product_videos ENABLE ROW LEVEL SECURITY;
 
--- Public Read Policies (Allows reading catalog, listings, inspection items)
+-- Public Read Policies (Allows reading catalog, listings, inspection items, stores, creators, approved videos)
 CREATE POLICY "Allow public read access on products" ON public.products FOR SELECT USING (true);
 CREATE POLICY "Allow public read access on listings" ON public.listings FOR SELECT USING (true);
 CREATE POLICY "Allow public read access on inspection_items" ON public.inspection_items FOR SELECT USING (true);
 CREATE POLICY "Allow public read access on users" ON public.users FOR SELECT USING (true);
 CREATE POLICY "Allow public read access on orders" ON public.orders FOR SELECT USING (true);
 CREATE POLICY "Allow public read access on disputes" ON public.disputes FOR SELECT USING (true);
+CREATE POLICY "Allow public read access on stores" ON public.stores FOR SELECT USING (true);
+CREATE POLICY "Allow public read access on creator_profiles" ON public.creator_profiles FOR SELECT USING (true);
+CREATE POLICY "Allow public read access on product_videos" ON public.product_videos FOR SELECT USING (status = 'APPROVED');
 
--- Public Insert/Update Policies (Allows submitting orders, listings, disputes, users)
+-- Public Insert/Update Policies
 CREATE POLICY "Allow public insert on users" ON public.users FOR INSERT WITH CHECK (true);
 CREATE POLICY "Allow public update on users" ON public.users FOR UPDATE USING (true);
 
@@ -120,3 +188,12 @@ CREATE POLICY "Allow public update on orders" ON public.orders FOR UPDATE USING 
 
 CREATE POLICY "Allow public insert on disputes" ON public.disputes FOR INSERT WITH CHECK (true);
 CREATE POLICY "Allow public update on disputes" ON public.disputes FOR UPDATE USING (true);
+
+CREATE POLICY "Allow public insert on stores" ON public.stores FOR INSERT WITH CHECK (true);
+CREATE POLICY "Allow public update on stores" ON public.stores FOR UPDATE USING (true);
+
+CREATE POLICY "Allow public insert on creator_profiles" ON public.creator_profiles FOR INSERT WITH CHECK (true);
+CREATE POLICY "Allow public update on creator_profiles" ON public.creator_profiles FOR UPDATE USING (true);
+
+CREATE POLICY "Allow public insert on product_videos" ON public.product_videos FOR INSERT WITH CHECK (true);
+CREATE POLICY "Allow public update on product_videos" ON public.product_videos FOR UPDATE USING (true);

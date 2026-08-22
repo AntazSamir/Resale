@@ -118,7 +118,7 @@ export type Listing = {
   grade: Grade;
   warrantyMonths: number;
   invoice: boolean;
-  battery?: number;
+  battery?: number | undefined;
   accessories: string;
   repairs: string;
   physical: string;
@@ -129,12 +129,14 @@ export type Listing = {
     rating: number;
     sales: number;
     district: string;
-    area?: string;
+    area?: string | undefined;
   };
-  repairHistory?: RepairHistory[];
-  deviceVerification?: DeviceVerification;
-  includedItems?: string[];
-  knownIssues?: string[];
+  storeId?: string | undefined;
+  storeName?: string | undefined;
+  repairHistory?: RepairHistory[] | undefined;
+  deviceVerification?: DeviceVerification | undefined;
+  includedItems?: string[] | undefined;
+  knownIssues?: string[] | undefined;
 };
 
 export type Product = {
@@ -2372,6 +2374,8 @@ export const listings: Listing[] = [
     physical: "No visible signs of use",
     screen: "Flawless, screen protector applied since day one",
     seller: { name: "Rafiq H.", verified: true, rating: 4.9, sales: 23, district: "Dhaka" },
+    storeId: "store-apple-vault",
+    storeName: "Apple Vault Banani",
     includedItems: ["Device", "Original box", "USB-C charging cable", "20W adapter"],
     deviceVerification: {
       imeiStatus: "clean",
@@ -2408,6 +2412,8 @@ export const listings: Listing[] = [
     physical: "Minor signs of use on frame",
     screen: "No visible scratches",
     seller: { name: "Nusrat T.", verified: true, rating: 4.7, sales: 11, district: "Chattogram" },
+    storeId: "store-apple-vault",
+    storeName: "Apple Vault Banani",
     includedItems: ["Device", "USB-C cable"],
     deviceVerification: {
       imeiStatus: "clean",
@@ -2441,6 +2447,8 @@ export const listings: Listing[] = [
     physical: "Visible scuffs on corners",
     screen: "Replaced panel, no scratches",
     seller: { name: "Imran K.", verified: false, rating: 4.4, sales: 6, district: "Sylhet" },
+    storeId: "store-pixel-hub",
+    storeName: "Pixel & Gadget Hub",
     includedItems: ["Device only"],
     deviceVerification: {
       imeiStatus: "clean",

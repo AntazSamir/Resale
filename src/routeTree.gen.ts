@@ -26,15 +26,20 @@ import { Route as AdminIdentityRouteImport } from './routes/admin.identity'
 import { Route as AdminModerationRouteImport } from './routes/admin.moderation'
 import { Route as AdminOrdersRouteImport } from './routes/admin.orders'
 import { Route as CategoryCategorySlugRouteImport } from './routes/category.$categorySlug'
+import { Route as CreatorCreatorSlugRouteImport } from './routes/creator.$creatorSlug'
 import { Route as ListingListingIdRouteImport } from './routes/listing.$listingId'
 import { Route as ProductProductIdRouteImport } from './routes/product.$productId'
 import { Route as SellIndexRouteImport } from './routes/sell.index'
 import { Route as SellerSellerIdRouteImport } from './routes/seller.$sellerId'
+import { Route as SellerCreatorProfileRouteImport } from './routes/seller.creator-profile'
 import { Route as SellerDashboardRouteImport } from './routes/seller.dashboard'
 import { Route as SellerListingsRouteImport } from './routes/seller.listings'
 import { Route as SellerOrdersRouteImport } from './routes/seller.orders'
 import { Route as SellerPayoutsRouteImport } from './routes/seller.payouts'
+import { Route as SellerStorefrontRouteImport } from './routes/seller.storefront'
+import { Route as StoreStoreSlugRouteImport } from './routes/store.$storeSlug'
 import { Route as AccountOrdersOrderIdRouteImport } from './routes/account.orders.$orderId'
+import { Route as SellerInventoryImportRouteImport } from './routes/seller.inventory.import'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -121,6 +126,11 @@ const CategoryCategorySlugRoute = CategoryCategorySlugRouteImport.update({
   path: '/category/$categorySlug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CreatorCreatorSlugRoute = CreatorCreatorSlugRouteImport.update({
+  id: '/creator/$creatorSlug',
+  path: '/creator/$creatorSlug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ListingListingIdRoute = ListingListingIdRouteImport.update({
   id: '/listing/$listingId',
   path: '/listing/$listingId',
@@ -139,6 +149,11 @@ const SellIndexRoute = SellIndexRouteImport.update({
 const SellerSellerIdRoute = SellerSellerIdRouteImport.update({
   id: '/seller/$sellerId',
   path: '/seller/$sellerId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SellerCreatorProfileRoute = SellerCreatorProfileRouteImport.update({
+  id: '/seller/creator-profile',
+  path: '/seller/creator-profile',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SellerDashboardRoute = SellerDashboardRouteImport.update({
@@ -161,10 +176,25 @@ const SellerPayoutsRoute = SellerPayoutsRouteImport.update({
   path: '/seller/payouts',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SellerStorefrontRoute = SellerStorefrontRouteImport.update({
+  id: '/seller/storefront',
+  path: '/seller/storefront',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StoreStoreSlugRoute = StoreStoreSlugRouteImport.update({
+  id: '/store/$storeSlug',
+  path: '/store/$storeSlug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AccountOrdersOrderIdRoute = AccountOrdersOrderIdRouteImport.update({
   id: '/$orderId',
   path: '/$orderId',
   getParentRoute: () => AccountOrdersRoute,
+} as any)
+const SellerInventoryImportRoute = SellerInventoryImportRouteImport.update({
+  id: '/seller/inventory/import',
+  path: '/seller/inventory/import',
+  getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -184,16 +214,21 @@ export interface FileRoutesByFullPath {
   '/admin/moderation': typeof AdminModerationRoute
   '/admin/orders': typeof AdminOrdersRoute
   '/category/$categorySlug': typeof CategoryCategorySlugRoute
+  '/creator/$creatorSlug': typeof CreatorCreatorSlugRoute
   '/listing/$listingId': typeof ListingListingIdRoute
   '/product/$productId': typeof ProductProductIdRoute
   '/seller/$sellerId': typeof SellerSellerIdRoute
+  '/seller/creator-profile': typeof SellerCreatorProfileRoute
   '/seller/dashboard': typeof SellerDashboardRoute
   '/seller/listings': typeof SellerListingsRoute
   '/seller/orders': typeof SellerOrdersRoute
   '/seller/payouts': typeof SellerPayoutsRoute
+  '/seller/storefront': typeof SellerStorefrontRoute
+  '/store/$storeSlug': typeof StoreStoreSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/sell/': typeof SellIndexRoute
   '/account/orders/$orderId': typeof AccountOrdersOrderIdRoute
+  '/seller/inventory/import': typeof SellerInventoryImportRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -212,16 +247,21 @@ export interface FileRoutesByTo {
   '/admin/moderation': typeof AdminModerationRoute
   '/admin/orders': typeof AdminOrdersRoute
   '/category/$categorySlug': typeof CategoryCategorySlugRoute
+  '/creator/$creatorSlug': typeof CreatorCreatorSlugRoute
   '/listing/$listingId': typeof ListingListingIdRoute
   '/product/$productId': typeof ProductProductIdRoute
   '/seller/$sellerId': typeof SellerSellerIdRoute
+  '/seller/creator-profile': typeof SellerCreatorProfileRoute
   '/seller/dashboard': typeof SellerDashboardRoute
   '/seller/listings': typeof SellerListingsRoute
   '/seller/orders': typeof SellerOrdersRoute
   '/seller/payouts': typeof SellerPayoutsRoute
+  '/seller/storefront': typeof SellerStorefrontRoute
+  '/store/$storeSlug': typeof StoreStoreSlugRoute
   '/admin': typeof AdminIndexRoute
   '/sell': typeof SellIndexRoute
   '/account/orders/$orderId': typeof AccountOrdersOrderIdRoute
+  '/seller/inventory/import': typeof SellerInventoryImportRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -241,16 +281,21 @@ export interface FileRoutesById {
   '/admin/moderation': typeof AdminModerationRoute
   '/admin/orders': typeof AdminOrdersRoute
   '/category/$categorySlug': typeof CategoryCategorySlugRoute
+  '/creator/$creatorSlug': typeof CreatorCreatorSlugRoute
   '/listing/$listingId': typeof ListingListingIdRoute
   '/product/$productId': typeof ProductProductIdRoute
   '/seller/$sellerId': typeof SellerSellerIdRoute
+  '/seller/creator-profile': typeof SellerCreatorProfileRoute
   '/seller/dashboard': typeof SellerDashboardRoute
   '/seller/listings': typeof SellerListingsRoute
   '/seller/orders': typeof SellerOrdersRoute
   '/seller/payouts': typeof SellerPayoutsRoute
+  '/seller/storefront': typeof SellerStorefrontRoute
+  '/store/$storeSlug': typeof StoreStoreSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/sell/': typeof SellIndexRoute
   '/account/orders/$orderId': typeof AccountOrdersOrderIdRoute
+  '/seller/inventory/import': typeof SellerInventoryImportRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -271,16 +316,21 @@ export interface FileRouteTypes {
     | '/admin/moderation'
     | '/admin/orders'
     | '/category/$categorySlug'
+    | '/creator/$creatorSlug'
     | '/listing/$listingId'
     | '/product/$productId'
     | '/seller/$sellerId'
+    | '/seller/creator-profile'
     | '/seller/dashboard'
     | '/seller/listings'
     | '/seller/orders'
     | '/seller/payouts'
+    | '/seller/storefront'
+    | '/store/$storeSlug'
     | '/admin/'
     | '/sell/'
     | '/account/orders/$orderId'
+    | '/seller/inventory/import'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -299,16 +349,21 @@ export interface FileRouteTypes {
     | '/admin/moderation'
     | '/admin/orders'
     | '/category/$categorySlug'
+    | '/creator/$creatorSlug'
     | '/listing/$listingId'
     | '/product/$productId'
     | '/seller/$sellerId'
+    | '/seller/creator-profile'
     | '/seller/dashboard'
     | '/seller/listings'
     | '/seller/orders'
     | '/seller/payouts'
+    | '/seller/storefront'
+    | '/store/$storeSlug'
     | '/admin'
     | '/sell'
     | '/account/orders/$orderId'
+    | '/seller/inventory/import'
   id:
     | '__root__'
     | '/'
@@ -327,16 +382,21 @@ export interface FileRouteTypes {
     | '/admin/moderation'
     | '/admin/orders'
     | '/category/$categorySlug'
+    | '/creator/$creatorSlug'
     | '/listing/$listingId'
     | '/product/$productId'
     | '/seller/$sellerId'
+    | '/seller/creator-profile'
     | '/seller/dashboard'
     | '/seller/listings'
     | '/seller/orders'
     | '/seller/payouts'
+    | '/seller/storefront'
+    | '/store/$storeSlug'
     | '/admin/'
     | '/sell/'
     | '/account/orders/$orderId'
+    | '/seller/inventory/import'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -356,15 +416,20 @@ export interface RootRouteChildren {
   AdminModerationRoute: typeof AdminModerationRoute
   AdminOrdersRoute: typeof AdminOrdersRoute
   CategoryCategorySlugRoute: typeof CategoryCategorySlugRoute
+  CreatorCreatorSlugRoute: typeof CreatorCreatorSlugRoute
   ListingListingIdRoute: typeof ListingListingIdRoute
   ProductProductIdRoute: typeof ProductProductIdRoute
   SellerSellerIdRoute: typeof SellerSellerIdRoute
+  SellerCreatorProfileRoute: typeof SellerCreatorProfileRoute
   SellerDashboardRoute: typeof SellerDashboardRoute
   SellerListingsRoute: typeof SellerListingsRoute
   SellerOrdersRoute: typeof SellerOrdersRoute
   SellerPayoutsRoute: typeof SellerPayoutsRoute
+  SellerStorefrontRoute: typeof SellerStorefrontRoute
+  StoreStoreSlugRoute: typeof StoreStoreSlugRoute
   AdminIndexRoute: typeof AdminIndexRoute
   SellIndexRoute: typeof SellIndexRoute
+  SellerInventoryImportRoute: typeof SellerInventoryImportRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -488,6 +553,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CategoryCategorySlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/creator/$creatorSlug': {
+      id: '/creator/$creatorSlug'
+      path: '/creator/$creatorSlug'
+      fullPath: '/creator/$creatorSlug'
+      preLoaderRoute: typeof CreatorCreatorSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/listing/$listingId': {
       id: '/listing/$listingId'
       path: '/listing/$listingId'
@@ -514,6 +586,13 @@ declare module '@tanstack/react-router' {
       path: '/seller/$sellerId'
       fullPath: '/seller/$sellerId'
       preLoaderRoute: typeof SellerSellerIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/seller/creator-profile': {
+      id: '/seller/creator-profile'
+      path: '/seller/creator-profile'
+      fullPath: '/seller/creator-profile'
+      preLoaderRoute: typeof SellerCreatorProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/seller/dashboard': {
@@ -544,12 +623,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SellerPayoutsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/seller/storefront': {
+      id: '/seller/storefront'
+      path: '/seller/storefront'
+      fullPath: '/seller/storefront'
+      preLoaderRoute: typeof SellerStorefrontRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/store/$storeSlug': {
+      id: '/store/$storeSlug'
+      path: '/store/$storeSlug'
+      fullPath: '/store/$storeSlug'
+      preLoaderRoute: typeof StoreStoreSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/account/orders/$orderId': {
       id: '/account/orders/$orderId'
       path: '/$orderId'
       fullPath: '/account/orders/$orderId'
       preLoaderRoute: typeof AccountOrdersOrderIdRouteImport
       parentRoute: typeof AccountOrdersRoute
+    }
+    '/seller/inventory/import': {
+      id: '/seller/inventory/import'
+      path: '/seller/inventory/import'
+      fullPath: '/seller/inventory/import'
+      preLoaderRoute: typeof SellerInventoryImportRouteImport
+      parentRoute: typeof rootRouteImport
     }
   }
 }
@@ -583,15 +683,20 @@ const rootRouteChildren: RootRouteChildren = {
   AdminModerationRoute: AdminModerationRoute,
   AdminOrdersRoute: AdminOrdersRoute,
   CategoryCategorySlugRoute: CategoryCategorySlugRoute,
+  CreatorCreatorSlugRoute: CreatorCreatorSlugRoute,
   ListingListingIdRoute: ListingListingIdRoute,
   ProductProductIdRoute: ProductProductIdRoute,
   SellerSellerIdRoute: SellerSellerIdRoute,
+  SellerCreatorProfileRoute: SellerCreatorProfileRoute,
   SellerDashboardRoute: SellerDashboardRoute,
   SellerListingsRoute: SellerListingsRoute,
   SellerOrdersRoute: SellerOrdersRoute,
   SellerPayoutsRoute: SellerPayoutsRoute,
+  SellerStorefrontRoute: SellerStorefrontRoute,
+  StoreStoreSlugRoute: StoreStoreSlugRoute,
   AdminIndexRoute: AdminIndexRoute,
   SellIndexRoute: SellIndexRoute,
+  SellerInventoryImportRoute: SellerInventoryImportRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

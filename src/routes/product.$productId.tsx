@@ -15,11 +15,16 @@ import {
   taka,
 } from "@/data/catalog";
 
+import { getApprovedVideosForProduct } from "@/lib/creator-store";
+import { CreatorReviewStrip } from "@/components/creator/creator-review-strip";
+import { StoreBadge } from "@/components/storefront/store-badge";
+
 export const Route = createFileRoute("/product/$productId")({
   loader: ({ params }) => {
     const product = productFor(params.productId);
     if (!product) throw notFound();
-    return { product };
+    const videos = getApprovedVideosForProduct(params.productId);
+    return { product, videos };
   },
   head: ({ loaderData }) => {
     const name = loaderData?.product.name ?? "Product";
@@ -38,7 +43,7 @@ export const Route = createFileRoute("/product/$productId")({
 });
 
 function ProductPage() {
-  const { product } = Route.useLoaderData();
+  const { product, videos } = Route.useLoaderData();
   const rows = listingsFor(product.id);
   const best = cheapest(product.id);
   const high = rows.length > 0 ? rows[rows.length - 1] : undefined;
@@ -98,59 +103,80 @@ function ProductPage() {
               {product.name}
             </h1>
 
+            {/* Price band or best price */}
             {best ? (
-              <div>
-                <p className="mt-4 font-display text-3xl font-bold text-primary">
-                  from {taka(best.price)}
-                </p>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  {rows.length} seller listing{rows.length > 1 ? "s" : ""} · prices from{" "}
+              <div className="pt-2">
+                <span className="font-display text-2xl md:text-3xl font-bold text-primary">
                   {taka(best.price)}
-                  {high && high.id !== best.id ? ` to ${taka(high.price)}` : ""}
-                </p>
+                </span>
+                {high && high.price !== best.price && (
+                  <span className="ml-2 text-sm text-muted-foreground font-display">
+                    – {taka(high.price)}
+                  </span>
+                )}
+                <span className="ml-3 text-xs text-muted-foreground">
+                  (Ref. new: {taka(product.retail)})
+                </span>
               </div>
             ) : (
-              <div className="mt-4 p-4 bg-muted/60 border border-border">
-                <p className="font-display text-lg font-semibold text-muted-foreground">
-                  Currently Out of Stock
-                </p>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  No active listings for this item right now. Have one to sell?{" "}
-                  <Link to="/sell" className="text-primary underline font-medium">
-                    List yours here
-                  </Link>
-                  .
-                </p>
-              </div>
+              <p className="text-sm text-muted-foreground">No listings currently available</p>
             )}
 
-            {available.length > 0 && (
-              <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2">
-                {available.map((g) => (
-                  <span key={g} className="inline-flex items-center gap-1.5 text-xs">
-                    <span className="grade-chip size-5 text-[10px]">{g}</span>
-                    <span className="text-muted-foreground">
-                      {gradeLabel[g]} · {rows.filter((l) => l.grade === g).length}
-                    </span>
-                  </span>
-                ))}
-              </div>
-            )}
-
-            {/* Top Key Highlights */}
-            <dl className="mt-6 border-t border-border/60 divide-y divide-border/40 text-xs">
+            {/* Quick specs pill row */}
+            <div className="flex flex-wrap gap-2 pt-2">
               {product.specs.map((s) => (
-                <div key={s.label} className="flex justify-between py-2.5">
-                  <dt className="text-muted-foreground font-medium">{s.label}</dt>
-                  <dd className="font-semibold text-foreground text-right">{s.value}</dd>
-                </div>
+                <span
+                  key={s.label}
+                  className="bg-secondary text-subtle-foreground px-2.5 py-1 text-xs font-mono font-medium border border-border/60"
+                >
+                  <span className="text-muted-foreground">{s.label}: </span>
+                  {s.value}
+                </span>
               ))}
-            </dl>
+            </div>
+
+            {/* Grades in stock */}
+            {available.length > 0 && (
+              <div className="pt-3">
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                  Condition Grades Available
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {available.map((g) => {
+                    const count = rows.filter((l) => l.grade === g).length;
+                    const fromPrice = rows.filter((l) => l.grade === g)[0]?.price;
+                    return (
+                      <div
+                        key={g}
+                        className="flex items-center gap-2 border border-border/80 px-3 py-1.5 bg-card/60"
+                      >
+                        <GradeBadge grade={g} />
+                        <div className="text-xs">
+                          <span className="font-semibold text-foreground">
+                            {fromPrice ? taka(fromPrice) : ""}
+                          </span>
+                          <span className="text-muted-foreground ml-1">
+                            ({count} {count === 1 ? "unit" : "units"})
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
+        {/* ── Creator Hands-On Video Reviews Strip ── */}
+        {videos && videos.length > 0 && (
+          <div className="mt-12">
+            <CreatorReviewStrip videos={videos} productName={product.name} />
+          </div>
+        )}
+
         {/* ── All Listings Table with Condition Score Pills & Verified Badges ── */}
-        <section className="mt-16 sm:mt-20">
+        <section className="mt-12 sm:mt-16">
           <div className="flex items-end justify-between border-b border-border pb-4">
             <div>
               <h2 className="font-display text-2xl font-bold text-foreground">
@@ -201,7 +227,7 @@ function ProductPage() {
                     />
                   </div>
                   <div className="space-y-2">
-                    {/* Header line: Condition Pill + Seller + NID Badge */}
+                    {/* Header line: Condition Pill + Seller + NID Badge + Optional Store Badge */}
                     <div className="flex flex-wrap items-center gap-2.5">
                       <ConditionScore score={l.conditionScore} grade={l.grade} compact />
 
@@ -219,6 +245,9 @@ function ProductPage() {
                           <span className="text-[9.5px] text-muted-foreground bg-secondary px-1.5 py-0.5 border border-border/40">
                             Not Verified
                           </span>
+                        )}
+                        {(l.storeId || l.storeName) && (
+                          <StoreBadge storeId={l.storeId} storeName={l.storeName} />
                         )}
                       </span>
 

@@ -27,6 +27,8 @@ export interface OrderItemSnapshot {
   sellerId?: string | undefined;
   sellerName?: string | undefined;
   sellerDistrict?: string | undefined;
+  storeId?: string | undefined;
+  storeName?: string | undefined;
   warrantyMonths?: number | undefined;
   accessories?: string | undefined;
   includedItems?: string[] | undefined;

@@ -2,16 +2,20 @@ import { useState } from "react";
 import { Star, ShieldCheck, MapPin, CheckCircle2, UserCheck } from "lucide-react";
 import { type Listing } from "@/data/catalog";
 
+import { StoreBadge } from "@/components/storefront/store-badge";
+
 interface SellerTrustProps {
   seller: Listing["seller"];
+  storeId?: string | undefined;
+  storeName?: string | undefined;
   className?: string | undefined;
 }
 
 /**
  * Compact trust line designed to sit at the very top of the product info column.
- * [Avatar] Name  ✓ Verified Seller · Location · Rating
+ * [Avatar] Name  [🏪 StoreBadge] ✓ Verified Seller · Location · Rating
  */
-export function SellerTrustLine({ seller, className = "" }: SellerTrustProps) {
+export function SellerTrustLine({ seller, storeId, storeName, className = "" }: SellerTrustProps) {
   const [showTooltip, setShowTooltip] = useState(false);
 
   return (
@@ -23,6 +27,9 @@ export function SellerTrustLine({ seller, className = "" }: SellerTrustProps) {
 
       {/* Seller Name */}
       <span className="font-semibold text-foreground">{seller.name}</span>
+
+      {/* Optional Store Badge */}
+      {(storeId || storeName) && <StoreBadge storeId={storeId} storeName={storeName} />}
 
       {/* Verified Badge */}
       {seller.verified ? (

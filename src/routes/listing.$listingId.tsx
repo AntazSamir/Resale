@@ -10,6 +10,7 @@ import {
   FileText,
   Battery,
   Box,
+  Play,
 } from "lucide-react";
 import { SiteFooter, SiteHeader } from "@/components/site-header";
 import { useCart } from "@/lib/cart-store";
@@ -20,6 +21,8 @@ import { RepairHistoryCard } from "@/components/repair-history";
 import { DeviceVerificationCard } from "@/components/device-verification";
 import { WhatsIncludedCard } from "@/components/whats-included";
 import { SellerTrustLine } from "@/components/seller-trust-card";
+import { getApprovedVideoForListing } from "@/lib/creator-store";
+import { CreatorVideoModal } from "@/components/creator/creator-video-modal";
 import {
   galleryShots,
   gradeCriteria,
@@ -60,10 +63,13 @@ function ListingPage() {
   const { listing, product } = Route.useLoaderData();
   const [shot, setShot] = useState(0);
   const [addedToCart, setAddedToCart] = useState(false);
+  const [videoModalOpen, setVideoModalOpen] = useState(false);
   const active = galleryShots[shot] ?? galleryShots[0]!;
   const { addToCart, isInCart } = useCart();
   const navigate = useNavigate();
   const inCart = isInCart(listing.id);
+
+  const exactVideo = getApprovedVideoForListing(listing.id);
 
   // Check if there are known defects/issues to disclose
   const hasKnownIssues =
@@ -80,6 +86,14 @@ function ListingPage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <SiteHeader />
+
+      {exactVideo && (
+        <CreatorVideoModal
+          open={videoModalOpen}
+          onOpenChange={setVideoModalOpen}
+          video={exactVideo}
+        />
+      )}
 
       <main className="mx-auto max-w-7xl px-4 sm:px-6 py-6 sm:py-8 space-y-12 sm:space-y-16">
         {/* Breadcrumb Navigation */}
@@ -118,11 +132,17 @@ function ListingPage() {
               <img
                 src={product.image}
                 alt={`${product.name} — ${active.label.toLowerCase()} view`}
-                width={900}
-                height={900}
-                className="w-full h-full object-cover transition-transform duration-300"
+                width={700}
+                height={700}
+                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                 style={{ objectPosition: active.position }}
               />
+              <div className="absolute top-3 left-3 flex items-center gap-2">
+                <GradeBadge grade={listing.grade} />
+              </div>
+              <div className="absolute bottom-3 right-3 bg-background/80 backdrop-blur-xs text-[10px] uppercase font-mono px-2 py-0.5 border border-border">
+                {active.label} View
+              </div>
             </div>
 
             {/* Thumbnail Buttons */}
@@ -163,8 +183,41 @@ function ListingPage() {
           <div className="space-y-6">
             {/* 1. Seller Identity Line */}
             <div className="pb-1 border-b border-border/40">
-              <SellerTrustLine seller={listing.seller} />
+              <SellerTrustLine
+                seller={listing.seller}
+                storeId={listing.storeId}
+                storeName={listing.storeName}
+              />
             </div>
+
+            {/* Exact Unit Creator Video Review Feature Banner */}
+            {exactVideo && (
+              <div className="p-3.5 rounded-lg border border-primary/20 bg-primary/5 flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="size-9 rounded-md bg-primary text-primary-foreground flex items-center justify-center shrink-0 shadow-xs">
+                    <Play className="size-4 fill-current ml-0.5" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-1.5 text-xs font-bold text-foreground">
+                      <span>Featured in Creator Review</span>
+                      <span className="px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 text-[9px] font-semibold">
+                        Exact Unit Tested
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-muted-foreground line-clamp-1 mt-0.5">
+                      {exactVideo.title}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setVideoModalOpen(true)}
+                  className="px-3 py-1.5 text-xs font-semibold rounded bg-background border border-border hover:border-primary text-foreground shrink-0 shadow-xs transition-colors"
+                >
+                  Watch Review
+                </button>
+              </div>
+            )}
 
             {/* 2. Brand & 3. Product Title */}
             <div className="space-y-1">
