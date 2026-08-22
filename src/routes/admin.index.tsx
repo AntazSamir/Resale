@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteHeader, SiteFooter } from "@/components/site-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { LayoutDashboard, Shield, Users, TrendingUp } from "lucide-react";
+import { LayoutDashboard, Shield, Users, TrendingUp, Package } from "lucide-react";
 import { ProtectedRoute } from "@/components/protected-route";
 import resaleLogo from "@/assets/resale-logo.png";
 
@@ -12,7 +12,11 @@ export const Route = createFileRoute("/admin/")({
   component: AdminDashboardPage,
 });
 
-export function AdminSidebar({ active }: { active: "dashboard" | "moderation" | "identity" }) {
+export function AdminSidebar({
+  active,
+}: {
+  active: "dashboard" | "orders" | "moderation" | "identity";
+}) {
   return (
     <aside className="w-64 shrink-0 hidden md:block">
       <nav className="space-y-2 sticky top-24">
@@ -28,6 +32,12 @@ export function AdminSidebar({ active }: { active: "dashboard" | "moderation" | 
           className={`flex items-center gap-3 px-4 py-3 rounded-md transition-colors ${active === "dashboard" ? "bg-primary text-primary-foreground" : "hover:bg-muted"}`}
         >
           <LayoutDashboard className="size-4" /> Overview
+        </Link>
+        <Link
+          to="/admin/orders"
+          className={`flex items-center gap-3 px-4 py-3 rounded-md transition-colors ${active === "orders" ? "bg-primary text-primary-foreground" : "hover:bg-muted"}`}
+        >
+          <Package className="size-4" /> Transactions &amp; Orders
         </Link>
         <Link
           to="/admin/moderation"
@@ -55,7 +65,7 @@ function AdminDashboardPage() {
           <AdminSidebar active="dashboard" />
 
           <div className="flex-1">
-            <h1 className="text-3xl mb-8">Platform Overview</h1>
+            <h1 className="text-3xl mb-8 font-display font-bold">Platform Overview</h1>
 
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
               <Card>
@@ -65,7 +75,7 @@ function AdminDashboardPage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-display">৳4.2M</div>
+                  <div className="text-3xl font-display font-bold text-primary">৳4.2M</div>
                   <p className="text-xs text-success mt-1">+12% from last month</p>
                 </CardContent>
               </Card>
@@ -77,7 +87,7 @@ function AdminDashboardPage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-display text-destructive">24</div>
+                  <div className="text-3xl font-display text-destructive font-bold">24</div>
                   <p className="text-xs text-muted-foreground mt-1">Listings awaiting approval</p>
                 </CardContent>
               </Card>
@@ -89,13 +99,13 @@ function AdminDashboardPage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-display text-primary">8</div>
+                  <div className="text-3xl font-display text-primary font-bold">8</div>
                   <p className="text-xs text-muted-foreground mt-1">Identity docs to review</p>
                 </CardContent>
               </Card>
             </div>
 
-            <h2 className="text-xl mb-4">Recent Platform Activity</h2>
+            <h2 className="text-xl mb-4 font-bold font-display">Recent Platform Activity</h2>
             <Card>
               <div className="p-6 text-sm text-muted-foreground">
                 <ul>

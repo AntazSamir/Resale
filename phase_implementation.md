@@ -106,65 +106,79 @@ Phase 3 focuses on scaling platform operations, financial automation, logistics 
 
 ---
 
-### 💳 3.1 Live Escrow & Automated Payout Engine
-- **Local Digital Payment Gateway Integration**:
-  - Direct integration with **bKash**, **Nagad**, and **SSLCommerz** for instant digital payments alongside COD.
-- **48-Hour Buyer Inspection Escrow**:
-  - Payments held securely in platform escrow during delivery and throughout the 48-hour inspection window.
-  - Automatic fund release to the seller's wallet / bank account once the buyer approves or the 48-hour return window expires without dispute.
-- **Automated Platform Commission & Take-Rate**:
-  - Dynamic commission calculation (3–5% take-rate) deducted automatically upon payout settlement.
-  - Automated seller invoice and payout statement generation.
+## ✅ Phase 3.1: Order & Transaction Infrastructure
+
+**Status:** `COMPLETED`
+
+Phase 3.1 established the core transaction and order lifecycle backbone, decoupling the order system from payment providers while maintaining active COD fulfillment and strict data snapshot integrity.
+
+### 1. Decoupled Lifecycle State Machine
+- **Order Lifecycle States**: `PENDING` &rarr; `CONFIRMED` &rarr; `PROCESSING` &rarr; `READY_TO_SHIP` &rarr; `SHIPPED` &rarr; `DELIVERED` &rarr; `COMPLETED` (plus `CANCELLED`, `REFUND_REQUESTED`, `REFUNDED`, `DISPUTED`).
+- **Independent Payment Status**: `PENDING` (payment due on delivery), `AUTHORIZED`, `PAID`, `FAILED`, `REFUND_PENDING`, `REFUNDED`.
+- **Payment Method Abstraction**: Architecture supports `COD`, `BKASH`, `NAGAD`, `SSLCOMMERZ`, `CARD`, with **COD as the only active provider** in this phase.
+
+### 2. Order Snapshot & Financial Integrity
+- **Listing Snapshot Preservation**: Each order item permanently captures the listing's product name, grade, condition score, seller identity, images, and included accessories at the exact moment of checkout.
+- **Shared Price Calculator**: Centralized `calculateOrderTotals` helper enforcing consistent math across Cart, Checkout, Order Confirmation, Buyer Tracking, Seller Hub, and Admin Console.
+
+### 3. Buyer Order Tracking & Controlled Cancellation
+- **Audited Event Timeline (`/account/orders/$orderId`)**: Displays chronological application events with timestamp, actor (`BUYER`, `SELLER`, `COURIER`, `ADMIN`), and verified note.
+- **Controlled Cancellation Flow**: Buyers can cancel only at `PENDING` or `CONFIRMED` stages before dispatch, with required reason logging and audit trail update.
+
+### 4. Seller Fulfillment Hub (`/seller/orders`)
+- **Seller Order Management**: Stage-by-stage progression controls (`Confirm Order` &rarr; `Start Packing` &rarr; `Mark Ready` &rarr; `Hand to Courier` &rarr; `Confirm Delivery`).
+- **Integrated Seller Hub**: Added to `SellerSidebar` with live pending order counts and GMV metrics.
+
+### 5. Admin Transaction Oversight (`/admin/orders`)
+- **Platform-Wide Transaction Audit**: Searchable order directory with dual Order/Payment status filters, total GMV volume tracking, and instant access to dispute audit logs.
+
+---
+
+## 🚀 Upcoming Strategic & Engineering Roadmap (Phase 3.2 – 3.6)
+
+**Status:** `PLANNED` · **Target Milestones**
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                             UPCOMING ROADMAP                                │
+├───────────────────────┬─────────────────────────┬───────────────────────────┤
+│   3.2 Logistics &     │   3.3 Automated         │   3.4 Creator &           │
+│   Courier APIs        │   Diagnostics           │   Business Storefronts    │
+├───────────────────────┼─────────────────────────┼───────────────────────────┤
+│   3.5 AI Valuation &  │   3.6 Dispute &         │   Future Payment Gateways │
+│   Smart Pricing       │   Fraud Shield          │   (bKash/Nagad/Escrow)    │
+└───────────────────────┴─────────────────────────┴───────────────────────────┘
+```
 
 ---
 
 ### 🚚 3.2 3rd-Party Courier & Automated Tracking Integration
-- **Direct Logistics APIs**:
-  - Integration with Bangladesh courier APIs (**Steadfast**, **Pathao Courier**, **Paperfly**, **RedX**).
-- **Automated Tracking Workflow**:
-  - Automatic generation of courier consignment notes and printable shipping labels when a seller confirms an order.
-  - Real-time webhook tracking updates pushed to the buyer's order dashboard (`Pending Pickup` &rarr; `In Transit` &rarr; `Out for Delivery` &rarr; `Delivered`).
-  - Automated COD collection reconciliation with courier settlements.
+- **Direct Logistics APIs**: Integration with Bangladesh courier APIs (**Steadfast**, **Pathao Courier**, **Paperfly**, **RedX**).
+- **Automated Tracking Workflow**: Consignment note generation, printable shipping labels, live webhook order status sync (`Pending Pickup` &rarr; `In Transit` &rarr; `Delivered`), and automated COD reconciliation.
 
 ---
 
 ### 🔍 3.3 Live IMEI & Automated Device Diagnostics
-- **Real-Time IMEI / Serial Verification**:
-  - Integration with global GSMA and carrier databases to detect stolen, blacklisted, or finance-locked devices automatically during listing creation.
-- **Browser & Mobile Diagnostic Runner**:
-  - Lightweight client-side diagnostic tool that sellers can run on the device to automatically verify screen touch responsiveness, dead pixels, microphone/speaker operation, camera sensors, and battery health reporting.
-  - Automated generation of "Platform-Certified" inspection reports for devices tested through the runner.
+- **Real-Time IMEI / Serial Verification**: Integration with GSMA blacklist databases.
+- **Browser & Mobile Diagnostic Runner**: Lightweight test runner for touch screens, pixels, sensors, and battery health reporting.
 
 ---
 
 ### 🏪 3.4 Professional & Creator Reseller Storefronts
-- **Creator / Reviewer Verified Listings**:
-  - Embedded YouTube / TikTok review unit links displayed directly on listings from verified tech creators.
-  - Dedicated "Creator Drops" showcase on the homepage.
-- **Professional Shop Accounts**:
-  - Tiered seller subscriptions (Individual &rarr; Verified &rarr; Professional &rarr; Brand Refurbisher).
-  - Dedicated seller profile storefronts with custom banners, store search, and inventory analytics.
-  - Bulk CSV / API listing upload for multi-unit commercial sellers.
+- **Creator / Reviewer Verified Listings**: Embedded YouTube/TikTok review unit links.
+- **Professional Shop Accounts**: Tiered subscriptions, branded storefront profiles, and bulk CSV inventory upload.
 
 ---
 
 ### 🤖 3.5 AI-Powered Smart Pricing & Valuation Engine
-- **Fair-Market Price Recommendation**:
-  - Machine learning model trained on historical completed sales in Bangladesh to suggest optimal listing prices based on device model, storage, condition score, and warranty remaining.
-  - "Good Deal" / "Fair Price" badges on listings priced below average market rates.
-- **Price History & Depreciation Tracker**:
-  - Visual price trends graph showing average resale price depreciation for popular models over 3, 6, and 12 months.
+- **Fair-Market Price Recommendation**: Machine learning model based on historical completed sales.
+- **Depreciation Tracker**: Visual price depreciation charts for popular smartphones and laptops.
 
 ---
 
 ### ⚖️ 3.6 Automated Dispute Mediation & Fraud Shield
-- **Structured Dispute Resolution Center (`/account/disputes`)**:
-  - Evidence upload portal (photo/video unboxing requirements) within the 48-hour return window.
-  - SLA tracking with automatic seller response timers (48-hour countdown).
-  - One-click admin arbitration outcomes: Full Refund, Partial Compensation, Return & Refund, or Claim Dismissal.
-- **Seller Strike & Anti-Fraud Engine**:
-  - Automated trust score degradation and temporary listing bans for sellers who misrepresent condition grades or conceal known defects.
-  - Device serial deduplication preventing relisting of disputed or blacklisted units.
+- **Structured Dispute Resolution Center (`/account/disputes`)**: Evidence upload portal (photo/video unboxing), SLA timers, and one-click admin arbitration.
+- **Seller Strike & Anti-Fraud Engine**: Automated trust score degradation and serial deduplication.
 
 ---
 
@@ -174,7 +188,7 @@ Phase 3 focuses on scaling platform operations, financial automation, logistics 
 |---|---|---|:---:|
 | **Phase 1** | Marketplace Core & Catalog | Alternating Homepage, Catalog Filters, Cart, COD Checkout, NID Auth, Seller Wizard | ✅ Completed |
 | **Phase 2** | Trust & Inspection UX | 32-Point Inspection, Condition Gauge, Seller Trust Line, Device Verification, Product Multi-Seller Page | ✅ Completed |
-| **Phase 3.1** | Payments & Escrow | bKash/Nagad/SSLCommerz gateways, 48h escrow hold, automated seller payouts | 📋 Planned |
+| **Phase 3.1** | Order & Transaction Backbone | Decoupled Lifecycle State Machine, Payment Abstraction (COD Active), Buyer Timeline & Cancellation, Seller Fulfillment Hub, Admin Oversight | ✅ Completed |
 | **Phase 3.2** | Courier Logistics | Steadfast/Pathao API integration, live tracking webhooks, automated COD reconciliation | 📋 Planned |
 | **Phase 3.3** | Automated Diagnostics | Live IMEI verification API, device hardware test runner, certified badges | 📋 Planned |
 | **Phase 3.4** | Creator & Pro Storefronts | Video-linked review units, custom shop profiles, bulk inventory uploader | 📋 Planned |
@@ -184,3 +198,4 @@ Phase 3 focuses on scaling platform operations, financial automation, logistics 
 ---
 
 *Last Updated: August 2026 · Resale.com Engineering Team*
+
