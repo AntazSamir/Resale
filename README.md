@@ -14,6 +14,7 @@
 ## ✨ Key Features & Architecture
 
 ### 🧭 1. Dual-Tier Navigation & Rich Portal Dropdowns
+
 - **Desktop Secondary Category Header**: Sticky navigation strip with hover/click dropdowns mounted directly to `document.body` via React Portals (`createPortal`), guaranteeing top-level foreground rendering (`z-[99999]`) over hero banners and media components:
   - **[Accessories ▾]**: Chargers & Cables, Power Banks, Cases & Covers, Screen Protectors, Stylus & Pens, USB Hubs & Docks, Memory Cards, Mounts & Stands, Keyboard & Mouse, Camera Bags & Straps, All Accessories.
   - **[Essentials ▾]**: Smartwatches, Earbuds, Headphones, Bluetooth Speakers, Soundbars, Wearable Fitness Bands, Smart Home Devices, Home Products.
@@ -23,7 +24,9 @@
 ---
 
 ### 🔍 2. Trust Architecture & Progressive Listing UX (Phase 2)
+
 The listing details page (`/listing/$listingId`) presents a structured, high-trust buyer evaluation journey:
+
 1. **Seller Trust Line**: Avatar, name, verified badge with hover tooltip, district/area, and star rating.
 2. **Brand & Product Title**: High-contrast typography with subtle uppercase brand tracking.
 3. **Condition Score Gauge**: 4-zone segmented progress bar (<60 Heavy Wear, 60–74 Fair, 75–89 Good, 90–100 Excellent) and grade badge.
@@ -37,6 +40,7 @@ The listing details page (`/listing/$listingId`) presents a structured, high-tru
 ---
 
 ### 📦 3. Order & Transaction Infrastructure (Phase 3.1)
+
 - **Decoupled Order Lifecycle Engine**:
   - `OrderStatus`: `PENDING` &rarr; `CONFIRMED` &rarr; `PROCESSING` &rarr; `READY_TO_SHIP` &rarr; `SHIPPED` &rarr; `DELIVERED` &rarr; `COMPLETED` (plus `CANCELLED`, `REFUND_REQUESTED`, `REFUNDED`, `DISPUTED`).
   - `PaymentStatus`: `PENDING` (Payment due on delivery), `AUTHORIZED`, `PAID`, `FAILED`, `REFUND_PENDING`, `REFUNDED`.
@@ -50,6 +54,7 @@ The listing details page (`/listing/$listingId`) presents a structured, high-tru
 ---
 
 ### 🏪 4. Pro Storefronts & Creator Suite (Phase 3.4)
+
 - **Public Branded Storefronts (`/store/:slug`)**: Verified merchant profiles with cover banners, operational badges, warranty policies, and live catalog filtering.
 - **Verified Creator Video Hub (`/creator/:slug`)**: Direct creator channels featuring short-form and long-form hands-on device unboxings with exact-unit inspection tag links.
 - **Hands-on Video Review Strip**: Listing pages embed creator review cards with modal video players and timestamps.
@@ -58,6 +63,7 @@ The listing details page (`/listing/$listingId`) presents a structured, high-tru
 ---
 
 ### ⚖️ 5. Dispute Mediation Hub & Fraud Shield (Phase 3.6)
+
 - **48-Hour Buyer Inspection Window (`/account/disputes`)**:
   - Enforced delivery timestamp validation with real-time countdown badges.
   - 32-point inspection defect checklist targeting specific component mismatches.
@@ -65,7 +71,7 @@ The listing details page (`/listing/$listingId`) presents a structured, high-tru
   - PII masking on sensitive contact info (`017****1234`, `****-****-9201`).
 - **Seller Claims Hub (`/seller/disputes`)**:
   - 24-hour response SLA countdown timer with automatic escalation to admin review upon timeout.
-  - *"Accept Return & Authorize Full Refund (Simulation)"* 1-click agreement flow.
+  - _"Accept Return & Authorize Full Refund (Simulation)"_ 1-click agreement flow.
   - Counter-evidence and explanation uploader (dispatch packaging photos, IMEI serial match proof).
 - **Admin Mediation Workbench (`/admin/disputes`)**:
   - Side-by-side comparison matrix: Original 32-Point Listing Baseline vs. Buyer Claim & Evidence vs. Seller Response.
@@ -173,26 +179,31 @@ The listing details page (`/listing/$listingId`) presents a structured, high-tru
 ## 🚀 Getting Started
 
 ### Prerequisites
+
 - **Node.js**: `v20.x` or higher
 - **Package Manager**: `npm` (`v10+`)
 
 ### Installation & Local Development
 
 1. **Clone the repository:**
+
    ```bash
    git clone https://github.com/AntazSamir/Resale.git
    cd Resale
    ```
 
 2. **Install dependencies:**
+
    ```bash
    npm install
    ```
 
 3. **Start the local development server:**
+
    ```bash
    npm run dev
    ```
+
    Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 4. **Verify formatting, linting, and production build:**
@@ -205,5 +216,6 @@ The listing details page (`/listing/$listingId`) presents a structured, high-tru
 ---
 
 ## 📄 License & Credits
+
 Built with ❤️ for Bangladesh's pre-owned electronics ecosystem.  
 © 2026 Resale.com Limited. All rights reserved.

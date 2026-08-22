@@ -304,6 +304,8 @@ export function SiteHeader() {
     return () => clearTimeout(timer);
   }, []);
 
+  const isLogoCentered = isHomePage && !scrolledPastHero;
+
   return (
     <div className="sticky top-0 z-40 w-full bg-background">
       {/* Announcement Bar (Shows for 3 seconds, then smoothly closes) */}
@@ -335,10 +337,12 @@ export function SiteHeader() {
             </button>
           </div>
 
-          {/* Brand Logo */}
+          {/* Brand Logo - Centered at initial top state when search is hidden, slides to left on scroll */}
           <Link
             to="/"
-            className="inline-flex items-center shrink-0 hover:opacity-90 transition-opacity absolute left-1/2 -translate-x-1/2 md:static md:translate-x-0 md:ml-3 md:mr-1"
+            className={`inline-flex items-center shrink-0 hover:opacity-90 transition-all duration-300 ease-out absolute left-1/2 -translate-x-1/2 ${
+              isLogoCentered ? "md:left-1/2 md:-translate-x-1/2" : "md:left-5 md:translate-x-0"
+            }`}
             aria-label="Resale Home"
           >
             <img
@@ -351,8 +355,8 @@ export function SiteHeader() {
           {/* Desktop Center: Search Bar with Autocomplete (Smoothly collapses when Hero search is in view on Homepage) */}
           <div
             ref={searchContainerRef}
-            className={`ml-auto hidden relative flex-1 md:flex md:max-w-md transition-all duration-300 ease-out ${
-              isHomePage && !scrolledPastHero
+            className={`ml-auto md:ml-36 md:mr-auto hidden relative flex-1 md:flex md:max-w-md transition-all duration-300 ease-out ${
+              isLogoCentered
                 ? "opacity-0 pointer-events-none -translate-y-1 invisible"
                 : "opacity-100 pointer-events-auto translate-y-0 visible"
             }`}
