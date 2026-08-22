@@ -1,8 +1,8 @@
 # RESALE.COM — Phase Implementation & Roadmap
 
-> **Bangladesh's Trusted C2C Marketplace for Quality-Checked Pre-Owned, Open-Box & Like-New Electronics**
+> **Bangladesh's Trusted C2C & B2B Marketplace for Quality-Checked Pre-Owned, Open-Box & Like-New Electronics**
 
-This document tracks the completed engineering milestones across **Phase 1** and **Phase 2**, and outlines the strategic and technical roadmap for **Phase 3**.
+This document tracks the completed engineering milestones across **Phase 1**, **Phase 2**, and **Phase 3.1**, and outlines the strategic and technical roadmap for **Phase 3.2 – 3.6**.
 
 ---
 
@@ -97,31 +97,11 @@ The listing details page (`src/routes/listing.$listingId.tsx`) was reorganized f
 
 ---
 
-## 🚀 Phase 3: Future Strategic & Engineering Roadmap
-
-**Status:** `PLANNED` · **Target Milestones**
-
-Phase 3 focuses on scaling platform operations, financial automation, logistics integration, and intelligent pricing tooling.
-
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                             PHASE 3 ROADMAP                                 │
-├───────────────────────┬─────────────────────────┬───────────────────────────┤
-│   3.1 Payments &      │   3.2 Logistics &       │   3.3 Automated           │
-│   Escrow Engine       │   Courier APIs          │   Diagnostics             │
-├───────────────────────┼─────────────────────────┼───────────────────────────┤
-│   3.4 Creator &       │   3.5 AI Valuation &    │   3.6 Dispute &           │
-│   Business Storefronts│   Smart Pricing         │   Fraud Shield            │
-└───────────────────────┴─────────────────────────┴───────────────────────────┘
-```
-
----
-
 ## ✅ Phase 3.1: Order & Transaction Infrastructure
 
-**Status:** `COMPLETED`
+**Status:** `COMPLETED` · **Commit Milestones:** `c1af4a7`, `3630476`, `d7fdeab`, `f7d0467`
 
-Phase 3.1 established the core transaction and order lifecycle backbone, decoupling the order system from payment providers while maintaining active COD fulfillment and strict data snapshot integrity.
+Phase 3.1 established the core transaction and order lifecycle backbone, decoupling the order system from payment providers while maintaining active COD fulfillment, mandatory authentication, and strict data snapshot integrity.
 
 ### 1. Decoupled Lifecycle State Machine
 
@@ -129,22 +109,28 @@ Phase 3.1 established the core transaction and order lifecycle backbone, decoupl
 - **Independent Payment Status**: `PENDING` (payment due on delivery), `AUTHORIZED`, `PAID`, `FAILED`, `REFUND_PENDING`, `REFUNDED`.
 - **Payment Method Abstraction**: Architecture supports `COD`, `BKASH`, `NAGAD`, `SSLCOMMERZ`, `CARD`, with **COD as the only active provider** in this phase.
 
-### 2. Order Snapshot & Financial Integrity
+### 2. Mandatory Authentication & Pre-Fill
+
+- **Gated Checkout & Tracking**: Checkout (`/checkout`) and Order Tracking (`/account/orders/*`) require active user login.
+- **Post-Auth Redirection**: Integrated `redirect` query parameter support returning users directly to their checkout session upon login/registration.
+- **Credential Auto-Fill**: Verified user name and phone automatically populate shipping address forms.
+
+### 3. Order Snapshot & Financial Integrity
 
 - **Listing Snapshot Preservation**: Each order item permanently captures the listing's product name, grade, condition score, seller identity, images, and included accessories at the exact moment of checkout.
 - **Shared Price Calculator**: Centralized `calculateOrderTotals` helper enforcing consistent math across Cart, Checkout, Order Confirmation, Buyer Tracking, Seller Hub, and Admin Console.
 
-### 3. Buyer Order Tracking & Controlled Cancellation
+### 4. Buyer Order Tracking & Controlled Cancellation
 
 - **Audited Event Timeline (`/account/orders/$orderId`)**: Displays chronological application events with timestamp, actor (`BUYER`, `SELLER`, `COURIER`, `ADMIN`), and verified note.
 - **Controlled Cancellation Flow**: Buyers can cancel only at `PENDING` or `CONFIRMED` stages before dispatch, with required reason logging and audit trail update.
 
-### 4. Seller Fulfillment Hub (`/seller/orders`)
+### 5. Seller Fulfillment Hub (`/seller/orders`)
 
 - **Seller Order Management**: Stage-by-stage progression controls (`Confirm Order` &rarr; `Start Packing` &rarr; `Mark Ready` &rarr; `Hand to Courier` &rarr; `Confirm Delivery`).
 - **Integrated Seller Hub**: Added to `SellerSidebar` with live pending order counts and GMV metrics.
 
-### 5. Admin Transaction Oversight (`/admin/orders`)
+### 6. Admin Transaction Oversight (`/admin/orders`)
 
 - **Platform-Wide Transaction Audit**: Searchable order directory with dual Order/Payment status filters, total GMV volume tracking, and instant access to dispute audit logs.
 
@@ -205,16 +191,16 @@ Phase 3.1 established the core transaction and order lifecycle backbone, decoupl
 
 ## 📊 Summary Milestone Table
 
-| Milestone     | Key Focus Area               | Deliverables                                                                                                                                |    Status    |
-| ------------- | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | :----------: |
-| **Phase 1**   | Marketplace Core & Catalog   | Alternating Homepage, Catalog Filters, Cart, COD Checkout, NID Auth, Seller Wizard                                                          | ✅ Completed |
-| **Phase 2**   | Trust & Inspection UX        | 32-Point Inspection, Condition Gauge, Seller Trust Line, Device Verification, Product Multi-Seller Page                                     | ✅ Completed |
-| **Phase 3.1** | Order & Transaction Backbone | Decoupled Lifecycle State Machine, Payment Abstraction (COD Active), Buyer Timeline & Cancellation, Seller Fulfillment Hub, Admin Oversight | ✅ Completed |
-| **Phase 3.2** | Courier Logistics            | Steadfast/Pathao API integration, live tracking webhooks, automated COD reconciliation                                                      |  📋 Planned  |
-| **Phase 3.3** | Automated Diagnostics        | Live IMEI verification API, device hardware test runner, certified badges                                                                   |  📋 Planned  |
-| **Phase 3.4** | Creator & Pro Storefronts    | Video-linked review units, custom shop profiles, bulk inventory uploader                                                                    |  📋 Planned  |
-| **Phase 3.5** | AI Valuation Engine          | Real-time price recommender, price history graphs, "Fair Deal" badges                                                                       |  📋 Planned  |
-| **Phase 3.6** | Dispute Mediation Hub        | Evidence upload portal, SLA timers, admin dispute workbench, fraud scoring                                                                  |  📋 Planned  |
+| Milestone     | Key Focus Area               | Deliverables                                                                                                                                                           |    Status    |
+| ------------- | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------: |
+| **Phase 1**   | Marketplace Core & Catalog   | Alternating Homepage, Catalog Filters, Cart, COD Checkout, NID Auth, Seller Wizard                                                                                     | ✅ Completed |
+| **Phase 2**   | Trust & Inspection UX        | 32-Point Inspection, Condition Gauge, Seller Trust Line, Device Verification, Product Multi-Seller Page                                                                | ✅ Completed |
+| **Phase 3.1** | Order & Transaction Backbone | Decoupled Lifecycle State Machine, Payment Abstraction (COD Active), Mandatory Auth & Redirect, Buyer Timeline & Cancellation, Seller Fulfillment Hub, Admin Oversight | ✅ Completed |
+| **Phase 3.2** | Courier Logistics            | Steadfast/Pathao API integration, live tracking webhooks, automated COD reconciliation                                                                                 |  📋 Planned  |
+| **Phase 3.3** | Automated Diagnostics        | Live IMEI verification API, device hardware test runner, certified badges                                                                                              |  📋 Planned  |
+| **Phase 3.4** | Creator & Pro Storefronts    | Video-linked review units, custom shop profiles, bulk inventory uploader                                                                                               |  📋 Planned  |
+| **Phase 3.5** | AI Valuation Engine          | Real-time price recommender, price history graphs, "Fair Deal" badges                                                                                                  |  📋 Planned  |
+| **Phase 3.6** | Dispute Mediation Hub        | Evidence upload portal, SLA timers, admin dispute workbench, fraud scoring                                                                                             |  📋 Planned  |
 
 ---
 

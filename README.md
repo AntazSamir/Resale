@@ -7,13 +7,13 @@
 [![Vercel](https://img.shields.io/badge/Deploy-Vercel-000000?logo=vercel&logoColor=white)](https://vercel.com/)
 [![Cloudflare](https://img.shields.io/badge/Deploy-Cloudflare-F38020?logo=cloudflare&logoColor=white)](https://workers.cloudflare.com/)
 
-**Resale.com** is Bangladesh's premier C2C and B2B marketplace for quality-checked pre-owned, open-box, and refurbished electronics. Engineered with objective component-level condition grading (A+ to D), NID-verified sellers, nationwide Cash on Delivery (COD), and a 48-hour buyer protection guarantee.
+**Resale.com** is Bangladesh's premier C2C and B2B marketplace for quality-checked pre-owned, open-box, and refurbished electronics. Engineered with objective component-level condition grading (A+ to D), 32-point hardware inspection, NID-verified sellers, nationwide Cash on Delivery (COD), decoupled order lifecycle state machines, and a 48-hour buyer protection guarantee.
 
 ---
 
 ## ✨ Key Features & User Experience
 
-### 🧭 1. Dual-Tier Navigation & Rich Dropdown Engine
+### 🧭 1. Dual-Tier Navigation & Rich Portal Dropdowns
 
 - **Desktop Secondary Category Header**: Sticky navigation strip with hover/click dropdowns mounted directly to `document.body` via React Portals (`createPortal`), guaranteeing top-level foreground rendering (`z-[99999]`) over hero banners and media components:
   - **[Accessories ▾]**: Chargers & Cables, Power Banks, Cases & Covers, Screen Protectors, Stylus & Pens, USB Hubs & Docks, Memory Cards, Mounts & Stands, Keyboard & Mouse, Camera Bags & Straps, All Accessories.
@@ -21,42 +21,57 @@
   - **Direct Category Links**: Smartphones, Laptops, Cameras, Tablets, Gaming Consoles, Sell with Us, Partner Program.
 - **Mobile Drawer Navigation**: Slide-over drawer featuring expandable accordion submenus for Accessories and Essentials with fluid chevron rotation animations and instant navigation handling.
 
-### 📝 2. 4-Step Interactive Selling Wizard (`/sell`)
+---
 
-- **Step 1 — Product & Details**:
-  - Category dropdown selection (9 main marketplace categories).
-  - Product Name / Model text input (e.g. _Apple iPhone 15 Pro 256GB Natural Titanium_).
-  - Short Description / Seller Note textarea for usage history and details.
-  - Warranty status dropdown (_Active Manufacturer Warranty_, _Expired_, _No Warranty_).
-  - Accessories included dropdown (_Box and all original accessories_, _Some original accessories_, _Device only_).
-  - **Full Validation Engine**: Visual asterisks (`*`), red border highlighting on submit attempt, inline helper error messages.
-- **Step 2 — Diagnostic Condition Grading Checklist**:
-  - 5 objective hardware checks totaling 100 points.
-  - **Conditional Repair Disclosure**: Selecting _"Official service repair, documented"_ or _"Third-party repair"_ opens a required input for replaced parts details.
-- **Step 3 — Media & Pricing**:
-  - Multi-photo drag-and-drop dropzone with instant thumbnail rendering, photo order badges (`#1`, `#2`...), and deletion (`✕`).
-  - Selling price in BDT (৳) with platform fee and credit estimates.
-- **Step 4 — Preview & Submit**:
-  - Consolidated pre-moderation summary previewing category badge, product title, seller notes, calculated condition grade, checklist breakdown, and photo gallery.
+### 🔍 2. Trust Architecture & Progressive Listing UX (Phase 2)
 
-### 🔍 3. Objective Condition Grading Matrix (100-Point Scale)
+The listing details page (`/listing/$listingId`) presents a structured, high-trust buyer evaluation journey:
 
-- **Grade A+ (Like New / Open-box)**: 95–100 pts · Flawless display & housing, 95%+ battery capacity, complete accessories.
-- **Grade A (Excellent)**: 85–94 pts · Micro-scratches only visible under direct light, high battery health, zero functional defects.
-- **Grade B (Good)**: 70–84 pts · Normal everyday cosmetic wear, 100% functional components, all repairs disclosed.
-- **Grade C (Fair)**: 55–69 pts · Noticeable casing marks or scuffs, fully operational for value buyers.
-- **Grade D (Heavy Wear)**: < 55 pts · Heavy wear or replaced parts sold with full disclosure and discount pricing.
-
-### 🛡️ 4. Trust & Buyer Protection Ecosystem
-
-- **NID Identity Verification**: Government-verified seller profiles ensuring platform safety.
-- **Nationwide Cash on Delivery (COD)**: Safe transactions delivered through trusted courier partners across all 64 districts.
-- **48-Hour Inspection & Return Policy**: Escrow protection window allowing buyers to inspect their device upon arrival.
-- **Seller Portal (`/seller/listings`)**: Comprehensive dashboard showing active listings and pending drafts with live grade breakdowns, warranty tags, and repair disclosures.
+1. **Seller Trust Line**: Avatar, name, verified badge with hover tooltip, district/area, and star rating.
+2. **Brand & Product Title**: High-contrast typography with subtle uppercase brand tracking.
+3. **Condition Score Gauge**: 4-zone segmented progress bar (<60 Heavy Wear, 60–74 Fair, 75–89 Good, 90–100 Excellent) and grade badge.
+4. **Quick Trust Pills**: Badges for remaining warranty months, battery health percentage, and original invoice availability.
+5. **What's Included**: Chips for included accessories (Original Box, 70W Adapter, MagSafe Cable) or explicit "Device only" notice.
+6. **Repair History**: Servicing breakdown (Official / Third-Party / Self-Serviced with dates and repair receipts) or verified "No repairs recorded".
+7. **32-Point Hardware Inspection**: 5 evaluation categories (Physical, Functional, Connectivity, Security, Authenticity) with strict data-truth safeguards.
+8. **Device Verification Matrix**: IMEI, carrier lock, iCloud/activation lock status with sample verification badges.
+9. **Multi-Seller Canonical Catalog (`/product/$productId`)**: Canonical product page aggregating all active seller units with instant grade filtering and price sorting.
 
 ---
 
-## 🎨 UI/UX Design System Guidelines
+### 📦 3. Order & Transaction Infrastructure (Phase 3.1)
+
+- **Decoupled Order Lifecycle Engine**:
+  - `OrderStatus`: `PENDING` &rarr; `CONFIRMED` &rarr; `PROCESSING` &rarr; `READY_TO_SHIP` &rarr; `SHIPPED` &rarr; `DELIVERED` &rarr; `COMPLETED` (plus `CANCELLED`, `REFUND_REQUESTED`, `REFUNDED`, `DISPUTED`).
+  - `PaymentStatus`: `PENDING` (Payment due on delivery), `AUTHORIZED`, `PAID`, `FAILED`, `REFUND_PENDING`, `REFUNDED`.
+- **Payment Method Abstraction**: Architecture supports `COD`, `BKASH`, `NAGAD`, `SSLCOMMERZ`, `CARD`, with **Cash on Delivery (COD) as the active method**.
+- **Listing Snapshot Preservation**: Each order item permanently preserves the product name, grade, condition score, seller identity, images, and included accessories at the exact moment of checkout.
+- **Audited Event Timeline (`/account/orders/$orderId`)**: Chronological event logs recorded by Buyer, Seller, Courier, and Admin.
+- **Controlled Cancellation Flow**: Buyers can cancel orders during `PENDING` and `CONFIRMED` stages before courier dispatch with mandatory reason capture.
+- **Seller Order Fulfillment Hub (`/seller/orders`)**: Dedicated dashboard for sellers to progress orders through confirmation, packaging, and courier handover.
+- **Admin Transaction Monitoring (`/admin/orders`)**: Platform-wide transaction directory with dual Order/Payment state filters, GMV tracking, and dispute access.
+
+---
+
+### 🔐 4. Identity & Authentication Gate
+
+- **Mandatory Auth for Orders**: All checkout and order tracking pages require verified login.
+- **Seamless Post-Auth Redirection**: `redirect` search parameter preservation ensures buyers return directly to checkout upon OTP verification without losing cart state.
+- **NID-Gated User Onboarding (`/register`)**: Mandatory National ID (NID) collection at onboarding to reduce fraud and build marketplace accountability.
+- **Session Auto-Prefill**: Verified buyer name and phone numbers are automatically pre-populated during checkout.
+
+---
+
+### 📝 5. 4-Step Interactive Selling Wizard (`/sell`)
+
+- **Step 1 — Product & Details**: Category, brand model selection, seller usage notes, warranty status, and included accessories.
+- **Step 2 — Diagnostic Condition Grading Checklist**: 5 objective hardware checks calculating a 100-point score with conditional repair disclosures.
+- **Step 3 — Media & Pricing**: Multi-photo drag-and-drop zone with reordering badges, pricing in BDT, and payout estimates.
+- **Step 4 — Preview & Submit**: Comprehensive pre-moderation summary for seller review before submission.
+
+---
+
+## 🎨 UI/UX Design System Tokens
 
 | Token / Layer              | Light Mode                      | Dark Mode                | Usage                                         |
 | :------------------------- | :------------------------------ | :----------------------- | :-------------------------------------------- |
@@ -74,7 +89,7 @@
 | Layer            | Technology                                                                                    |
 | :--------------- | :-------------------------------------------------------------------------------------------- |
 | **Framework**    | [TanStack Start](https://tanstack.com/start) + [TanStack Router](https://tanstack.com/router) |
-| **Frontend**     | React 19, TypeScript 5.7+                                                                     |
+| **Frontend**     | React 19, TypeScript 5.7+ (Strict Optional Types)                                             |
 | **Styling**      | Tailwind CSS v4, PostCSS, Radix UI Primitives, Lucide Icons                                   |
 | **State & Data** | In-Memory Catalog Data Store, TanStack Query, Nitro Server Functions                          |
 | **Deployment**   | Vercel (Edge & Serverless) / Cloudflare Workers / Nitro Multi-target Preset                   |
@@ -84,41 +99,57 @@
 ## 📁 Project Structure
 
 ```
-├── vercel.json                 # Vercel deployment configuration
-├── public/                     # Static public assets (logos, maps, favicons)
+├── vercel.json                         # Vercel deployment configuration
+├── public/                             # Static public assets (logos, maps, favicons)
 ├── src/
-│   ├── assets/                 # Brand assets & images (official logo, hero media, product images)
+│   ├── assets/                         # Brand assets & images (official logo, hero media, product images)
 │   ├── components/
-│   │   ├── ui/                 # Accessible Radix & Tailwind UI components (Button, Sheet, Select, etc.)
-│   │   ├── site-header.tsx     # Dual header bar, portal dropdown engine & mobile drawer
-│   │   ├── site-footer.tsx     # Footer, newsletter subscription & platform directory
-│   │   ├── listing-card.tsx    # Listing-first product offer card
-│   │   ├── product-card.tsx    # Catalog model showcase card
-│   │   ├── grade-badge.tsx     # Visual condition grade badge (A+ to D)
-│   │   ├── grade-selector.tsx  # Condition grading form & conditional repair inputs
-│   │   └── protected-route.tsx # Auth guard for accounts, sellers & admin
+│   │   ├── ui/                         # Accessible Radix & Tailwind UI components (Button, Sheet, Select, etc.)
+│   │   ├── site-header.tsx             # Dual header bar, portal dropdown engine & mobile drawer
+│   │   ├── site-footer.tsx             # Footer, newsletter subscription & platform directory
+│   │   ├── listing-card.tsx            # Listing-first product offer card
+│   │   ├── product-card.tsx            # Catalog model showcase card
+│   │   ├── grade-badge.tsx             # Visual condition grade badge (A+ to D)
+│   │   ├── condition-score.tsx         # 4-zone condition score gauge
+│   │   ├── seller-trust-card.tsx       # SellerTrustLine and SellerTrustCard
+│   │   ├── device-verification.tsx     # Security and cloud activation matrix
+│   │   ├── inspection-report.tsx       # 32-point inspection breakdown
+│   │   ├── repair-history.tsx          # Component servicing disclosure table
+│   │   ├── whats-included.tsx          # Accessory tags and inclusions
+│   │   └── protected-route.tsx         # Auth guard with redirect support
 │   ├── data/
-│   │   ├── catalog.ts          # Products catalog, active listings, brands & pricing utilities
-│   │   └── grading.ts          # 100-point condition grading calculation matrix
+│   │   ├── catalog.ts                  # Products catalog, active listings, brands & pricing utilities
+│   │   └── grading.ts                  # 100-point condition grading calculation matrix
 │   ├── lib/
-│   │   ├── auth-store.tsx      # User authentication session store
-│   │   ├── cart-store.tsx      # Shopping cart store & persistence
-│   │   ├── grade-store.ts      # Graded listing drafts store
-│   │   ├── order-store.ts      # Orders & delivery tracking store
-│   │   └── server-functions.ts # Nitro server functions (OTP auth, checkout handlers)
+│   │   ├── auth-store.tsx              # User authentication session store
+│   │   ├── cart-store.tsx              # Shopping cart store & persistence
+│   │   ├── grade-store.ts              # Graded listing drafts store
+│   │   ├── order-store.ts              # Orders, lifecycle state machine, & timeline engine
+│   │   └── server-functions.ts         # Nitro server functions (OTP auth, checkout handlers)
 │   ├── routes/
-│   │   ├── __root.tsx          # Root HTML layout & global error boundary
-│   │   ├── index.tsx           # Homepage (Hero, Deals, Categories, Banners, Grading, Brands)
-│   │   ├── products.tsx        # Unified Marketplace with full facet filter engine
-│   │   ├── categories.tsx      # Compact Category Catalog Hub
-│   │   ├── listing.$listingId.tsx # Individual Listing Details & Diagnostic Report
-│   │   ├── checkout.tsx        # Multi-step checkout & COD order placement
-│   │   ├── sell.index.tsx      # Interactive 4-Step Grading Wizard & Listing Submission
-│   │   ├── partner.tsx         # B2B Corporate Excess Inventory Application
-│   │   ├── seller.*.tsx        # Seller Dashboard, My Listings & Payouts
-│   │   ├── admin.*.tsx         # Admin Moderation & Identity Verification
-│   │   └── contact.tsx         # Support Desk & Knowledge Base FAQ
-│   └── styles.css              # Global styles, editorial typography & hairline grid tokens
+│   │   ├── __root.tsx                  # Root HTML layout & global error boundary
+│   │   ├── index.tsx                   # Homepage (18 alternating discovery sections)
+│   │   ├── products.tsx                # Unified Marketplace with full multi-facet filter engine
+│   │   ├── categories.tsx              # Compact Category Catalog Hub
+│   │   ├── product.$productId.tsx      # Multi-seller aggregated product view
+│   │   ├── listing.$listingId.tsx      # Progressive Listing Details & 32-Point Report
+│   │   ├── checkout.tsx                # Gated 3-step checkout & COD order placement
+│   │   ├── account.orders.tsx          # Buyer Order History & status filters
+│   │   ├── account.orders.$orderId.tsx # Buyer Detailed Timeline Tracking & Cancellation
+│   │   ├── sell.index.tsx              # Interactive 4-Step Grading Wizard & Listing Submission
+│   │   ├── seller.dashboard.tsx        # Seller Analytics & Recent Orders
+│   │   ├── seller.orders.tsx           # Seller Order Fulfillment Hub & Step Progression
+│   │   ├── seller.listings.tsx         # Seller Inventory Management
+│   │   ├── seller.payouts.tsx          # Seller Earnings & Escrow Settlements
+│   │   ├── admin.index.tsx             # Admin Overview & Navigation
+│   │   ├── admin.orders.tsx            # Admin Platform-Wide Transactions & Audits
+│   │   ├── admin.moderation.tsx        # Admin Listing Review Queue
+│   │   ├── admin.identity.tsx          # Admin NID Verification Queue
+│   │   ├── login.tsx                   # Phone OTP Login with return redirection
+│   │   ├── register.tsx                # NID-Verified Registration
+│   │   ├── partner.tsx                 # B2B Corporate Excess Inventory Application
+│   │   └── contact.tsx                 # Support Desk & Knowledge Base FAQ
+│   └── styles.css                      # Global styles, typography & hairline grid tokens
 ```
 
 ---
@@ -146,38 +177,19 @@
    ```
 
 3. **Start the local development server:**
+
    ```bash
    npm run dev
    ```
+
    Open [http://localhost:3000](http://localhost:3000) in your browser.
 
----
-
-## ☁️ Deployment
-
-### 1. Deploying to Vercel (Recommended)
-
-This project is pre-configured with [`vercel.json`](./vercel.json) for instant, one-click deployments on Vercel:
-
-1. Push your code to GitHub.
-2. Go to [Vercel Dashboard](https://vercel.com/dashboard) and click **"Add New..." ➔ "Project"**.
-3. Select the `AntazSamir/Resale` repository.
-4. Leave all settings default (`vercel.json` automatically triggers `NITRO_PRESET=vercel vite build`).
-5. Click **"Deploy"**.
-
-### 2. Deploying to Cloudflare Workers
-
-To compile TypeScript and build for Cloudflare Workers / Nitro:
-
-```bash
-npm run build
-```
-
-To preview the production bundle locally:
-
-```bash
-npx vite preview
-```
+4. **Verify formatting, linting, and production build:**
+   ```bash
+   npm run format
+   npm run lint
+   npm run build
+   ```
 
 ---
 
