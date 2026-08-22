@@ -311,21 +311,21 @@ function Index() {
                 <Link
                   to="/products"
                   search={{ q: undefined, category: undefined, brand: undefined }}
-                  className="inline-flex items-center gap-2 bg-primary px-5 py-2.5 text-xs md:text-sm font-semibold text-primary-foreground hover:opacity-90 transition-opacity shadow-xs"
+                  className="inline-flex items-center gap-2 bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:opacity-90 transition-opacity"
                 >
-                  <Layers className="size-4 text-orange-500" />
+                  <Layers className="size-4" />
                   <span>Shop Devices</span>
                 </Link>
                 <Link
                   to="/sell"
-                  className="inline-flex items-center gap-2 bg-background/90 backdrop-blur-xs text-foreground border border-border px-5 py-2.5 text-xs md:text-sm font-semibold hover:bg-muted transition-colors shadow-xs"
+                  className="inline-flex items-center gap-2 bg-background/90 backdrop-blur-xs text-foreground border border-border px-5 py-2.5 text-sm font-semibold hover:bg-muted transition-colors"
                 >
                   <span>Sell Your Device</span>
                   <ArrowRight className="size-4" />
                 </Link>
 
                 <div className="hidden sm:inline-flex items-center gap-2 bg-card/90 backdrop-blur-xs border border-border px-3 py-2 text-xs text-muted-foreground">
-                  <span className="bg-emerald-500/10 text-emerald-600 text-[10px] font-bold px-1.5 py-0.5 border border-emerald-500/20">
+                  <span className="bg-emerald-500/10 text-emerald-600 text-xs font-bold px-1.5 py-0.5 border border-emerald-500/20">
                     32-Point Check
                   </span>
                   <span>Tested &amp; Verified</span>
@@ -335,16 +335,16 @@ function Index() {
           </div>
         </div>
 
-        {/* 4-Item Trust Feature Strip (Matching User Reference) */}
+        {/* 4-Item Trust Feature Strip (Semantic H2 Headings) */}
         <div className="px-4 md:px-5 py-3 md:py-4">
           <div className="grid grid-cols-2 md:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-border border border-border bg-card text-center p-3 sm:p-5">
             {/* Transparent Grading */}
             <div className="flex flex-col items-center px-2 py-2 sm:py-0 space-y-1">
               <ShieldCheck className="size-5 text-foreground mb-0.5" />
-              <h3 className="font-bold text-foreground text-xs sm:text-sm leading-tight">
+              <h2 className="font-bold text-foreground text-xs sm:text-sm leading-tight">
                 Transparent Grading
-              </h3>
-              <p className="text-[10px] sm:text-xs text-muted-foreground leading-snug">
+              </h2>
+              <p className="text-xs text-muted-foreground leading-snug">
                 Every unit graded A+ to D.
               </p>
             </div>
@@ -352,10 +352,10 @@ function Index() {
             {/* NID Verified Sellers */}
             <div className="flex flex-col items-center px-2 py-2 sm:py-0 space-y-1">
               <CheckCircle2 className="size-5 text-foreground mb-0.5" />
-              <h3 className="font-bold text-foreground text-xs sm:text-sm leading-tight">
+              <h2 className="font-bold text-foreground text-xs sm:text-sm leading-tight">
                 NID Verified Sellers
-              </h3>
-              <p className="text-[10px] sm:text-xs text-muted-foreground leading-snug">
+              </h2>
+              <p className="text-xs text-muted-foreground leading-snug">
                 NID-verified accounts only.
               </p>
             </div>
@@ -363,10 +363,10 @@ function Index() {
             {/* 32-Point Inspection */}
             <div className="flex flex-col items-center px-2 py-2 sm:py-0 space-y-1">
               <FileCheck2 className="size-5 text-foreground mb-0.5" />
-              <h3 className="font-bold text-foreground text-xs sm:text-sm leading-tight">
+              <h2 className="font-bold text-foreground text-xs sm:text-sm leading-tight">
                 32-Point Inspection
-              </h3>
-              <p className="text-[10px] sm:text-xs text-muted-foreground leading-snug">
+              </h2>
+              <p className="text-xs text-muted-foreground leading-snug">
                 Comprehensive component test.
               </p>
             </div>
@@ -374,10 +374,10 @@ function Index() {
             {/* 48h Buyer Protection */}
             <div className="flex flex-col items-center px-2 py-2 sm:py-0 space-y-1">
               <Lock className="size-5 text-foreground mb-0.5" />
-              <h3 className="font-bold text-foreground text-xs sm:text-sm leading-tight">
+              <h2 className="font-bold text-foreground text-xs sm:text-sm leading-tight">
                 48h Buyer Protection
-              </h3>
-              <p className="text-[10px] sm:text-xs text-muted-foreground leading-snug">
+              </h2>
+              <p className="text-xs text-muted-foreground leading-snug">
                 Pay on arrival &amp; dispute window.
               </p>
             </div>
@@ -395,10 +395,7 @@ function Index() {
             <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground font-mono">
               Explore by Category
             </span>
-            <Link
-              to="/categories"
-              className="text-xs font-semibold text-foreground hover:text-primary transition-colors"
-            >
+            <Link to="/categories" className="text-xs font-semibold text-primary hover:underline">
               View all →
             </Link>
           </div>
@@ -420,7 +417,7 @@ function Index() {
                   className="w-20 xs:w-22 shrink-0 snap-start border border-border bg-card p-2.5 flex flex-col items-center justify-center text-center aspect-square hover:border-primary transition-colors group"
                 >
                   <Icon className="size-5 text-foreground group-hover:text-primary mb-1.5 transition-colors" />
-                  <span className="text-[10px] font-semibold text-foreground truncate w-full leading-tight">
+                  <span className="text-xs font-semibold text-foreground truncate w-full leading-tight">
                     {displayLabel}
                   </span>
                 </Link>
@@ -438,7 +435,10 @@ function Index() {
                 Browse graded pre-owned devices by electronics category
               </p>
             </div>
-            <Link to="/categories" className="text-xs font-semibold text-primary hover:underline">
+            <Link
+              to="/categories"
+              className="text-sm font-semibold text-primary hover:underline inline-flex items-center gap-1"
+            >
               View all categories →
             </Link>
           </div>
@@ -491,7 +491,7 @@ function Index() {
           <Link
             to="/products"
             search={{ q: undefined, category: undefined, brand: undefined }}
-            className="text-xs font-semibold text-primary hover:underline"
+            className="text-sm font-semibold text-primary hover:underline inline-flex items-center gap-1"
           >
             Browse all catalog →
           </Link>
@@ -536,7 +536,7 @@ function Index() {
           <Link
             to="/products"
             search={{ category: "Smartphones", q: undefined, brand: undefined }}
-            className="text-xs font-semibold text-primary hover:underline"
+            className="text-sm font-semibold text-primary hover:underline inline-flex items-center gap-1"
           >
             View all Smartphones →
           </Link>
@@ -583,10 +583,10 @@ function Index() {
             <div className="flex flex-row items-center justify-between gap-3.5 sm:gap-6 md:gap-8">
               <div className="space-y-2 sm:space-y-3.5 min-w-0 flex-1">
                 <div className="flex items-center gap-1.5 sm:gap-2">
-                  <span className="bg-emerald-500 text-white font-bold text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5">
+                  <span className="bg-emerald-500 text-white font-bold text-xs px-2 py-0.5">
                     Grade {featuredDealListing.grade}
                   </span>
-                  <span className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-wider font-semibold truncate">
+                  <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold truncate">
                     {featuredDealProduct.brand} &middot; {featuredDealProduct.category}
                   </span>
                 </div>
@@ -595,7 +595,7 @@ function Index() {
                   {featuredDealProduct.name}
                 </h2>
 
-                <p className="text-[11px] sm:text-xs md:text-sm text-subtle-foreground line-clamp-2 sm:line-clamp-3 leading-relaxed">
+                <p className="text-xs md:text-sm text-subtle-foreground line-clamp-2 sm:line-clamp-3 leading-relaxed">
                   {featuredDealListing.sellerNote ||
                     "32-point tested with original display, high battery health, and verified NID seller."}
                 </p>
@@ -606,7 +606,7 @@ function Index() {
                     {taka(featuredDealListing.price)}
                   </span>
                   {featuredDealProduct.retail > featuredDealListing.price && (
-                    <span className="text-[10px] sm:text-xs text-muted-foreground">
+                    <span className="text-xs text-muted-foreground">
                       Ref. New: {taka(featuredDealProduct.retail)} (Sample)
                     </span>
                   )}
@@ -616,7 +616,7 @@ function Index() {
                   <Link
                     to="/listing/$listingId"
                     params={{ listingId: featuredDealListing.id }}
-                    className="inline-flex items-center justify-center bg-primary text-primary-foreground font-semibold px-3 sm:px-5 py-2 sm:py-3 text-[11px] sm:text-xs md:text-sm uppercase tracking-wider hover:opacity-90 transition-opacity"
+                    className="inline-flex items-center justify-center bg-primary text-primary-foreground font-semibold px-4 sm:px-5 py-2.5 sm:py-3 text-xs sm:text-sm hover:opacity-90 transition-opacity"
                   >
                     View Verified Listing →
                   </Link>
@@ -627,7 +627,7 @@ function Index() {
                       q: undefined,
                       brand: undefined,
                     }}
-                    className="hidden sm:inline-flex items-center justify-center bg-secondary text-secondary-foreground border border-border font-medium px-4 py-3 text-xs md:text-sm hover:bg-muted transition-colors"
+                    className="hidden sm:inline-flex items-center justify-center bg-secondary text-secondary-foreground border border-border font-medium px-4 py-2.5 sm:py-3 text-xs sm:text-sm hover:bg-muted transition-colors"
                   >
                     Compare Similar Models
                   </Link>
@@ -641,7 +641,7 @@ function Index() {
                   alt={featuredDealProduct.name}
                   className="size-full object-cover"
                 />
-                <div className="absolute top-2 right-2 sm:top-3 sm:right-3 bg-background/90 backdrop-blur-xs text-[10px] sm:text-xs font-semibold px-2 py-0.5 sm:px-2.5 sm:py-1 border border-border">
+                <div className="absolute top-2 right-2 sm:top-3 sm:right-3 bg-background/90 backdrop-blur-xs text-xs font-semibold px-2 py-0.5 sm:px-2.5 sm:py-1 border border-border">
                   32-Pt Inspected
                 </div>
               </div>
@@ -666,7 +666,7 @@ function Index() {
           <Link
             to="/products"
             search={{ q: undefined, category: undefined, brand: undefined }}
-            className="text-xs font-semibold text-primary hover:underline"
+            className="text-sm font-semibold text-primary hover:underline inline-flex items-center gap-1"
           >
             View all listings →
           </Link>
@@ -715,7 +715,134 @@ function Index() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 hairline-grid bg-card">
+        {/* Mobile Bento Grid (< sm) */}
+        <div className="grid grid-cols-2 gap-2.5 sm:hidden">
+          {/* Bento Card 1: 32-Point Standardized Inspection (Span 2 / Primary Bento Card) */}
+          <div className="col-span-2 border border-border bg-background p-4 flex flex-col justify-between space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="size-6 bg-primary text-primary-foreground font-display font-bold text-xs flex items-center justify-center">
+                  01
+                </span>
+                <span className="text-xs font-bold uppercase tracking-wider text-primary">
+                  Standardized Testing
+                </span>
+              </div>
+              <FileCheck2 className="size-5 text-primary shrink-0" />
+            </div>
+
+            <div>
+              <h3 className="text-base font-bold text-foreground leading-snug">
+                32-Point Component Inspection
+              </h3>
+              <p className="text-xs text-subtle-foreground mt-1 leading-relaxed">
+                Every device is tested across physical chassis, display touch, cameras, biometric
+                sensors, and wireless radios before listing.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap gap-1.5 pt-1">
+              <span className="bg-secondary text-subtle-foreground text-xs font-medium px-2 py-0.5 border border-border">
+                ✓ Display &amp; Touch
+              </span>
+              <span className="bg-secondary text-subtle-foreground text-xs font-medium px-2 py-0.5 border border-border">
+                ✓ Battery Health
+              </span>
+              <span className="bg-secondary text-subtle-foreground text-xs font-medium px-2 py-0.5 border border-border">
+                ✓ OEM Authentic
+              </span>
+            </div>
+          </div>
+
+          {/* Bento Card 2: Condition Grades A+ to D (Col 1 of 2) */}
+          <div className="col-span-1 border border-border bg-background p-3.5 flex flex-col justify-between space-y-2.5">
+            <div className="flex items-center justify-between">
+              <span className="size-5 bg-muted text-foreground font-display font-bold text-xs flex items-center justify-center">
+                02
+              </span>
+              <ShieldCheck className="size-4 text-primary" />
+            </div>
+            <div>
+              <h3 className="text-xs font-bold text-foreground leading-snug">
+                Condition Grading (A+ to D)
+              </h3>
+              <p className="text-xs text-subtle-foreground mt-1 leading-normal">
+                Algorithm-driven scoring and verified battery health %.
+              </p>
+            </div>
+            <div className="flex items-center gap-1 pt-1">
+              <span className="bg-emerald-500 text-white font-bold text-xs px-1.5 py-0.5">A+</span>
+              <span className="bg-emerald-500/20 text-emerald-600 font-bold text-xs px-1.5 py-0.5">
+                A
+              </span>
+              <span className="bg-amber-500/20 text-amber-600 font-bold text-xs px-1.5 py-0.5">
+                B
+              </span>
+              <span className="bg-muted text-muted-foreground font-bold text-xs px-1.5 py-0.5">
+                C
+              </span>
+            </div>
+          </div>
+
+          {/* Bento Card 3: NID Verified Sellers (Col 2 of 2) */}
+          <div className="col-span-1 border border-border bg-background p-3.5 flex flex-col justify-between space-y-2.5">
+            <div className="flex items-center justify-between">
+              <span className="size-5 bg-muted text-foreground font-display font-bold text-xs flex items-center justify-center">
+                03
+              </span>
+              <CheckCircle2 className="size-4 text-emerald-600" />
+            </div>
+            <div>
+              <h3 className="text-xs font-bold text-foreground leading-snug">
+                NID Verified Sellers
+              </h3>
+              <p className="text-xs text-subtle-foreground mt-1 leading-normal">
+                Government National ID and phone authenticated sellers.
+              </p>
+            </div>
+            <div className="pt-1">
+              <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-600 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5">
+                <span>✓ 100% NID Matched</span>
+              </span>
+            </div>
+          </div>
+
+          {/* Bento Card 4: 48-Hour Buyer Protection (Span 2 / Full Width) */}
+          <div className="col-span-2 border border-border bg-background p-4 flex flex-col justify-between space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="size-6 bg-primary text-primary-foreground font-display font-bold text-xs flex items-center justify-center">
+                  04
+                </span>
+                <span className="text-xs font-bold uppercase tracking-wider text-primary">
+                  Buyer Protection
+                </span>
+              </div>
+              <Lock className="size-5 text-primary shrink-0" />
+            </div>
+
+            <div>
+              <h3 className="text-base font-bold text-foreground leading-snug">
+                48-Hour Inspection &amp; Refund Window
+              </h3>
+              <p className="text-xs text-subtle-foreground mt-1 leading-relaxed">
+                Inspect upon arrival. If any undisclosed defect or mismatch exists, our Dhaka
+                support team handles immediate returns and full refunds.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2 pt-0.5 text-xs text-muted-foreground font-medium">
+              <span className="inline-flex items-center gap-1 text-foreground font-semibold">
+                🛡️ Cash on Delivery Protection
+              </span>
+              <span>&middot;</span>
+              <span>Dedicated Dhaka Support</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Desktop / Tablet Grid (sm:grid) */}
+        <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-4 hairline-grid bg-card">
           {whyResalePillars.map((p) => {
             const Icon = p.icon;
             return (
@@ -753,7 +880,7 @@ function Index() {
           <Link
             to="/products"
             search={{ category: "Laptops", q: undefined, brand: undefined }}
-            className="text-xs font-semibold text-primary hover:underline"
+            className="text-sm font-semibold text-primary hover:underline inline-flex items-center gap-1"
           >
             View all Laptops →
           </Link>
@@ -832,7 +959,7 @@ function Index() {
                       <Check className="size-4 text-emerald-600 shrink-0 mt-0.5" />
                       <div>
                         <span className="font-semibold text-foreground block">{check}</span>
-                        <span className="text-[10px] text-muted-foreground">
+                        <span className="text-xs text-muted-foreground">
                           Standardized Inspection item
                         </span>
                       </div>
@@ -874,7 +1001,7 @@ function Index() {
           <Link
             to="/products"
             search={{ q: undefined, category: "Audio", brand: undefined }}
-            className="text-xs font-semibold text-primary hover:underline"
+            className="text-sm font-semibold text-primary hover:underline inline-flex items-center gap-1"
           >
             View Audio &amp; Cameras →
           </Link>
@@ -943,7 +1070,7 @@ function Index() {
                 <span className="flex size-7 items-center justify-center bg-primary text-primary-foreground font-bold text-xs">
                   01
                 </span>
-                <h4 className="font-bold text-sm text-foreground">Compare Graded Listings</h4>
+                <h3 className="font-bold text-sm text-foreground">Compare Graded Listings</h3>
                 <p className="text-xs text-subtle-foreground leading-relaxed">
                   Review the 32-point inspection findings, battery health %, high-resolution angle
                   photos, and seller NID status.
@@ -953,7 +1080,7 @@ function Index() {
                 <span className="flex size-7 items-center justify-center bg-primary text-primary-foreground font-bold text-xs">
                   02
                 </span>
-                <h4 className="font-bold text-sm text-foreground">Order with Cash on Delivery</h4>
+                <h3 className="font-bold text-sm text-foreground">Order with Cash on Delivery</h3>
                 <p className="text-xs text-subtle-foreground leading-relaxed">
                   Pay upon delivery across Bangladesh. Funds are protected during your post-delivery
                   inspection window.
@@ -963,7 +1090,7 @@ function Index() {
                 <span className="flex size-7 items-center justify-center bg-primary text-primary-foreground font-bold text-xs">
                   03
                 </span>
-                <h4 className="font-bold text-sm text-foreground">48-Hour Inspection Window</h4>
+                <h3 className="font-bold text-sm text-foreground">48-Hour Inspection Window</h3>
                 <p className="text-xs text-subtle-foreground leading-relaxed">
                   Test every component. If any undisclosed fault or mismatch exists, initiate a
                   dispute for a full refund.
@@ -976,7 +1103,7 @@ function Index() {
                 <span className="flex size-7 items-center justify-center bg-muted-foreground text-background font-bold text-xs">
                   01
                 </span>
-                <h4 className="font-bold text-sm text-foreground">Guided 32-Point Listing</h4>
+                <h3 className="font-bold text-sm text-foreground">Guided 32-Point Listing</h3>
                 <p className="text-xs text-subtle-foreground leading-relaxed">
                   Enter device model, upload clear angle photos, report battery health, and disclose
                   any prior repairs honestly.
@@ -986,7 +1113,7 @@ function Index() {
                 <span className="flex size-7 items-center justify-center bg-muted-foreground text-background font-bold text-xs">
                   02
                 </span>
-                <h4 className="font-bold text-sm text-foreground">Human Moderation Check</h4>
+                <h3 className="font-bold text-sm text-foreground">Human Moderation Check</h3>
                 <p className="text-xs text-subtle-foreground leading-relaxed">
                   Our moderation team verifies condition photos, IMEI validity, and pricing realism
                   before your listing goes live.
@@ -996,7 +1123,7 @@ function Index() {
                 <span className="flex size-7 items-center justify-center bg-muted-foreground text-background font-bold text-xs">
                   03
                 </span>
-                <h4 className="font-bold text-sm text-foreground">Dispatch &amp; Direct Payout</h4>
+                <h3 className="font-bold text-sm text-foreground">Dispatch &amp; Direct Payout</h3>
                 <p className="text-xs text-subtle-foreground leading-relaxed">
                   Hand over the packaged device to our courier partner. Receive payout directly via
                   bKash, Nagad, or Bank.
@@ -1023,7 +1150,7 @@ function Index() {
           <Link
             to="/products"
             search={{ category: "Tablets", q: undefined, brand: undefined }}
-            className="text-xs font-semibold text-primary hover:underline"
+            className="text-sm font-semibold text-primary hover:underline inline-flex items-center gap-1"
           >
             View Tablets &amp; Gaming →
           </Link>

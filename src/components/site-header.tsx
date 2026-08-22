@@ -278,6 +278,23 @@ export function SiteHeader() {
     }
   };
 
+  const location = useLocation();
+  const isHomePage = location.pathname === "/";
+  const [scrolledPastHero, setScrolledPastHero] = useState(!isHomePage);
+
+  useEffect(() => {
+    if (!isHomePage) {
+      setScrolledPastHero(true);
+      return;
+    }
+    const handleScroll = () => {
+      setScrolledPastHero(window.scrollY > 280);
+    };
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [isHomePage]);
+
   const [showAnnouncement, setShowAnnouncement] = useState(true);
 
   useEffect(() => {
@@ -297,11 +314,11 @@ export function SiteHeader() {
             : "max-h-0 py-0 px-4 opacity-0 border-0 pointer-events-none"
         }`}
       >
-        <span>⚡ OPEN-BOX &amp; PRE-OWNED ELECTRONICS AT FACTORY PRICES</span>
+        <span>⚡ Open-Box &amp; Pre-Owned Electronics at Direct Prices</span>
         <span className="hidden md:inline font-normal opacity-80">|</span>
-        <span className="hidden md:inline">32-POINT STANDARDIZED INSPECTION</span>
+        <span className="hidden md:inline">32-Point Standardized Inspection</span>
         <span className="hidden md:inline font-normal opacity-80">|</span>
-        <span className="hidden lg:inline">NID VERIFIED SELLERS &amp; 48H BUYER PROTECTION</span>
+        <span className="hidden lg:inline">NID Verified Sellers &amp; 48h Buyer Protection</span>
       </div>
 
       {/* Main Header Bar */}
@@ -331,14 +348,18 @@ export function SiteHeader() {
             />
           </Link>
 
-          {/* Desktop Center: Search Bar with Autocomplete */}
+          {/* Desktop Center: Search Bar with Autocomplete (Smoothly collapses when Hero search is in view on Homepage) */}
           <div
             ref={searchContainerRef}
-            className="ml-auto hidden relative flex-1 md:flex md:max-w-md"
+            className={`ml-auto hidden relative flex-1 md:flex md:max-w-md transition-all duration-300 ease-out ${
+              isHomePage && !scrolledPastHero
+                ? "opacity-0 pointer-events-none -translate-y-1 invisible"
+                : "opacity-100 pointer-events-auto translate-y-0 visible"
+            }`}
           >
             <form
               onSubmit={(e) => handleSearchSubmit(e)}
-              className="w-full flex items-center gap-2 border border-border bg-card px-3 py-2 text-sm focus-within:border-foreground transition-colors"
+              className="w-full flex items-center gap-2 border border-border bg-card px-3.5 py-2 text-sm focus-within:border-foreground transition-colors"
             >
               <Search className="size-4 text-muted-foreground shrink-0" />
               <input
@@ -707,7 +728,7 @@ export function SiteHeader() {
                 <Link
                   to="/sell"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="block px-3 py-2 hover:bg-muted text-[#ea580c] font-bold"
+                  className="block px-3 py-2 hover:bg-muted text-primary font-bold"
                 >
                   Sell an Item
                 </Link>
@@ -859,7 +880,7 @@ export function SiteHeader() {
             role="group"
             aria-label="Category navigation"
           >
-            <ul className="flex w-max items-center gap-0 text-[11px] md:text-[12px] font-medium whitespace-nowrap">
+            <ul className="flex w-max items-center gap-1 text-xs font-medium whitespace-nowrap">
               {desktopCategoryNav.map((item) => {
                 // Dropdown item
                 if ("dropdown" in item) {
@@ -873,9 +894,9 @@ export function SiteHeader() {
                         }}
                         onMouseEnter={() => setOpenDropdown(item.label)}
                         onClick={() => setOpenDropdown(isOpen ? null : item.label)}
-                        className={`flex min-h-10 md:min-h-11 items-center gap-1 px-2.5 sm:px-3 lg:px-3.5 transition-colors border-b-2 ${
+                        className={`flex min-h-11 items-center gap-1 px-3 sm:px-3.5 lg:px-4 transition-colors border-b-2 ${
                           isOpen
-                            ? "text-primary border-primary bg-muted/40"
+                            ? "text-foreground font-semibold border-primary bg-muted/40"
                             : "text-subtle-foreground hover:text-foreground hover:bg-muted/60 border-transparent hover:border-primary"
                         }`}
                       >
@@ -903,9 +924,21 @@ export function SiteHeader() {
                           brand: undefined,
                         }}
                         onMouseEnter={() => setOpenDropdown(null)}
-                        className="flex min-h-10 md:min-h-11 items-center px-2.5 sm:px-3 lg:px-3.5 text-subtle-foreground hover:text-foreground hover:bg-muted/60 transition-colors border-b-2 border-transparent hover:border-primary"
+                        className="flex min-h-11 items-center px-3 sm:px-3.5 lg:px-4 text-subtle-foreground hover:text-foreground hover:bg-muted/60 transition-colors border-b-2 border-transparent hover:border-primary text-xs font-medium"
                         activeProps={{
-                          className: "text-primary border-b-2 border-primary bg-muted/40",
+                          className: "!text-foreground !border-primary !font-semibold bg-muted/40",
+                        }}
+                      >
+                        {navItem.label}
+                      </Link>
+                    ) : navItem.to === "/" ? (
+                      <Link
+                        to="/"
+                        activeOptions={{ exact: true }}
+                        onMouseEnter={() => setOpenDropdown(null)}
+                        className="flex min-h-11 items-center px-3 sm:px-3.5 lg:px-4 text-subtle-foreground hover:text-foreground hover:bg-muted/60 transition-colors border-b-2 border-transparent hover:border-primary text-xs font-medium"
+                        activeProps={{
+                          className: "!text-foreground !border-primary !font-semibold bg-muted/40",
                         }}
                       >
                         {navItem.label}
@@ -914,9 +947,9 @@ export function SiteHeader() {
                       <Link
                         to={navItem.to}
                         onMouseEnter={() => setOpenDropdown(null)}
-                        className="flex min-h-10 md:min-h-11 items-center px-2.5 sm:px-3 lg:px-3.5 text-subtle-foreground hover:text-foreground hover:bg-muted/60 transition-colors border-b-2 border-transparent hover:border-primary"
+                        className="flex min-h-11 items-center px-3 sm:px-3.5 lg:px-4 text-subtle-foreground hover:text-foreground hover:bg-muted/60 transition-colors border-b-2 border-transparent hover:border-primary text-xs font-medium"
                         activeProps={{
-                          className: "text-primary border-b-2 border-primary bg-muted/40",
+                          className: "!text-foreground !border-primary !font-semibold bg-muted/40",
                         }}
                       >
                         {navItem.label}
