@@ -252,30 +252,44 @@ function Index() {
       <SiteHeader />
 
       {/* ════════════════════════════════════════════════════════════════
-          2. HERO & QUICK DISCOVERY
+          2. HERO & QUICK DISCOVERY (Full Horizontal Image Hero)
       ════════════════════════════════════════════════════════════════ */}
-      <section className="border-b border-border bg-card">
-        {/* Desktop Hero */}
-        <div className="hidden md:grid md:grid-cols-[1.2fr_0.8fr] items-stretch">
-          <div className="p-8 md:p-12 lg:p-14 flex flex-col justify-between">
-            <div>
-              <div className="inline-flex items-center gap-2 bg-primary/10 text-primary border border-primary/20 px-3 py-1 text-xs font-bold uppercase tracking-wider mb-5">
+      <section className="relative border-b border-border bg-card overflow-hidden">
+        {/* Full-width horizontal background visual */}
+        <div
+          className="relative w-full min-h-115 md:min-h-125 lg:min-h-135 flex items-center bg-cover bg-right md:bg-right-center"
+          style={{
+            backgroundImage: `url(${hero})`,
+            backgroundSize: "cover",
+            backgroundPosition: "right center",
+          }}
+        >
+          {/* Multi-layer gradient overlays for high readability in light and dark mode */}
+          <div className="absolute inset-0 bg-linear-to-r from-background via-background/90 md:via-background/75 to-transparent md:to-background/15 pointer-events-none" />
+          <div className="absolute inset-0 bg-background/30 dark:bg-black/40 pointer-events-none" />
+
+          {/* Foreground Hero Content */}
+          <div className="relative z-10 w-full max-w-7xl mx-auto px-5 py-10 md:py-16">
+            <div className="max-w-2xl space-y-5 md:space-y-6">
+              <div className="inline-flex items-center gap-2 bg-primary/10 text-primary border border-primary/20 px-3 py-1 text-xs font-bold uppercase tracking-wider backdrop-blur-xs">
                 <ShieldCheck className="size-4" />
                 <span>Bangladesh&apos;s Trusted Electronics Marketplace</span>
               </div>
-              <h1 className="text-4xl lg:text-5xl font-display font-bold leading-[1.1] tracking-tight text-foreground">
+
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-display font-bold leading-[1.12] tracking-tight text-foreground">
                 Buy Used.
                 <br />
                 Know Exactly What You&apos;re Getting.
               </h1>
-              <p className="mt-4 text-sm lg:text-base text-subtle-foreground max-w-xl leading-relaxed">
+
+              <p className="text-xs sm:text-sm lg:text-base text-subtle-foreground max-w-xl leading-relaxed">
                 Verified pre-owned electronics with transparent condition reports, standardized
                 32-point inspections, battery health disclosures, and 48-hour buyer protection.
               </p>
 
               {/* Search input in hero */}
-              <form onSubmit={handleHomeSearch} className="mt-6 flex gap-2 max-w-lg">
-                <div className="flex-1 flex items-center gap-2 border border-border bg-background px-3.5 py-2.5 focus-within:border-foreground transition-colors">
+              <form onSubmit={handleHomeSearch} className="flex gap-2 max-w-lg">
+                <div className="flex-1 flex items-center gap-2 border border-border bg-background/95 backdrop-blur-xs px-3.5 py-2.5 shadow-xs focus-within:border-foreground transition-colors">
                   <Search className="size-4 text-muted-foreground shrink-0" />
                   <input
                     value={homeSearchInput}
@@ -286,109 +300,37 @@ function Index() {
                 </div>
                 <button
                   type="submit"
-                  className="bg-primary text-primary-foreground font-semibold px-5 py-2.5 text-xs md:text-sm hover:opacity-90 shrink-0"
+                  className="bg-primary text-primary-foreground font-semibold px-5 py-2.5 text-xs md:text-sm hover:opacity-90 transition-opacity shrink-0 shadow-xs"
                 >
                   Search
                 </button>
               </form>
 
-              {/* CTAs */}
-              <div className="mt-6 flex flex-wrap items-center gap-3">
+              {/* CTAs & Floating Inspection Tag */}
+              <div className="flex flex-wrap items-center gap-3 pt-1">
                 <Link
                   to="/products"
                   search={{ q: undefined, category: undefined, brand: undefined }}
-                  className="inline-flex items-center gap-2 bg-primary px-5 py-2.5 text-xs md:text-sm font-semibold text-primary-foreground hover:opacity-90 transition-opacity"
+                  className="inline-flex items-center gap-2 bg-primary px-5 py-2.5 text-xs md:text-sm font-semibold text-primary-foreground hover:opacity-90 transition-opacity shadow-xs"
                 >
                   <Layers className="size-4 text-orange-500" />
                   <span>Shop Devices</span>
                 </Link>
                 <Link
                   to="/sell"
-                  className="inline-flex items-center gap-2 bg-secondary text-secondary-foreground border border-border px-5 py-2.5 text-xs md:text-sm font-semibold hover:bg-muted transition-colors"
+                  className="inline-flex items-center gap-2 bg-background/90 backdrop-blur-xs text-foreground border border-border px-5 py-2.5 text-xs md:text-sm font-semibold hover:bg-muted transition-colors shadow-xs"
                 >
                   <span>Sell Your Device</span>
                   <ArrowRight className="size-4" />
                 </Link>
-              </div>
-            </div>
-          </div>
 
-          {/* Hero Side Visual */}
-          <div
-            className="hidden md:block relative bg-muted border-l border-border overflow-hidden"
-            style={{
-              backgroundImage: `url(${hero})`,
-              backgroundSize: "cover",
-              backgroundPosition: "center right",
-            }}
-          >
-            <div className="absolute inset-0 bg-linear-to-t from-background/90 via-background/30 to-transparent p-6 flex flex-col justify-end">
-              <div className="bg-card/95 backdrop-blur-xs border border-border p-4 space-y-2 max-w-xs">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="font-semibold text-foreground">Demo Inspection Report</span>
+                <div className="hidden sm:inline-flex items-center gap-2 bg-card/90 backdrop-blur-xs border border-border px-3 py-2 text-xs text-muted-foreground">
                   <span className="bg-emerald-500/10 text-emerald-600 text-[10px] font-bold px-1.5 py-0.5 border border-emerald-500/20">
-                    31/32 Checks Passed
+                    32-Point Check
                   </span>
+                  <span>Tested &amp; Verified</span>
                 </div>
-                <p className="text-[11px] text-muted-foreground">
-                  OEM Display &middot; 94% Battery Health &middot; Genuine Serial Match
-                </p>
               </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Mobile Hero */}
-        <div className="block md:hidden p-4 pb-2">
-          <div className="relative border border-border bg-card p-5 space-y-4">
-            <div className="inline-flex items-center gap-1.5 bg-primary/10 text-primary border border-primary/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider">
-              <ShieldCheck className="size-3.5" />
-              <span>Verified Marketplace</span>
-            </div>
-            <h1 className="text-2xl font-display font-bold leading-tight text-foreground tracking-tight">
-              Buy Used.
-              <br />
-              Know Exactly What You&apos;re Getting.
-            </h1>
-            <p className="text-xs text-subtle-foreground leading-relaxed">
-              Verified pre-owned electronics with transparent condition reports, 32-point inspection
-              checks, and 48-hour buyer protection.
-            </p>
-
-            <form onSubmit={handleHomeSearch} className="flex gap-1.5">
-              <div className="flex-1 flex items-center gap-2 border border-border bg-background px-3 py-2">
-                <Search className="size-3.5 text-muted-foreground shrink-0" />
-                <input
-                  value={homeSearchInput}
-                  onChange={(e) => setHomeSearchInput(e.target.value)}
-                  placeholder="Search devices..."
-                  className="w-full bg-transparent outline-none text-xs text-foreground placeholder:text-muted-foreground"
-                />
-              </div>
-              <button
-                type="submit"
-                className="bg-primary text-primary-foreground font-semibold px-3.5 py-2 text-xs"
-              >
-                Go
-              </button>
-            </form>
-
-            <div className="flex flex-col gap-2 pt-1">
-              <Link
-                to="/products"
-                search={{ q: undefined, category: undefined, brand: undefined }}
-                className="inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground text-xs font-semibold py-2.5 hover:opacity-90"
-              >
-                <Layers className="size-3.5 text-orange-500" />
-                <span>Shop Devices</span>
-              </Link>
-              <Link
-                to="/sell"
-                className="inline-flex items-center justify-center gap-1.5 bg-secondary text-secondary-foreground border border-border text-xs font-semibold py-2 hover:bg-muted"
-              >
-                <span>Sell Your Device</span>
-                <ArrowRight className="size-3.5" />
-              </Link>
             </div>
           </div>
         </div>
