@@ -23,13 +23,16 @@ import { WhatsIncludedCard } from "@/components/whats-included";
 import { SellerTrustLine } from "@/components/seller-trust-card";
 import { getApprovedVideoForListing } from "@/lib/creator-store";
 import { CreatorVideoModal } from "@/components/creator/creator-video-modal";
+import { ProductCard } from "@/components/product-card";
 import {
   galleryShots,
   gradeCriteria,
   gradeLabel,
   grades,
   listings,
+  listingsFor,
   productFor,
+  products,
   taka,
 } from "@/data/catalog";
 
@@ -471,6 +474,27 @@ function ListingPage() {
             )}
           </section>
         </div>
+        <section className="mt-14 border-t border-border/60 pt-8">
+          <div className="flex items-end justify-between gap-4 mb-5">
+            <div>
+              <h2 className="font-display text-xl font-bold tracking-tight">You may also like</h2>
+              <p className="text-xs text-muted-foreground mt-1">
+                Other inspected devices buyers compare with this one.
+              </p>
+            </div>
+            <Link to="/browse" className="text-xs font-semibold underline underline-offset-4">
+              See all
+            </Link>
+          </div>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            {products
+              .filter((p) => p.id !== product.id && listingsFor(p.id).length > 0)
+              .slice(0, 4)
+              .map((p) => (
+                <ProductCard key={p.id} product={p} />
+              ))}
+          </div>
+        </section>
       </main>
 
       <SiteFooter />
