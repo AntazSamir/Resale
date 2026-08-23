@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import {
   ShieldCheck,
   CheckCircle2,
@@ -33,6 +33,122 @@ import {
   TOTAL_INSPECTION_CHECKS,
 } from "@/data/catalog";
 import hero from "@/assets/hero.jpg";
+
+const testimonials = [
+  {
+    stars: 5,
+    quote:
+      "The 32-point inspection matched the iPhone 15 Pro exactly. Battery health was reported at 96% and diagnostics were 100% accurate.",
+    name: "Tanvir Ahmed",
+    location: "Dhaka (Banani)",
+  },
+  {
+    stars: 5,
+    quote:
+      "Sold my MacBook Air M2. The structured condition checklist removed all endless bargaining. Buyer inspected and payout cleared smoothly.",
+    name: "Nusrat Jahan",
+    location: "Chattogram (GEC)",
+  },
+  {
+    stars: 5,
+    quote:
+      "Purchased a Fujifilm X100V with Cash on Delivery. 48-hour inspection window gave total peace of mind to verify sensor cleanliness.",
+    name: "Shakil Hasan",
+    location: "Sylhet (Zindabazar)",
+  },
+];
+
+function TestimonialCarousel() {
+  const [active, setActive] = useState(0);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const scrollTo = (idx: number) => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const card = el.children[idx] as HTMLElement;
+    if (card) card.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "start" });
+    setActive(idx);
+  };
+
+  const startTimer = () => {
+    timerRef.current = setInterval(() => {
+      setActive((prev) => {
+        const next = (prev + 1) % testimonials.length;
+        const el = scrollRef.current;
+        if (el) {
+          const card = el.children[next] as HTMLElement;
+          if (card) card.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "start" });
+        }
+        return next;
+      });
+    }, 3000);
+  };
+
+  useEffect(() => {
+    startTimer();
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, []);
+
+  const handleUserScroll = () => {
+    if (timerRef.current) clearInterval(timerRef.current);
+    const el = scrollRef.current;
+    if (!el) return;
+    const idx = Math.round(el.scrollLeft / el.offsetWidth);
+    setActive(idx);
+    // restart auto-advance after 5s idle
+    timerRef.current = setTimeout(() => startTimer(), 5000) as unknown as ReturnType<
+      typeof setInterval
+    >;
+  };
+
+  return (
+    <div className="md:hidden">
+      <div
+        ref={scrollRef}
+        onScroll={handleUserScroll}
+        className="flex overflow-x-auto snap-x snap-mandatory scrollbar-none bg-background"
+        style={{ scrollSnapType: "x mandatory" }}
+      >
+        {testimonials.map((t, i) => (
+          <div
+            key={i}
+            className="min-w-full snap-start p-6 space-y-3 border-r border-border last:border-r-0"
+          >
+            <div className="flex items-center gap-1 text-amber-500 text-xs">
+              {"★".repeat(t.stars)}
+            </div>
+            <p className="text-xs text-subtle-foreground leading-relaxed">
+              &ldquo;{t.quote}&rdquo;
+            </p>
+            <div className="text-[11px] pt-2 border-t border-border text-muted-foreground">
+              <span className="font-semibold text-foreground">{t.name}</span> &middot; {t.location}
+            </div>
+          </div>
+        ))}
+      </div>
+      {/* Dot indicators */}
+      <div className="flex items-center justify-center gap-1.5 py-3">
+        {testimonials.map((_, i) => (
+          <button
+            key={i}
+            type="button"
+            onClick={() => {
+              if (timerRef.current) clearInterval(timerRef.current);
+              scrollTo(i);
+              startTimer();
+            }}
+            className={`rounded-full transition-all duration-300 ${
+              i === active ? "w-4 h-1.5 bg-primary" : "w-1.5 h-1.5 bg-border"
+            }`}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
 
 const title = "Resale — Buy Used. Know Exactly What You're Getting.";
 const description =
@@ -1230,7 +1346,8 @@ function Index() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 hairline-grid bg-background">
+        {/* Desktop: 3-col grid */}
+        <div className="hidden md:grid grid-cols-3 hairline-grid bg-background">
           <div className="p-6 space-y-3">
             <div className="flex items-center gap-1 text-amber-500 text-xs">{"★".repeat(5)}</div>
             <p className="text-xs text-subtle-foreground leading-relaxed">
@@ -1267,6 +1384,9 @@ function Index() {
             </div>
           </div>
         </div>
+
+        {/* Mobile: auto-scrolling horizontal carousel */}
+        <TestimonialCarousel />
       </section>
 
       {/* ════════════════════════════════════════════════════════════════

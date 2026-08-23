@@ -348,7 +348,7 @@ function ListingPage() {
                     addToCart(listing.id);
                     navigate({ to: "/cart" });
                   }}
-                  className="flex-1 bg-primary text-primary-foreground font-semibold px-6 py-3.5 text-sm transition-opacity hover:opacity-90 shadow-sm cursor-pointer text-center"
+                  className="flex-1 bg-primary text-primary-foreground font-semibold px-4 sm:px-6 py-3.5 text-sm transition-opacity hover:opacity-90 shadow-sm cursor-pointer text-center whitespace-nowrap"
                 >
                   Buy now
                 </button>
@@ -359,11 +359,11 @@ function ListingPage() {
                     setAddedToCart(true);
                     setTimeout(() => setAddedToCart(false), 2000);
                   }}
-                  className="flex-1 border border-border bg-card hover:bg-secondary text-foreground font-semibold px-6 py-3.5 text-sm transition-colors flex items-center justify-center gap-2 cursor-pointer"
+                  className="flex-1 border border-border bg-card hover:bg-secondary text-foreground font-semibold px-4 sm:px-6 py-3.5 text-sm transition-colors flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap"
                 >
                   {inCart || addedToCart ? (
                     <>
-                      <Check className="size-4 text-emerald-500" /> Added to cart
+                      <Check className="size-4 shrink-0 text-emerald-500" /> Added to cart
                     </>
                   ) : (
                     "Add to cart"
