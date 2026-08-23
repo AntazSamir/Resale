@@ -68,8 +68,7 @@ function TestimonialCarousel() {
   const scrollTo = (idx: number) => {
     const el = scrollRef.current;
     if (!el) return;
-    const card = el.children[idx] as HTMLElement;
-    if (card) card.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "start" });
+    el.scrollTo({ left: idx * el.offsetWidth, behavior: "smooth" });
     setActive(idx);
   };
 
@@ -79,12 +78,11 @@ function TestimonialCarousel() {
         const next = (prev + 1) % testimonials.length;
         const el = scrollRef.current;
         if (el) {
-          const card = el.children[next] as HTMLElement;
-          if (card) card.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "start" });
+          el.scrollTo({ left: next * el.offsetWidth, behavior: "smooth" });
         }
         return next;
       });
-    }, 3000);
+    }, 4000);
   };
 
   useEffect(() => {
