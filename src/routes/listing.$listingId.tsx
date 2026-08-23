@@ -482,7 +482,7 @@ function ListingPage() {
                 Other inspected devices buyers compare with this one.
               </p>
             </div>
-            <Link to="/browse" className="text-xs font-semibold underline underline-offset-4">
+            <Link to="/categories" className="text-xs font-semibold underline underline-offset-4">
               See all
             </Link>
           </div>
