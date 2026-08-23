@@ -33,6 +33,8 @@ import {
   TOTAL_INSPECTION_CHECKS,
 } from "@/data/catalog";
 import hero from "@/assets/hero.jpg";
+import banner1 from "@/assets/banner-1.png";
+import banner2 from "@/assets/banner-2.png";
 
 const testimonials = [
   {
@@ -324,18 +326,6 @@ function Index() {
     ? productFor(featuredDealListing.productId)
     : undefined;
 
-  // Curated subsets for product shelves with 0 duplication
-  const featuredProducts = useMemo(
-    () =>
-      [
-        products.find((p) => p.id === "iphone-15-pro-256")!,
-        products.find((p) => p.id === "macbook-pro-14-m3")!,
-        products.find((p) => p.id === "sony-a7-iv")!,
-        products.find((p) => p.id === "apple-ipad-pro-11-m2")!,
-      ].filter(Boolean),
-    [],
-  );
-
   const smartphoneProducts = useMemo(
     () => products.filter((p) => p.category === "Smartphones").slice(0, 8),
     [],
@@ -591,17 +581,19 @@ function Index() {
       </section>
 
       {/* ════════════════════════════════════════════════════════════════
-          4. FEATURED PRODUCTS (Curated Cross-Category Flagships)
+          4. RECENTLY ADDED VERIFIED LISTINGS
       ════════════════════════════════════════════════════════════════ */}
-      <section id="featured-products" className="py-8 px-4 md:px-5 border-t border-border">
+      <section id="recent-listings" className="py-8 px-4 md:px-5 border-t border-border">
         <div className="flex items-end justify-between border-b border-border pb-4 mb-6">
           <div>
             <div className="inline-flex items-center gap-1.5 bg-primary/10 text-primary border border-primary/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider mb-1">
-              <span>Editor&apos;s Pick</span>
+              <span>Verified Inventory</span>
             </div>
-            <h2 className="text-xl md:text-2xl font-display font-bold">Featured Products</h2>
+            <h2 className="text-xl md:text-2xl font-display font-bold">
+              Recently Added Verified Units
+            </h2>
             <p className="text-xs text-muted-foreground">
-              Hand-curated top models across smartphones, MacBooks, audio, and cameras
+              Individual units graded and listed by verified sellers across Bangladesh
             </p>
           </div>
           <Link
@@ -609,30 +601,61 @@ function Index() {
             search={{ q: undefined, category: undefined, brand: undefined }}
             className="text-sm font-semibold text-primary hover:underline inline-flex items-center gap-1"
           >
-            Browse all catalog →
+            View all listings →
           </Link>
         </div>
 
         {/* Desktop 4-grid */}
         <div className="hidden lg:grid hairline-grid grid-cols-4 bg-card">
-          {featuredProducts.map((p) => (
-            <ProductCard key={p.id} product={p} />
-          ))}
+          {listings.slice(0, 8).map((listing) => {
+            const product = productFor(listing.productId);
+            if (!product) return null;
+            return <ListingCard key={listing.id} listing={listing} product={product} />;
+          })}
         </div>
 
-        {/* Mobile Swipe */}
+        {/* Mobile Swipe Carousel */}
         <div className="block lg:hidden">
           <div className="flex gap-3 overflow-x-auto scrollbar-none snap-x snap-mandatory pb-2">
-            {featuredProducts.map((p) => (
-              <div
-                key={p.id}
-                className="w-55 shrink-0 snap-start border border-border bg-card flex flex-col"
-              >
-                <ProductCard product={p} />
-              </div>
-            ))}
+            {listings.slice(0, 8).map((listing) => {
+              const product = productFor(listing.productId);
+              if (!product) return null;
+              return (
+                <div
+                  key={listing.id}
+                  className="w-55 shrink-0 snap-start border border-border bg-card flex flex-col"
+                >
+                  <ListingCard listing={listing} product={product} />
+                </div>
+              );
+            })}
           </div>
         </div>
+      </section>
+
+      {/* ════════════════════════════════════════════════════════════════
+          PROMOTIONAL BANNER SECTION (Desktop: Banner 1, Mobile: Banner 2)
+      ════════════════════════════════════════════════════════════════ */}
+      <section className="px-4 md:px-5 py-4 border-t border-border bg-card">
+        <Link
+          to="/products"
+          search={{ q: undefined, category: undefined, brand: undefined }}
+          className="block overflow-hidden border border-border group hover:border-primary/50 transition-colors"
+          aria-label="Promotional campaign banner"
+        >
+          {/* Desktop Banner (Banner 1) */}
+          <img
+            src={banner1}
+            alt="Resale promotional banner"
+            className="hidden md:block w-full h-auto object-cover group-hover:opacity-95 transition-opacity"
+          />
+          {/* Mobile Banner (Banner 2) */}
+          <img
+            src={banner2}
+            alt="Resale promotional banner"
+            className="block md:hidden w-full h-auto object-cover group-hover:opacity-95 transition-opacity"
+          />
+        </Link>
       </section>
 
       {/* ════════════════════════════════════════════════════════════════
@@ -767,57 +790,7 @@ function Index() {
       )}
 
       {/* ════════════════════════════════════════════════════════════════
-          7. RECENTLY ADDED VERIFIED LISTINGS
-      ════════════════════════════════════════════════════════════════ */}
-      <section id="recent-listings" className="py-8 px-4 md:px-5 border-t border-border">
-        <div className="flex items-end justify-between border-b border-border pb-4 mb-6">
-          <div>
-            <h2 className="text-xl md:text-2xl font-display font-bold">
-              Recently Added Verified Units
-            </h2>
-            <p className="text-xs text-muted-foreground">
-              Individual units graded and listed by verified sellers across Bangladesh
-            </p>
-          </div>
-          <Link
-            to="/products"
-            search={{ q: undefined, category: undefined, brand: undefined }}
-            className="text-sm font-semibold text-primary hover:underline inline-flex items-center gap-1"
-          >
-            View all listings →
-          </Link>
-        </div>
-
-        {/* Desktop 4-grid */}
-        <div className="hidden lg:grid hairline-grid grid-cols-4 bg-card">
-          {listings.slice(0, 8).map((listing) => {
-            const product = productFor(listing.productId);
-            if (!product) return null;
-            return <ListingCard key={listing.id} listing={listing} product={product} />;
-          })}
-        </div>
-
-        {/* Mobile Swipe Carousel */}
-        <div className="block lg:hidden">
-          <div className="flex gap-3 overflow-x-auto scrollbar-none snap-x snap-mandatory pb-2">
-            {listings.slice(0, 8).map((listing) => {
-              const product = productFor(listing.productId);
-              if (!product) return null;
-              return (
-                <div
-                  key={listing.id}
-                  className="w-55 shrink-0 snap-start border border-border bg-card flex flex-col"
-                >
-                  <ListingCard listing={listing} product={product} />
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* ════════════════════════════════════════════════════════════════
-          8. WHY RESALE IS DIFFERENT
+          7. WHY RESALE IS DIFFERENT
       ════════════════════════════════════════════════════════════════ */}
       <section className="py-10 px-4 md:px-5 border-t border-border bg-card">
         <div className="max-w-2xl mb-8">
