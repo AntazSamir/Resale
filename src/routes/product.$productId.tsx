@@ -55,6 +55,11 @@ function ProductPage() {
   const different = others.filter((p) => p.category !== product.category);
   const related = [...sameCategory, ...different].slice(0, 3);
 
+  // You may also like: remaining products not already shown above
+  const relatedIds = new Set(related.map((p) => p.id));
+  const alsoLikePool = others.filter((p) => !relatedIds.has(p.id));
+  const alsoLike = (alsoLikePool.length > 0 ? alsoLikePool : others).slice(0, 4);
+
   // Best value: product with lowest listing price among products with listings
   const productsWithListings = products.filter((p) => listingsFor(p.id).length > 0);
   const bestDealProduct =
