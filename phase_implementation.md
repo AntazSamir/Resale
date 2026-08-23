@@ -250,7 +250,7 @@ Phase 3.4 integrated professional merchant storefronts, tech reviewer creator hu
 
 ## 🚧 Phase 4: Real Persistence, Intelligence & Buyer Retention
 
-**Status:** `IN PROGRESS` (Phase 4.1A & 4.1B Complete) · **Architecture Audit:** August 2026
+**Status:** `IN PROGRESS` (Phase 4.1A, 4.1B & 4.1E Complete) · **Architecture Audit:** August 2026
 
 Phase 4 transitions Resale.com from browser-local `localStorage` into a **real shared, persistent, multi-user marketplace architecture backed by Supabase PostgreSQL**, followed by behavioral signal tracking, buyer retention tools, and evidence-based seller analytics.
 
@@ -300,6 +300,18 @@ Phase 4 transitions Resale.com from browser-local `localStorage` into a **real s
 **Objective**: Upgrade `resale.cart` with cloud persistence for authenticated users.
 
 - **Guest-to-User Merge**: Local cart preserves items for guests, automatically merging into persistent cloud cart upon login.
+
+---
+
+### 4.1E — Server-Authoritative Admin Auth & Email Registration ✅ COMPLETED
+
+**Objective**: Eliminate client-side permission tampering (sessionStorage spoofing) with backend-issued session tokens and introduce email-based user registration & login.
+
+- **Server-Issued Session Tokens**: Upon OTP verification, `verifyOtpFn` generates high-entropy session tokens (`rst_...`) stored in the server's `db.sessions` memory map with a 30-day TTL.
+- **Server Role Authority**: The user's role (`ADMIN`, `SELLER`, `BUYER`) and `isAdmin` status are determined strictly on the backend — client storage cannot elevate privileges.
+- **Hydration Session Validation**: `AuthProvider` calls `validateSessionFn` on every app mount to verify token validity and role directly against the server, revoking tampered sessions.
+- **Email Registration & Login**: Added tab toggle on `/register` and `/login` supporting both phone numbers and email addresses with OTP verification (`sendOtpFn` & `verifyOtpFn`).
+- **Explicit Session Revocation**: `signOutFn` deletes server session tokens upon logout.
 
 ---
 
@@ -376,6 +388,7 @@ Phase 4 transitions Resale.com from browser-local `localStorage` into a **real s
 | **Phase 3.5**  | AI Valuation Engine          | Real-time price recommender, price history graphs, "Fair Deal" badges                                                                                                             |  📋 Planned  |
 | **Phase 4.1A** | Supabase Orders Persistence  | Remote PostgreSQL orders sync, user foreign-key resolution, snapshot immutability, cross-browser shared state                                                                     | ✅ Completed |
 | **Phase 4.1B** | Remote Stores & Creators     | Supabase persistence for Pro Storefronts (`stores`) and Creator Hub (`creator_profiles`, `product_videos`)                                                                        | ✅ Completed |
+| **Phase 4.1E** | Backend Admin Auth & Email   | Server-issued session tokens, backend role enforcement, spoofing prevention, email registration/login with OTP                                                                    | ✅ Completed |
 | **Phase 4.1C** | Remote Dispute Persistence   | Supabase persistence for Disputes (`disputes`) and evidence metadata                                                                                                              |  📋 Planned  |
 | **Phase 4.1D** | Cloud Cart Sync              | Guest-to-user cart cloud persistence & automatic login merging                                                                                                                    |  📋 Planned  |
 | **Phase 4.2**  | Event & Analytics Model      | 12-type behavioral event model, privacy-safe session tracking, analytics foundation                                                                                                |  📋 Planned  |
