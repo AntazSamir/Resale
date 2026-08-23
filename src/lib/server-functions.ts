@@ -178,7 +178,12 @@ export const verifyOtpFn = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const target = data.email?.trim().toLowerCase() || data.phone?.trim() || "";
     if (!target) {
-      return { success: false, error: "Missing phone number or email address.", user: null, token: null };
+      return {
+        success: false,
+        error: "Missing phone number or email address.",
+        user: null,
+        token: null,
+      };
     }
 
     const record = db.otps.get(target);
@@ -316,4 +321,3 @@ export const signOutFn = createServerFn({ method: "POST" })
     }
     return { success: true };
   });
-

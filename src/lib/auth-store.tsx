@@ -41,7 +41,9 @@ function readCachedToken(): string | null {
 function readCachedUser(): AuthUser | null {
   if (typeof window === "undefined") return null;
   try {
-    const raw = window.localStorage.getItem(CACHED_USER_KEY) || window.sessionStorage.getItem(CACHED_USER_KEY);
+    const raw =
+      window.localStorage.getItem(CACHED_USER_KEY) ||
+      window.sessionStorage.getItem(CACHED_USER_KEY);
     return raw ? (JSON.parse(raw) as AuthUser) : null;
   } catch {
     return null;
@@ -207,4 +209,3 @@ export function useAuth(): AuthContextValue {
   if (!ctx) throw new Error("useAuth must be used inside <AuthProvider>");
   return ctx;
 }
-
