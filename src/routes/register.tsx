@@ -38,8 +38,10 @@ export const Route = createFileRoute("/register")({
 function RegisterPage() {
   const search = Route.useSearch();
   const [step, setStep] = useState<"details" | "otp">("details");
+  const [authMethod, setAuthMethod] = useState<"phone" | "email">("phone");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
   const [nid, setNid] = useState("");
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
@@ -49,18 +51,29 @@ function RegisterPage() {
 
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (
-      phone.length < 11 ||
-      (nid.length !== 10 && nid.length !== 13 && nid.length !== 17) ||
-      name.length < 2
-    ) {
+    if (authMethod === "phone" && phone.length < 11) {
+      setError("Please enter a valid 11-digit phone number.");
       return;
     }
+    if (authMethod === "email" && (!email || !email.includes("@") || !email.includes("."))) {
+      setError("Please enter a valid email address.");
+      return;
+    }
+    if ((nid.length !== 10 && nid.length !== 13 && nid.length !== 17) || name.length < 2) {
+      setError("Please fill out all required fields with valid information.");
+      return;
+    }
+
     setError(null);
     setLoading(true);
 
     try {
-      await sendOtpFn({ data: { phone } });
+      await sendOtpFn({
+        data: {
+          phone: authMethod === "phone" ? phone : undefined,
+          email: authMethod === "email" ? email : undefined,
+        },
+      });
       setStep("otp");
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Failed to send OTP. Please try again.";
@@ -79,15 +92,16 @@ function RegisterPage() {
     try {
       const res = await verifyOtpFn({
         data: {
-          phone,
+          phone: authMethod === "phone" ? phone : undefined,
+          email: authMethod === "email" ? email : undefined,
           otp,
           name,
           nid,
         },
       });
 
-      if (res && res.success && res.user) {
-        signIn(res.user);
+      if (res && res.success && res.user && res.token) {
+        signIn({ token: res.token, user: res.user });
         if (search.redirect) {
           navigate({ to: search.redirect });
         } else {
@@ -103,6 +117,8 @@ function RegisterPage() {
       setLoading(false);
     }
   };
+
+  const targetLabel = authMethod === "phone" ? phone : email;
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -129,7 +145,7 @@ function RegisterPage() {
                 ? "Register a verified account to place your order."
                 : step === "details"
                   ? "Join Resale.com to buy or sell quality-checked electronics."
-                  : `We sent a 6-digit code to ${phone}. (Enter 123456 in dev/testing)`}
+                  : `We sent a 6-digit code to ${targetLabel}. (Enter 123456 in dev/testing)`}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -151,6 +167,38 @@ function RegisterPage() {
 
             {step === "details" ? (
               <form onSubmit={handleSendOtp} className="space-y-4">
+                {/* Method selector tab */}
+                <div className="flex rounded-md bg-secondary p-1 text-xs">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAuthMethod("phone");
+                      setError(null);
+                    }}
+                    className={`flex-1 py-1.5 font-medium rounded transition-colors ${
+                      authMethod === "phone"
+                        ? "bg-background text-foreground shadow-sm font-semibold"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    Mobile Number
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAuthMethod("email");
+                      setError(null);
+                    }}
+                    className={`flex-1 py-1.5 font-medium rounded transition-colors ${
+                      authMethod === "email"
+                        ? "bg-background text-foreground shadow-sm font-semibold"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    Email Address
+                  </button>
+                </div>
+
                 <div className="space-y-2">
                   <Label htmlFor="name">Full Name</Label>
                   <Input
@@ -161,18 +209,34 @@ function RegisterPage() {
                     required
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="phone">Phone Number</Label>
-                  <Input
-                    id="phone"
-                    placeholder="01XXXXXXXXX"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    required
-                    pattern="01[3-9][0-9]{8}"
-                    title="Valid Bangladesh mobile number starting with 01"
-                  />
-                </div>
+
+                {authMethod === "phone" ? (
+                  <div className="space-y-2">
+                    <Label htmlFor="phone">Phone Number</Label>
+                    <Input
+                      id="phone"
+                      placeholder="01XXXXXXXXX"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      required
+                      pattern="01[3-9][0-9]{8}"
+                      title="Valid Bangladesh mobile number starting with 01"
+                    />
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email Address</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="e.g. name@example.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                    />
+                  </div>
+                )}
+
                 <div className="space-y-2">
                   <Label htmlFor="nid">NID Number</Label>
                   <Input
@@ -189,7 +253,7 @@ function RegisterPage() {
                   </p>
                 </div>
                 <Button type="submit" className="w-full font-semibold" disabled={loading}>
-                  {loading ? "Sending OTP…" : "Send OTP"}
+                  {loading ? "Sending OTP…" : "Send Verification Code"}
                 </Button>
               </form>
             ) : (
@@ -253,3 +317,4 @@ function RegisterPage() {
     </div>
   );
 }
+

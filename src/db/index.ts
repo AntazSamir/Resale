@@ -9,9 +9,23 @@ export type Dispute = typeof schema.disputes.$inferSelect;
 export type InspectionItem = typeof schema.inspectionItems.$inferSelect;
 
 export interface OtpRecord {
-  phone: string;
+  target: string;
+  phone?: string | undefined;
+  email?: string | undefined;
   otp: string;
   expiresAt: number;
+}
+
+export interface SessionRecord {
+  token: string;
+  userId: string;
+  role: "BUYER" | "SELLER" | "ADMIN";
+  isAdmin: boolean;
+  phone?: string | undefined;
+  email?: string | undefined;
+  name?: string | undefined;
+  expiresAt: number;
+  createdAt: string;
 }
 
 // In-memory data store that runs seamlessly in any JS runtime
@@ -21,6 +35,7 @@ class MemoryDatabase {
     {
       id: "u-admin",
       phone: "01700000000",
+      email: "admin@resale.com",
       name: "Admin User",
       nidNumber: "199526920199201",
       role: "ADMIN",
@@ -30,6 +45,7 @@ class MemoryDatabase {
     {
       id: "u-1",
       phone: "01711111111",
+      email: "seller.rafiq@example.com",
       name: "Rafiq H.",
       nidNumber: "199526920199202",
       role: "SELLER",
@@ -39,6 +55,7 @@ class MemoryDatabase {
     {
       id: "u-2",
       phone: "01722222222",
+      email: "seller.nusrat@example.com",
       name: "Nusrat T.",
       nidNumber: "199526920199203",
       role: "SELLER",
@@ -117,6 +134,7 @@ class MemoryDatabase {
 
   disputes: Dispute[] = [];
   otps: Map<string, OtpRecord> = new Map();
+  sessions: Map<string, SessionRecord> = new Map();
 
   // Drizzle-like chainable select/query helper for compatibility
   select() {

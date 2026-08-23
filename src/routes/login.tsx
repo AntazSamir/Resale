@@ -37,8 +37,10 @@ export const Route = createFileRoute("/login")({
 
 function LoginPage() {
   const search = Route.useSearch();
-  const [step, setStep] = useState<"phone" | "otp">("phone");
+  const [step, setStep] = useState<"credentials" | "otp">("credentials");
+  const [authMethod, setAuthMethod] = useState<"phone" | "email">("phone");
   const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -47,12 +49,24 @@ function LoginPage() {
 
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (phone.length < 11) return;
+    if (authMethod === "phone" && phone.length < 11) {
+      setError("Please enter a valid 11-digit mobile number.");
+      return;
+    }
+    if (authMethod === "email" && (!email || !email.includes("@") || !email.includes("."))) {
+      setError("Please enter a valid email address.");
+      return;
+    }
     setError(null);
     setLoading(true);
 
     try {
-      await sendOtpFn({ data: { phone } });
+      await sendOtpFn({
+        data: {
+          phone: authMethod === "phone" ? phone : undefined,
+          email: authMethod === "email" ? email : undefined,
+        },
+      });
       setStep("otp");
     } catch (err: unknown) {
       const message =
@@ -70,9 +84,15 @@ function LoginPage() {
     setLoading(true);
 
     try {
-      const res = await verifyOtpFn({ data: { phone, otp } });
-      if (res && res.success && res.user) {
-        signIn(res.user);
+      const res = await verifyOtpFn({
+        data: {
+          phone: authMethod === "phone" ? phone : undefined,
+          email: authMethod === "email" ? email : undefined,
+          otp,
+        },
+      });
+      if (res && res.success && res.user && res.token) {
+        signIn({ token: res.token, user: res.user });
         if (search.redirect) {
           navigate({ to: search.redirect });
         } else {
@@ -88,6 +108,8 @@ function LoginPage() {
       setLoading(false);
     }
   };
+
+  const targetLabel = authMethod === "phone" ? phone : email;
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -112,9 +134,9 @@ function LoginPage() {
             <CardDescription className="text-xs sm:text-sm">
               {search.redirect?.includes("checkout")
                 ? "Please sign in to proceed with your order checkout."
-                : step === "phone"
-                  ? "Enter your phone number to sign in to your account."
-                  : `We sent a 6-digit code to ${phone}. (Enter 123456 in dev/testing)`}
+                : step === "credentials"
+                  ? "Sign in with your verified phone number or email address."
+                  : `We sent a 6-digit code to ${targetLabel}. (Enter 123456 in dev/testing)`}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -132,22 +154,69 @@ function LoginPage() {
               </div>
             )}
 
-            {step === "phone" ? (
+            {step === "credentials" ? (
               <form onSubmit={handleSendOtp} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="phone">Phone Number</Label>
-                  <Input
-                    id="phone"
-                    placeholder="01XXXXXXXXX"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    required
-                    pattern="01[3-9][0-9]{8}"
-                    title="Valid Bangladesh mobile number starting with 01"
-                  />
+                {/* Method selector tab */}
+                <div className="flex rounded-md bg-secondary p-1 text-xs">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAuthMethod("phone");
+                      setError(null);
+                    }}
+                    className={`flex-1 py-1.5 font-medium rounded transition-colors ${
+                      authMethod === "phone"
+                        ? "bg-background text-foreground shadow-sm font-semibold"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    Mobile Number
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAuthMethod("email");
+                      setError(null);
+                    }}
+                    className={`flex-1 py-1.5 font-medium rounded transition-colors ${
+                      authMethod === "email"
+                        ? "bg-background text-foreground shadow-sm font-semibold"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    Email Address
+                  </button>
                 </div>
+
+                {authMethod === "phone" ? (
+                  <div className="space-y-2">
+                    <Label htmlFor="phone">Phone Number</Label>
+                    <Input
+                      id="phone"
+                      placeholder="01XXXXXXXXX"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      required
+                      pattern="01[3-9][0-9]{8}"
+                      title="Valid Bangladesh mobile number starting with 01"
+                    />
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email Address</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="e.g. name@example.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                    />
+                  </div>
+                )}
+
                 <Button type="submit" className="w-full font-semibold" disabled={loading}>
-                  {loading ? "Sending OTP…" : "Send OTP"}
+                  {loading ? "Sending OTP…" : "Send Verification Code"}
                 </Button>
               </form>
             ) : (
@@ -176,12 +245,12 @@ function LoginPage() {
                   <button
                     type="button"
                     onClick={() => {
-                      setStep("phone");
+                      setStep("credentials");
                       setError(null);
                     }}
                     className="text-xs text-primary hover:underline cursor-pointer"
                   >
-                    Change phone number
+                    Change {authMethod === "phone" ? "phone number" : "email"}
                   </button>
                 </div>
               </form>

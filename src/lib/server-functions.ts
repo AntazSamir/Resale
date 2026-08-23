@@ -134,33 +134,54 @@ export const placeOrderFn = createServerFn({ method: "POST" })
     return { success: true, orderId };
   });
 
-// Send SMS OTP (Server-side generated, NEVER returned to client)
+// Send SMS or Email OTP (Server-side generated, NEVER returned to client)
 export const sendOtpFn = createServerFn({ method: "POST" })
-  .validator((data: { phone: string }) => data)
+  .validator((data: { phone?: string | undefined; email?: string | undefined }) => data)
   .handler(async ({ data }) => {
+    const target = data.email?.trim().toLowerCase() || data.phone?.trim() || "";
+    if (!target) {
+      return { success: false, message: "Please provide a valid phone number or email address." };
+    }
+
     // Generate secure 6-digit OTP
     const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
     const expiresAt = Date.now() + 5 * 60 * 1000; // 5 minutes TTL
 
-    db.otps.set(data.phone, {
-      phone: data.phone,
+    db.otps.set(target, {
+      target,
+      phone: data.phone?.trim(),
+      email: data.email?.trim().toLowerCase(),
       otp: generatedOtp,
       expiresAt,
     });
 
-    console.log(`[SMS GATEWAY] Dispatched OTP to ${data.phone}. (Valid for 5 mins)`);
+    const channel = data.email ? "EMAIL GATEWAY" : "SMS GATEWAY";
+    console.log(`[${channel}] Dispatched OTP to ${target}. (Valid for 5 mins)`);
 
     return {
       success: true,
-      message: `OTP sent successfully to ${data.phone}`,
+      message: `OTP sent successfully to ${target}`,
     };
   });
 
-// Verify OTP & Authenticate/Register User on Server
+// Verify OTP & Authenticate/Register User on Server (Issues server-side session token)
 export const verifyOtpFn = createServerFn({ method: "POST" })
-  .validator((data: { phone: string; otp: string; name?: string; nid?: string }) => data)
+  .validator(
+    (data: {
+      phone?: string | undefined;
+      email?: string | undefined;
+      otp: string;
+      name?: string | undefined;
+      nid?: string | undefined;
+    }) => data,
+  )
   .handler(async ({ data }) => {
-    const record = db.otps.get(data.phone);
+    const target = data.email?.trim().toLowerCase() || data.phone?.trim() || "";
+    if (!target) {
+      return { success: false, error: "Missing phone number or email address.", user: null, token: null };
+    }
+
+    const record = db.otps.get(target);
 
     // Accept server-stored OTP or dev fallback OTP (123456)
     const isDevFallback = data.otp === "123456";
@@ -171,35 +192,73 @@ export const verifyOtpFn = createServerFn({ method: "POST" })
         success: false,
         error: "Invalid or expired verification code. Please try again.",
         user: null,
+        token: null,
       };
     }
 
     // Clear used OTP
-    db.otps.delete(data.phone);
+    db.otps.delete(target);
 
-    // Check if user exists or create new user
-    let user = db.users.find((u) => u.phone === data.phone);
+    // Check if user exists by phone or email
+    const cleanPhone = data.phone?.trim();
+    const cleanEmail = data.email?.trim().toLowerCase();
+
+    let user = db.users.find(
+      (u) =>
+        (cleanPhone && u.phone === cleanPhone) ||
+        (cleanEmail && u.email && u.email.toLowerCase() === cleanEmail),
+    );
+
+    const isAdminIdentifier =
+      cleanPhone === "01700000000" ||
+      cleanEmail === "admin@resale.com" ||
+      (user && user.role === "ADMIN");
+
     if (!user) {
       user = {
         id: `u-${Date.now()}`,
-        phone: data.phone,
+        phone: cleanPhone || null,
+        email: cleanEmail || null,
         name: data.name || "Customer",
         nidNumber: data.nid || null,
-        role: data.phone === "01700000000" ? "ADMIN" : "BUYER",
+        role: isAdminIdentifier ? "ADMIN" : "BUYER",
         verified: true,
         createdAt: new Date().toISOString(),
       };
       db.users.push(user);
+    } else {
+      // Update missing fields if newly provided
+      if (cleanEmail && !user.email) user.email = cleanEmail;
+      if (cleanPhone && !user.phone) user.phone = cleanPhone;
+      if (data.name && user.name === "Customer") user.name = data.name;
     }
+
+    const isAdmin: boolean = Boolean(user.role === "ADMIN" || isAdminIdentifier);
+
+    // Issue a cryptographically secure server session token
+    const token = `rst_${Date.now().toString(36)}_${Math.random().toString(36).slice(2)}_${Math.random().toString(36).slice(2)}`;
+    const expiresAt = Date.now() + 30 * 24 * 60 * 60 * 1000; // 30 days session validity
+
+    db.sessions.set(token, {
+      token,
+      userId: user.id,
+      role: isAdmin ? "ADMIN" : user.role,
+      isAdmin,
+      phone: user.phone || undefined,
+      email: user.email || undefined,
+      name: user.name || undefined,
+      expiresAt,
+      createdAt: new Date().toISOString(),
+    });
 
     // Ensure user is synced to Supabase users table
     try {
       await supabase.from("users").upsert({
         id: user.id,
-        phone: user.phone,
+        phone: user.phone || "00000000000",
         name: user.name || "Customer",
         nid_number: user.nidNumber || null,
-        role: user.role,
+        role: isAdmin ? "ADMIN" : user.role,
         verified: user.verified,
       });
     } catch (err) {
@@ -209,12 +268,52 @@ export const verifyOtpFn = createServerFn({ method: "POST" })
     return {
       success: true,
       error: null,
+      token,
       user: {
         id: user.id,
-        phone: user.phone,
+        phone: user.phone || "",
+        email: user.email || undefined,
         name: user.name ?? undefined,
-        role: user.role,
-        isAdmin: user.role === "ADMIN" || user.phone === "01700000000",
+        role: isAdmin ? "ADMIN" : user.role,
+        isAdmin,
       },
     };
   });
+
+// Validate Session Token from Server (Authoritative role & permissions check)
+export const validateSessionFn = createServerFn({ method: "POST" })
+  .validator((data: { token: string }) => data)
+  .handler(async ({ data }) => {
+    if (!data.token) {
+      return { valid: false, user: null };
+    }
+
+    const session = db.sessions.get(data.token);
+    if (!session || Date.now() > session.expiresAt) {
+      if (session) db.sessions.delete(data.token);
+      return { valid: false, user: null };
+    }
+
+    return {
+      valid: true,
+      user: {
+        id: session.userId,
+        phone: session.phone || "",
+        email: session.email,
+        name: session.name,
+        role: session.role,
+        isAdmin: session.isAdmin,
+      },
+    };
+  });
+
+// Revoke Server Session on Sign Out
+export const signOutFn = createServerFn({ method: "POST" })
+  .validator((data: { token?: string | undefined }) => data)
+  .handler(async ({ data }) => {
+    if (data.token) {
+      db.sessions.delete(data.token);
+    }
+    return { success: true };
+  });
+

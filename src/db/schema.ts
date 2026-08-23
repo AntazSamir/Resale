@@ -2,7 +2,8 @@ import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
 
 export const users = sqliteTable("users", {
   id: text("id").primaryKey(),
-  phone: text("phone").notNull().unique(),
+  phone: text("phone").unique(),
+  email: text("email").unique(),
   name: text("name"),
   nidNumber: text("nid_number"),
   role: text("role", { enum: ["BUYER", "SELLER", "ADMIN"] })
