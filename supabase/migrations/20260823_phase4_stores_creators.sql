@@ -77,39 +77,48 @@ ALTER TABLE public.product_videos ENABLE ROW LEVEL SECURITY;
 
 -- ── Store Policies ──
 -- Public can read all published stores
+DROP POLICY IF EXISTS "Allow public read access on stores" ON public.stores;
 CREATE POLICY "Allow public read access on stores" ON public.stores
   FOR SELECT USING (true);
 
 -- Sellers can insert their own storefront
+DROP POLICY IF EXISTS "Allow store creation for authenticated sellers" ON public.stores;
 CREATE POLICY "Allow store creation for authenticated sellers" ON public.stores
   FOR INSERT WITH CHECK (true);
 
 -- Sellers can only update their own storefront
+DROP POLICY IF EXISTS "Allow store update for owners" ON public.stores;
 CREATE POLICY "Allow store update for owners" ON public.stores
   FOR UPDATE USING (true);
 
 -- ── Creator Profile Policies ──
 -- Public can read all creator profiles
+DROP POLICY IF EXISTS "Allow public read access on creator_profiles" ON public.creator_profiles;
 CREATE POLICY "Allow public read access on creator_profiles" ON public.creator_profiles
   FOR SELECT USING (true);
 
 -- Users can register/create their own creator profile
+DROP POLICY IF EXISTS "Allow creator profile creation" ON public.creator_profiles;
 CREATE POLICY "Allow creator profile creation" ON public.creator_profiles
   FOR INSERT WITH CHECK (true);
 
 -- Creators can update their own profile
+DROP POLICY IF EXISTS "Allow creator profile update for owners" ON public.creator_profiles;
 CREATE POLICY "Allow creator profile update for owners" ON public.creator_profiles
   FOR UPDATE USING (true);
 
 -- ── Product Video Policies ──
 -- Public can view approved videos
+DROP POLICY IF EXISTS "Allow public read access on approved videos" ON public.product_videos;
 CREATE POLICY "Allow public read access on approved videos" ON public.product_videos
   FOR SELECT USING (status = 'APPROVED' OR true);
 
 -- Creators can submit/manage videos
+DROP POLICY IF EXISTS "Allow video insertion for creators" ON public.product_videos;
 CREATE POLICY "Allow video insertion for creators" ON public.product_videos
   FOR INSERT WITH CHECK (true);
 
 -- Creators can update their video metadata
+DROP POLICY IF EXISTS "Allow video update for creators" ON public.product_videos;
 CREATE POLICY "Allow video update for creators" ON public.product_videos
   FOR UPDATE USING (true);

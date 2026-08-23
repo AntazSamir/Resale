@@ -250,7 +250,7 @@ Phase 3.4 integrated professional merchant storefronts, tech reviewer creator hu
 
 ## 🚧 Phase 4: Real Persistence, Intelligence & Buyer Retention
 
-**Status:** `IN PROGRESS` (Phase 4.1A Complete) · **Architecture Audit:** August 2026
+**Status:** `IN PROGRESS` (Phase 4.1A & 4.1B Complete) · **Architecture Audit:** August 2026
 
 Phase 4 transitions Resale.com from browser-local `localStorage` into a **real shared, persistent, multi-user marketplace architecture backed by Supabase PostgreSQL**, followed by behavioral signal tracking, buyer retention tools, and evidence-based seller analytics.
 
@@ -275,13 +275,14 @@ Phase 4 transitions Resale.com from browser-local `localStorage` into a **real s
 
 ---
 
-### 4.1B — Storefronts & Creator Hub Remote Persistence 📋 NEXT UP
+### 4.1B — Storefronts & Creator Hub Remote Persistence ✅ COMPLETED
 
 **Objective**: Migrate Pro Storefronts and Creator Profiles from `localStorage` to Supabase PostgreSQL.
 
-- **Storefronts Migration**: Move `resale.stores` to `public.stores` table with slug uniqueness, verification badges, business hours, and store catalogs.
-- **Creator Profiles**: Move `resale.creators` and `resale.product-videos` to `public.creator_profiles` and `public.product_videos`.
-- **Cross-User Visibility**: Ensure newly created merchant stores and video reviews are instantly discoverable across all browsers.
+- **Storefronts Migration**: Added `public.stores` table (`supabase/migrations/20260823_phase4_stores_creators.sql`) with slug uniqueness, verification badges, business hours, and store catalogs.
+- **Creator Profiles & Video Reviews**: Added `public.creator_profiles` and `public.product_videos` tables with platform validation and listing associations.
+- **Bi-directional Stores & Creators Sync**: Implemented `storefrontToSupabase()`, `fetchStoresAsync()`, `saveStorefrontAsync()`, `creatorProfileToSupabase()`, `fetchCreatorsAsync()`, and `saveProductVideoAsync()` with automatic local-storage caching fallbacks.
+- **Cross-User Visibility**: Newly created merchant stores (`/store/:slug`) and video reviews (`/creator/:slug`) are instantly persisted and queryable across all client browsers.
 
 ---
 
@@ -374,7 +375,7 @@ Phase 4 transitions Resale.com from browser-local `localStorage` into a **real s
 | **Phase 3.3**  | Automated Diagnostics        | Live IMEI verification API, device hardware test runner, certified badges                                                                                                         |  📋 Planned  |
 | **Phase 3.5**  | AI Valuation Engine          | Real-time price recommender, price history graphs, "Fair Deal" badges                                                                                                             |  📋 Planned  |
 | **Phase 4.1A** | Supabase Orders Persistence  | Remote PostgreSQL orders sync, user foreign-key resolution, snapshot immutability, cross-browser shared state                                                                     | ✅ Completed |
-| **Phase 4.1B** | Remote Stores & Creators     | Supabase persistence for Pro Storefronts (`stores`) and Creator Hub (`creator_profiles`, `product_videos`)                                                                        | 🚧 In Progress |
+| **Phase 4.1B** | Remote Stores & Creators     | Supabase persistence for Pro Storefronts (`stores`) and Creator Hub (`creator_profiles`, `product_videos`)                                                                        | ✅ Completed |
 | **Phase 4.1C** | Remote Dispute Persistence   | Supabase persistence for Disputes (`disputes`) and evidence metadata                                                                                                              |  📋 Planned  |
 | **Phase 4.1D** | Cloud Cart Sync              | Guest-to-user cart cloud persistence & automatic login merging                                                                                                                    |  📋 Planned  |
 | **Phase 4.2**  | Event & Analytics Model      | 12-type behavioral event model, privacy-safe session tracking, analytics foundation                                                                                                |  📋 Planned  |
