@@ -446,7 +446,6 @@ export function rowToOrderRecord(row: Record<string, unknown>): OrderRecord {
             price: total,
           },
         ];
-
   const nidNumber =
     typeof row["nid_number"] === "string" ? row["nid_number"] : "199526920199201";
 

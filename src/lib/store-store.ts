@@ -215,7 +215,9 @@ export function getStoreByOwnerId(ownerId: string): Storefront | undefined {
   return all.find((s) => s.ownerId === ownerId);
 }
 
-async function syncStoreToSupabase(store: Storefront): Promise<{ success: boolean; error?: string }> {
+async function syncStoreToSupabase(
+  store: Storefront,
+): Promise<{ success: boolean; error?: string }> {
   try {
     // 1. Ensure owner user exists in public.users to satisfy foreign key
     const ownerId = store.ownerId || "u-1";

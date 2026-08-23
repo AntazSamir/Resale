@@ -224,7 +224,9 @@ export function getCreatorByHandle(handle: string): CreatorProfile | undefined {
   return all.find((c) => c.handle.toLowerCase() === normalized);
 }
 
-export async function fetchCreatorByHandleAsync(handle: string): Promise<CreatorProfile | undefined> {
+export async function fetchCreatorByHandleAsync(
+  handle: string,
+): Promise<CreatorProfile | undefined> {
   const normalized = handle.trim().toLowerCase();
   try {
     const { data, error } = await supabase

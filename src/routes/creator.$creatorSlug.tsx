@@ -1,6 +1,10 @@
 import { createFileRoute, notFound, Link } from "@tanstack/react-router";
 import { SiteHeader, SiteFooter } from "@/components/site-header";
-import { getCreatorByHandle, fetchCreatorByHandleAsync, getVideosByCreator } from "@/lib/creator-store";
+import {
+  getCreatorByHandle,
+  fetchCreatorByHandleAsync,
+  getVideosByCreator,
+} from "@/lib/creator-store";
 import { CreatorHero } from "@/components/creator/creator-hero";
 import { CreatorVideoCard } from "@/components/creator/creator-video-card";
 import { Sparkles, Video, PlaySquare } from "lucide-react";
