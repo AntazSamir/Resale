@@ -9,10 +9,11 @@ interface ProtectedRouteProps {
 }
 
 export function ProtectedRoute({ children, requireAdmin = false, redirect }: ProtectedRouteProps) {
-  const { isLoggedIn, user } = useAuth();
+  const { isLoggedIn, user, hydrated } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
+    if (!hydrated) return;
     if (!isLoggedIn) {
       if (redirect) {
         navigate({
