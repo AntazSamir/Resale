@@ -55,11 +55,6 @@ function ProductPage() {
   const different = others.filter((p) => p.category !== product.category);
   const related = [...sameCategory, ...different].slice(0, 3);
 
-  // You may also like: remaining products not already shown above
-  const relatedIds = new Set(related.map((p) => p.id));
-  const alsoLikePool = others.filter((p) => !relatedIds.has(p.id));
-  const alsoLike = (alsoLikePool.length > 0 ? alsoLikePool : others).slice(0, 4);
-
   // Best value: product with lowest listing price among products with listings
   const productsWithListings = products.filter((p) => listingsFor(p.id).length > 0);
   const bestDealProduct =
@@ -424,34 +419,6 @@ function ProductPage() {
             {/* Related product cards */}
             <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-3 md:gap-5 lg:grid-cols-3 items-stretch auto-rows-fr">
               {related.map((p) => (
-                <ProductCard key={p.id} product={p} />
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* ── You May Also Like ── */}
-        {alsoLike.length > 0 && (
-          <section className="mt-16 sm:mt-20">
-            <div className="flex items-end justify-between border-b border-border pb-4">
-              <div>
-                <h2 className="font-display text-2xl font-bold text-foreground">
-                  You May Also Like
-                </h2>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  Other graded devices buyers viewed alongside {product.name}
-                </p>
-              </div>
-              <Link
-                to="/products"
-                search={{ q: undefined, category: undefined, brand: undefined }}
-                className="text-xs font-semibold text-primary hover:underline transition-colors flex items-center gap-0.5"
-              >
-                See all <ChevronRight className="size-3.5" />
-              </Link>
-            </div>
-            <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-5 items-stretch auto-rows-fr">
-              {alsoLike.map((p) => (
                 <ProductCard key={p.id} product={p} />
               ))}
             </div>
