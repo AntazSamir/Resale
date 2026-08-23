@@ -1,5 +1,5 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { Check, FileText, ShieldCheck, Sparkles, Star, Tag, ChevronRight } from "lucide-react";
+import { Check, FileText, ShieldCheck, Star } from "lucide-react";
 import { SiteFooter, SiteHeader } from "@/components/site-header";
 import { GradeBadge } from "@/components/grade-badge";
 import { ProductCard } from "@/components/product-card";
@@ -49,11 +49,20 @@ function ProductPage() {
   const high = rows.length > 0 ? rows[rows.length - 1] : undefined;
   const available = grades.filter((g) => rows.some((l) => l.grade === g));
 
-  // Related products: same category first, then others
+  // "You May Also Like" recommendations: same category & brand first, then same category, then others
   const others = products.filter((p) => p.id !== product.id && listingsFor(p.id).length > 0);
-  const sameCategory = others.filter((p) => p.category === product.category);
-  const different = others.filter((p) => p.category !== product.category);
-  const related = [...sameCategory, ...different].slice(0, 3);
+  const sameCategorySameBrand = others.filter(
+    (p) => p.category === product.category && p.brand === product.brand,
+  );
+  const sameCategoryOtherBrand = others.filter(
+    (p) => p.category === product.category && p.brand !== product.brand,
+  );
+  const otherCategories = others.filter((p) => p.category !== product.category);
+  const recommendedProducts = [
+    ...sameCategorySameBrand,
+    ...sameCategoryOtherBrand,
+    ...otherCategories,
+  ].slice(0, 4);
 
   // Best value: product with lowest listing price among products with listings
   const productsWithListings = products.filter((p) => listingsFor(p.id).length > 0);
@@ -372,55 +381,49 @@ function ProductPage() {
           </ul>
         </section>
 
-        {/* ── Related Products & Deals ── */}
-        {related.length > 0 && (
-          <section className="mt-16 sm:mt-20">
-            <div className="flex items-end justify-between border-b border-border pb-4">
-              <h2 className="font-display text-2xl font-bold text-foreground flex items-center gap-2">
-                <Sparkles className="size-5 text-primary" />
-                Related Products &amp; Deals
-              </h2>
+        {/* ── You May Also Like Section ── */}
+        {recommendedProducts.length > 0 && (
+          <section className="mt-16 sm:mt-20 border-t border-border pt-8 sm:pt-10">
+            <div className="flex items-end justify-between border-b border-border pb-4 mb-6">
+              <div>
+                <div className="inline-flex items-center gap-1.5 bg-primary/10 text-primary border border-primary/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider mb-1">
+                  <span>Recommended</span>
+                </div>
+                <h2 className="text-xl md:text-2xl font-display font-bold text-foreground">
+                  You May Also Like
+                </h2>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Inspected alternatives &amp; top picks in {product.category}
+                </p>
+              </div>
               <Link
                 to="/products"
-                search={{ q: undefined, category: undefined, brand: undefined }}
-                className="text-xs font-semibold text-primary hover:underline transition-colors flex items-center gap-0.5"
+                search={{ category: product.category, q: undefined, brand: undefined }}
+                className="text-sm font-semibold text-primary hover:underline inline-flex items-center gap-1 shrink-0"
               >
-                Browse all <ChevronRight className="size-3.5" />
+                Browse all {product.category} →
               </Link>
             </div>
 
-            {/* Best value banner */}
-            {bestDealProduct && bestDealCheapest && (
-              <div className="mt-6 flex items-center gap-4 border border-amber-500/30 bg-amber-500/10 px-5 py-4">
-                <Tag className="size-5 shrink-0 text-amber-500" />
-                <div className="min-w-0 flex-1">
-                  <p className="text-[10.5px] font-bold uppercase tracking-widest text-amber-500">
-                    🔥 Best Listed Price Right Now
-                  </p>
-                  <p className="mt-0.5 text-sm font-semibold text-foreground truncate">
-                    {bestDealProduct.name}
-                  </p>
-                </div>
-                <div className="text-right shrink-0">
-                  <p className="font-display text-xl font-bold text-amber-500">
-                    {taka(bestDealCheapest.price)}
-                  </p>
-                </div>
-                <Link
-                  to="/product/$productId"
-                  params={{ productId: bestDealProduct.id }}
-                  className="shrink-0 inline-flex items-center justify-center border border-amber-500 text-amber-500 px-4 py-2 text-xs font-semibold transition-colors hover:bg-amber-500 hover:text-black"
-                >
-                  View
-                </Link>
-              </div>
-            )}
-
-            {/* Related product cards */}
-            <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-3 md:gap-5 lg:grid-cols-3 items-stretch auto-rows-fr">
-              {related.map((p) => (
+            {/* Desktop 4-grid with website's hairline-grid style */}
+            <div className="hidden md:grid hairline-grid grid-cols-4 bg-card">
+              {recommendedProducts.map((p) => (
                 <ProductCard key={p.id} product={p} />
               ))}
+            </div>
+
+            {/* Mobile & tablet horizontal snap swipe */}
+            <div className="block md:hidden">
+              <div className="flex gap-3 overflow-x-auto scrollbar-none snap-x snap-mandatory pb-2">
+                {recommendedProducts.map((p) => (
+                  <div
+                    key={p.id}
+                    className="w-55 shrink-0 snap-start border border-border bg-card flex flex-col"
+                  >
+                    <ProductCard product={p} />
+                  </div>
+                ))}
+              </div>
             </div>
           </section>
         )}

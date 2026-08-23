@@ -15,6 +15,7 @@ import {
 import { SiteFooter, SiteHeader } from "@/components/site-header";
 import { useCart } from "@/lib/cart-store";
 import { GradeBadge } from "@/components/grade-badge";
+import { ProductCard } from "@/components/product-card";
 import { ConditionScore } from "@/components/condition-score";
 import { InspectionReport } from "@/components/inspection-report";
 import { RepairHistoryCard } from "@/components/repair-history";
@@ -24,12 +25,15 @@ import { SellerTrustLine } from "@/components/seller-trust-card";
 import { getApprovedVideoForListing } from "@/lib/creator-store";
 import { CreatorVideoModal } from "@/components/creator/creator-video-modal";
 import {
+  cheapest,
   galleryShots,
   gradeCriteria,
   gradeLabel,
   grades,
   listings,
+  listingsFor,
   productFor,
+  products,
   taka,
 } from "@/data/catalog";
 
@@ -82,6 +86,21 @@ function ListingPage() {
     month: "long",
     year: "numeric",
   });
+
+  // "You May Also Like" recommendations: same category & brand first, then same category, then others
+  const otherProducts = products.filter((p) => p.id !== product.id && listingsFor(p.id).length > 0);
+  const sameCategorySameBrand = otherProducts.filter(
+    (p) => p.category === product.category && p.brand === product.brand,
+  );
+  const sameCategoryOtherBrand = otherProducts.filter(
+    (p) => p.category === product.category && p.brand !== product.brand,
+  );
+  const otherCategories = otherProducts.filter((p) => p.category !== product.category);
+  const recommendedProducts = [
+    ...sameCategorySameBrand,
+    ...sameCategoryOtherBrand,
+    ...otherCategories,
+  ].slice(0, 4);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -470,6 +489,53 @@ function ListingPage() {
               </dl>
             )}
           </section>
+
+          {/* ── You May Also Like Section ── */}
+          {recommendedProducts.length > 0 && (
+            <section className="border-t border-border pt-10 sm:pt-14">
+              <div className="flex items-end justify-between border-b border-border pb-4 mb-6">
+                <div>
+                  <div className="inline-flex items-center gap-1.5 bg-primary/10 text-primary border border-primary/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider mb-1">
+                    <span>Recommended</span>
+                  </div>
+                  <h2 className="text-xl md:text-2xl font-display font-bold text-foreground">
+                    You May Also Like
+                  </h2>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Inspected alternatives &amp; top picks in {product.category}
+                  </p>
+                </div>
+                <Link
+                  to="/products"
+                  search={{ category: product.category, q: undefined, brand: undefined }}
+                  className="text-sm font-semibold text-primary hover:underline inline-flex items-center gap-1 shrink-0"
+                >
+                  Browse all {product.category} →
+                </Link>
+              </div>
+
+              {/* Desktop 4-grid with website's hairline-grid style */}
+              <div className="hidden md:grid hairline-grid grid-cols-4 bg-card">
+                {recommendedProducts.map((p) => (
+                  <ProductCard key={p.id} product={p} />
+                ))}
+              </div>
+
+              {/* Mobile & tablet horizontal snap swipe */}
+              <div className="block md:hidden">
+                <div className="flex gap-3 overflow-x-auto scrollbar-none snap-x snap-mandatory pb-2">
+                  {recommendedProducts.map((p) => (
+                    <div
+                      key={p.id}
+                      className="w-55 shrink-0 snap-start border border-border bg-card flex flex-col"
+                    >
+                      <ProductCard product={p} />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </section>
+          )}
         </div>
       </main>
 
