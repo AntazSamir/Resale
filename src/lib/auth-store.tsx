@@ -33,9 +33,11 @@ function readSession(): AuthUser | null {
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
+  const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
     setUser(readSession());
+    setHydrated(true);
   }, []);
 
   const signIn = useCallback((userData: string | Partial<AuthUser>) => {
@@ -73,7 +75,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, isLoggedIn: !!user, signIn, signOut }}>
+    <AuthContext.Provider value={{ user, isLoggedIn: !!user, hydrated, signIn, signOut }}>
       {children}
     </AuthContext.Provider>
   );
