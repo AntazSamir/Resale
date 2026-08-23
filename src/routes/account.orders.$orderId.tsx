@@ -22,6 +22,8 @@ import {
   getOrderById,
   canCancelOrder,
   cancelOrder,
+  fetchOrdersAsync,
+  onOrdersChange,
   type OrderRecord,
   type OrderStatus,
 } from "@/lib/order-store";
@@ -153,6 +155,17 @@ function OrderDetailsPage() {
 
   useEffect(() => {
     setOrder(getOrderById(orderId) || null);
+    fetchOrdersAsync()
+      .then((orders) => {
+        const found = orders.find((o) => o.id.toUpperCase() === orderId.toUpperCase());
+        if (found) setOrder(found);
+      })
+      .catch(() => {});
+    const unsubscribe = onOrdersChange((orders) => {
+      const found = orders.find((o) => o.id.toUpperCase() === orderId.toUpperCase());
+      if (found) setOrder(found);
+    });
+    return () => unsubscribe();
   }, [orderId]);
 
   const handleCancelSubmit = (e: React.FormEvent) => {

@@ -1,13 +1,14 @@
 import { createFileRoute, notFound, Link } from "@tanstack/react-router";
 import { SiteHeader, SiteFooter } from "@/components/site-header";
-import { getStoreBySlug, getListingsForStore } from "@/lib/store-store";
+import { getStoreBySlug, fetchStoreBySlugAsync, getListingsForStore } from "@/lib/store-store";
 import { StoreHeader } from "@/components/storefront/store-header";
 import { StoreCatalog } from "@/components/storefront/store-catalog";
 import { ShieldCheck, ArrowLeft, Store } from "lucide-react";
 
 export const Route = createFileRoute("/store/$storeSlug")({
-  loader: ({ params }) => {
-    const store = getStoreBySlug(params.storeSlug);
+  loader: async ({ params }) => {
+    const store =
+      (await fetchStoreBySlugAsync(params.storeSlug)) || getStoreBySlug(params.storeSlug);
     if (!store) {
       throw notFound();
     }

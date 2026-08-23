@@ -1,13 +1,15 @@
 import { createFileRoute, notFound, Link } from "@tanstack/react-router";
 import { SiteHeader, SiteFooter } from "@/components/site-header";
-import { getCreatorByHandle, getVideosByCreator } from "@/lib/creator-store";
+import { getCreatorByHandle, fetchCreatorByHandleAsync, getVideosByCreator } from "@/lib/creator-store";
 import { CreatorHero } from "@/components/creator/creator-hero";
 import { CreatorVideoCard } from "@/components/creator/creator-video-card";
 import { Sparkles, Video, PlaySquare } from "lucide-react";
 
 export const Route = createFileRoute("/creator/$creatorSlug")({
-  loader: ({ params }) => {
-    const creator = getCreatorByHandle(params.creatorSlug);
+  loader: async ({ params }) => {
+    const creator =
+      (await fetchCreatorByHandleAsync(params.creatorSlug)) ||
+      getCreatorByHandle(params.creatorSlug);
     if (!creator) {
       throw notFound();
     }

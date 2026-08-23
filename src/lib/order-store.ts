@@ -1,3 +1,5 @@
+import { supabase } from "./supabase";
+
 export type OrderStatus =
   | "PENDING"
   | "CONFIRMED"
@@ -109,6 +111,27 @@ const STORAGE_KEY = "resale.orders.v3";
 const LEGACY_STORAGE_KEY = "resale.orders";
 
 export const DEFAULT_DELIVERY_FEE = 120;
+
+// In-memory listeners for cross-component and remote sync updates
+type OrderListener = (orders: OrderRecord[]) => void;
+const listeners = new Set<OrderListener>();
+
+export function onOrdersChange(callback: OrderListener): () => void {
+  listeners.add(callback);
+  return () => {
+    listeners.delete(callback);
+  };
+}
+
+function notifyListeners(orders: OrderRecord[]): void {
+  listeners.forEach((fn) => {
+    try {
+      fn(orders);
+    } catch {
+      // ignore
+    }
+  });
+}
 
 /**
  * Shared price calculation utility across cart, checkout, orders, seller, and admin
@@ -366,131 +389,253 @@ const INITIAL_SAMPLE_ORDERS: OrderRecord[] = [
 ];
 
 /**
- * Retrieves all stored orders, migrating legacy records if present
+ * Maps Supabase PostgreSQL row to strongly-typed frontend OrderRecord
  */
-export function getOrders(): OrderRecord[] {
+export function rowToOrderRecord(row: Record<string, unknown>): OrderRecord {
+  const addrJson =
+    typeof row["shipping_address_json"] === "object" && row["shipping_address_json"] !== null
+      ? (row["shipping_address_json"] as Record<string, unknown>)
+      : {};
+
+  const meta =
+    typeof addrJson["_orderSnapshot"] === "object" && addrJson["_orderSnapshot"] !== null
+      ? (addrJson["_orderSnapshot"] as Record<string, unknown>)
+      : null;
+
+  const cleanedAddress: ShippingAddress = {
+    name: typeof addrJson["name"] === "string" ? addrJson["name"] : "Customer",
+    phone: typeof addrJson["phone"] === "string" ? addrJson["phone"] : "",
+    division: typeof addrJson["division"] === "string" ? addrJson["division"] : "Dhaka",
+    district: typeof addrJson["district"] === "string" ? addrJson["district"] : "Dhaka",
+    area: typeof addrJson["area"] === "string" ? addrJson["area"] : "",
+    address: typeof addrJson["address"] === "string" ? addrJson["address"] : "",
+  };
+
+  const id = typeof row["id"] === "string" ? row["id"] : `ORD-${Date.now()}`;
+  const amountPoisha = typeof row["amount_poisha"] === "number" ? row["amount_poisha"] : 0;
+  const total =
+    meta && typeof meta["total"] === "number" ? meta["total"] : Math.round(amountPoisha / 100);
+  const subtotal = meta && typeof meta["subtotal"] === "number" ? meta["subtotal"] : total;
+  const deliveryFee =
+    meta && typeof meta["deliveryFee"] === "number" ? meta["deliveryFee"] : DEFAULT_DELIVERY_FEE;
+  const discount = meta && typeof meta["discount"] === "number" ? meta["discount"] : 0;
+
+  const statusRaw = typeof row["status"] === "string" ? row["status"] : "PENDING";
+  const orderStatus = (statusRaw.toUpperCase() as OrderStatus) || "PENDING";
+
+  const paymentMethodRaw =
+    typeof row["payment_method"] === "string" ? row["payment_method"].toUpperCase() : "COD";
+  const paymentMethod = (paymentMethodRaw as PaymentMethod) || "COD";
+
+  const paymentStatus: PaymentStatus =
+    meta && typeof meta["paymentStatus"] === "string"
+      ? (meta["paymentStatus"] as PaymentStatus)
+      : orderStatus === "DELIVERED" || orderStatus === "COMPLETED"
+        ? "PAID"
+        : "PENDING";
+
+  const items: OrderItemSnapshot[] =
+    meta && Array.isArray(meta["items"])
+      ? (meta["items"] as OrderItemSnapshot[])
+      : [
+          {
+            listingId: typeof row["listing_id"] === "string" ? row["listing_id"] : "l-1",
+            productId: "iphone-15-pro-256",
+            name: `Item (Listing #${typeof row["listing_id"] === "string" ? row["listing_id"] : "1"})`,
+            grade: "A",
+            price: total,
+          },
+        ];
+
+  const nidNumber =
+    typeof row["nid_number"] === "string" ? row["nid_number"] : "199526920199201";
+
+  const buyerContact =
+    meta && typeof meta["buyerContact"] === "object" && meta["buyerContact"] !== null
+      ? (meta["buyerContact"] as { name: string; phone: string; nidNumber?: string })
+      : {
+          name: cleanedAddress.name,
+          phone: cleanedAddress.phone,
+          nidNumber,
+        };
+
+  const createdAt =
+    typeof row["created_at"] === "string" ? row["created_at"] : new Date().toISOString();
+
+  const timeline: OrderTimelineEvent[] =
+    meta && Array.isArray(meta["timeline"])
+      ? (meta["timeline"] as OrderTimelineEvent[])
+      : [
+          {
+            id: `evt-${id}`,
+            type: "ORDER_CREATED",
+            title: `Order Placed (${paymentMethod})`,
+            description: "Order recorded in persistent database",
+            timestamp: createdAt,
+            actor: "BUYER",
+          },
+        ];
+
+  return {
+    id,
+    date:
+      meta && typeof meta["date"] === "string"
+        ? meta["date"]
+        : createdAt.split("T")[0] || "2026-08-23",
+    orderStatus,
+    status: orderStatus,
+    paymentStatus,
+    paymentMethod,
+    items,
+    subtotal,
+    deliveryFee,
+    discount,
+    total,
+    currency: "BDT",
+    shippingAddress: cleanedAddress,
+    buyerContact,
+    nidNumber,
+    timeline,
+    cancellation:
+      meta && typeof meta["cancellation"] === "object" && meta["cancellation"] !== null
+        ? (meta["cancellation"] as OrderRecord["cancellation"])
+        : undefined,
+    refundStatus:
+      meta && typeof meta["refundStatus"] === "string"
+        ? (meta["refundStatus"] as OrderRecord["refundStatus"])
+        : undefined,
+    isSampleData: false,
+    createdAt,
+    updatedAt: createdAt,
+    completedAt: meta && typeof meta["completedAt"] === "string" ? meta["completedAt"] : undefined,
+  };
+}
+
+function mapToDbStatus(status: OrderStatus): string {
+  switch (status) {
+    case "PENDING":
+      return "PENDING";
+    case "CONFIRMED":
+    case "PROCESSING":
+    case "READY_TO_SHIP":
+      return "CONFIRMED";
+    case "SHIPPED":
+      return "SHIPPED";
+    case "DELIVERED":
+    case "COMPLETED":
+      return "DELIVERED";
+    case "CANCELLED":
+      return "CANCELLED";
+    case "DISPUTED":
+    case "REFUND_REQUESTED":
+    case "REFUNDED":
+      return "DISPUTED";
+    default:
+      return "PENDING";
+  }
+}
+
+/**
+ * Maps frontend OrderRecord to Supabase PostgreSQL row
+ */
+export function orderRecordToSupabase(order: OrderRecord): Record<string, unknown> {
+  const listingId = order.items[0]?.listingId || "l-1";
+  const buyerId = order.buyerContact?.phone
+    ? `u-${order.buyerContact.phone.replace(/\D/g, "")}`
+    : "u-admin";
+
+  return {
+    id: order.id,
+    listing_id: listingId,
+    buyer_id: buyerId,
+    amount_poisha: Math.round(order.total * 100),
+    payment_method: order.paymentMethod,
+    status: mapToDbStatus(order.orderStatus),
+    shipping_address_json: {
+      ...order.shippingAddress,
+      _orderSnapshot: {
+        orderStatus: order.orderStatus,
+        items: order.items,
+        timeline: order.timeline,
+        cancellation: order.cancellation,
+        paymentStatus: order.paymentStatus,
+        subtotal: order.subtotal,
+        deliveryFee: order.deliveryFee,
+        discount: order.discount,
+        total: order.total,
+        date: order.date,
+        buyerContact: order.buyerContact,
+        refundStatus: order.refundStatus,
+        completedAt: order.completedAt,
+      },
+    },
+    nid_number: order.buyerContact?.nidNumber || order.nidNumber || "199526920199201",
+    created_at: order.createdAt || new Date().toISOString(),
+  };
+}
+
+/**
+ * Fetches all orders directly from Supabase PostgreSQL, updates local cache, and notifies listeners
+ */
+export async function fetchOrdersAsync(): Promise<OrderRecord[]> {
+  try {
+    const { data, error } = await supabase
+      .from("orders")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.warn("Supabase fetchOrders error, using local cache:", error.message);
+      return getOrders();
+    }
+
+    if (Array.isArray(data) && data.length > 0) {
+      const remoteOrders = data.map((r) => rowToOrderRecord(r as Record<string, unknown>));
+
+      // Merge with any unique local records if present
+      if (typeof window !== "undefined") {
+        const local = readLocalOrders();
+        const mergedMap = new Map<string, OrderRecord>();
+        // Remote takes precedence
+        remoteOrders.forEach((o) => mergedMap.set(o.id.toUpperCase(), o));
+        local.forEach((o) => {
+          if (!mergedMap.has(o.id.toUpperCase())) {
+            mergedMap.set(o.id.toUpperCase(), o);
+          }
+        });
+        const merged = Array.from(mergedMap.values());
+        writeLocalOrders(merged);
+        notifyListeners(merged);
+        return merged;
+      }
+
+      notifyListeners(remoteOrders);
+      return remoteOrders;
+    }
+
+    return getOrders();
+  } catch (err) {
+    console.warn("fetchOrdersAsync exception, using local cache:", err);
+    return getOrders();
+  }
+}
+
+function readLocalOrders(): OrderRecord[] {
   if (typeof window === "undefined") return INITIAL_SAMPLE_ORDERS;
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) {
-      // Check legacy key
       const legacyRaw = window.localStorage.getItem(LEGACY_STORAGE_KEY);
       if (legacyRaw) {
         try {
           const parsedLegacy = JSON.parse(legacyRaw);
           if (Array.isArray(parsedLegacy) && parsedLegacy.length > 0) {
-            const upgraded: OrderRecord[] = parsedLegacy.map((item: unknown) => {
-              const leg =
-                typeof item === "object" && item !== null ? (item as Record<string, unknown>) : {};
-              const id =
-                typeof leg["id"] === "string"
-                  ? leg["id"]
-                  : `ORD-${Date.now().toString(36).toUpperCase().slice(-6)}`;
-              const date =
-                typeof leg["date"] === "string"
-                  ? leg["date"]
-                  : new Date().toISOString().split("T")[0] || "";
-              const statusVal =
-                typeof leg["status"] === "string" ? (leg["status"] as OrderStatus) : "PENDING";
-              const paymentStatusVal =
-                typeof leg["paymentStatus"] === "string"
-                  ? (leg["paymentStatus"] as PaymentStatus)
-                  : "PENDING";
-              const paymentMethodVal: PaymentMethod =
-                typeof leg["paymentMethod"] === "string" &&
-                leg["paymentMethod"].toUpperCase() === "BKASH"
-                  ? "BKASH"
-                  : "COD";
-              const itemsVal = Array.isArray(leg["items"])
-                ? (leg["items"] as OrderItemSnapshot[])
-                : [];
-              const subtotalVal = typeof leg["subtotal"] === "number" ? leg["subtotal"] : 0;
-              const deliveryFeeVal =
-                typeof leg["deliveryFee"] === "number" ? leg["deliveryFee"] : DEFAULT_DELIVERY_FEE;
-              const discountVal = typeof leg["discount"] === "number" ? leg["discount"] : 0;
-              const totalVal =
-                typeof leg["total"] === "number"
-                  ? leg["total"]
-                  : subtotalVal + deliveryFeeVal - discountVal;
-
-              const rawAddress =
-                typeof leg["shippingAddress"] === "object" && leg["shippingAddress"] !== null
-                  ? (leg["shippingAddress"] as Record<string, unknown>)
-                  : null;
-              const shippingAddress: ShippingAddress = {
-                name:
-                  rawAddress && typeof rawAddress["name"] === "string"
-                    ? rawAddress["name"]
-                    : "Customer",
-                phone:
-                  rawAddress && typeof rawAddress["phone"] === "string" ? rawAddress["phone"] : "",
-                division:
-                  rawAddress && typeof rawAddress["division"] === "string"
-                    ? rawAddress["division"]
-                    : "Dhaka",
-                district:
-                  rawAddress && typeof rawAddress["district"] === "string"
-                    ? rawAddress["district"]
-                    : "Dhaka",
-                area:
-                  rawAddress && typeof rawAddress["area"] === "string" ? rawAddress["area"] : "",
-                address:
-                  rawAddress && typeof rawAddress["address"] === "string"
-                    ? rawAddress["address"]
-                    : "",
-              };
-
-              const buyerContact = {
-                name: shippingAddress.name,
-                phone: shippingAddress.phone,
-                nidNumber: typeof leg["nidNumber"] === "string" ? leg["nidNumber"] : undefined,
-              };
-
-              const createdAt =
-                typeof leg["createdAt"] === "string" ? leg["createdAt"] : new Date().toISOString();
-
-              const timeline: OrderTimelineEvent[] = Array.isArray(leg["timeline"])
-                ? (leg["timeline"] as OrderTimelineEvent[])
-                : [
-                    {
-                      id: `evt-legacy-${id}`,
-                      type: "ORDER_CREATED",
-                      title: "Order Placed",
-                      description: `Order placed via ${paymentMethodVal}`,
-                      timestamp: createdAt,
-                      actor: "BUYER",
-                    },
-                  ];
-
-              return {
-                id,
-                date,
-                orderStatus: statusVal,
-                status: statusVal,
-                paymentStatus: paymentStatusVal,
-                paymentMethod: paymentMethodVal,
-                items: itemsVal,
-                subtotal: subtotalVal,
-                deliveryFee: deliveryFeeVal,
-                discount: discountVal,
-                total: totalVal,
-                currency: "BDT",
-                shippingAddress,
-                buyerContact,
-                nidNumber: typeof leg["nidNumber"] === "string" ? leg["nidNumber"] : undefined,
-                timeline,
-                createdAt,
-                updatedAt: createdAt,
-              };
-            });
-            window.localStorage.setItem(STORAGE_KEY, JSON.stringify(upgraded));
-            return upgraded;
+            return parsedLegacy as OrderRecord[];
           }
         } catch {
-          // ignore legacy parse errors
+          // ignore
         }
       }
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(INITIAL_SAMPLE_ORDERS));
       return INITIAL_SAMPLE_ORDERS;
     }
     const parsed = JSON.parse(raw) as OrderRecord[];
@@ -498,6 +643,35 @@ export function getOrders(): OrderRecord[] {
   } catch {
     return INITIAL_SAMPLE_ORDERS;
   }
+}
+
+function writeLocalOrders(orders: OrderRecord[]): void {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(orders));
+    window.localStorage.setItem(LEGACY_STORAGE_KEY, JSON.stringify(orders));
+  } catch {
+    // ignore
+  }
+}
+
+let syncInitiated = false;
+
+/**
+ * Retrieves all stored orders immediately from cache and triggers a background sync with Supabase
+ */
+export function getOrders(): OrderRecord[] {
+  const local = readLocalOrders();
+
+  // Initiate background Supabase sync on first read in client
+  if (typeof window !== "undefined" && !syncInitiated) {
+    syncInitiated = true;
+    setTimeout(() => {
+      fetchOrdersAsync().catch(() => {});
+    }, 50);
+  }
+
+  return local;
 }
 
 /**
@@ -508,24 +682,71 @@ export function getOrderById(id: string): OrderRecord | undefined {
   return orders.find((o) => o.id.toUpperCase() === id.trim().toUpperCase());
 }
 
-/**
- * Saves a new or updated order to storage
- */
-export function saveOrder(order: OrderRecord): void {
-  if (typeof window === "undefined") return;
+async function syncOrderToSupabase(
+  order: OrderRecord,
+): Promise<{ success: boolean; error?: string }> {
   try {
-    const existing = getOrders();
-    const updated = [order, ...existing.filter((o) => o.id !== order.id)];
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-    // sync backward compatibility
-    window.localStorage.setItem(LEGACY_STORAGE_KEY, JSON.stringify(updated));
-  } catch (error) {
-    console.error("Failed to save order to localStorage:", error);
+    const buyerPhone = order.buyerContact?.phone || "01700000000";
+    const buyerId = `u-${buyerPhone.replace(/\D/g, "") || "admin"}`;
+
+    // 1. Ensure buyer exists in public.users to satisfy foreign key
+    await supabase.from("users").upsert(
+      {
+        id: buyerId,
+        phone: buyerPhone,
+        name: order.buyerContact?.name || "Customer",
+        nid_number: order.buyerContact?.nidNumber || null,
+        role: "BUYER",
+        verified: true,
+      },
+      { onConflict: "id" },
+    );
+
+    // 2. Upsert order
+    const payload = orderRecordToSupabase(order);
+    payload["buyer_id"] = buyerId;
+    const { error } = await supabase.from("orders").upsert(payload);
+    if (error) {
+      console.warn("Supabase order upsert warning:", error.message);
+      return { success: false, error: error.message };
+    }
+    return { success: true };
+  } catch (err) {
+    console.warn("Supabase syncOrderToSupabase exception:", err);
+    return { success: false, error: String(err) };
   }
 }
 
 /**
- * Updates an existing order record in storage
+ * Saves a new or updated order to both local storage and persistent Supabase database
+ */
+export function saveOrder(order: OrderRecord): void {
+  if (typeof window === "undefined") return;
+  try {
+    const existing = readLocalOrders();
+    const updated = [order, ...existing.filter((o) => o.id !== order.id)];
+    writeLocalOrders(updated);
+    notifyListeners(updated);
+
+    // Asynchronously push to Supabase PostgreSQL with FK guarantee
+    syncOrderToSupabase(order).catch(() => {});
+  } catch (error) {
+    console.error("Failed to save order:", error);
+  }
+}
+
+/**
+ * Async version of saveOrder that guarantees awaiting Supabase persistence
+ */
+export async function saveOrderAsync(
+  order: OrderRecord,
+): Promise<{ success: boolean; error?: string }> {
+  saveOrder(order);
+  return syncOrderToSupabase(order);
+}
+
+/**
+ * Updates an existing order record in storage and Supabase
  */
 export function updateOrder(
   orderId: string,
@@ -533,7 +754,7 @@ export function updateOrder(
 ): OrderRecord | undefined {
   if (typeof window === "undefined") return;
   try {
-    const existing = getOrders();
+    const existing = readLocalOrders();
     const targetIndex = existing.findIndex((o) => o.id.toUpperCase() === orderId.toUpperCase());
     if (targetIndex === -1) return undefined;
 
@@ -541,8 +762,12 @@ export function updateOrder(
     const updated = updater({ ...current, updatedAt: new Date().toISOString() });
     existing[targetIndex] = updated;
 
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(existing));
-    window.localStorage.setItem(LEGACY_STORAGE_KEY, JSON.stringify(existing));
+    writeLocalOrders(existing);
+    notifyListeners(existing);
+
+    // Asynchronously update in Supabase
+    syncOrderToSupabase(updated).catch(() => {});
+
     return updated;
   } catch (error) {
     console.error("Failed to update order:", error);
@@ -621,7 +846,6 @@ export function transitionOrderStatus(
   );
 
   const updatedOrder = updateOrder(orderId, (prev) => {
-    // If order was delivered on COD, payment status can be marked PAID if courier confirms, otherwise remains PENDING until collection
     const updatedPaymentStatus =
       nextStatus === "COMPLETED" || (nextStatus === "DELIVERED" && actor === "COURIER")
         ? "PAID"

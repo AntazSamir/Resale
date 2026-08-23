@@ -14,7 +14,13 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { taka } from "@/data/catalog";
-import { getOrders, type OrderRecord, type OrderStatus } from "@/lib/order-store";
+import {
+  getOrders,
+  fetchOrdersAsync,
+  onOrdersChange,
+  type OrderRecord,
+  type OrderStatus,
+} from "@/lib/order-store";
 
 import { ProtectedRoute } from "@/components/protected-route";
 
@@ -137,6 +143,13 @@ function OrdersPage() {
 
   useEffect(() => {
     setOrders(getOrders());
+    fetchOrdersAsync()
+      .then((res) => {
+        if (Array.isArray(res) && res.length > 0) setOrders(res);
+      })
+      .catch(() => {});
+    const unsubscribe = onOrdersChange(setOrders);
+    return () => unsubscribe();
   }, []);
 
   const filteredOrders = orders.filter((order) => {

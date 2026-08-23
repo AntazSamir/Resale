@@ -248,4 +248,142 @@ Phase 3.4 integrated professional merchant storefronts, tech reviewer creator hu
 
 ---
 
+## 🚧 Phase 4: Real Persistence, Intelligence & Buyer Retention
+
+**Status:** `IN PROGRESS` (Phase 4.1A Complete) · **Architecture Audit:** August 2026
+
+Phase 4 transitions Resale.com from browser-local `localStorage` into a **real shared, persistent, multi-user marketplace architecture backed by Supabase PostgreSQL**, followed by behavioral signal tracking, buyer retention tools, and evidence-based seller analytics.
+
+---
+
+### 4.1A — Supabase Persistence & Shared Orders Foundation ✅ COMPLETED
+
+**Objective**: Establish Supabase as the production-ready persistent database and bridge all order management to shared remote PostgreSQL state.
+
+- **Supabase Client & RLS**: Connected `taqsfmxkiznbjyxbmbge.supabase.co` with live tables (`users`, `products`, `listings`, `inspection_items`, `orders`, `disputes`) and verified Row Level Security policies.
+- **Shared Multi-User Orders**: Replaced isolated browser `localStorage` orders with bidirectional Supabase sync (`fetchOrdersAsync()`, `saveOrderAsync()`, `syncOrderToSupabase()`, `onOrdersChange()`).
+- **Snapshot Integrity**: Preserved immutable `_orderSnapshot` in `shipping_address_json` (items, 32-point inspection baseline, seller identity, condition score, delivery fee, timeline events).
+- **Foreign-Key Resolution**: Auto-upserts verified user records (`public.users`) on checkout, satisfying `orders_buyer_id_fkey`.
+- **Integrated Routes**:
+  - `/account/orders` (Buyer order list with live sync)
+  - `/account/orders/$orderId` (Buyer cancellation & status timeline)
+  - `/seller/orders` (Seller order fulfillment & transition workbench)
+  - `/seller/dashboard` (Live GMV & active order metrics)
+  - `/admin/orders` (Admin transaction oversight)
+  - `src/lib/server-functions.ts` (`placeOrderFn`, `verifyOtpFn`, `createListingFn`)
+- **Cross-Browser Verification**: E2E verified — an order placed by a Buyer in Browser A is immediately fetched and updated by a Seller in Browser B and an Admin in Browser C.
+
+---
+
+### 4.1B — Storefronts & Creator Hub Remote Persistence 📋 NEXT UP
+
+**Objective**: Migrate Pro Storefronts and Creator Profiles from `localStorage` to Supabase PostgreSQL.
+
+- **Storefronts Migration**: Move `resale.stores` to `public.stores` table with slug uniqueness, verification badges, business hours, and store catalogs.
+- **Creator Profiles**: Move `resale.creators` and `resale.product-videos` to `public.creator_profiles` and `public.product_videos`.
+- **Cross-User Visibility**: Ensure newly created merchant stores and video reviews are instantly discoverable across all browsers.
+
+---
+
+### 4.1C — Disputes & Evidence Persistence 📋 PLANNED
+
+**Objective**: Migrate Dispute Mediation Hub from `localStorage` (`resale.disputes.v2`) to remote Supabase `disputes` and storage buckets.
+
+- **Dispute Records**: Move 48h dispute filings, evidence metadata, seller response SLAs, and admin verdicts to PostgreSQL.
+- **Audit Logs**: Store immutable mediation timeline events in database records.
+
+---
+
+### 4.1D — Cart Cloud Synchronization 📋 PLANNED
+
+**Objective**: Upgrade `resale.cart` with cloud persistence for authenticated users.
+
+- **Guest-to-User Merge**: Local cart preserves items for guests, automatically merging into persistent cloud cart upon login.
+
+---
+
+### 4.2 — Event & Analytics Foundation ⭐ HIGH
+
+**Objective**: Instrument the 12-type behavioral event model to power all intelligence features.
+
+- **Event Types**: `PRODUCT_VIEWED`, `LISTING_VIEWED`, `SEARCH_PERFORMED`, `FILTER_APPLIED`, `CART_ADDED`, `CART_REMOVED`, `CHECKOUT_STARTED`, `ORDER_COMPLETED`, `STORE_VIEWED`, `CREATOR_VIDEO_PLAYED`, `FAVORITE_ADDED`, `FAVORITE_REMOVED`.
+- **Privacy Standards**: Session-based anonymous tracking — zero PII (NID, phone) in event payloads. All events stored in Resale's own database.
+- **Data Truth Rule**: Events are only recorded when they actually occur. Never backfilled, inferred, or fabricated.
+
+---
+
+### 4.3 — Favorites & Saved Searches ⭐ HIGH
+
+**Objective**: Allow buyers to save listings/products and persist search queries with optional new-listing alerts.
+
+- **Favorites**: Heart button on listing and product pages. Saved to database. Private to the saving user.
+- **Saved Searches**: "Save this search" action in `/products`. Stores query + active filters.
+- **New Routes**: `/account/favorites` — buyer favorites dashboard.
+
+---
+
+### 4.4 — Seller Analytics Intelligence ⭐ HIGH
+
+**Objective**: Give sellers evidence-based performance metrics derived from actual recorded events.
+
+- **Metrics Available**: Listing views (7d/30d), cart additions, favorites count, total orders, delivered GMV, conversion rate, average days to sale, dispute rate.
+- **Intelligent Insights (rule-based)**: "Your listing has 45 views but 0 cart additions — consider adjusting the price."
+- **New Route**: `/seller/analytics` — per-listing performance breakdown.
+
+---
+
+### 4.5 — Notifications Infrastructure ⭐ MEDIUM
+
+**Objective**: Deliver timely, relevant alerts to buyers and sellers via an in-app notification center.
+
+- **Buyer Alerts**: Order status updates, dispute resolutions, price drops on favorited listings.
+- **Seller Alerts**: New order placed, order SLA approaching, dispute filed.
+- **Architecture**: In-app notification bell in `SiteHeader`.
+
+---
+
+### 4.6 — Rule-Based Personalization ⭐ MEDIUM
+
+**Objective**: Surface relevant products and listings based on the user's actual recorded behavior.
+
+- **Personalized Homepage**: "Based on your recent order" shelf. "New matches for your saved search" shelf.
+- **Recommendation Engine**: Rule-based engine in `src/lib/recommendation-engine.ts`.
+- **Data Truth Rule**: If a user has no history, show curated editorial picks — never fabricate personalization signals.
+
+---
+
+### 4.7 — Device Lifecycle Passport ⭐ LOW
+
+**Objective**: Build a persistent, honest record of a device's history on the Resale platform.
+
+- **What Can Be Recorded**: Listing date, grade, condition score, number of inspection checks recorded, sale date, sold price, disputes filed.
+- **Implementation**: `/product/$productId/history` sub-page showing the device's Resale timeline.
+
+---
+
+## 📊 Updated Summary Milestone Table
+
+| Milestone      | Key Focus Area               | Deliverables                                                                                                                                                                      |    Status    |
+| -------------- | ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------: |
+| **Phase 1**    | Marketplace Core & Catalog   | Alternating Homepage, Catalog Filters, Cart, COD Checkout, NID Auth, Seller Wizard                                                                                                | ✅ Completed |
+| **Phase 2**    | Trust & Inspection UX        | 32-Point Inspection, Condition Gauge, Seller Trust Line, Device Verification, Product Multi-Seller Page                                                                           | ✅ Completed |
+| **Phase 3.1**  | Order & Transaction Backbone | Decoupled Lifecycle State Machine, Payment Abstraction (COD Active), Mandatory Auth & Redirect, Buyer Timeline & Cancellation, Seller Fulfillment Hub, Admin Oversight            | ✅ Completed |
+| **Phase 3.4**  | Creator & Pro Storefronts    | Public Branded Storefronts (`/store/:slug`), Verified Creator Profiles (`/creator/:slug`), Hands-on Product Video Reviews, Exact-Unit Review Badging, Bulk CSV Inventory Importer | ✅ Completed |
+| **Phase 3.6**  | Dispute Mediation Hub        | 48h Inspection Window, 24h Seller SLA, Evidence Dropzone, Side-by-Side Admin Workbench, Deterministic Risk Analyzer, Simulated Payout Holds & Reverse Logistics                   | ✅ Completed |
+| **Phase 3.2**  | Courier Logistics            | Steadfast/Pathao API integration, live tracking webhooks, automated COD reconciliation                                                                                            |  📋 Planned  |
+| **Phase 3.3**  | Automated Diagnostics        | Live IMEI verification API, device hardware test runner, certified badges                                                                                                         |  📋 Planned  |
+| **Phase 3.5**  | AI Valuation Engine          | Real-time price recommender, price history graphs, "Fair Deal" badges                                                                                                             |  📋 Planned  |
+| **Phase 4.1A** | Supabase Orders Persistence  | Remote PostgreSQL orders sync, user foreign-key resolution, snapshot immutability, cross-browser shared state                                                                     | ✅ Completed |
+| **Phase 4.1B** | Remote Stores & Creators     | Supabase persistence for Pro Storefronts (`stores`) and Creator Hub (`creator_profiles`, `product_videos`)                                                                        | 🚧 In Progress |
+| **Phase 4.1C** | Remote Dispute Persistence   | Supabase persistence for Disputes (`disputes`) and evidence metadata                                                                                                              |  📋 Planned  |
+| **Phase 4.1D** | Cloud Cart Sync              | Guest-to-user cart cloud persistence & automatic login merging                                                                                                                    |  📋 Planned  |
+| **Phase 4.2**  | Event & Analytics Model      | 12-type behavioral event model, privacy-safe session tracking, analytics foundation                                                                                                |  📋 Planned  |
+| **Phase 4.3**  | Favorites & Saved Searches   | Listing/product favorites, saved search persistence, new-listing alerts                                                                                                           |  📋 Planned  |
+| **Phase 4.4**  | Seller Intelligence          | Real listing view/conversion metrics, seller analytics page, dashboard overhaul                                                                                                   |  📋 Planned  |
+| **Phase 4.5**  | Notifications                | In-app notification center, order/dispute/price-drop alerts, email/SMS pipeline                                                                                                   |  📋 Planned  |
+| **Phase 4.6**  | Rule-Based Personalization   | Personalized homepage shelves, recommendation engine, saved-search-driven discovery                                                                                               |  📋 Planned  |
+| **Phase 4.7**  | Device Lifecycle Passport    | Honest per-device Resale history page, inspection/sale/dispute timeline                                                                                                           |  📋 Planned  |
+
+---
+
 _Last Updated: August 2026 · Resale.com Engineering Team_

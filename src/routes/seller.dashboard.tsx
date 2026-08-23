@@ -18,7 +18,12 @@ import {
 } from "lucide-react";
 import { taka } from "@/data/catalog";
 import { ProtectedRoute } from "@/components/protected-route";
-import { getOrders, type OrderRecord } from "@/lib/order-store";
+import {
+  getOrders,
+  fetchOrdersAsync,
+  onOrdersChange,
+  type OrderRecord,
+} from "@/lib/order-store";
 import { Badge } from "@/components/ui/badge";
 import resaleLogo from "@/assets/resale-logo.svg";
 
@@ -125,6 +130,13 @@ function SellerDashboardPage() {
 
   useEffect(() => {
     setOrders(getOrders());
+    fetchOrdersAsync()
+      .then((res) => {
+        if (Array.isArray(res) && res.length > 0) setOrders(res);
+      })
+      .catch(() => {});
+    const unsubscribe = onOrdersChange(setOrders);
+    return () => unsubscribe();
   }, []);
 
   const totalSales = orders

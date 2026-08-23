@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { db } from "@/db";
+import { supabase } from "@/lib/supabase";
 
 // Fetch all products
 export const getProductsFn = createServerFn({ method: "GET" }).handler(async () => {
@@ -62,6 +63,25 @@ export const createListingFn = createServerFn({ method: "POST" })
     };
 
     db.listings.unshift(newListing);
+
+    try {
+      await supabase.from("listings").upsert({
+        id,
+        product_id: data.productId,
+        seller_id: data.sellerId || "u-1",
+        grade: data.grade,
+        condition_score: data.conditionScore ?? 90,
+        price_poisha: (data.price || 0) * 100,
+        seller_note: data.sellerNote || "",
+        status: "PENDING_MODERATION",
+        warranty_months: data.warrantyMonths ?? 0,
+        has_invoice: Boolean(data.hasInvoice),
+        accessories: data.accessories || "",
+      });
+    } catch {
+      // ignore
+    }
+
     return { success: true, listingId: id };
   });
 
@@ -80,19 +100,37 @@ export const placeOrderFn = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     const orderId = data.orderId || `ORD-${Math.floor(10000 + Math.random() * 90000)}`;
+    const createdAt = new Date().toISOString();
     const newOrder = {
       id: orderId,
       listingId: data.listingId,
       buyerId: data.buyerId || "u-admin",
       amountPoisha: Math.round(data.amount * 100),
       paymentMethod: data.paymentMethod,
-      status: "CONFIRMED" as const,
+      status: "PENDING" as const,
       shippingAddressJson: JSON.stringify(data.shippingAddress),
       nidNumber: data.nidNumber,
-      createdAt: new Date().toISOString(),
+      createdAt,
     };
 
     db.orders.unshift(newOrder);
+
+    try {
+      await supabase.from("orders").upsert({
+        id: orderId,
+        listing_id: data.listingId,
+        buyer_id: data.buyerId || "u-admin",
+        amount_poisha: Math.round(data.amount * 100),
+        payment_method: data.paymentMethod.toUpperCase(),
+        status: "PENDING",
+        shipping_address_json: data.shippingAddress,
+        nid_number: data.nidNumber,
+        created_at: createdAt,
+      });
+    } catch (err) {
+      console.warn("Supabase placeOrder server sync error:", err);
+    }
+
     return { success: true, orderId };
   });
 
@@ -154,6 +192,20 @@ export const verifyOtpFn = createServerFn({ method: "POST" })
       db.users.push(user);
     }
 
+    // Ensure user is synced to Supabase users table
+    try {
+      await supabase.from("users").upsert({
+        id: user.id,
+        phone: user.phone,
+        name: user.name || "Customer",
+        nid_number: user.nidNumber || null,
+        role: user.role,
+        verified: user.verified,
+      });
+    } catch (err) {
+      console.warn("Supabase user sync error:", err);
+    }
+
     return {
       success: true,
       error: null,
@@ -166,3 +218,4 @@ export const verifyOtpFn = createServerFn({ method: "POST" })
       },
     };
   });
+

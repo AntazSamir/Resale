@@ -20,6 +20,8 @@ import { taka } from "@/data/catalog";
 import { ProtectedRoute } from "@/components/protected-route";
 import {
   getOrders,
+  fetchOrdersAsync,
+  onOrdersChange,
   transitionOrderStatus,
   type OrderRecord,
   type OrderStatus,
@@ -112,10 +114,17 @@ function SellerOrdersPage() {
 
   const refresh = () => {
     setOrders(getOrders());
+    fetchOrdersAsync()
+      .then((res) => {
+        if (Array.isArray(res) && res.length > 0) setOrders(res);
+      })
+      .catch(() => {});
   };
 
   useEffect(() => {
     refresh();
+    const unsubscribe = onOrdersChange(setOrders);
+    return () => unsubscribe();
   }, []);
 
   const handleTransition = (orderId: string, nextStatus: OrderStatus, label: string) => {

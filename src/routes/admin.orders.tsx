@@ -21,6 +21,8 @@ import { taka } from "@/data/catalog";
 import { ProtectedRoute } from "@/components/protected-route";
 import {
   getOrders,
+  fetchOrdersAsync,
+  onOrdersChange,
   type OrderRecord,
   type OrderStatus,
   type PaymentStatus,
@@ -41,6 +43,13 @@ function AdminOrdersPage() {
 
   useEffect(() => {
     setOrders(getOrders());
+    fetchOrdersAsync()
+      .then((res) => {
+        if (Array.isArray(res) && res.length > 0) setOrders(res);
+      })
+      .catch(() => {});
+    const unsubscribe = onOrdersChange(setOrders);
+    return () => unsubscribe();
   }, []);
 
   const totalGMV = orders.reduce((sum, o) => sum + o.total, 0);
