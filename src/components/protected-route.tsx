@@ -9,10 +9,11 @@ interface ProtectedRouteProps {
 }
 
 export function ProtectedRoute({ children, requireAdmin = false, redirect }: ProtectedRouteProps) {
-  const { isLoggedIn, user } = useAuth();
+  const { isLoggedIn, user, hydrated } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
+    if (!hydrated) return;
     if (!isLoggedIn) {
       if (redirect) {
         navigate({
@@ -25,7 +26,15 @@ export function ProtectedRoute({ children, requireAdmin = false, redirect }: Pro
         });
       }
     }
-  }, [isLoggedIn, navigate, redirect]);
+  }, [hydrated, isLoggedIn, navigate, redirect]);
+
+  if (!hydrated) {
+    return (
+      <div className="flex flex-1 items-center justify-center py-32 px-5">
+        <p className="text-sm text-muted-foreground">Loading…</p>
+      </div>
+    );
+  }
 
   if (!isLoggedIn) {
     return null;
