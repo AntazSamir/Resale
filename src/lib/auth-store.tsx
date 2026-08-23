@@ -11,6 +11,7 @@ export interface AuthUser {
 interface AuthContextValue {
   user: AuthUser | null;
   isLoggedIn: boolean;
+  hydrated: boolean;
   signIn: (userData: string | Partial<AuthUser>) => void;
   signOut: () => void;
 }
