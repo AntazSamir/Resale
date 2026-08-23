@@ -161,9 +161,7 @@ export function ProductCard({ product, compact = false }: { product: Product; co
       {/* Bottom meta & actions */}
       <div className="mt-3 pt-2.5 space-y-2.5 border-t border-border/60">
         <div className="flex items-center justify-between text-xs text-muted-foreground">
-          <span className="truncate font-normal">
-            {best.seller.district}
-          </span>
+          <span className="truncate font-normal">{best.seller.district}</span>
           <span className="text-emerald-600 font-semibold shrink-0 ml-2">Grade {best.grade}</span>
         </div>
 
