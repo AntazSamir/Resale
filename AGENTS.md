@@ -10,3 +10,10 @@
 > the editor, so keep the branch in a working state.
 
 <!-- LOVABLE:END -->
+
+## Git Rules
+
+- **NEVER commit or push to GitHub without explicit permission from the user.**
+  Always ask first and wait for confirmation before running `git commit` or
+  `git push`.
+- Local verification (lint, typecheck, build) is fine to run at any time.
