@@ -160,40 +160,19 @@ ALTER TABLE public.stores ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.creator_profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.product_videos ENABLE ROW LEVEL SECURITY;
 
--- Public Read Policies (Allows reading catalog, listings, inspection items, stores, creators, approved videos)
+-- ── SECURITY MODEL (2026-08-26 lockdown) ──
+-- * Anonymous visitors: READ-ONLY access to public catalog data.
+-- * ALL writes go through the app server using SUPABASE_SERVICE_ROLE_KEY
+--   (service_role bypasses RLS — no public INSERT/UPDATE policies exist).
+-- * PII tables (users, orders, disputes) have NO public read policy;
+--   they are only readable server-side.
+--
+-- Do NOT add `USING (true)` / `WITH CHECK (true)` write policies here.
+-- See supabase/migrations/20260826_rls_lockdown.sql for details.
+
 CREATE POLICY "Allow public read access on products" ON public.products FOR SELECT USING (true);
 CREATE POLICY "Allow public read access on listings" ON public.listings FOR SELECT USING (true);
 CREATE POLICY "Allow public read access on inspection_items" ON public.inspection_items FOR SELECT USING (true);
-CREATE POLICY "Allow public read access on users" ON public.users FOR SELECT USING (true);
-CREATE POLICY "Allow public read access on orders" ON public.orders FOR SELECT USING (true);
-CREATE POLICY "Allow public read access on disputes" ON public.disputes FOR SELECT USING (true);
 CREATE POLICY "Allow public read access on stores" ON public.stores FOR SELECT USING (true);
 CREATE POLICY "Allow public read access on creator_profiles" ON public.creator_profiles FOR SELECT USING (true);
-CREATE POLICY "Allow public read access on product_videos" ON public.product_videos FOR SELECT USING (status = 'APPROVED');
-
--- Public Insert/Update Policies
-CREATE POLICY "Allow public insert on users" ON public.users FOR INSERT WITH CHECK (true);
-CREATE POLICY "Allow public update on users" ON public.users FOR UPDATE USING (true);
-
-CREATE POLICY "Allow public insert on products" ON public.products FOR INSERT WITH CHECK (true);
-CREATE POLICY "Allow public update on products" ON public.products FOR UPDATE USING (true);
-
-CREATE POLICY "Allow public insert on listings" ON public.listings FOR INSERT WITH CHECK (true);
-CREATE POLICY "Allow public update on listings" ON public.listings FOR UPDATE USING (true);
-
-CREATE POLICY "Allow public insert on inspection_items" ON public.inspection_items FOR INSERT WITH CHECK (true);
-
-CREATE POLICY "Allow public insert on orders" ON public.orders FOR INSERT WITH CHECK (true);
-CREATE POLICY "Allow public update on orders" ON public.orders FOR UPDATE USING (true);
-
-CREATE POLICY "Allow public insert on disputes" ON public.disputes FOR INSERT WITH CHECK (true);
-CREATE POLICY "Allow public update on disputes" ON public.disputes FOR UPDATE USING (true);
-
-CREATE POLICY "Allow public insert on stores" ON public.stores FOR INSERT WITH CHECK (true);
-CREATE POLICY "Allow public update on stores" ON public.stores FOR UPDATE USING (true);
-
-CREATE POLICY "Allow public insert on creator_profiles" ON public.creator_profiles FOR INSERT WITH CHECK (true);
-CREATE POLICY "Allow public update on creator_profiles" ON public.creator_profiles FOR UPDATE USING (true);
-
-CREATE POLICY "Allow public insert on product_videos" ON public.product_videos FOR INSERT WITH CHECK (true);
-CREATE POLICY "Allow public update on product_videos" ON public.product_videos FOR UPDATE USING (true);
+CREATE POLICY "Allow public read access on approved videos" ON public.product_videos FOR SELECT USING (status = 'APPROVED');

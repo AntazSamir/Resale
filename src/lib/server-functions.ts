@@ -1,6 +1,10 @@
 import { createServerFn } from "@tanstack/react-start";
 import { db } from "@/db";
-import { supabase } from "@/lib/supabase";
+
+async function supabaseAdmin() {
+  const { getSupabaseAdmin } = await import("@/lib/supabase-admin");
+  return getSupabaseAdmin();
+}
 
 // Fetch all products
 export const getProductsFn = createServerFn({ method: "GET" }).handler(async () => {
@@ -65,6 +69,7 @@ export const createListingFn = createServerFn({ method: "POST" })
     db.listings.unshift(newListing);
 
     try {
+      const supabase = await supabaseAdmin();
       await supabase.from("listings").upsert({
         id,
         product_id: data.productId,
@@ -116,6 +121,7 @@ export const placeOrderFn = createServerFn({ method: "POST" })
     db.orders.unshift(newOrder);
 
     try {
+      const supabase = await supabaseAdmin();
       await supabase.from("orders").upsert({
         id: orderId,
         listing_id: data.listingId,
@@ -258,6 +264,7 @@ export const verifyOtpFn = createServerFn({ method: "POST" })
 
     // Ensure user is synced to Supabase users table
     try {
+      const supabase = await supabaseAdmin();
       await supabase.from("users").upsert({
         id: user.id,
         phone: user.phone || "00000000000",

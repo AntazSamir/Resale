@@ -2,6 +2,7 @@ import { Storefront, INITIAL_DEMO_STORES } from "@/data/storefront";
 import { listings, Listing } from "@/data/catalog";
 import { readGradedDrafts } from "@/lib/grade-store";
 import { supabase } from "./supabase";
+import { upsertUserRecordFn, upsertStoreFn } from "./db-server";
 
 const STORE_STORAGE_KEY = "resale.stores";
 
@@ -221,25 +222,23 @@ async function syncStoreToSupabase(
   try {
     // 1. Ensure owner user exists in public.users to satisfy foreign key
     const ownerId = store.ownerId || "u-1";
-    await supabase.from("users").upsert(
-      {
+    const userResult = await upsertUserRecordFn({
+      data: {
         id: ownerId,
         phone: store.phone || "01700000000",
         name: store.name,
         role: "SELLER",
         verified: true,
       },
-      { onConflict: "id" },
-    );
+    });
+    if (!userResult.success) {
+      return userResult;
+    }
 
-    // 2. Upsert storefront
+    // 2. Upsert storefront (privileged server-side write)
     const payload = storefrontToSupabase(store);
     payload["owner_id"] = ownerId;
-    const { error } = await supabase.from("stores").upsert(payload, { onConflict: "id" });
-    if (error) {
-      return { success: false, error: error.message };
-    }
-    return { success: true };
+    return await upsertStoreFn({ data: payload });
   } catch (err) {
     return { success: false, error: String(err) };
   }

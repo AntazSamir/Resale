@@ -1,4 +1,4 @@
-import { supabase } from "./supabase";
+import { upsertUserRecordFn, upsertOrderFn, listOrdersFn } from "./db-server";
 
 export type OrderStatus =
   | "PENDING"
@@ -446,8 +446,7 @@ export function rowToOrderRecord(row: Record<string, unknown>): OrderRecord {
             price: total,
           },
         ];
-  const nidNumber =
-    typeof row["nid_number"] === "string" ? row["nid_number"] : "199526920199201";
+  const nidNumber = typeof row["nid_number"] === "string" ? row["nid_number"] : "199526920199201";
 
   const buyerContact =
     meta && typeof meta["buyerContact"] === "object" && meta["buyerContact"] !== null
@@ -578,41 +577,37 @@ export function orderRecordToSupabase(order: OrderRecord): Record<string, unknow
  */
 export async function fetchOrdersAsync(): Promise<OrderRecord[]> {
   try {
-    const { data, error } = await supabase
-      .from("orders")
-      .select("*")
-      .order("created_at", { ascending: false });
+    const { json, error } = await listOrdersFn();
+    const rows = JSON.parse(json || "[]") as Array<Record<string, unknown>>;
 
-    if (error) {
-      console.warn("Supabase fetchOrders error, using local cache:", error.message);
+    if (error || !Array.isArray(rows) || rows.length === 0) {
+      if (error) {
+        console.warn("listOrdersFn error, using local cache:", error);
+      }
       return getOrders();
     }
 
-    if (Array.isArray(data) && data.length > 0) {
-      const remoteOrders = data.map((r) => rowToOrderRecord(r as Record<string, unknown>));
+    const remoteOrders = rows.map((r) => rowToOrderRecord(r as Record<string, unknown>));
 
-      // Merge with any unique local records if present
-      if (typeof window !== "undefined") {
-        const local = readLocalOrders();
-        const mergedMap = new Map<string, OrderRecord>();
-        // Remote takes precedence
-        remoteOrders.forEach((o) => mergedMap.set(o.id.toUpperCase(), o));
-        local.forEach((o) => {
-          if (!mergedMap.has(o.id.toUpperCase())) {
-            mergedMap.set(o.id.toUpperCase(), o);
-          }
-        });
-        const merged = Array.from(mergedMap.values());
-        writeLocalOrders(merged);
-        notifyListeners(merged);
-        return merged;
-      }
-
-      notifyListeners(remoteOrders);
-      return remoteOrders;
+    // Merge with any unique local records if present
+    if (typeof window !== "undefined") {
+      const local = readLocalOrders();
+      const mergedMap = new Map<string, OrderRecord>();
+      // Remote takes precedence
+      remoteOrders.forEach((o) => mergedMap.set(o.id.toUpperCase(), o));
+      local.forEach((o) => {
+        if (!mergedMap.has(o.id.toUpperCase())) {
+          mergedMap.set(o.id.toUpperCase(), o);
+        }
+      });
+      const merged = Array.from(mergedMap.values());
+      writeLocalOrders(merged);
+      notifyListeners(merged);
+      return merged;
     }
 
-    return getOrders();
+    notifyListeners(remoteOrders);
+    return remoteOrders;
   } catch (err) {
     console.warn("fetchOrdersAsync exception, using local cache:", err);
     return getOrders();
@@ -689,27 +684,25 @@ async function syncOrderToSupabase(
     const buyerId = `u-${buyerPhone.replace(/\D/g, "") || "admin"}`;
 
     // 1. Ensure buyer exists in public.users to satisfy foreign key
-    await supabase.from("users").upsert(
-      {
+    const userResult = await upsertUserRecordFn({
+      data: {
         id: buyerId,
         phone: buyerPhone,
         name: order.buyerContact?.name || "Customer",
-        nid_number: order.buyerContact?.nidNumber || null,
+        nidNumber: order.buyerContact?.nidNumber || null,
         role: "BUYER",
         verified: true,
       },
-      { onConflict: "id" },
-    );
+    });
+    if (!userResult.success) {
+      console.warn("Supabase buyer upsert warning:", userResult.error);
+      return userResult;
+    }
 
-    // 2. Upsert order
+    // 2. Upsert order (privileged server-side write)
     const payload = orderRecordToSupabase(order);
     payload["buyer_id"] = buyerId;
-    const { error } = await supabase.from("orders").upsert(payload);
-    if (error) {
-      console.warn("Supabase order upsert warning:", error.message);
-      return { success: false, error: error.message };
-    }
-    return { success: true };
+    return await upsertOrderFn({ data: payload });
   } catch (err) {
     console.warn("Supabase syncOrderToSupabase exception:", err);
     return { success: false, error: String(err) };

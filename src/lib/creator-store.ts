@@ -7,6 +7,7 @@ import {
   ReviewType,
 } from "@/data/creator";
 import { supabase } from "./supabase";
+import { upsertUserRecordFn, upsertCreatorProfileFn, upsertProductVideoFn } from "./db-server";
 
 const CREATORS_STORAGE_KEY = "resale.creators";
 const VIDEOS_STORAGE_KEY = "resale.product-videos";
@@ -260,25 +261,23 @@ async function syncCreatorToSupabase(
   try {
     // 1. Ensure user exists in public.users to satisfy foreign key
     const userId = creator.userId || `user-${creator.handle}`;
-    await supabase.from("users").upsert(
-      {
+    const userResult = await upsertUserRecordFn({
+      data: {
         id: userId,
         phone: "01700000000",
         name: creator.displayName,
         role: "BUYER",
         verified: true,
       },
-      { onConflict: "id" },
-    );
+    });
+    if (!userResult.success) {
+      return userResult;
+    }
 
-    // 2. Upsert creator profile
+    // 2. Upsert creator profile (privileged server-side write)
     const payload = creatorProfileToSupabase(creator);
     payload["user_id"] = userId;
-    const { error } = await supabase.from("creator_profiles").upsert(payload, { onConflict: "id" });
-    if (error) {
-      return { success: false, error: error.message };
-    }
-    return { success: true };
+    return await upsertCreatorProfileFn({ data: payload });
   } catch (err) {
     return { success: false, error: String(err) };
   }
@@ -416,11 +415,7 @@ async function syncProductVideoToSupabase(
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const payload = productVideoToSupabase(video);
-    const { error } = await supabase.from("product_videos").upsert(payload, { onConflict: "id" });
-    if (error) {
-      return { success: false, error: error.message };
-    }
-    return { success: true };
+    return await upsertProductVideoFn({ data: payload });
   } catch (err) {
     return { success: false, error: String(err) };
   }

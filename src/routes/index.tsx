@@ -553,7 +553,9 @@ function Index() {
                   <BadgeCheck className="absolute -bottom-0.5 -right-0.5 size-4 rounded-full bg-background text-grade-a" />
                 )}
               </span>
-              <span className="w-full truncate text-xs font-semibold text-foreground">{s.name}</span>
+              <span className="w-full truncate text-xs font-semibold text-foreground">
+                {s.name}
+              </span>
               <span className="w-full truncate text-[11px] text-muted-foreground">{s.role}</span>
               <span className="text-[11px] font-semibold text-primary">{s.count} listings</span>
             </div>
