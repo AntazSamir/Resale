@@ -82,6 +82,27 @@ const testimonials = [
     name: "Shakil Hasan",
     location: "Sylhet (Zindabazar)",
   },
+  {
+    stars: 5,
+    quote:
+      "Sold my iPhone 15 Pro Max. Quick payment and honest grading made the process stress-free. Highly recommended!",
+    name: "Ayesha Khan",
+    location: "Khulna (Khalifa)",
+  },
+  {
+    stars: 5,
+    quote:
+      "Bought a refurbished MacBook Pro M1. Arrived exactly as described, battery at 98% health. Great experience overall.",
+    name: "Rahim Uddin",
+    location: "Barisal (City)",
+  },
+  {
+    stars: 5,
+    quote:
+      "Excellent customer service! The team helped me find the right device within my budget. Transparent pricing and smooth delivery.",
+    name: "Fatima Ahmed",
+    location: "Rajshahi (Shaheb Bazar)",
+  },
 ];
 
 const whyResalePillars = [
