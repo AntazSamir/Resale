@@ -32,9 +32,9 @@ import {
   inspectionFramework,
   TOTAL_INSPECTION_CHECKS,
 } from "@/data/catalog";
-import hero from "@/assets/hero.jpg";
-import banner1 from "@/assets/banner-1.png";
-import banner2 from "@/assets/banner-2.png";
+import hero from "@/assets/hero.webp";
+import banner1 from "@/assets/banner-1.webp";
+import banner2 from "@/assets/banner-2.webp";
 
 const testimonials = [
   {
