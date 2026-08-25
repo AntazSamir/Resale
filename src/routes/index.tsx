@@ -30,6 +30,8 @@ import { getCreators } from "@/lib/creator-store";
 import { getStores } from "@/lib/store-store";
 import { useCart } from "@/lib/cart-store";
 import hero from "@/assets/hero.webp";
+import banner1 from "@/assets/banner-1.webp";
+import banner2 from "@/assets/banner-2.webp";
 
 export const Route = createFileRoute("/")({
   head: () => {
@@ -465,6 +467,33 @@ function Index() {
                 </div>
               ))}
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ═════════════════════════════════════════════════════════════
+          BANNERS
+      ════════════════════════════════════════════════════════════ */}
+      <section className="px-4 md:px-5 py-2">
+        <div className="mx-auto max-w-7xl">
+          {/* Desktop banner - full width on desktop */}
+          <div className="w-full md:w-auto bg-secondary/80 backdrop-blur-sm rounded-t-2xl rounded-b-2xl overflow-hidden md:rounded-none md:rounded-t-0 md:rounded-b-0 md:max-w-7xl">
+            <img
+              src={banner1}
+              alt="Resale featured banner desktop"
+              loading="lazy"
+              className="w-full h-64 md:h-80 object-cover"
+            />
+          </div>
+
+          {/* Mobile banner - full width on mobile */}
+          <div className="hidden md:block w-full bg-secondary/80 backdrop-blur-sm rounded-t-2xl rounded-b-2xl overflow-hidden md:rounded-none md:rounded-t-0 md:rounded-b-0 md:max-w-7xl">
+            <img
+              src={banner2}
+              alt="Resale featured banner mobile"
+              loading="lazy"
+              className="w-full h-64 md:h-80 object-cover"
+            />
           </div>
         </div>
       </section>
