@@ -266,7 +266,7 @@ function Index() {
               <img
                 src={hero}
                 alt="Verified second-hand electronics"
-                className="aspect-[16/10] w-full object-cover"
+                className="aspect-16/10 w-full object-cover"
               />
             </div>
 
