@@ -474,7 +474,7 @@ function Index() {
       {/* ═════════════════════════════════════════════════════════════
           BANNERS
       ════════════════════════════════════════════════════════════ */}
-      <section className="px-4 md:px-5 py-2">
+      <section className="px-4 md:px-5 py-10 border-t border-border">
         <div className="mx-auto max-w-7xl">
           {/* Desktop banner - full width on desktop */}
           <div className="w-full md:w-auto bg-secondary/80 backdrop-blur-sm rounded-t-2xl rounded-b-2xl overflow-hidden md:rounded-none md:rounded-t-0 md:rounded-b-0 md:max-w-7xl">
