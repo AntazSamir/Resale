@@ -3,7 +3,7 @@ import { useState } from "react";
 import { GradeBadge } from "./grade-badge";
 import { taka, type Listing, type Product } from "@/data/catalog";
 import { useCart } from "@/lib/cart-store";
-import { ShoppingBag, Check } from "lucide-react";
+import { ShoppingBag, Check, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface ListingCardProps {
@@ -168,17 +168,21 @@ export function ListingCard({
           </p>
 
           <div className="flex flex-wrap items-center gap-2 pt-1 text-xs text-muted-foreground">
-            <span className="bg-secondary px-2 py-0.5 border border-border text-foreground font-medium">
-              📍 {listing.seller.district}
+            <span className="flex items-center gap-1 text-amber-500 font-medium">
+              <Star className="size-3 fill-current" />
+              {listing.seller.rating.toFixed(1)}
             </span>
             {listing.battery && (
               <span className="bg-emerald-500/10 text-emerald-600 px-2 py-0.5 border border-emerald-500/20 font-medium">
                 🔋 {listing.battery}% Battery
               </span>
             )}
-            <span className="bg-primary/10 text-primary px-2 py-0.5 border border-primary/20 font-medium">
-              ✓ NID Verified Seller
-            </span>
+            {listing.seller.verified && (
+              <span className="flex items-center gap-1 text-primary font-semibold">
+                <Check className="size-2.5" />
+                {listing.seller.name}
+              </span>
+            )}
           </div>
         </div>
 
@@ -280,10 +284,14 @@ export function ListingCard({
       {/* Bottom meta & actions */}
       <div className="mt-3 pt-2.5 space-y-2.5 border-t border-border/60">
         <div className="flex items-center justify-between text-xs text-muted-foreground">
-          <span className="truncate font-medium text-foreground">
-            {listing.seller.name} · {listing.seller.district}
+          <span className="flex items-center gap-1 text-foreground font-medium truncate">
+            {listing.seller.name}
+            {listing.seller.verified && <Check className="size-2.5 text-emerald-500 shrink-0" />}
           </span>
-          <span className="text-primary font-semibold text-xs shrink-0 ml-1">✓ NID Verified</span>
+          <span className="flex items-center gap-1 text-muted-foreground">
+            <Star className="size-3 fill-amber-400 text-amber-400" />
+            {listing.seller.rating.toFixed(1)}
+          </span>
         </div>
 
         <div className="grid grid-cols-2 gap-2">

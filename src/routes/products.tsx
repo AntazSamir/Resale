@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useSearch } from "@tanstack/react-router";
+import { createFileRoute, Link, useSearch, useRouter } from "@tanstack/react-router";
 import { useState, useMemo, useEffect } from "react";
 import { SiteHeader, SiteFooter } from "@/components/site-header";
 import { ListingCard } from "@/components/listing-card";
@@ -48,6 +48,7 @@ interface ProductsSearch {
   q?: string | undefined;
   category?: string | undefined;
   brand?: string | undefined;
+  sub?: string | undefined;
 }
 
 export const Route = createFileRoute("/products")({
@@ -55,6 +56,7 @@ export const Route = createFileRoute("/products")({
     q: typeof search["q"] === "string" ? search["q"] : undefined,
     category: typeof search["category"] === "string" ? search["category"] : undefined,
     brand: typeof search["brand"] === "string" ? search["brand"] : undefined,
+    sub: typeof search["sub"] === "string" ? search["sub"] : undefined,
   }),
   head: () => ({
     meta: [
@@ -76,6 +78,7 @@ const MAX_CATALOG_PRICE = 300000;
 
 function ProductsPage() {
   const urlSearch = useSearch({ from: "/products" });
+  const router = useRouter();
 
   // Filter states
   const [searchQuery, setSearchQuery] = useState(urlSearch.q || "");
@@ -85,6 +88,7 @@ function ProductsPage() {
   const [selectedBrands, setSelectedBrands] = useState<string[]>(
     urlSearch.brand ? [urlSearch.brand] : [],
   );
+  const [selectedSubs, setSelectedSubs] = useState<string[]>(urlSearch.sub ? [urlSearch.sub] : []);
   const [selectedGrades, setSelectedGrades] = useState<Grade[]>([]);
   const [selectedDistricts, setSelectedDistricts] = useState<string[]>([]);
   const [minBatteryHealth, setMinBatteryHealth] = useState<number | null>(null);
@@ -100,7 +104,8 @@ function ProductsPage() {
     if (urlSearch.q !== undefined) setSearchQuery(urlSearch.q);
     if (urlSearch.category !== undefined) setSelectedCategories([urlSearch.category]);
     if (urlSearch.brand !== undefined) setSelectedBrands([urlSearch.brand]);
-  }, [urlSearch.q, urlSearch.category, urlSearch.brand]);
+    if (urlSearch.sub !== undefined) setSelectedSubs([urlSearch.sub]);
+  }, [urlSearch.q, urlSearch.category, urlSearch.brand, urlSearch.sub]);
 
   // Facet value lists
   const allCategories = useMemo(() => Array.from(new Set(products.map((p) => p.category))), []);
@@ -147,6 +152,7 @@ function ProductsPage() {
     setSearchQuery("");
     setSelectedCategories([]);
     setSelectedBrands([]);
+    setSelectedSubs([]);
     setSelectedGrades([]);
     setSelectedDistricts([]);
     setMinBatteryHealth(null);
@@ -154,6 +160,8 @@ function ProductsPage() {
     setSelectedRam([]);
     setPriceMax(MAX_CATALOG_PRICE);
     setSortBy("relevance");
+    // Clear URL params so filters stay cleared (they re-sync from the URL otherwise)
+    router.navigate({ to: "/products", search: {} });
   };
 
   const activeFilterCount =
@@ -198,6 +206,11 @@ function ProductsPage() {
 
       // 2. Category
       if (selectedCategories.length > 0 && !selectedCategories.includes(product.category)) {
+        return false;
+      }
+
+      // 2b. Subcategory
+      if (selectedSubs.length > 0 && !selectedSubs.includes(product.subcategory ?? "")) {
         return false;
       }
 
@@ -253,6 +266,7 @@ function ProductsPage() {
   }, [
     searchQuery,
     selectedCategories,
+    selectedSubs,
     selectedBrands,
     selectedGrades,
     selectedDistricts,
