@@ -235,7 +235,6 @@ function Index() {
         <div className="absolute inset-0 flex items-end sm:items-center pb-8 sm:pb-0">
           <div className="w-full max-w-7xl mx-auto px-5 md:px-8">
             <div className="max-w-xl space-y-4 sm:space-y-6 text-center sm:text-left mx-auto sm:mx-0">
-
               {/* Badge — hidden on smallest screens to save space */}
               <div className="hidden xs:inline-flex sm:inline-flex items-center gap-2 bg-orange-500/20 text-orange-300 border border-orange-400/30 px-3 py-1.5 text-[11px] md:text-xs font-bold uppercase tracking-wider backdrop-blur-sm">
                 <BadgeCheck className="size-3.5" />
@@ -290,7 +289,6 @@ function Index() {
                   </div>
                 ))}
               </div>
-
             </div>
           </div>
         </div>
