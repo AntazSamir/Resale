@@ -99,11 +99,32 @@ The listing details page (`/listing/$listingId`) presents a structured, high-tru
 | :--------------- | :-------------------------------------------------------------------------------------------- |
 | **Framework**    | [TanStack Start](https://tanstack.com/start) + [TanStack Router](https://tanstack.com/router) |
 | **Frontend**     | React 19, TypeScript 5.7+ (Strict Optional Types)                                             |
-| **Styling**      | Tailwind CSS v4, PostCSS, Radix UI Primitives, Lucide Icons                                   |
-| **State & Data** | In-Memory Catalog & Store Engines, TanStack Query, Nitro Server Functions                     |
-| **Deployment**   | Vercel (Edge & Serverless) / Cloudflare Workers / Nitro Multi-target Preset                   |
+| **Styling**      | Tailwind CSS v4, PostCSS, Radix UI Primitives, Lucide Icons, **Apple‑style CSS micro‑interactions** |
+| **State & Data** | In‑Memory Catalog & Store Engines, TanStack Query, Nitro Server Functions, **Supabase PostgreSQL** |
+| **Deployment**   | Vercel (Edge & Serverless) / Cloudflare Workers / Nitro Multi‑target Preset                   |
 
 ---
+
+
+## 🆕 New in This Release
+
+### 📊 Phase 4.2 — Event & Analytics Foundation
+- **12‑type behavioral event model** instrumented across all pages (product views, cart actions, orders, store views, creator videos, favorites)
+- **Privacy‑first session tracking**: anonymous session IDs stored in `sessionStorage`, zero PII in event payloads
+- **Supabase `public.user_events` table** with indexes on `event_type` and `occurred_at` for analytics queries
+- **Type‑safe event guards** (`isActiveEventType`, `isReservedEventType`, `isEventType`) for compile‑time safety
+- **Micro‑interactions**: Apple‑style press‑feedback (scale 0.97 on press) and card‑hover‑lift with reduced‑motion fallback, implemented purely in CSS (no animation libraries)
+
+### 🎨 Phase 4.3 — Favorites & Saved Searches *(planned)*
+- Heart button on listing/product pages for saving items privately
+- “Save this search” action in `/products` store query + active filters
+- New `/account/favorites` dashboard route
+
+---
+
+## 📁 Project Structure
+
+[...existing content...]
 
 ## 📁 Project Structure
 
