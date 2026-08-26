@@ -14,7 +14,6 @@ import {
   Layers,
   Lock,
   MapPin,
-  Search,
   ShieldCheck,
   ShoppingBag,
   Smartphone,
@@ -489,7 +488,6 @@ function Index() {
           </div>
         </div>
       </section>
-
 
       {/* ════════════════════════════════════════════════════════════
           FEATURED DEVICES
