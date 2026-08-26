@@ -28,7 +28,7 @@ import { products, listings, productFor, taka, type Product } from "@/data/catal
 import { getCreators } from "@/lib/creator-store";
 import { getStores } from "@/lib/store-store";
 import { useCart } from "@/lib/cart-store";
-import hero from "@/assets/hero.webp";
+import banner1 from "@/assets/banner-1.png";
 
 export const Route = createFileRoute("/")({
   head: () => {
@@ -218,115 +218,79 @@ function Index() {
       <SiteHeader />
 
       {/* ════════════════════════════════════════════════════════════
-          HERO
+          HERO — Full-width Banner 1 with overlay content
       ════════════════════════════════════════════════════════════ */}
-      <section className="relative overflow-hidden bg-linear-to-br from-orange-50 via-background to-orange-100/60 dark:from-orange-950/25 dark:via-background dark:to-orange-950/15">
-        <div className="max-w-7xl mx-auto px-4 md:px-5 py-10 md:py-16 grid lg:grid-cols-2 gap-10 lg:gap-8 items-center">
-          {/* Copy */}
-          <div className="space-y-6">
-            <div className="inline-flex items-center gap-2 bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/25 px-3 py-1.5 text-[11px] md:text-xs font-bold uppercase tracking-wider">
-              <BadgeCheck className="size-3.5" />
-              <span>Verified Second-Hand Electronics</span>
-            </div>
+      <section className="relative w-full overflow-hidden">
+        {/* Full-width background image — object-top on mobile to keep subject in frame */}
+        <img
+          src={banner1}
+          alt="Resale — Buy Used Electronics with Confidence"
+          className="w-full h-130 sm:h-140 lg:h-160 object-cover object-top sm:object-center"
+        />
 
-            <h1 className="text-4xl sm:text-5xl lg:text-[3.4rem] font-display font-bold leading-[1.06] tracking-tight text-foreground">
-              Buy Used.
-              <br />
-              Know Exactly
-              <br />
-              What You&apos;re Getting.
-            </h1>
+        {/* Gradient scrim — full coverage on mobile, left-heavy on desktop */}
+        <div className="absolute inset-0 bg-linear-to-t from-black/85 via-black/60 to-black/30 sm:bg-none sm:[background:linear-gradient(to_right,rgba(0,0,0,0.8)_0%,rgba(0,0,0,0.55)_50%,rgba(0,0,0,0.15)_100%)]" />
 
-            <p className="text-sm md:text-base text-subtle-foreground max-w-md leading-relaxed">
-              Inspected devices from trusted sellers, with transparent condition grades and real
-              product details.
-            </p>
+        {/* Content overlay — centered on mobile, left-aligned on desktop */}
+        <div className="absolute inset-0 flex items-end sm:items-center pb-8 sm:pb-0">
+          <div className="w-full max-w-7xl mx-auto px-5 md:px-8">
+            <div className="max-w-xl space-y-4 sm:space-y-6 text-center sm:text-left mx-auto sm:mx-0">
 
-            <div className="flex flex-wrap items-center gap-3">
-              <Link
-                to="/products"
-                search={{ q: undefined, category: undefined, brand: undefined }}
-                className="inline-flex items-center gap-2 bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition-all hover:opacity-90 hover:shadow-md active:scale-[0.98]"
-              >
-                <span>Shop Devices</span>
-                <ArrowRight className="size-4" />
-              </Link>
-              <Link
-                to="/sell"
-                className="inline-flex items-center gap-2 bg-card text-foreground border border-border px-6 py-3 text-sm font-semibold transition-all hover:border-border-strong hover:shadow-sm active:scale-[0.98]"
-              >
-                <span>Sell Your Device</span>
-              </Link>
-            </div>
+              {/* Badge — hidden on smallest screens to save space */}
+              <div className="hidden xs:inline-flex sm:inline-flex items-center gap-2 bg-orange-500/20 text-orange-300 border border-orange-400/30 px-3 py-1.5 text-[11px] md:text-xs font-bold uppercase tracking-wider backdrop-blur-sm">
+                <BadgeCheck className="size-3.5" />
+                <span>Verified Second-Hand Electronics</span>
+              </div>
 
-            {/* Stats row */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4 max-w-lg">
-              {[
-                { icon: ShieldCheck, value: "100%", label: "Inspected Listings" },
-                { icon: Star, value: "4.8/5", label: "Buyer Rating" },
-                { icon: Lock, value: "48h", label: "Buyer Protection" },
-                { icon: Wallet, value: "COD", label: "Secure Payments" },
-              ].map((s) => (
-                <div key={s.label} className="flex items-start gap-2">
-                  <s.icon className="size-4 text-primary mt-0.5 shrink-0" />
-                  <div>
-                    <p className="text-sm font-bold text-foreground leading-none">{s.value}</p>
-                    <p className="text-[10px] text-muted-foreground mt-1 leading-tight">
-                      {s.label}
-                    </p>
+              <h1 className="text-[2rem] xs:text-4xl sm:text-5xl lg:text-[3.4rem] font-display font-bold leading-[1.08] tracking-tight text-white drop-shadow-lg">
+                Buy Used.
+                <span className="block">Know Exactly</span>
+                <span className="block">What You&apos;re Getting.</span>
+              </h1>
+
+              <p className="hidden sm:block text-sm md:text-base text-white/80 max-w-md leading-relaxed drop-shadow">
+                Inspected devices from trusted sellers, with transparent condition grades and real
+                product details.
+              </p>
+
+              {/* Buttons — stacked full-width on mobile, inline on sm+ */}
+              <div className="flex flex-col xs:flex-row sm:flex-row flex-wrap items-stretch xs:items-center sm:items-center gap-2.5 sm:gap-3">
+                <Link
+                  to="/products"
+                  search={{ q: undefined, category: undefined, brand: undefined }}
+                  className="inline-flex items-center justify-center gap-2 bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition-all hover:opacity-90 hover:shadow-lg active:scale-[0.98]"
+                >
+                  <span>Shop Devices</span>
+                  <ArrowRight className="size-4" />
+                </Link>
+                <Link
+                  to="/sell"
+                  className="inline-flex items-center justify-center gap-2 bg-white/15 text-white border border-white/30 px-6 py-3 text-sm font-semibold backdrop-blur-sm transition-all hover:bg-white/25 hover:shadow-sm active:scale-[0.98]"
+                >
+                  <span>Sell Your Device</span>
+                </Link>
+              </div>
+
+              {/* Stats row — 2-col on mobile, 4-col on sm+ */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 pt-1 sm:pt-2">
+                {[
+                  { icon: ShieldCheck, value: "100%", label: "Inspected" },
+                  { icon: Star, value: "4.8/5", label: "Buyer Rating" },
+                  { icon: Lock, value: "48h", label: "Protection" },
+                  { icon: Wallet, value: "COD", label: "Payments" },
+                ].map((s) => (
+                  <div key={s.label} className="flex items-center sm:items-start gap-2">
+                    <s.icon className="size-4 text-orange-400 shrink-0" />
+                    <div>
+                      <p className="text-xs sm:text-sm font-bold text-white leading-none drop-shadow">
+                        {s.value}
+                      </p>
+                      <p className="text-[10px] text-white/60 mt-0.5 leading-tight">{s.label}</p>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Visual */}
-          <div className="relative">
-            <div className="relative border border-border bg-card shadow-xl overflow-hidden">
-              <img
-                src={hero}
-                alt="Verified second-hand electronics"
-                className="aspect-16/10 w-full object-cover"
-              />
-            </div>
-
-            {/* Floating badges */}
-            <div className="absolute top-4 -right-2 md:-right-4 border border-border bg-card/95 px-3 py-2 shadow-lg backdrop-blur-sm">
-              <div className="flex items-center gap-2">
-                <span className="flex size-6 items-center justify-center rounded-full bg-emerald-500 text-white">
-                  <Check className="size-3.5" />
-                </span>
-                <div>
-                  <p className="text-[11px] font-bold text-foreground leading-none">Grade A</p>
-                  <p className="text-[9px] text-muted-foreground mt-0.5">Quality Assured</p>
-                </div>
+                ))}
               </div>
-            </div>
 
-            <div className="absolute -bottom-4 left-4 md:left-8 border border-border bg-card/95 px-3 py-2 shadow-lg backdrop-blur-sm">
-              <div className="flex items-center gap-2">
-                <span className="flex size-6 items-center justify-center rounded-full bg-emerald-500 text-white">
-                  <Check className="size-3.5" />
-                </span>
-                <div>
-                  <p className="text-[11px] font-bold text-foreground leading-none">Inspected</p>
-                  <p className="text-[9px] text-muted-foreground mt-0.5">32-Point Check</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="absolute -bottom-4 right-4 md:right-10 hidden sm:block border border-border bg-card/95 px-3 py-2 shadow-lg backdrop-blur-sm">
-              <div className="flex items-center gap-2">
-                <span className="flex size-6 items-center justify-center rounded-full bg-emerald-500 text-white">
-                  <Check className="size-3.5" />
-                </span>
-                <div>
-                  <p className="text-[11px] font-bold text-foreground leading-none">
-                    Verified Seller
-                  </p>
-                  <p className="text-[9px] text-muted-foreground mt-0.5">Trusted &amp; Rated</p>
-                </div>
-              </div>
             </div>
           </div>
         </div>
