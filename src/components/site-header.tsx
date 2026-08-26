@@ -784,21 +784,26 @@ export function SiteHeader() {
                           </button>
                           {isExpanded && (
                             <div className="pl-3 ml-3 border-l border-border/80 space-y-0.5 py-1">
-                              {cat.dropdown.map((sub) => (
-                                <Link
-                                  key={sub.label}
-                                  to="/products"
-                                  search={{
-                                    category: sub.category,
-                                    q: sub.q,
-                                    brand: undefined,
-                                  }}
-                                  onClick={() => setMobileMenuOpen(false)}
-                                  className="block px-2.5 py-1.5 hover:bg-muted hover:text-foreground text-muted-foreground transition-colors"
-                                >
-                                  {sub.label}
-                                </Link>
-                              ))}
+                   {item.dropdown.map((sub, idx) => (
+                     <Link
+                       key={sub.label}
+                       to="/products"
+                       search={{
+                         category: sub.category,
+                         q: sub.q,
+                         brand: undefined,
+                       }}
+                       onClick={() => setMobileMenuOpen(false)}
+                       className="flex items-center px-2.5 py-1.5 hover:bg-muted hover:text-foreground text-muted-foreground transition-colors group"
+                     >
+                       <div className="relative flex items-center gap-2">
+                         {/* Mobile Tree Connector */}
+                         <div className="absolute -left-2 top-1/2 w-2 h-px bg-border group-hover:bg-primary transition-colors" />
+                         <div className={`absolute -left-1 top-1/2 -translate-y-1/2 size-1 rounded-full bg-border group-hover:bg-primary transition-colors ${idx === 0 ? 'hidden' : ''}`} />
+                         {sub.label}
+                       </div>
+                     </Link>
+                   ))}
                             </div>
                           )}
                         </div>
@@ -974,29 +979,43 @@ export function SiteHeader() {
               const rect = btnEl?.getBoundingClientRect();
               if (!rect) return null;
               return createPortal(
-                <div
-                  key={item.label}
-                  style={{
-                    position: "fixed",
-                    top: rect.bottom,
-                    left: rect.left,
-                    zIndex: 99999,
-                  }}
-                  className="min-w-50 bg-background border border-border border-t-0 shadow-2xl py-1"
-                  onMouseEnter={() => setOpenDropdown(item.label)}
-                  onMouseLeave={() => setOpenDropdown(null)}
-                >
-                  {item.dropdown.map((sub) => (
-                    <Link
-                      key={sub.label}
-                      to="/products"
-                      search={{ q: sub.q, category: sub.category, brand: undefined }}
-                      onClick={() => setOpenDropdown(null)}
-                      className="flex items-center px-4 py-1.5 text-[12px] text-subtle-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
-                    >
-                      {sub.label}
-                    </Link>
-                  ))}
+               <div
+                 key={item.label}
+                 style={{
+                   position: "fixed",
+                   top: rect.bottom,
+                   left: rect.left,
+                   zIndex: 99999,
+                 }}
+                 className="min-w-50 bg-background border border-border border-t-0 shadow-2xl py-1 animate-in fade-in slide-in-from-top-2"
+                 onMouseEnter={() => setOpenDropdown(item.label)}
+                 onMouseLeave={() => setOpenDropdown(null)}
+               >
+                    {item.dropdown.map((sub, idx) => (
+                      <Link
+                        key={sub.label}
+                        to="/products"
+                        search={{ q: sub.q, category: sub.category, brand: undefined }}
+                        onClick={() => setOpenDropdown(null)}
+                        className="group relative flex items-center px-4 py-2 text-[12px] text-subtle-foreground hover:text-foreground hover:bg-muted/60 transition-all"
+                      >
+                        {/* Tree Connector */}
+                        <div className="absolute -left-4 flex items-center justify-center">
+                          {/* Vertical line: full height for all but last item, half height for last */}
+                          <div className={`absolute w-px bg-border group-hover:bg-primary transition-colors ${
+                            idx === item.dropdown.length - 1 
+                              ? "h-1/2 bottom-0" 
+                              : "h-full"
+                          }`} />
+                          {/* Horizontal arm */}
+                          <div className="absolute top-1/2 -translate-y-1/2 w-4 h-px bg-border group-hover:bg-primary transition-colors" />
+                        </div>
+                        
+                        <div className="flex items-center gap-2">
+                          {sub.label}
+                        </div>
+                      </Link>
+                    ))}
                 </div>,
                 document.body,
               );
