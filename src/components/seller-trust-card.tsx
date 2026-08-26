@@ -39,7 +39,7 @@ export function SellerTrustLine({ seller, storeId, storeName, className = "" }: 
             onClick={() => setShowTooltip((prev) => !prev)}
             onMouseEnter={() => setShowTooltip(true)}
             onMouseLeave={() => setShowTooltip(false)}
-            className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-[10px] font-medium transition-colors hover:bg-emerald-500/20"
+            className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-[10px] font-medium transition-colors hover:bg-emerald-500/20 press-feedback"
             title="NID Verified Seller"
           >
             <ShieldCheck className="size-3 shrink-0" />
@@ -85,7 +85,7 @@ export function SellerTrustCard({ seller, className = "" }: SellerTrustProps) {
   const [showTooltip, setShowTooltip] = useState(false);
 
   return (
-    <div className={`border border-border/70 bg-card/60 p-4 space-y-3 ${className}`}>
+    <div className={`border border-border/70 bg-card/60 p-4 space-y-3 press-feedback card-hover-lift ${className}`}>
       {/* Seller Header */}
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3">

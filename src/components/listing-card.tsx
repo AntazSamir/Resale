@@ -43,7 +43,7 @@ export function ListingCard({
   /* ── Compact variant (used in mobile swipe) ── */
   if (compact) {
     return (
-      <div className="group relative flex flex-col justify-between h-full bg-card border border-border p-2.5 transition-colors hover:bg-secondary/40 select-none overflow-hidden rounded-none">
+      <div className="group relative flex flex-col justify-between h-full bg-card border border-border p-2.5 transition-colors hover:bg-secondary/40 select-none overflow-hidden rounded-none press-feedback">
         <div>
           {/* Image */}
           <Link
@@ -57,7 +57,7 @@ export function ListingCard({
               width={400}
               height={400}
               loading="lazy"
-              className="size-full object-cover transition-transform duration-300 group-hover:scale-105"
+className="size-full object-cover transition-none group-hover:scale-105"
             />
           </Link>
 
@@ -141,7 +141,7 @@ export function ListingCard({
             width={300}
             height={300}
             loading="lazy"
-            className="size-full object-cover transition-transform duration-300 group-hover:scale-105"
+            className="size-full object-cover transition-none group-hover:scale-105"
           />
         </Link>
 
@@ -242,7 +242,7 @@ export function ListingCard({
             width={900}
             height={900}
             loading="lazy"
-            className="size-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+            className="size-full object-cover transition-none group-hover:scale-[1.04]"
           />
           <div className="absolute bottom-2 right-2">
             <GradeBadge grade={listing.grade} showLabel={false} />

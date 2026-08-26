@@ -205,3 +205,46 @@
     display: none;
   }
 }
+
+/* ── Micro-interaction utilities ───────────────────────────────────────── */
+
+/* Press/tap feedback: immediate scale-down on pointer-down, springy release */
+@utility press-feedback {
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+  /* Press-down: scale to 97% over 80ms */
+  &:active {
+    transform: scale(0.97);
+    transition: transform 80ms cubic-bezier(0.34, 1.56, 0.64, 1) ease-out;
+  }
+  /* Release: springy overshoot (handled by the transition above) */
+}
+
+/* Card hover lift with shadow + reduced-motion fallback */
+@utility card-hover-lift {
+  /* Hover: lift + shadow-md */
+  &:hover {
+    @media (prefers-reduced-motion: no-preference) {
+      transform: translateY(-0.5rem);
+      transition: transform 200ms cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    @media (prefers-reduced-motion: reduce) {
+      /* Fallback: opacity cross-fade for reduced motion */
+      transition: opacity 200ms ease-out;
+      /* The shadow remains, but we avoid the transform */
+    }
+  }
+  /* Active/tactile feedback */
+  &:active {
+    transform: scale(0.97);
+    transition: transform 80ms cubic-bezier(0.34, 1.56, 0.64, 1) ease-out;
+  }
+}
+
+/* Interactive element active state */
+@utility interactive-active {
+  &:active {
+    transform: scale(0.97);
+    transition: transform 80ms cubic-bezier(0.34, 1.56, 0.64, 1) ease-out;
+  }
+}

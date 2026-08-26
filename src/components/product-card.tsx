@@ -34,7 +34,7 @@ export function ProductCard({ product, compact = false }: { product: Product; co
 
   if (compact) {
     return (
-      <div className="group relative flex flex-col justify-between h-full bg-card border border-border p-2.5 transition-colors hover:bg-secondary/40 select-none overflow-hidden rounded-none">
+      <div className="group relative flex flex-col justify-between h-full bg-card border border-border p-2.5 transition-colors hover:bg-secondary/40 select-none overflow-hidden rounded-none press-feedback">
         <div>
           {/* Product Image Link → listing */}
           <Link
@@ -48,7 +48,7 @@ export function ProductCard({ product, compact = false }: { product: Product; co
               width={400}
               height={400}
               loading="lazy"
-              className="size-full object-cover transition-transform duration-300 group-hover:scale-105"
+              className="size-full object-cover transition-none group-hover:scale-105"
             />
           </Link>
 
@@ -117,7 +117,7 @@ export function ProductCard({ product, compact = false }: { product: Product; co
   }
 
   return (
-    <div className="group flex flex-col bg-card p-4 transition-all hover:bg-secondary/40 relative overflow-hidden h-full justify-between">
+    <div className="group flex flex-col bg-card p-4 press-feedback card-hover-lift relative overflow-hidden h-full justify-between">
       <div>
         {/* Product Image Link → listing */}
         <Link
