@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react";
 import { listingFor } from "@/data/catalog";
+import { trackActiveEvent } from "@/lib/event-tracker";
 
 export interface CartItem {
   listingId: string;
@@ -59,12 +60,22 @@ export function CartProvider({ children }: { children: ReactNode }) {
       writeToStorage(next);
       return next;
     });
+    trackActiveEvent({
+      eventType: "CART_ADDED",
+      entityType: "listing",
+      entityId: listingId,
+    }).catch(() => {});
   }, []);
 
   const removeFromCart = useCallback(
     (listingId: string) => {
       const next = items.filter((i) => i.listingId !== listingId);
       persist(next);
+      trackActiveEvent({
+        eventType: "CART_REMOVED",
+        entityType: "listing",
+        entityId: listingId,
+      }).catch(() => {});
     },
     [items, persist],
   );
@@ -100,6 +111,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useCart(): CartContextValue {
   const ctx = useContext(CartContext);
   if (!ctx) throw new Error("useCart must be used inside <CartProvider>");

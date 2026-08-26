@@ -166,6 +166,10 @@ CREATE INDEX IF NOT EXISTS idx_stores_slug ON public.stores(slug);
 CREATE INDEX IF NOT EXISTS idx_creator_handle ON public.creator_profiles(handle);
 CREATE INDEX IF NOT EXISTS idx_product_videos_product ON public.product_videos(product_id);
 CREATE INDEX IF NOT EXISTS idx_product_videos_creator ON public.product_videos(creator_id);
+CREATE INDEX IF NOT EXISTS idx_user_events_entity_lookup ON public.user_events(entity_type, entity_id, event_type);
+CREATE INDEX IF NOT EXISTS idx_user_events_analytics_aggregation ON public.user_events(event_type, entity_id, occurred_at);
+CREATE INDEX IF NOT EXISTS idx_orders_seller_listing_status ON public.orders(listing_id, status);
+CREATE INDEX IF NOT EXISTS idx_disputes_order_lookup ON public.disputes(order_id, status);
 
 -- Enable Row Level Security (RLS)
 ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;

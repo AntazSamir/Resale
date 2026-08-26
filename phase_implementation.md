@@ -336,13 +336,30 @@ Phase 4 transitions Resale.com from browser-local `localStorage` into a **real s
 
 ---
 
-### 4.4 — Seller Analytics Intelligence ⭐ HIGH
+### 4.4 — Seller Analytics Intelligence ✅ COMPLETED
 
-**Objective**: Give sellers evidence-based performance metrics derived from actual recorded events.
+**Objective**: Give sellers evidence-based performance metrics derived strictly from actual recorded Resale data.
 
-- **Metrics Available**: Listing views (7d/30d), cart additions, favorites count, total orders, delivered GMV, conversion rate, average days to sale, dispute rate.
-- **Intelligent Insights (rule-based)**: "Your listing has 45 views but 0 cart additions — consider adjusting the price."
-- **New Route**: `/seller/analytics` — per-listing performance breakdown.
+- **Verified Data-Truth Metrics**:
+  - **Listing Views**: Real 7-day, 30-day, and all-time views aggregated from `public.user_events` (`LISTING_VIEWED`).
+  - **Cart Additions**: Real 7-day, 30-day, and all-time additions from `public.user_events` (`CART_ADDED`).
+  - **Favorites Status**: Honest unavailable state (`"Favorites: Not available yet"`) acknowledging Phase 4.3 status without fabrication.
+  - **Orders Breakdown**: Direct counts of Placed/Pending, Confirmed, Delivered/Completed, and Cancelled/Refunded orders.
+  - **Delivered GMV**: Revenue calculated strictly from `DELIVERED` and `COMPLETED` orders (excluding unfulfilled orders and pending COD).
+  - **Conversion Rate**: Verified ratio of delivered sales to listing views (with `"Not enough recorded data"` empty state when views = 0).
+  - **Average Days to Sale**: Average duration between listing date and sale completion across completed sales.
+  - **Dispute Rate**: Percentage of seller orders associated with buyer dispute filings.
+- **Intelligent Deterministic Insights**:
+  - High views with 0 cart additions pricing & listing suggestions.
+  - Active cart interest with no orders notification.
+  - Initial traffic awaiting notice for new listings.
+  - Milestone acknowledgements for completed sales.
+  - Proactive alerts for recorded dispute activity.
+- **Seller Privacy & Authorization Isolation**:
+  - Server-side session verification in `getSellerAnalyticsFn` prevents client ID spoofing or IDOR attacks.
+  - Database queries strictly isolate listings, events, orders, and disputes to the authenticated seller ID.
+- **Dedicated Route**: `/seller/analytics` (`src/routes/seller.analytics.tsx`) featuring overview metrics cards, deterministic insights, search & filter, desktop table, and mobile card grid.
+- **Dashboard Overhaul**: Updated `src/routes/seller.dashboard.tsx` with live analytics links and honest unrecorded metrics.
 
 ---
 
@@ -392,9 +409,9 @@ Phase 4 transitions Resale.com from browser-local `localStorage` into a **real s
 | **Phase 4.1E** | Backend Admin Auth & Email   | Server-issued session tokens, backend role enforcement, spoofing prevention, email registration/login with OTP                                                                    | ✅ Completed |
 | **Phase 4.1C** | Remote Dispute Persistence   | Supabase persistence for Disputes (`disputes`) and evidence metadata                                                                                                              |  📋 Planned  |
 | **Phase 4.1D** | Cloud Cart Sync              | Guest-to-user cart cloud persistence & automatic login merging                                                                                                                    |  📋 Planned  |
-| **Phase 4.2**  | Event & Analytics Model      | 12-type behavioral event model, privacy-safe session tracking, analytics foundation                                                                                                | ✅ Completed |
+| **Phase 4.2**  | Event & Analytics Model      | 12-type behavioral event model, privacy-safe session tracking, analytics foundation                                                                                               | ✅ Completed |
 | **Phase 4.3**  | Favorites & Saved Searches   | Listing/product favorites, saved search persistence, new-listing alerts                                                                                                           |  📋 Planned  |
-| **Phase 4.4**  | Seller Intelligence          | Real listing view/conversion metrics, seller analytics page, dashboard overhaul                                                                                                   |  📋 Planned  |
+| **Phase 4.4**  | Seller Intelligence          | Real listing view/conversion metrics, seller analytics page, dashboard overhaul                                                                                                   | ✅ Completed |
 | **Phase 4.5**  | Notifications                | In-app notification center, order/dispute/price-drop alerts, email/SMS pipeline                                                                                                   |  📋 Planned  |
 | **Phase 4.6**  | Rule-Based Personalization   | Personalized homepage shelves, recommendation engine, saved-search-driven discovery                                                                                               |  📋 Planned  |
 | **Phase 4.7**  | Device Lifecycle Passport    | Honest per-device Resale history page, inspection/sale/dispute timeline                                                                                                           |  📋 Planned  |

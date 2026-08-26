@@ -95,36 +95,35 @@ The listing details page (`/listing/$listingId`) presents a structured, high-tru
 
 ## 🛠️ Technology Stack
 
-| Layer            | Technology                                                                                    |
-| :--------------- | :-------------------------------------------------------------------------------------------- |
-| **Framework**    | [TanStack Start](https://tanstack.com/start) + [TanStack Router](https://tanstack.com/router) |
-| **Frontend**     | React 19, TypeScript 5.7+ (Strict Optional Types)                                             |
+| Layer            | Technology                                                                                          |
+| :--------------- | :-------------------------------------------------------------------------------------------------- |
+| **Framework**    | [TanStack Start](https://tanstack.com/start) + [TanStack Router](https://tanstack.com/router)       |
+| **Frontend**     | React 19, TypeScript 5.7+ (Strict Optional Types)                                                   |
 | **Styling**      | Tailwind CSS v4, PostCSS, Radix UI Primitives, Lucide Icons, **Apple‑style CSS micro‑interactions** |
-| **State & Data** | In‑Memory Catalog & Store Engines, TanStack Query, Nitro Server Functions, **Supabase PostgreSQL** |
-| **Deployment**   | Vercel (Edge & Serverless) / Cloudflare Workers / Nitro Multi‑target Preset                   |
+| **State & Data** | In‑Memory Catalog & Store Engines, TanStack Query, Nitro Server Functions, **Supabase PostgreSQL**  |
+| **Deployment**   | Vercel (Edge & Serverless) / Cloudflare Workers / Nitro Multi‑target Preset                         |
 
 ---
-
 
 ## 🆕 New in This Release
 
+### 📈 Phase 4.4 — Seller Analytics Intelligence
+
+- **Evidence-Based Seller Metrics**: Dedicated `/seller/analytics` dashboard derived strictly from actual recorded Resale data (zero simulated numbers or fabricated conversion rates).
+- **Listing Views & Cart Telemetry**: 7-day, 30-day, and all-time views (`LISTING_VIEWED`) and cart additions (`CART_ADDED`) aggregated with session duplicate suppression.
+- **Strict GMV Calculation**: Delivered revenue counted strictly from orders in `DELIVERED` or `COMPLETED` statuses (pending COD & active unfulfilled orders are excluded).
+- **Deterministic Intelligent Insights**: Automated rule-based alerts for pricing review (high views with 0 cart additions), active cart demand without orders, completed sales milestones, and dispute tracking.
+- **Server-Authoritative Privacy**: Session-derived seller isolation preventing cross-seller data access or IDOR parameter manipulation.
+
 ### 📊 Phase 4.2 — Event & Analytics Foundation
+
 - **12‑type behavioral event model** instrumented across all pages (product views, cart actions, orders, store views, creator videos, favorites)
 - **Privacy‑first session tracking**: anonymous session IDs stored in `sessionStorage`, zero PII in event payloads
-- **Supabase `public.user_events` table** with indexes on `event_type` and `occurred_at` for analytics queries
+- **Supabase `public.user_events` table** with composite indexes on `entity_type`, `entity_id`, `event_type`, and `occurred_at` for high-throughput queries
 - **Type‑safe event guards** (`isActiveEventType`, `isReservedEventType`, `isEventType`) for compile‑time safety
 - **Micro‑interactions**: Apple‑style press‑feedback (scale 0.97 on press) and card‑hover‑lift with reduced‑motion fallback, implemented purely in CSS (no animation libraries)
 
-### 🎨 Phase 4.3 — Favorites & Saved Searches *(planned)*
-- Heart button on listing/product pages for saving items privately
-- “Save this search” action in `/products` store query + active filters
-- New `/account/favorites` dashboard route
-
 ---
-
-## 📁 Project Structure
-
-[...existing content...]
 
 ## 📁 Project Structure
 
@@ -160,7 +159,8 @@ The listing details page (`/listing/$listingId`) presents a structured, high-tru
 │   │   ├── store-store.ts              # Pro merchant storefronts store
 │   │   ├── creator-store.ts            # Creator profiles & video review relations
 │   │   ├── bulk-importer.ts            # CSV / JSON inventory parsing & validation engine
-│   │   └── server-functions.ts         # Nitro server functions (OTP auth, checkout handlers)
+│   │   ├── event-tracker.ts            # 12-type behavioral telemetry engine & duplicate suppression
+│   │   └── server-functions.ts         # Nitro server functions (OTP auth, checkout handlers, seller analytics)
 │   ├── routes/
 │   │   ├── __root.tsx                  # Root HTML layout & global error boundary
 │   │   ├── index.tsx                   # Homepage (18 discovery sections with mobile bento grid)
@@ -176,6 +176,7 @@ The listing details page (`/listing/$listingId`) presents a structured, high-tru
 │   │   ├── account.disputes.tsx        # Buyer Dispute Filing & Evidence Upload Dropzone
 │   │   ├── sell.index.tsx              # Interactive 4-Step Grading Wizard & Listing Submission
 │   │   ├── seller.dashboard.tsx        # Seller Hub Analytics & Navigation
+│   │   ├── seller.analytics.tsx        # Seller Analytics Intelligence & Performance Telemetry
 │   │   ├── seller.orders.tsx           # Seller Order Fulfillment Hub & Step Progression
 │   │   ├── seller.disputes.tsx         # Seller Claims Response Portal & 24h SLA Countdown
 │   │   ├── seller.storefront.tsx       # Seller Storefront Profile Editor

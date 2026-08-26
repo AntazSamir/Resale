@@ -57,7 +57,7 @@ export function ListingCard({
               width={400}
               height={400}
               loading="lazy"
-className="size-full object-cover transition-none group-hover:scale-105"
+              className="size-full object-cover transition-none group-hover:scale-105"
             />
           </Link>
 

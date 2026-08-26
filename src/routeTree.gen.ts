@@ -32,6 +32,7 @@ import { Route as ListingListingIdRouteImport } from './routes/listing.$listingI
 import { Route as ProductProductIdRouteImport } from './routes/product.$productId'
 import { Route as SellIndexRouteImport } from './routes/sell.index'
 import { Route as SellerSellerIdRouteImport } from './routes/seller.$sellerId'
+import { Route as SellerAnalyticsRouteImport } from './routes/seller.analytics'
 import { Route as SellerCreatorProfileRouteImport } from './routes/seller.creator-profile'
 import { Route as SellerDashboardRouteImport } from './routes/seller.dashboard'
 import { Route as SellerDisputesRouteImport } from './routes/seller.disputes'
@@ -158,6 +159,11 @@ const SellerSellerIdRoute = SellerSellerIdRouteImport.update({
   path: '/seller/$sellerId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SellerAnalyticsRoute = SellerAnalyticsRouteImport.update({
+  id: '/seller/analytics',
+  path: '/seller/analytics',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SellerCreatorProfileRoute = SellerCreatorProfileRouteImport.update({
   id: '/seller/creator-profile',
   path: '/seller/creator-profile',
@@ -231,6 +237,7 @@ export interface FileRoutesByFullPath {
   '/listing/$listingId': typeof ListingListingIdRoute
   '/product/$productId': typeof ProductProductIdRoute
   '/seller/$sellerId': typeof SellerSellerIdRoute
+  '/seller/analytics': typeof SellerAnalyticsRoute
   '/seller/creator-profile': typeof SellerCreatorProfileRoute
   '/seller/dashboard': typeof SellerDashboardRoute
   '/seller/disputes': typeof SellerDisputesRoute
@@ -266,6 +273,7 @@ export interface FileRoutesByTo {
   '/listing/$listingId': typeof ListingListingIdRoute
   '/product/$productId': typeof ProductProductIdRoute
   '/seller/$sellerId': typeof SellerSellerIdRoute
+  '/seller/analytics': typeof SellerAnalyticsRoute
   '/seller/creator-profile': typeof SellerCreatorProfileRoute
   '/seller/dashboard': typeof SellerDashboardRoute
   '/seller/disputes': typeof SellerDisputesRoute
@@ -302,6 +310,7 @@ export interface FileRoutesById {
   '/listing/$listingId': typeof ListingListingIdRoute
   '/product/$productId': typeof ProductProductIdRoute
   '/seller/$sellerId': typeof SellerSellerIdRoute
+  '/seller/analytics': typeof SellerAnalyticsRoute
   '/seller/creator-profile': typeof SellerCreatorProfileRoute
   '/seller/dashboard': typeof SellerDashboardRoute
   '/seller/disputes': typeof SellerDisputesRoute
@@ -339,6 +348,7 @@ export interface FileRouteTypes {
     | '/listing/$listingId'
     | '/product/$productId'
     | '/seller/$sellerId'
+    | '/seller/analytics'
     | '/seller/creator-profile'
     | '/seller/dashboard'
     | '/seller/disputes'
@@ -374,6 +384,7 @@ export interface FileRouteTypes {
     | '/listing/$listingId'
     | '/product/$productId'
     | '/seller/$sellerId'
+    | '/seller/analytics'
     | '/seller/creator-profile'
     | '/seller/dashboard'
     | '/seller/disputes'
@@ -409,6 +420,7 @@ export interface FileRouteTypes {
     | '/listing/$listingId'
     | '/product/$productId'
     | '/seller/$sellerId'
+    | '/seller/analytics'
     | '/seller/creator-profile'
     | '/seller/dashboard'
     | '/seller/disputes'
@@ -445,6 +457,7 @@ export interface RootRouteChildren {
   ListingListingIdRoute: typeof ListingListingIdRoute
   ProductProductIdRoute: typeof ProductProductIdRoute
   SellerSellerIdRoute: typeof SellerSellerIdRoute
+  SellerAnalyticsRoute: typeof SellerAnalyticsRoute
   SellerCreatorProfileRoute: typeof SellerCreatorProfileRoute
   SellerDashboardRoute: typeof SellerDashboardRoute
   SellerDisputesRoute: typeof SellerDisputesRoute
@@ -621,6 +634,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SellerSellerIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/seller/analytics': {
+      id: '/seller/analytics'
+      path: '/seller/analytics'
+      fullPath: '/seller/analytics'
+      preLoaderRoute: typeof SellerAnalyticsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/seller/creator-profile': {
       id: '/seller/creator-profile'
       path: '/seller/creator-profile'
@@ -728,6 +748,7 @@ const rootRouteChildren: RootRouteChildren = {
   ListingListingIdRoute: ListingListingIdRoute,
   ProductProductIdRoute: ProductProductIdRoute,
   SellerSellerIdRoute: SellerSellerIdRoute,
+  SellerAnalyticsRoute: SellerAnalyticsRoute,
   SellerCreatorProfileRoute: SellerCreatorProfileRoute,
   SellerDashboardRoute: SellerDashboardRoute,
   SellerDisputesRoute: SellerDisputesRoute,

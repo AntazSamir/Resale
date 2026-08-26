@@ -85,7 +85,9 @@ export function SellerTrustCard({ seller, className = "" }: SellerTrustProps) {
   const [showTooltip, setShowTooltip] = useState(false);
 
   return (
-    <div className={`border border-border/70 bg-card/60 p-4 space-y-3 press-feedback card-hover-lift ${className}`}>
+    <div
+      className={`border border-border/70 bg-card/60 p-4 space-y-3 press-feedback card-hover-lift ${className}`}
+    >
       {/* Seller Header */}
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3">

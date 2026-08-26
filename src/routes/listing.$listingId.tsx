@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
 import {
   Check,
@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { SiteFooter, SiteHeader } from "@/components/site-header";
 import { useCart } from "@/lib/cart-store";
+import { trackActiveEvent } from "@/lib/event-tracker";
 import { GradeBadge } from "@/components/grade-badge";
 import { ProductCard } from "@/components/product-card";
 import { ConditionScore } from "@/components/condition-score";
@@ -74,6 +75,22 @@ function ListingPage() {
   const inCart = isInCart(listing.id);
 
   const exactVideo = getApprovedVideoForListing(listing.id);
+
+  useEffect(() => {
+    if (listing?.id) {
+      trackActiveEvent({
+        eventType: "LISTING_VIEWED",
+        entityType: "listing",
+        entityId: listing.id,
+        metadata: {
+          category: product?.category,
+          brand: product?.brand,
+          grade: listing?.grade,
+          price: listing?.price,
+        },
+      }).catch(() => {});
+    }
+  }, [listing?.id, product?.category, product?.brand, listing?.grade, listing?.price]);
 
   // Check if there are known defects/issues to disclose
   const hasKnownIssues =

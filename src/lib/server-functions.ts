@@ -340,24 +340,22 @@ export const signOutFn = createServerFn({ method: "POST" })
 // this function receives the payload, but we re‑validate here for defense‑in‑depth.
 export const trackEventFn = createServerFn({ method: "POST" })
   .validator(
-    (
-      data: {
-        eventType: string
-        entityType: string
-        entityId: string
-        sessionId: string
-        userId: string | null
-        metadata: Record<string, unknown>
-        occurredAt: string
-      }
-    ) => data
+    (data: {
+      eventType: string;
+      entityType: string;
+      entityId: string;
+      sessionId: string;
+      userId: string | null;
+      metadata: Record<string, unknown>;
+      occurredAt: string;
+    }) => data,
   )
   .handler(async ({ data }) => {
     try {
-      const supabase = await supabaseAdmin()
+      const supabase = await supabaseAdmin();
 
       // 1. Insert into user_events – RLS is bypassed by the service‑role key.
-      const { error } = await supabase.from('user_events').insert({
+      const { error } = await supabase.from("user_events").insert({
         user_id: data.userId || null,
         session_id: data.sessionId,
         event_type: data.eventType,
@@ -365,19 +363,644 @@ export const trackEventFn = createServerFn({ method: "POST" })
         entity_id: data.entityId,
         metadata_json: JSON.stringify(data.metadata),
         occurred_at: data.occurredAt,
-      })
+      });
 
       if (error) {
         // Log to server console; do NOT expose to client.
-        // eslint-disable-next-line no-console
-        console.error('[server-functions/trackEventFn] Supabase insert error:', error.message)
-        return { success: false, error: error.message }
+        console.error("[server-functions/trackEventFn] Supabase insert error:", error.message);
+        return { success: false, error: error.message };
       }
 
-      return { success: true }
-    } catch (err: any) {
-      // eslint-disable-next-line no-console
-      console.error('[server-functions/trackEventFn] Unexpected error:', err.message)
-      return { success: false, error: err.message }
+      return { success: true };
+    } catch (err: unknown) {
+      const msg = (err as Error)?.message || String(err);
+      console.error("[server-functions/trackEventFn] Unexpected error:", msg);
+      return { success: false, error: msg };
     }
-  })
+  });
+
+// ── Phase 4.4: Seller Analytics Intelligence Server Function ───────────
+// Server-side, authorized aggregation for seller analytics.
+// Enforces strict seller privacy:
+//   - Requires a valid session token.
+//   - Only accesses listings, events, orders, and disputes belonging to the authenticated seller.
+//   - Adheres strictly to the Core Data-Truth rule (no fabricated metrics or estimates).
+
+export interface SellerAnalyticsInsight {
+  id: string;
+  type: "INFO" | "WARNING" | "SUCCESS" | "ACTION";
+  title: string;
+  message: string;
+  listingId?: string;
+}
+
+export interface ListingPerformanceRecord {
+  listingId: string;
+  productId: string;
+  title: string;
+  brand: string;
+  category: string;
+  image: string;
+  grade: string;
+  conditionScore: number;
+  price: number;
+  status: string;
+  listedAt: string;
+  views7d: number;
+  views30d: number;
+  viewsTotal: number;
+  cartAdds7d: number;
+  cartAdds30d: number;
+  cartAddsTotal: number;
+  favorites: string; // "Not available yet"
+  totalOrders: number;
+  deliveredOrders: number;
+  deliveredGMV: number;
+  conversionRate: number | null; // null => "Not enough recorded data"
+  avgDaysToSale: number | null; // null => "No completed sales yet"
+  disputeCount: number;
+  disputeRate: number | null; // null => "Not enough recorded data"
+}
+
+export interface SellerAnalyticsData {
+  sellerId: string;
+  totalListingsCount: number;
+  views7d: number;
+  views30d: number;
+  viewsTotal: number;
+  cartAdds7d: number;
+  cartAdds30d: number;
+  cartAddsTotal: number;
+  favoritesStatus: string; // "Not available yet"
+  ordersBreakdown: {
+    total: number;
+    placedOrPending: number;
+    confirmed: number;
+    deliveredOrCompleted: number;
+    cancelledOrRefunded: number;
+  };
+  deliveredGMV: number;
+  conversionRate: number | null;
+  avgDaysToSale: number | null;
+  disputeRate: number | null;
+  totalDisputesCount: number;
+  listings: ListingPerformanceRecord[];
+  insights: SellerAnalyticsInsight[];
+}
+
+export const getSellerAnalyticsFn = createServerFn({ method: "POST" })
+  .validator((data: { token: string }) => data)
+  .handler(
+    async ({
+      data,
+    }): Promise<{ success: boolean; error: string | null; data: SellerAnalyticsData | null }> => {
+      try {
+        if (!data.token) {
+          return { success: false, error: "Unauthorized: Missing session token.", data: null };
+        }
+
+        // 1. Authoritative session verification
+        const session = db.sessions.get(data.token);
+        if (!session || Date.now() > session.expiresAt) {
+          if (session) db.sessions.delete(data.token);
+          return {
+            success: false,
+            error: "Unauthorized: Session is invalid or expired.",
+            data: null,
+          };
+        }
+
+        const sellerId = session.userId;
+        const supabase = await supabaseAdmin();
+
+        // 2. Fetch seller's own listings (Supabase + Memory store fallback)
+        const listingsMap = new Map<
+          string,
+          {
+            id: string;
+            productId: string;
+            sellerId: string;
+            grade: string;
+            conditionScore: number;
+            price: number;
+            status: string;
+            listedAt: string;
+          }
+        >();
+
+        // A. Memory database listings for this seller
+        db.listings
+          .filter((l) => l.sellerId === sellerId)
+          .forEach((l) => {
+            listingsMap.set(l.id, {
+              id: l.id,
+              productId: l.productId,
+              sellerId: l.sellerId,
+              grade: l.grade,
+              conditionScore: l.conditionScore,
+              price: Math.round(l.pricePoisha / 100),
+              status: l.status,
+              listedAt: l.listedAt || new Date().toISOString(),
+            });
+          });
+
+        // B. Supabase listings for this seller
+        try {
+          const { data: supaListings, error: lError } = await supabase
+            .from("listings")
+            .select("*")
+            .eq("seller_id", sellerId);
+
+          if (!lError && Array.isArray(supaListings)) {
+            supaListings.forEach((sl) => {
+              listingsMap.set(sl.id, {
+                id: sl.id,
+                productId: sl.product_id,
+                sellerId: sl.seller_id,
+                grade: sl.grade,
+                conditionScore: sl.condition_score ?? 90,
+                price: Math.round((sl.price_poisha || 0) / 100),
+                status: sl.status,
+                listedAt: sl.listed_at || new Date().toISOString(),
+              });
+            });
+          }
+        } catch (err) {
+          console.warn("getSellerAnalyticsFn supaListings warning:", err);
+        }
+
+        const sellerListings = Array.from(listingsMap.values());
+        const listingIds = sellerListings.map((l) => l.id);
+
+        // If seller has no listings at all, return empty real state
+        if (sellerListings.length === 0) {
+          return {
+            success: true,
+            error: null,
+            data: {
+              sellerId,
+              totalListingsCount: 0,
+              views7d: 0,
+              views30d: 0,
+              viewsTotal: 0,
+              cartAdds7d: 0,
+              cartAdds30d: 0,
+              cartAddsTotal: 0,
+              favoritesStatus: "Not available yet",
+              ordersBreakdown: {
+                total: 0,
+                placedOrPending: 0,
+                confirmed: 0,
+                deliveredOrCompleted: 0,
+                cancelledOrRefunded: 0,
+              },
+              deliveredGMV: 0,
+              conversionRate: null,
+              avgDaysToSale: null,
+              disputeRate: null,
+              totalDisputesCount: 0,
+              listings: [],
+              insights: [
+                {
+                  id: "ins-no-listings",
+                  type: "INFO",
+                  title: "No Active Listings",
+                  message:
+                    "You have no recorded listings yet. Create a listing to begin tracking performance.",
+                },
+              ],
+            },
+          };
+        }
+
+        // 3. Resolve products catalog metadata
+        const productsMap = new Map<
+          string,
+          { name: string; brand: string; category: string; image: string }
+        >();
+        db.products.forEach((p) => {
+          productsMap.set(p.id, {
+            name: p.name,
+            brand: p.brand,
+            category: p.category,
+            image: p.image,
+          });
+        });
+
+        try {
+          const { data: supaProducts } = await supabase
+            .from("products")
+            .select("id, name, brand, category, image");
+          if (Array.isArray(supaProducts)) {
+            supaProducts.forEach((p) => {
+              productsMap.set(p.id, {
+                name: p.name,
+                brand: p.brand,
+                category: p.category,
+                image: p.image,
+              });
+            });
+          }
+        } catch {
+          // ignore
+        }
+
+        // 4. Fetch real recorded events for these seller listings ONLY
+        const now = Date.now();
+        const sevenDaysAgo = now - 7 * 24 * 60 * 60 * 1000;
+        const thirtyDaysAgo = now - 30 * 24 * 60 * 60 * 1000;
+
+        interface EventCounts {
+          views7d: number;
+          views30d: number;
+          viewsTotal: number;
+          cartAdds7d: number;
+          cartAdds30d: number;
+          cartAddsTotal: number;
+        }
+
+        const listingEventsMap = new Map<string, EventCounts>();
+        listingIds.forEach((id) => {
+          listingEventsMap.set(id, {
+            views7d: 0,
+            views30d: 0,
+            viewsTotal: 0,
+            cartAdds7d: 0,
+            cartAdds30d: 0,
+            cartAddsTotal: 0,
+          });
+        });
+
+        try {
+          const { data: events, error: eError } = await supabase
+            .from("user_events")
+            .select("event_type, entity_id, occurred_at")
+            .eq("entity_type", "listing")
+            .in("entity_id", listingIds);
+
+          if (!eError && Array.isArray(events)) {
+            events.forEach((evt) => {
+              const counts = listingEventsMap.get(evt.entity_id);
+              if (!counts) return;
+
+              const time = new Date(evt.occurred_at).getTime();
+
+              if (evt.event_type === "LISTING_VIEWED") {
+                counts.viewsTotal += 1;
+                if (time >= thirtyDaysAgo) counts.views30d += 1;
+                if (time >= sevenDaysAgo) counts.views7d += 1;
+              } else if (evt.event_type === "CART_ADDED") {
+                counts.cartAddsTotal += 1;
+                if (time >= thirtyDaysAgo) counts.cartAdds30d += 1;
+                if (time >= sevenDaysAgo) counts.cartAdds7d += 1;
+              }
+            });
+          }
+        } catch (err) {
+          console.warn("getSellerAnalyticsFn user_events warning:", err);
+        }
+
+        // 5. Fetch real orders for these seller listings ONLY
+        interface OrderEntity {
+          id: string;
+          listingId: string;
+          amountPoisha: number;
+          status: string;
+          createdAt: string;
+          completedAt?: string | undefined;
+        }
+
+        const ordersMap = new Map<string, OrderEntity>();
+
+        // Memory orders matching seller listing IDs
+        db.orders
+          .filter((o) => listingIds.includes(o.listingId))
+          .forEach((o) => {
+            ordersMap.set(o.id.toUpperCase(), {
+              id: o.id,
+              listingId: o.listingId,
+              amountPoisha: o.amountPoisha,
+              status: o.status,
+              createdAt: o.createdAt || new Date().toISOString(),
+              completedAt: undefined,
+            });
+          });
+
+        // Supabase orders matching seller listing IDs
+        try {
+          const { data: supaOrders, error: oError } = await supabase
+            .from("orders")
+            .select("*")
+            .in("listing_id", listingIds);
+
+          if (!oError && Array.isArray(supaOrders)) {
+            supaOrders.forEach((so) => {
+              const addressJson = so.shipping_address_json as Record<string, unknown> | null;
+              const rawSnap = addressJson
+                ? (addressJson["_orderSnapshot"] as Record<string, unknown> | undefined)
+                : undefined;
+              ordersMap.set(so.id.toUpperCase(), {
+                id: so.id,
+                listingId: so.listing_id,
+                amountPoisha: so.amount_poisha || 0,
+                status: (rawSnap ? (rawSnap["orderStatus"] as string) : null) || so.status,
+                createdAt: so.created_at || new Date().toISOString(),
+                completedAt: rawSnap ? (rawSnap["completedAt"] as string | undefined) : undefined,
+              });
+            });
+          }
+        } catch (err) {
+          console.warn("getSellerAnalyticsFn orders warning:", err);
+        }
+
+        const allSellerOrders = Array.from(ordersMap.values());
+        const allSellerOrderIds = allSellerOrders.map((o) => o.id);
+
+        // 6. Fetch disputes for these seller orders ONLY
+        const disputesMap = new Map<string, { id: string; orderId: string; status: string }>();
+        db.disputes
+          .filter((d) => allSellerOrderIds.includes(d.orderId))
+          .forEach((d) => {
+            disputesMap.set(d.id, { id: d.id, orderId: d.orderId, status: d.status });
+          });
+
+        try {
+          if (allSellerOrderIds.length > 0) {
+            const { data: supaDisputes, error: dError } = await supabase
+              .from("disputes")
+              .select("id, order_id, status")
+              .in("order_id", allSellerOrderIds);
+
+            if (!dError && Array.isArray(supaDisputes)) {
+              supaDisputes.forEach((sd) => {
+                disputesMap.set(sd.id, { id: sd.id, orderId: sd.order_id, status: sd.status });
+              });
+            }
+          }
+        } catch (err) {
+          console.warn("getSellerAnalyticsFn disputes warning:", err);
+        }
+
+        const allSellerDisputes = Array.from(disputesMap.values());
+        const disputedOrderIdsSet = new Set(allSellerDisputes.map((d) => d.orderId.toUpperCase()));
+
+        // 7. Aggregate overall metrics
+        let totalViews7d = 0;
+        let totalViews30d = 0;
+        let totalViewsAllTime = 0;
+        let totalCartAdds7d = 0;
+        let totalCartAdds30d = 0;
+        let totalCartAddsAllTime = 0;
+
+        listingEventsMap.forEach((cnt) => {
+          totalViews7d += cnt.views7d;
+          totalViews30d += cnt.views30d;
+          totalViewsAllTime += cnt.viewsTotal;
+          totalCartAdds7d += cnt.cartAdds7d;
+          totalCartAdds30d += cnt.cartAdds30d;
+          totalCartAddsAllTime += cnt.cartAddsTotal;
+        });
+
+        let placedOrPendingCount = 0;
+        let confirmedCount = 0;
+        let deliveredOrCompletedCount = 0;
+        let cancelledOrRefundedCount = 0;
+        let totalDeliveredGMV = 0;
+        const saleDurationsDays: number[] = [];
+
+        allSellerOrders.forEach((o) => {
+          const st = o.status.toUpperCase();
+          if (st === "PENDING") {
+            placedOrPendingCount += 1;
+          } else if (["CONFIRMED", "PROCESSING", "READY_TO_SHIP", "SHIPPED"].includes(st)) {
+            confirmedCount += 1;
+          } else if (["DELIVERED", "COMPLETED"].includes(st)) {
+            deliveredOrCompletedCount += 1;
+            totalDeliveredGMV += Math.round(o.amountPoisha / 100);
+
+            // Compute days to sale: order date (or completedAt) - listing listedAt
+            const listing = listingsMap.get(o.listingId);
+            if (listing?.listedAt) {
+              const listedMs = new Date(listing.listedAt).getTime();
+              const soldMs = new Date(o.completedAt || o.createdAt).getTime();
+              if (soldMs >= listedMs) {
+                const days = Math.max(0, Math.round((soldMs - listedMs) / (1000 * 60 * 60 * 24)));
+                saleDurationsDays.push(days);
+              }
+            }
+          } else if (["CANCELLED", "REFUNDED", "REFUND_REQUESTED"].includes(st)) {
+            cancelledOrRefundedCount += 1;
+          }
+        });
+
+        const overallAvgDaysToSale =
+          saleDurationsDays.length > 0
+            ? Math.round(
+                (saleDurationsDays.reduce((a, b) => a + b, 0) / saleDurationsDays.length) * 10,
+              ) / 10
+            : null;
+
+        const overallConversionRate =
+          totalViewsAllTime > 0
+            ? Math.round((deliveredOrCompletedCount / totalViewsAllTime) * 1000) / 10
+            : null;
+
+        const overallDisputeRate =
+          allSellerOrders.length > 0
+            ? Math.round((disputedOrderIdsSet.size / allSellerOrders.length) * 1000) / 10
+            : null;
+
+        // 8. Build listing-level records
+        const listingRecords: ListingPerformanceRecord[] = sellerListings.map((l) => {
+          const prod = productsMap.get(l.productId);
+          const counts = listingEventsMap.get(l.id) || {
+            views7d: 0,
+            views30d: 0,
+            viewsTotal: 0,
+            cartAdds7d: 0,
+            cartAdds30d: 0,
+            cartAddsTotal: 0,
+          };
+
+          const listingOrders = allSellerOrders.filter((o) => o.listingId === l.id);
+          const listingDeliveredOrders = listingOrders.filter((o) =>
+            ["DELIVERED", "COMPLETED"].includes(o.status.toUpperCase()),
+          );
+
+          const listingDeliveredGMV = listingDeliveredOrders.reduce(
+            (acc, o) => acc + Math.round(o.amountPoisha / 100),
+            0,
+          );
+
+          const listingSaleDurations: number[] = [];
+          listingDeliveredOrders.forEach((o) => {
+            if (l.listedAt) {
+              const listedMs = new Date(l.listedAt).getTime();
+              const soldMs = new Date(o.completedAt || o.createdAt).getTime();
+              if (soldMs >= listedMs) {
+                listingSaleDurations.push(
+                  Math.max(0, Math.round((soldMs - listedMs) / (1000 * 60 * 60 * 24))),
+                );
+              }
+            }
+          });
+
+          const listingAvgDays =
+            listingSaleDurations.length > 0
+              ? Math.round(
+                  (listingSaleDurations.reduce((a, b) => a + b, 0) / listingSaleDurations.length) *
+                    10,
+                ) / 10
+              : null;
+
+          const listingConversion =
+            counts.viewsTotal > 0
+              ? Math.round((listingDeliveredOrders.length / counts.viewsTotal) * 1000) / 10
+              : null;
+
+          const listingDisputedOrders = listingOrders.filter((o) =>
+            disputedOrderIdsSet.has(o.id.toUpperCase()),
+          );
+          const listingDisputeRate =
+            listingOrders.length > 0
+              ? Math.round((listingDisputedOrders.length / listingOrders.length) * 1000) / 10
+              : null;
+
+          const listingDisputesCount = allSellerDisputes.filter((d) =>
+            listingOrders.some((o) => o.id.toUpperCase() === d.orderId.toUpperCase()),
+          ).length;
+
+          return {
+            listingId: l.id,
+            productId: l.productId,
+            title: prod?.name || `Listing ${l.id}`,
+            brand: prod?.brand || "Electronics",
+            category: prod?.category || "Device",
+            image: prod?.image || "/assets/p-phone.jpg",
+            grade: l.grade,
+            conditionScore: l.conditionScore,
+            price: l.price,
+            status: l.status,
+            listedAt: l.listedAt,
+            views7d: counts.views7d,
+            views30d: counts.views30d,
+            viewsTotal: counts.viewsTotal,
+            cartAdds7d: counts.cartAdds7d,
+            cartAdds30d: counts.cartAdds30d,
+            cartAddsTotal: counts.cartAddsTotal,
+            favorites: "Not available yet",
+            totalOrders: listingOrders.length,
+            deliveredOrders: listingDeliveredOrders.length,
+            deliveredGMV: listingDeliveredGMV,
+            conversionRate: listingConversion,
+            avgDaysToSale: listingAvgDays,
+            disputeCount: listingDisputesCount,
+            disputeRate: listingDisputeRate,
+          };
+        });
+
+        // 9. Generate Deterministic Rule-Based Insights
+        const insights: SellerAnalyticsInsight[] = [];
+
+        listingRecords.forEach((lr) => {
+          if (lr.viewsTotal >= 45 && lr.cartAddsTotal === 0) {
+            insights.push({
+              id: `ins-high-views-${lr.listingId}`,
+              type: "WARNING",
+              title: "High Views with Zero Cart Additions",
+              message: `Your listing "${lr.title}" has ${lr.viewsTotal} views but 0 cart additions — consider reviewing the price or listing presentation.`,
+              listingId: lr.listingId,
+            });
+          } else if (lr.viewsTotal > 0 && lr.cartAddsTotal > 0 && lr.totalOrders === 0) {
+            insights.push({
+              id: `ins-cart-no-orders-${lr.listingId}`,
+              type: "INFO",
+              title: "Cart Interest Without Orders",
+              message: `Your listing "${lr.title}" is receiving cart activity (${lr.cartAddsTotal} additions) but has no completed sales yet.`,
+              listingId: lr.listingId,
+            });
+          } else if (lr.viewsTotal === 0) {
+            insights.push({
+              id: `ins-no-views-${lr.listingId}`,
+              type: "INFO",
+              title: "Awaiting Initial Traffic",
+              message: `Your listing "${lr.title}" has no recorded views yet.`,
+              listingId: lr.listingId,
+            });
+          }
+
+          if (lr.deliveredOrders > 0) {
+            insights.push({
+              id: `ins-delivered-sales-${lr.listingId}`,
+              type: "SUCCESS",
+              title: "Completed Sales Recorded",
+              message: `Your listing "${lr.title}" has recorded ${lr.deliveredOrders} completed sales${
+                lr.avgDaysToSale !== null ? ` (avg ${lr.avgDaysToSale} days to sale)` : ""
+              }.`,
+              listingId: lr.listingId,
+            });
+          }
+
+          if (lr.disputeCount > 0) {
+            insights.push({
+              id: `ins-dispute-${lr.listingId}`,
+              type: "WARNING",
+              title: "Dispute Activity Recorded",
+              message: `Your listing "${lr.title}" has recorded dispute activity (${lr.disputeCount} dispute${
+                lr.disputeCount > 1 ? "s" : ""
+              }). Review the related orders for details.`,
+              listingId: lr.listingId,
+            });
+          }
+        });
+
+        if (insights.length === 0) {
+          insights.push({
+            id: "ins-active-monitoring",
+            type: "INFO",
+            title: "Analytics Active",
+            message:
+              "All seller events and metrics are being monitored with real-time verification.",
+          });
+        }
+
+        return {
+          success: true,
+          error: null,
+          data: {
+            sellerId,
+            totalListingsCount: sellerListings.length,
+            views7d: totalViews7d,
+            views30d: totalViews30d,
+            viewsTotal: totalViewsAllTime,
+            cartAdds7d: totalCartAdds7d,
+            cartAdds30d: totalCartAdds30d,
+            cartAddsTotal: totalCartAddsAllTime,
+            favoritesStatus: "Not available yet",
+            ordersBreakdown: {
+              total: allSellerOrders.length,
+              placedOrPending: placedOrPendingCount,
+              confirmed: confirmedCount,
+              deliveredOrCompleted: deliveredOrCompletedCount,
+              cancelledOrRefunded: cancelledOrRefundedCount,
+            },
+            deliveredGMV: totalDeliveredGMV,
+            conversionRate: overallConversionRate,
+            avgDaysToSale: overallAvgDaysToSale,
+            disputeRate: overallDisputeRate,
+            totalDisputesCount: allSellerDisputes.length,
+            listings: listingRecords,
+            insights,
+          },
+        };
+      } catch (err: unknown) {
+        const msg = (err as Error)?.message || String(err);
+        console.error("[getSellerAnalyticsFn] Error:", msg);
+        return {
+          success: false,
+          error: msg || "An unexpected error occurred.",
+          data: null,
+        };
+      }
+    },
+  );

@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
   LayoutDashboard,
+  BarChart3,
   List,
   Wallet,
   Plus,
@@ -15,10 +16,16 @@ import {
   Sparkles,
   UploadCloud,
   ShieldAlert,
+  ArrowUpRight,
+  Eye,
+  ShoppingCart,
+  Percent,
 } from "lucide-react";
 import { taka } from "@/data/catalog";
 import { ProtectedRoute } from "@/components/protected-route";
 import { getOrders, fetchOrdersAsync, onOrdersChange, type OrderRecord } from "@/lib/order-store";
+import { getSellerAnalyticsFn, type SellerAnalyticsData } from "@/lib/server-functions";
+import { useAuth } from "@/lib/auth-store";
 import { Badge } from "@/components/ui/badge";
 import resaleLogo from "@/assets/resale-logo.svg";
 
@@ -34,6 +41,7 @@ export function SellerSidebar({
 }: {
   active:
     | "dashboard"
+    | "analytics"
     | "orders"
     | "disputes"
     | "listings"
@@ -57,6 +65,12 @@ export function SellerSidebar({
           className={`flex items-center gap-3 px-4 py-2.5 text-xs font-medium rounded-md transition-colors ${active === "dashboard" ? "bg-primary text-primary-foreground font-semibold" : "hover:bg-muted"}`}
         >
           <LayoutDashboard className="size-4" /> Dashboard
+        </Link>
+        <Link
+          to="/seller/analytics"
+          className={`flex items-center gap-3 px-4 py-2.5 text-xs font-medium rounded-md transition-colors ${active === "analytics" ? "bg-primary text-primary-foreground font-semibold" : "hover:bg-muted"}`}
+        >
+          <BarChart3 className="size-4" /> Analytics Intelligence
         </Link>
         <Link
           to="/seller/orders"
@@ -121,7 +135,10 @@ export function SellerSidebar({
 }
 
 function SellerDashboardPage() {
+  const { token } = useAuth();
   const [orders, setOrders] = useState<OrderRecord[]>([]);
+  const [analytics, setAnalytics] = useState<SellerAnalyticsData | null>(null);
+  const [loadingAnalytics, setLoadingAnalytics] = useState(false);
 
   useEffect(() => {
     setOrders(getOrders());
@@ -134,6 +151,22 @@ function SellerDashboardPage() {
     return () => unsubscribe();
   }, []);
 
+  useEffect(() => {
+    if (token) {
+      setLoadingAnalytics(true);
+      getSellerAnalyticsFn({ data: { token } })
+        .then((res) => {
+          if (res.success && res.data) {
+            setAnalytics(res.data);
+          }
+        })
+        .catch(() => {})
+        .finally(() => {
+          setLoadingAnalytics(false);
+        });
+    }
+  }, [token]);
+
   const totalSales = orders
     .filter((o) => o.orderStatus === "DELIVERED" || o.orderStatus === "COMPLETED")
     .reduce((acc, o) => acc + o.total, 0);
@@ -141,6 +174,8 @@ function SellerDashboardPage() {
   const pendingOrdersCount = orders.filter((o) =>
     ["PENDING", "CONFIRMED", "PROCESSING", "READY_TO_SHIP"].includes(o.orderStatus),
   ).length;
+
+  const displayGmv = analytics ? analytics.deliveredGMV : totalSales;
 
   return (
     <ProtectedRoute>
@@ -150,8 +185,25 @@ function SellerDashboardPage() {
           <SellerSidebar active="dashboard" />
 
           <div className="flex-1 space-y-8">
-            <h1 className="text-3xl font-display font-bold text-foreground">Seller Dashboard</h1>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <h1 className="text-3xl font-display font-bold text-foreground">
+                  Seller Dashboard
+                </h1>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Overview of live inventory fulfillment and verified performance metrics.
+                </p>
+              </div>
+              <Button asChild variant="outline" size="sm" className="gap-2 self-start sm:self-auto">
+                <Link to="/seller/analytics">
+                  <BarChart3 className="size-4 text-primary" />
+                  <span>View Full Analytics</span>
+                  <ArrowUpRight className="size-3.5 ml-0.5" />
+                </Link>
+              </Button>
+            </div>
 
+            {/* Core Metrics Grid */}
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <Card>
                 <CardHeader className="pb-2">
@@ -161,9 +213,11 @@ function SellerDashboardPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-display font-bold text-primary">
-                    {taka(totalSales > 0 ? totalSales : 207120)}
+                    {taka(displayGmv)}
                   </div>
-                  <p className="text-xs text-muted-foreground mt-1">Cleared sales</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {displayGmv > 0 ? "Actual cleared sales" : "No completed sales yet"}
+                  </p>
                 </CardContent>
               </Card>
 
@@ -182,28 +236,64 @@ function SellerDashboardPage() {
               <Card>
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium text-muted-foreground">
-                    Seller Rating
+                    Listing Views (Total)
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold flex items-center gap-2 text-foreground">
-                    4.9 <Star className="size-5 fill-amber-400 text-amber-400" />
+                  <div className="text-2xl font-bold text-foreground flex items-center gap-2">
+                    <Eye className="size-5 text-muted-foreground" />
+                    {analytics ? analytics.viewsTotal : 0}
                   </div>
-                  <p className="text-xs text-muted-foreground mt-1">Verified seller score</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {analytics?.views7d !== undefined
+                      ? `${analytics.views7d} in last 7 days`
+                      : "Recorded traffic"}
+                  </p>
                 </CardContent>
               </Card>
 
               <Card>
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium text-muted-foreground">
-                    Listing Credits
+                    Store Conversion Rate
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-foreground">4</div>
-                  <p className="text-xs text-muted-foreground mt-1">Available to use</p>
+                  <div className="text-2xl font-bold text-foreground">
+                    {analytics?.conversionRate !== null && analytics?.conversionRate !== undefined
+                      ? `${analytics.conversionRate}%`
+                      : "—"}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {analytics?.conversionRate !== null && analytics?.conversionRate !== undefined
+                      ? "Delivered ÷ recorded views"
+                      : "Not enough recorded data"}
+                  </p>
                 </CardContent>
               </Card>
+            </div>
+
+            {/* Analytics Intelligence Teaser Banner */}
+            <div className="border border-border/80 bg-linear-to-r from-primary/5 via-card to-card p-5 rounded-lg flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+              <div className="space-y-1">
+                <div className="inline-flex items-center gap-1.5 text-[11px] font-bold text-primary uppercase tracking-wider">
+                  <Sparkles className="size-3.5" />
+                  <span>Phase 4.4 Seller Analytics Intelligence</span>
+                </div>
+                <h3 className="font-display font-bold text-base text-foreground">
+                  Evidence-Based Performance &amp; Real-Time Listing Telemetry
+                </h3>
+                <p className="text-xs text-muted-foreground max-w-2xl">
+                  Deep breakdown of 7d/30d listing views, cart additions, days to sale, dispute
+                  rates, and deterministic rule-based advice.
+                </p>
+              </div>
+              <Button asChild size="sm" className="shrink-0 gap-1.5">
+                <Link to="/seller/analytics">
+                  Open Analytics Intelligence
+                  <ChevronRight className="size-4" />
+                </Link>
+              </Button>
             </div>
 
             <div className="space-y-4">
