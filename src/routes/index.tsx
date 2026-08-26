@@ -495,54 +495,54 @@ function Index() {
       {/* ════════════════════════════════════════════════════════════
           BIGGEST SAVINGS RAIL
       ════════════════════════════════════════════════════════════ */}
-      {biggestSavings.length > 0 && (
-        <section className="px-4 md:px-5 py-10 border-t border-border bg-secondary/40">
-          <div className="mx-auto max-w-7xl">
-            <div className="flex items-end justify-between gap-4 mb-6">
-              <div>
-                <h2 className="text-2xl md:text-3xl font-display font-bold text-foreground">
-                  Biggest Savings
-                </h2>
-                <p className="mt-1 text-xs md:text-sm text-muted-foreground">
-                  Verified devices at steep discounts vs. brand-new retail.
-                </p>
-              </div>
-              <Link
-                to="/products"
-                search={{ q: undefined, category: undefined, brand: undefined }}
-                className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline whitespace-nowrap"
-              >
-                View all
-                <ArrowRight className="size-4" />
-              </Link>
-            </div>
-
-            <div className="flex gap-3 overflow-x-auto scrollbar-none snap-x pb-2">
-              {biggestSavings.map(({ listing: l, product: p, pct }) => (
-                <div key={l.id} className="w-40 shrink-0 snap-start sm:w-52">
-                  <FeaturedDeviceCard
-                    listingId={l.id}
-                    product={p}
-                    grade={l.grade}
-                    price={l.price}
-                    retail={p.retail}
-                    sellerDistrict={l.seller.district}
-                    saved={savedIds.has(l.id)}
-                    inCart={isInCart(l.id)}
-                    onToggleSaved={() => toggleSaved(l.id)}
-                    onBuyNow={() => handleBuyNow(l.id)}
-                  />
-                  {pct >= 40 && (
-                    <p className="mt-1 text-center text-[10px] font-bold text-primary">
-                      Save {taka(p.retail - l.price)}
-                    </p>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
+       {biggestSavings.length > 0 && (
+         <section className="px-4 md:px-5 py-16 border-t border-border bg-secondary/40 min-h-[600px]">
+           <div className="mx-auto max-w-7xl">
+             <div className="flex items-end justify-between gap-4 mb-6">
+               <div>
+                 <h2 className="text-2xl md:text-3xl font-display font-bold text-foreground">
+                   Biggest Savings
+                 </h2>
+                 <p className="mt-1 text-xs md:text-sm text-muted-foreground">
+                   Verified devices at steep discounts vs. brand-new retail.
+                 </p>
+               </div>
+               <Link
+                 to="/products"
+                 search={{ q: undefined, category: undefined, brand: undefined }}
+                 className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline whitespace-nowrap"
+               >
+                 View all
+                 <ArrowRight className="size-4" />
+               </Link>
+             </div>
+ 
+             <div className="flex gap-3 overflow-x-auto scrollbar-none snap-x pb-6">
+               {biggestSavings.map(({ listing: l, product: p, pct }) => (
+                 <div key={l.id} className="w-40 shrink-0 snap-start sm:w-52">
+                   <FeaturedDeviceCard
+                     listingId={l.id}
+                     product={p}
+                     grade={l.grade}
+                     price={l.price}
+                     retail={p.retail}
+                     sellerDistrict={l.seller.district}
+                     saved={savedIds.has(l.id)}
+                     inCart={isInCart(l.id)}
+                     onToggleSaved={() => toggleSaved(l.id)}
+                     onBuyNow={() => handleBuyNow(l.id)}
+                   />
+                   {pct >= 40 && (
+                     <p className="mt-1 text-center text-[10px] font-bold text-primary">
+                       Save {taka(p.retail - l.price)}
+                     </p>
+                   )}
+                 </div>
+               ))}
+             </div>
+           </div>
+         </section>
+       )}
 
       {/* ════════════════════════════════════════════════════════════
           AVAILABLE BRANDS
