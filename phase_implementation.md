@@ -315,13 +315,14 @@ Phase 4 transitions Resale.com from browser-local `localStorage` into a **real s
 
 ---
 
-### 4.2 — Event & Analytics Foundation ⭐ HIGH
+### 4.2 — Event & Analytics Foundation ✅ COMPLETED
 
 **Objective**: Instrument the 12-type behavioral event model to power all intelligence features.
 
 - **Event Types**: `PRODUCT_VIEWED`, `LISTING_VIEWED`, `SEARCH_PERFORMED`, `FILTER_APPLIED`, `CART_ADDED`, `CART_REMOVED`, `CHECKOUT_STARTED`, `ORDER_COMPLETED`, `STORE_VIEWED`, `CREATOR_VIDEO_PLAYED`, `FAVORITE_ADDED`, `FAVORITE_REMOVED`.
-- **Privacy Standards**: Session-based anonymous tracking — zero PII (NID, phone) in event payloads. All events stored in Resale's own database.
+- **Privacy Standards**: Session-based anonymous tracking — zero PII (NID, phone) in event payloads. All events stored in Resale's own database via `public.user_events` Supabase table.
 - **Data Truth Rule**: Events are only recorded when they actually occur. Never backfilled, inferred, or fabricated.
+- **Micro-interactions**: Apple-style press-feedback and card-hover-lift utilities implemented across all buttons, product cards, listing cards, and seller trust cards using pure CSS (no animation libraries). Respects `prefers-reduced-motion`.
 
 ---
 
