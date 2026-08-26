@@ -82,14 +82,14 @@ The listing details page (`/listing/$listingId`) presents a structured, high-tru
 
 ## 🎨 UI/UX Design System Tokens
 
-| Token / Layer              | Light Mode                      | Dark Mode                | Usage                                         |
-| :------------------------- | :------------------------------ | :----------------------- | :-------------------------------------------- |
-| **Primary (Brand Orange)** | `hsl(24, 95%, 53%)` (`#ea580c`) | Highlights & Action CTAs | Primary buttons, active tabs, badges          |
-| **Background Canvas**      | `hsl(0, 0%, 100%)`              | `hsl(240, 10%, 3.9%)`    | Page background                               |
-| **Card / Surface**         | `hsl(0, 0%, 98%)`               | `hsl(240, 10%, 6%)`      | Elevated cards, forms, drawer backgrounds     |
-| **Hairline Dividers**      | `hsl(240, 5.9%, 90%)`           | `hsl(240, 3.7%, 15.9%)`  | Crisp 1px structural grid lines               |
-| **Success / Verified**     | `hsl(142, 76%, 36%)`            | `hsl(142, 70%, 45%)`     | NID verification badges, 100% functional tags |
-| **Destructive / Error**    | `hsl(0, 84.2%, 60.2%)`          | `hsl(0, 62.8%, 30.6%)`   | Validation errors, defect warnings            |
+| Token / Layer              | Light Mode             | Dark Mode                | Usage                                         |
+| :------------------------- | :--------------------- | :----------------------- | :-------------------------------------------- |
+| **Primary (Brand Orange)** | `oklch(0.7 0.18 45)`   | Highlights & Action CTAs | Primary buttons, active tabs, badges          |
+| **Background Canvas**      | `hsl(0, 0%, 100%)`     | `hsl(240, 10%, 3.9%)`    | Page background                               |
+| **Card / Surface**         | `hsl(0, 0%, 98%)`      | `hsl(240, 10%, 6%)`      | Elevated cards, forms, drawer backgrounds     |
+| **Hairline Dividers**      | `hsl(240, 5.9%, 90%)`  | `hsl(240, 3.7%, 15.9%)`  | Crisp 1px structural grid lines               |
+| **Success / Verified**     | `hsl(142, 76%, 36%)`   | `hsl(142, 70%, 45%)`     | NID verification badges, 100% functional tags |
+| **Destructive / Error**    | `hsl(0, 84.2%, 60.2%)` | `hsl(0, 62.8%, 30.6%)`   | Validation errors, defect warnings            |
 
 ---
 

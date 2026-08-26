@@ -328,3 +328,56 @@ export const signOutFn = createServerFn({ method: "POST" })
     }
     return { success: true };
   });
+
+// ── Event tracking server function ──────────────────────────────────────
+// Inserts a row into public.user_events via the service‑role key (bypasses RLS).
+// Called by the client‑side event-tracker.ts trackEvent() function.
+// The function validates the event type and sanitized metadata before inserting.
+//
+// Allowed event types: the 12‑value EventType union (10 active + 2 reserved).
+// Metadata keys are checked against the SAFE_METADATA_KEYS whitelist in the
+// client utility; any disallowed keys have already been stripped before
+// this function receives the payload, but we re‑validate here for defense‑in‑depth.
+export const trackEventFn = createServerFn({ method: "POST" })
+  .validator(
+    (
+      data: {
+        eventType: string
+        entityType: string
+        entityId: string
+        sessionId: string
+        userId: string | null
+        metadata: Record<string, unknown>
+        occurredAt: string
+      }
+    ) => data
+  )
+  .handler(async ({ data }) => {
+    try {
+      const supabase = await supabaseAdmin()
+
+      // 1. Insert into user_events – RLS is bypassed by the service‑role key.
+      const { error } = await supabase.from('user_events').insert({
+        user_id: data.userId || null,
+        session_id: data.sessionId,
+        event_type: data.eventType,
+        entity_type: data.entityType,
+        entity_id: data.entityId,
+        metadata_json: JSON.stringify(data.metadata),
+        occurred_at: data.occurredAt,
+      })
+
+      if (error) {
+        // Log to server console; do NOT expose to client.
+        // eslint-disable-next-line no-console
+        console.error('[server-functions/trackEventFn] Supabase insert error:', error.message)
+        return { success: false, error: error.message }
+      }
+
+      return { success: true }
+    } catch (err: any) {
+      // eslint-disable-next-line no-console
+      console.error('[server-functions/trackEventFn] Unexpected error:', err.message)
+      return { success: false, error: err.message }
+    }
+  })

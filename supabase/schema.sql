@@ -136,8 +136,26 @@ CREATE TABLE IF NOT EXISTS public.product_videos (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+-- 10. Event Tracking Table (Phase 4.2)
+-- Stores anonymized behavioral events for analytics.
+-- All writes go through the server‑side trackEventFn (service_role key),
+-- which bypasses RLS. No public read/select policies are defined;
+-- reads are server‑only (e.g., admin dashboards).
+CREATE TABLE IF NOT EXISTS public.user_events (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id TEXT REFERENCES public.users(id) ON DELETE SET NULL,
+  session_id TEXT NOT NULL,
+  event_type TEXT NOT NULL,
+  entity_type TEXT NOT NULL,
+  entity_id TEXT NOT NULL,
+  metadata_json JSONB NOT NULL DEFAULT '{}'::jsonb,
+  occurred_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 -- Indexes for high performance
 CREATE INDEX IF NOT EXISTS idx_products_category ON public.products(category);
+CREATE INDEX IF NOT EXISTS idx_user_events_event_type ON public.user_events(event_type);
+CREATE INDEX IF NOT EXISTS idx_user_events_occurred_at ON public.user_events(occurred_at);
 CREATE INDEX IF NOT EXISTS idx_products_brand ON public.products(brand);
 CREATE INDEX IF NOT EXISTS idx_listings_product_id ON public.listings(product_id);
 CREATE INDEX IF NOT EXISTS idx_listings_seller_id ON public.listings(seller_id);
