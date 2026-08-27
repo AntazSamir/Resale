@@ -18,6 +18,20 @@ import {
   Sparkles,
   ArrowRight,
   TrendingUp,
+  Zap,
+  Battery,
+  Shield,
+  MemoryStick,
+  MonitorSmartphone,
+  Cable,
+  Gamepad2,
+  Watch,
+  Headphones,
+  Speaker,
+  Radio,
+  Activity,
+  Home,
+  LucideIcon,
 } from "lucide-react";
 import { BangladeshMapSVG } from "./bangladesh-map";
 import resaleLogo from "@/assets/resale-logo.svg";
@@ -33,9 +47,10 @@ type NavItem = {
   };
 };
 
-const desktopCategoryNav: (
-  NavItem | { label: string; dropdown: { label: string; q?: string; category?: string }[] }
-)[] = [
+type DropdownItem = { label: string; q?: string; category?: string; icon: LucideIcon; color: string };
+type DesktopNavItem = NavItem | { label: string; dropdown: DropdownItem[] };
+
+const desktopCategoryNav: DesktopNavItem[] = [
   { label: "Home", to: "/" },
   {
     label: "Smartphones",
@@ -60,30 +75,30 @@ const desktopCategoryNav: (
   {
     label: "Accessories",
     dropdown: [
-      { label: "Chargers & Cables", q: "Charger" },
-      { label: "Power Banks", q: "Power Bank" },
-      { label: "Cases & Covers", q: "Case" },
-      { label: "Screen Protectors", q: "Screen Protector" },
-      { label: "Stylus & Pens", q: "Stylus" },
-      { label: "USB Hubs & Docks", q: "USB Hub" },
-      { label: "Memory Cards", q: "Memory Card" },
-      { label: "Mounts & Stands", q: "Stand" },
-      { label: "Keyboard & Mouse", q: "Keyboard" },
-      { label: "Camera Bags & Straps", q: "Camera Bag" },
-      { label: "All Accessories", category: "Accessories" },
+      { label: "Chargers & Cables", q: "Charger",         icon: Cable,            color: "#f97316" },
+      { label: "Power Banks",       q: "Power Bank",      icon: Battery,          color: "#22c55e" },
+      { label: "Cases & Covers",    q: "Case",            icon: Shield,           color: "#3b82f6" },
+      { label: "Screen Protectors", q: "Screen Protector",icon: MonitorSmartphone,color: "#8b5cf6" },
+      { label: "Stylus & Pens",     q: "Stylus",          icon: Sparkles,         color: "#ec4899" },
+      { label: "USB Hubs & Docks",  q: "USB Hub",         icon: Zap,              color: "#eab308" },
+      { label: "Memory Cards",      q: "Memory Card",     icon: MemoryStick,      color: "#14b8a6" },
+      { label: "Mounts & Stands",   q: "Stand",           icon: Package,          color: "#6366f1" },
+      { label: "Keyboard & Mouse",  q: "Keyboard",        icon: Activity,         color: "#f43f5e" },
+      { label: "Camera Bags",       q: "Camera Bag",      icon: ShieldCheck,      color: "#0ea5e9" },
+      { label: "All Accessories",   category: "Accessories", icon: ArrowRight,    color: "#a855f7" },
     ],
   },
   {
     label: "Essentials",
     dropdown: [
-      { label: "Smartwatches", q: "Smartwatch" },
-      { label: "Earbuds", q: "Earbuds" },
-      { label: "Headphones", q: "Headphones" },
-      { label: "Bluetooth Speakers", q: "Speaker" },
-      { label: "Soundbars", q: "Soundbar" },
-      { label: "Wearable Fitness Bands", q: "Fitness Band" },
-      { label: "Smart Home Devices", q: "Smart Home" },
-      { label: "Home Products", category: "Home Products" },
+      { label: "Smartwatches",         q: "Smartwatch",  icon: Watch,       color: "#f97316" },
+      { label: "Earbuds",              q: "Earbuds",     icon: Radio,       color: "#3b82f6" },
+      { label: "Headphones",           q: "Headphones",  icon: Headphones,  color: "#8b5cf6" },
+      { label: "Bluetooth Speakers",   q: "Speaker",     icon: Speaker,     color: "#22c55e" },
+      { label: "Soundbars",            q: "Soundbar",    icon: Activity,    color: "#ec4899" },
+      { label: "Fitness Bands",        q: "Fitness Band",icon: Activity,    color: "#eab308" },
+      { label: "Smart Home Devices",   q: "Smart Home",  icon: Home,        color: "#14b8a6" },
+      { label: "Home Products",        category: "Home Products", icon: Building2, color: "#6366f1" },
     ],
   },
   { label: "Gaming", to: "/products", search: { category: "Gaming Consoles" } },
@@ -784,26 +799,28 @@ export function SiteHeader() {
                           </button>
                           {isExpanded && (
                             <div className="pl-3 ml-3 border-l border-border/80 space-y-0.5 py-1">
-                   {item.dropdown.map((sub, idx) => (
-                     <Link
-                       key={sub.label}
-                       to="/products"
-                       search={{
-                         category: sub.category,
-                         q: sub.q,
-                         brand: undefined,
-                       }}
-                       onClick={() => setMobileMenuOpen(false)}
-                       className="flex items-center px-2.5 py-1.5 hover:bg-muted hover:text-foreground text-muted-foreground transition-colors group"
-                     >
-                       <div className="relative flex items-center gap-2">
-                         {/* Mobile Tree Connector */}
-                         <div className="absolute -left-2 top-1/2 w-2 h-px bg-border group-hover:bg-primary transition-colors" />
-                         <div className={`absolute -left-1 top-1/2 -translate-y-1/2 size-1 rounded-full bg-border group-hover:bg-primary transition-colors ${idx === 0 ? 'hidden' : ''}`} />
-                         {sub.label}
-                       </div>
-                     </Link>
-                   ))}
+                              {cat.dropdown.map((sub, idx) => (
+                                <Link
+                                  key={sub.label}
+                                  to="/products"
+                                  search={{
+                                    category: sub.category,
+                                    q: sub.q,
+                                    brand: undefined,
+                                  }}
+                                  onClick={() => setMobileMenuOpen(false)}
+                                  className="flex items-center px-2.5 py-1.5 hover:bg-muted hover:text-foreground text-muted-foreground transition-colors group"
+                                >
+                                  <div className="relative flex items-center gap-2">
+                                    {/* Mobile Tree Connector */}
+                                    <div className="absolute -left-2 top-1/2 w-2 h-px bg-border group-hover:bg-primary transition-colors" />
+                                    <div
+                                      className={`absolute -left-1 top-1/2 -translate-y-1/2 size-1 rounded-full bg-border group-hover:bg-primary transition-colors ${idx === 0 ? "hidden" : ""}`}
+                                    />
+                                    {sub.label}
+                                  </div>
+                                </Link>
+                              ))}
                             </div>
                           )}
                         </div>
@@ -979,43 +996,66 @@ export function SiteHeader() {
               const rect = btnEl?.getBoundingClientRect();
               if (!rect) return null;
               return createPortal(
-               <div
-                 key={item.label}
-                 style={{
-                   position: "fixed",
-                   top: rect.bottom,
-                   left: rect.left,
-                   zIndex: 99999,
-                 }}
-                 className="min-w-50 bg-background border border-border border-t-0 shadow-2xl py-1 animate-in fade-in slide-in-from-top-2"
-                 onMouseEnter={() => setOpenDropdown(item.label)}
-                 onMouseLeave={() => setOpenDropdown(null)}
-               >
-                    {item.dropdown.map((sub, idx) => (
-                      <Link
-                        key={sub.label}
-                        to="/products"
-                        search={{ q: sub.q, category: sub.category, brand: undefined }}
-                        onClick={() => setOpenDropdown(null)}
-                        className="group relative flex items-center px-4 py-2 text-[12px] text-subtle-foreground hover:text-foreground hover:bg-muted/60 transition-all"
-                      >
-                        {/* Tree Connector */}
-                        <div className="absolute -left-4 flex items-center justify-center">
-                          {/* Vertical line: full height for all but last item, half height for last */}
-                          <div className={`absolute w-px bg-border group-hover:bg-primary transition-colors ${
-                            idx === item.dropdown.length - 1 
-                              ? "h-1/2 bottom-0" 
-                              : "h-full"
-                          }`} />
-                          {/* Horizontal arm */}
-                          <div className="absolute top-1/2 -translate-y-1/2 w-4 h-px bg-border group-hover:bg-primary transition-colors" />
-                        </div>
-                        
-                        <div className="flex items-center gap-2">
-                          {sub.label}
-                        </div>
-                      </Link>
-                    ))}
+                <div
+                  key={item.label}
+                  style={{
+                    position: "fixed",
+                    top: rect.bottom,
+                    left: rect.left,
+                    zIndex: 99999,
+                  }}
+                  className="min-w-50 bg-background border border-border border-t-0 shadow-2xl py-2 animate-in fade-in slide-in-from-top-2"
+                  onMouseEnter={() => setOpenDropdown(item.label)}
+                  onMouseLeave={() => setOpenDropdown(null)}
+                >
+                  {/* Tree root — vertical spine */}
+                  <div className="relative pl-8 pr-3">
+                    {/* Full-height vertical spine */}
+                    <div
+                      className="absolute left-4.5 top-0 bottom-0 w-px bg-border/60"
+                      style={{ top: "12px", bottom: "12px" }}
+                    />
+
+                    {(item as { label: string; dropdown: DropdownItem[] }).dropdown.map((sub, idx, arr) => {
+                      const Icon = sub.icon;
+                      const isLast = idx === arr.length - 1;
+                      return (
+                        <Link
+                          key={sub.label}
+                          to="/products"
+                          search={{ q: sub.q, category: sub.category, brand: undefined }}
+                          onClick={() => setOpenDropdown(null)}
+                          className="group relative flex items-center gap-2.5 py-1.75 text-[12px] text-subtle-foreground hover:text-foreground transition-colors"
+                        >
+                          {/* L-branch connector */}
+                          <span
+                            className="absolute -left-5.5 top-1/2 flex items-center"
+                            style={{ transform: "translateY(-50%)" }}
+                          >
+                            {/* vertical segment for this row (only up to center, stop for last) */}
+                            {!isLast && (
+                              <span
+                                className="absolute w-px bg-border/60"
+                                style={{ left: 0, top: "50%", bottom: "-50%" }}
+                              />
+                            )}
+                            {/* horizontal arm */}
+                            <span className="block w-3.5 h-px bg-border/70 group-hover:bg-primary transition-colors" />
+                          </span>
+
+                          {/* Colored icon */}
+                          <span
+                            className="shrink-0 flex items-center justify-center size-6 rounded"
+                            style={{ backgroundColor: sub.color + "18" }}
+                          >
+                            <Icon size={13} style={{ color: sub.color }} strokeWidth={2} />
+                          </span>
+
+                          <span className="font-medium leading-tight">{sub.label}</span>
+                        </Link>
+                      );
+                    })}
+                  </div>
                 </div>,
                 document.body,
               );

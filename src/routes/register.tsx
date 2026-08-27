@@ -43,6 +43,7 @@ function RegisterPage() {
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [nid, setNid] = useState("");
+  const [password, setPassword] = useState("");
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -61,6 +62,10 @@ function RegisterPage() {
     }
     if ((nid.length !== 10 && nid.length !== 13 && nid.length !== 17) || name.length < 2) {
       setError("Please fill out all required fields with valid information.");
+      return;
+    }
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters.");
       return;
     }
 
@@ -97,6 +102,7 @@ function RegisterPage() {
           otp,
           name,
           nid,
+          password,
         },
       });
 
@@ -252,6 +258,20 @@ function RegisterPage() {
                     Required for all users to ensure marketplace trust per PRD guidelines.
                   </p>
                 </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="password">Set Password</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder="Min. 6 characters"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    minLength={6}
+                  />
+                </div>
+
                 <Button type="submit" className="w-full font-semibold" disabled={loading}>
                   {loading ? "Sending OTP…" : "Send Verification Code"}
                 </Button>

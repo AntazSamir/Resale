@@ -135,6 +135,12 @@ class MemoryDatabase {
   disputes: Dispute[] = [];
   otps: Map<string, OtpRecord> = new Map();
   sessions: Map<string, SessionRecord> = new Map();
+  // password_hash map: key = userId, value = plain-text password (in-memory only, demo)
+  passwords: Map<string, string> = new Map([
+    ["u-admin", "Admin@1234"],
+    ["u-1", "Seller@1234"],
+    ["u-2", "Seller@1234"],
+  ]);
 
   // Drizzle-like chainable select/query helper for compatibility
   select() {
