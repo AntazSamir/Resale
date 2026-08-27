@@ -42,8 +42,11 @@
 
 ---
 
-### 🔐 3. Server-Authoritative Auth & Password Management
+### 🔐 3. Server-Authoritative Auth & Protected Routes
 
+- **Protected Flow Guards (`/sell`, `/account/disputes`)**:
+  - Direct route authentication checks redirect unauthenticated visitors to `/login` with clean `redirect` query preservation.
+  - Transparent return navigation restores previous wizard state or dispute claims upon successful sign-in.
 - **ID & Password Authentication (`/login`)**:
   - Sign in using verified **Mobile Number** (e.g. `01XXXXXXXXX`) or **Email Address** along with a secure password.
   - Show/hide password visibility toggle with high-contrast icons.
@@ -62,13 +65,13 @@
 
 - **Optimized Mobile Hero**:
   - Theme-aware gradient contrast ensuring crystal-clear text readability over background media.
-  - Side-by-side touch-friendly CTA buttons (*Shop Devices* & *Sell Device*).
+  - Side-by-side touch-friendly CTA buttons (_Shop Devices_ & _Sell Device_).
   - Dedicated **Mobile Trust Strip** (100% Inspected, 4.8★ Rating, 48h Protection, COD Available) positioned neatly below the hero section on mobile viewports.
 - **Dual Side-by-Side Photo Banners**:
-  - Clean photographic promotional banners (`Image 1.webp` and `Image 2.webp`) situated in between the *Just Listed* and *Featured Devices* sections.
+  - Clean photographic promotional banners (`Image 1.webp` and `Image 2.webp`) situated in between the _Just Listed_ and _Featured Devices_ sections.
   - Stacked on mobile and presented as a 2-column grid on tablets/desktops without jarring hover scales.
 - **Dynamic Product Discovery**:
-  - Category Carousels, *Just Listed* new arrivals, *Featured Devices*, and *Biggest Savings* discount rails.
+  - Category Carousels, _Just Listed_ new arrivals, _Featured Devices_, and _Biggest Savings_ discount rails.
 
 ---
 
@@ -76,7 +79,7 @@
 
 The listing details page (`/listing/$listingId`) presents a structured, high-trust buyer evaluation journey:
 
-1. **Seller Trust Line**: Avatar, name, verified badge with hover tooltip, district/area, and star rating.
+1. **Seller Trust Line & Verified Store Badge**: Avatar, name, verified badge with hover tooltip, district/area, star rating, and real lookup-backed verified store routing with graceful non-linked fallback.
 2. **Brand & Product Title**: High-contrast typography with subtle uppercase brand tracking.
 3. **Condition Score Gauge**: 4-zone segmented progress bar (<60 Heavy Wear, 60–74 Fair, 75–89 Good, 90–100 Excellent) and grade badge.
 4. **Quick Trust Pills**: Badges for remaining warranty months, battery health percentage, and original invoice availability.
@@ -94,7 +97,9 @@ The listing details page (`/listing/$listingId`) presents a structured, high-tru
   - `OrderStatus`: `PENDING` &rarr; `CONFIRMED` &rarr; `PROCESSING` &rarr; `READY_TO_SHIP` &rarr; `SHIPPED` &rarr; `DELIVERED` &rarr; `COMPLETED` (plus `CANCELLED`, `REFUND_REQUESTED`, `REFUNDED`, `DISPUTED`).
   - `PaymentStatus`: `PENDING` (Payment due on delivery), `AUTHORIZED`, `PAID`, `FAILED`, `REFUND_PENDING`, `REFUNDED`.
 - **Payment Method Abstraction**: Architecture supports `COD`, `BKASH`, `NAGAD`, `SSLCOMMERZ`, `CARD`, with **Cash on Delivery (COD) as the active method**.
-- **Supabase Shared PostgreSQL State**: Orders, listings, user records, and snapshots synced bidirectionally to remote Supabase database (`taqsfmxkiznbjyxbmbge.supabase.co`).
+- **Backend Persistence & Local-First Remote Sync**:
+  - Bidirectional remote synchronization for Cart Items, Orders, Disputes, Listings, and Stores backed by server functions in `src/lib/db-server.ts`.
+  - Silent error degradation ensuring optimistic local-first browser responsiveness even if database tables are in transit.
 - **Listing Snapshot Preservation**: Each order item permanently preserves the product name, grade, condition score, seller identity, images, and included accessories at the exact moment of checkout.
 - **Audited Event Timeline (`/account/orders/$orderId`)**: Chronological event logs recorded by Buyer, Seller, Courier, and Admin.
 - **Seller Order Fulfillment Hub (`/seller/orders`)**: Dedicated dashboard for sellers to progress orders through confirmation, packaging, and courier handover.
@@ -113,6 +118,7 @@ The listing details page (`/listing/$listingId`) presents a structured, high-tru
 ### ⚖️ 8. Dispute Mediation Hub & Fraud Shield (Phase 3.6)
 
 - **48-Hour Buyer Inspection Window (`/account/disputes`)**:
+  - Protected behind authentication guards with automatic redirect preservation.
   - Enforced delivery timestamp validation with real-time countdown badges.
   - 32-point inspection defect checklist targeting specific component mismatches.
   - Interactive drag-and-drop evidence dropzone (photos/videos with quota limits: max 5MB/photo, max 15MB/video).
@@ -156,6 +162,7 @@ The listing details page (`/listing/$listingId`) presents a structured, high-tru
 │   ├── assets/                         # Brand assets & images (official logo, promo banners, product images)
 │   ├── components/
 │   │   ├── ui/                         # Accessible Radix & Tailwind UI components (Button, Input, Sheet, etc.)
+│   │   ├── storefront/                 # Storefront components (StoreBadge, store verification chips)
 │   │   ├── site-header.tsx             # Dual header bar, smooth tree dropdowns & mobile drawer
 │   │   ├── site-footer.tsx             # Footer, newsletter subscription & platform directory
 │   │   ├── listing-card.tsx            # Listing-first product offer card
@@ -179,15 +186,16 @@ The listing details page (`/listing/$listingId`) presents a structured, high-tru
 │   │   └── seed.ts                     # Database seed data
 │   ├── lib/
 │   │   ├── auth-store.tsx              # User authentication session store
-│   │   ├── cart-store.tsx              # Shopping cart store & persistence
+│   │   ├── cart-store.tsx              # Shopping cart store & remote sync persistence
 │   │   ├── order-store.ts              # Orders, lifecycle state machine, & Supabase sync
-│   │   ├── dispute-store.ts            # Dispute lifecycle, SLA engine, & deterministic risk model
+│   │   ├── dispute-store.ts            # Dispute lifecycle, SLA engine, & Supabase persistence
 │   │   ├── store-store.ts              # Pro merchant storefronts store
 │   │   ├── creator-store.ts            # Creator profiles & video review relations
 │   │   ├── bulk-importer.ts            # CSV / JSON inventory parsing & validation engine
 │   │   ├── event-tracker.ts            # 12-type behavioral telemetry engine
 │   │   ├── supabase.ts                 # Supabase client configuration
 │   │   ├── supabase-admin.ts           # Supabase admin client
+│   │   ├── db-server.ts                # Server functions for Supabase orders, carts, disputes & stores
 │   │   └── server-functions.ts         # Nitro server functions (loginFn, changePasswordFn, verifyOtpFn, etc.)
 │   ├── routes/
 │   │   ├── __root.tsx                  # Root HTML layout & global error boundary
@@ -202,8 +210,8 @@ The listing details page (`/listing/$listingId`) presents a structured, high-tru
 │   │   ├── checkout.tsx                # Gated 3-step checkout & COD order placement
 │   │   ├── account.orders.tsx          # Buyer Order History & status filters
 │   │   ├── account.orders.$orderId.tsx # Buyer Detailed Timeline Tracking & 48h Inspection Timer
-│   │   ├── account.disputes.tsx        # Buyer Dispute Filing & Evidence Upload Dropzone
-│   │   ├── sell.index.tsx              # Interactive 4-Step Grading Wizard & Listing Submission
+│   │   ├── account.disputes.tsx        # Protected Buyer Dispute Filing & Evidence Dropzone
+│   │   ├── sell.index.tsx              # Protected 4-Step Grading Wizard & Listing Submission
 │   │   ├── seller.dashboard.tsx        # Seller Hub Overview & Analytics links
 │   │   ├── seller.analytics.tsx        # Seller Analytics Intelligence & Performance Telemetry
 │   │   ├── seller.orders.tsx           # Seller Order Fulfillment Hub & Step Progression
@@ -263,6 +271,15 @@ The listing details page (`/listing/$listingId`) presents a structured, high-tru
    npm run lint
    npm run build
    ```
+
+---
+
+## 📬 Contact & Support
+
+For platform support, partnership inquiries, or merchant onboarding assistance:
+
+- **Email**: [asr.resale@gmail.com](mailto:asr.resale@gmail.com)
+- **WhatsApp**: [+880 1765-918998](https://wa.me/8801765918998) (`01765918998`)
 
 ---
 

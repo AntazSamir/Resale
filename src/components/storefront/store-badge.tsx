@@ -17,9 +17,14 @@ export function StoreBadge({
 }: StoreBadgeProps) {
   if (!storeId && !storeName) return null;
 
-  const store = storeId ? getStoreById(storeId) : undefined;
+  // Real lookup: prefer id, then try slug derived from storeName as fallback
+  const store =
+    (storeId ? getStoreById(storeId) : undefined) ||
+    (storeName ? getStoreBySlug(storeName.toLowerCase().replace(/\s+/g, "-")) : undefined);
+
   const displayName = store?.name || storeName || "Verified Store";
-  const slug = store?.slug || (storeId ? storeId.replace("store-", "") : undefined);
+  // Only use slug from a confirmed store record — never guess it
+  const slug = store?.slug;
 
   const badgeContent = (
     <span
@@ -44,5 +49,6 @@ export function StoreBadge({
     );
   }
 
+  // Graceful fallback: render badge without link when store can't be resolved
   return badgeContent;
 }

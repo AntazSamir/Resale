@@ -6,6 +6,7 @@ import {
   type OrderRecord,
 } from "./order-store";
 import { products, productFor, taka } from "@/data/catalog";
+import { upsertDisputeFn } from "./db-server";
 
 export type DisputeStatus =
   | "OPEN" // Buyer filed, awaiting seller response
@@ -614,6 +615,22 @@ export function saveDisputes(disputes: DisputeRecord[]): void {
   } catch (err) {
     console.warn("Dispute localStorage write failed or quota exceeded:", err);
   }
+
+  // Background Supabase sync — silently ignored when table is absent
+  disputes.slice(0, 1).forEach((d) => {
+    const payload: Record<string, unknown> = {
+      id: d.id,
+      order_id: d.orderId,
+      buyer_id: d.buyerId,
+      seller_id: d.sellerId,
+      status: d.status,
+      reason: d.reason,
+      created_at: d.createdAt,
+      updated_at: d.updatedAt,
+      meta: JSON.stringify(d),
+    };
+    upsertDisputeFn({ data: payload }).catch(() => {});
+  });
 }
 
 export function getDisputeById(id: string): DisputeRecord | undefined {
