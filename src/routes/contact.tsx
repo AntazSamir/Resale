@@ -427,9 +427,9 @@ export default function ContactPage() {
                 Chat live with our customer support team for urgent order assistance or verification
                 questions.
               </p>
-              <p className="font-mono text-sm font-semibold text-foreground">+880 1700-000000</p>
+              <p className="font-mono text-sm font-semibold text-foreground">+880 1765-918998</p>
               <a
-                href="https://wa.me/8801700000000"
+                href="https://wa.me/8801765918998"
                 target="_blank"
                 rel="noreferrer"
                 className="inline-block text-xs font-bold uppercase tracking-wider text-emerald-600 hover:underline pt-1"
@@ -448,9 +448,11 @@ export default function ContactPage() {
                 Send general questions, condition dispute reports, or feedback directly to our
                 helpdesk.
               </p>
-              <p className="font-mono text-sm font-semibold text-foreground">support@resale.com</p>
+              <p className="font-mono text-sm font-semibold text-foreground">
+                asr.resale@gmail.com
+              </p>
               <a
-                href="mailto:support@resale.com"
+                href="mailto:asr.resale@gmail.com"
                 className="inline-block text-xs font-bold uppercase tracking-wider text-primary hover:underline pt-1"
               >
                 Send Email →
@@ -782,7 +784,7 @@ export default function ContactPage() {
 
             <div className="shrink-0 flex flex-col sm:flex-row items-start sm:items-center gap-3">
               <a
-                href="mailto:support@resale.com"
+                href="mailto:asr.resale@gmail.com"
                 className="inline-flex items-center justify-center bg-primary text-primary-foreground font-semibold text-sm px-5 py-3 uppercase tracking-wider transition-opacity hover:opacity-90"
               >
                 Email Support

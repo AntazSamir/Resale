@@ -691,7 +691,7 @@ function SellWizardPage() {
                 </Link>
                 <p className="text-[11px] text-muted-foreground flex items-center gap-1">
                   <Mail className="size-3 text-[#ea580c]" />
-                  <span>📩 Direct partner desk: partners@resale.com</span>
+                  <span>📩 Direct partner desk: asr.resale@gmail.com</span>
                 </p>
               </div>
             </div>

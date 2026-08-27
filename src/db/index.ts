@@ -35,8 +35,8 @@ class MemoryDatabase {
   users: User[] = [
     {
       id: "u-admin",
-      phone: "01700000000",
-      email: "admin@resale.com",
+      phone: "01765918998",
+      email: "asr.resale@gmail.com",
       name: "Admin User",
       nidNumber: "199526920199201",
       role: "ADMIN",

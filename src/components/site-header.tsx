@@ -1604,12 +1604,12 @@ export function SiteFooter() {
                 </li>
                 <li>
                   <a
-                    href="https://wa.me/8801700000000"
+                    href="https://wa.me/8801765918998"
                     target="_blank"
                     rel="noreferrer"
                     className="block py-1.5 text-emerald-600 font-medium"
                   >
-                    WhatsApp Support (+880 1700-000000)
+                    WhatsApp Support (+880 1765-918998)
                   </a>
                 </li>
                 <li>

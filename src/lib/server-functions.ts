@@ -342,7 +342,11 @@ export const loginFn = createServerFn({ method: "POST" })
     }
 
     const isAdmin =
-      user.role === "ADMIN" || user.phone === "01700000000" || user.email === "admin@resale.com";
+      user.role === "ADMIN" ||
+      user.phone === "01765918998" ||
+      user.phone === "01700000000" ||
+      user.email === "asr.resale@gmail.com" ||
+      user.email === "admin@resale.com";
 
     const token = `rst_${Date.now().toString(36)}_${Math.random().toString(36).slice(2)}_${Math.random().toString(36).slice(2)}`;
     const expiresAt = Date.now() + 30 * 24 * 60 * 60 * 1000;
