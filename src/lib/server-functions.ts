@@ -244,7 +244,7 @@ export const verifyOtpFn = createServerFn({ method: "POST" })
       db.passwords.set(user.id, data.password);
     }
 
-    const isAdmin: boolean = Boolean(user.role === "ADMIN" || isAdminIdentifier);
+    const isAdmin: boolean = user.role === "ADMIN";
 
     // Issue a cryptographically secure server session token
     const token = `rst_${Date.now().toString(36)}_${Math.random().toString(36).slice(2)}_${Math.random().toString(36).slice(2)}`;
@@ -303,7 +303,12 @@ export const loginFn = createServerFn({ method: "POST" })
     const password = data.password;
 
     if (!cleanPhone && !cleanEmail) {
-      return { success: false, error: "Please provide a phone number or email address.", user: null, token: null };
+      return {
+        success: false,
+        error: "Please provide a phone number or email address.",
+        user: null,
+        token: null,
+      };
     }
     if (!password) {
       return { success: false, error: "Password is required.", user: null, token: null };
@@ -316,17 +321,28 @@ export const loginFn = createServerFn({ method: "POST" })
     );
 
     if (!user) {
-      return { success: false, error: "No account found with that phone number or email.", user: null, token: null };
+      return {
+        success: false,
+        error: "No account found with that phone number or email.",
+        user: null,
+        token: null,
+      };
     }
 
     const storedPassword = db.passwords.get(user.id);
     // Accept stored password or dev fallback
     const isValid = storedPassword === password || password === "Dev@1234";
     if (!isValid) {
-      return { success: false, error: "Incorrect password. Please try again.", user: null, token: null };
+      return {
+        success: false,
+        error: "Incorrect password. Please try again.",
+        user: null,
+        token: null,
+      };
     }
 
-    const isAdmin = user.role === "ADMIN" || user.phone === "01700000000" || user.email === "admin@resale.com";
+    const isAdmin =
+      user.role === "ADMIN" || user.phone === "01700000000" || user.email === "admin@resale.com";
 
     const token = `rst_${Date.now().toString(36)}_${Math.random().toString(36).slice(2)}_${Math.random().toString(36).slice(2)}`;
     const expiresAt = Date.now() + 30 * 24 * 60 * 60 * 1000;

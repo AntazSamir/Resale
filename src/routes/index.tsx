@@ -29,6 +29,8 @@ import { getCreators } from "@/lib/creator-store";
 import { getStores } from "@/lib/store-store";
 import { useCart } from "@/lib/cart-store";
 import banner1 from "@/assets/banner-1.png";
+import bannerImage1 from "@/assets/image-1.webp";
+import bannerImage2 from "@/assets/image-2.webp";
 
 export const Route = createFileRoute("/")({
   head: () => {
@@ -218,70 +220,70 @@ function Index() {
       <SiteHeader />
 
       {/* ════════════════════════════════════════════════════════════
-          HERO — Banner 1 as background-image, dark text for light bg
+          HERO — Banner 1 as background-image, responsive layout
       ════════════════════════════════════════════════════════════ */}
       <section
-        className="relative w-full h-130 sm:h-140 lg:h-160 bg-cover bg-center bg-no-repeat flex items-center"
+        className="relative w-full min-h-95 sm:min-h-125 lg:min-h-145 bg-cover bg-position-[center_right_-60px] sm:bg-center bg-no-repeat flex items-center py-7 sm:py-14"
         style={{ backgroundImage: `url(${banner1})` }}
       >
-        {/* Subtle left-side fade so text is always readable on mobile */}
-        <div className="absolute inset-0 bg-linear-to-r from-white/80 via-white/50 to-transparent sm:from-white/60 sm:via-white/30 sm:to-transparent" />
+        {/* Theme-aware responsive gradient overlay for crystal clear contrast */}
+        <div className="absolute inset-0 bg-linear-to-r from-background/95 via-background/80 to-background/30 sm:from-background/90 sm:via-background/50 sm:to-transparent" />
 
         {/* Content */}
-        <div className="relative z-10 w-full max-w-7xl mx-auto px-5 md:px-10 py-10">
-          <div className="max-w-lg space-y-5">
+        <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-10">
+          <div className="max-w-lg space-y-4 sm:space-y-5">
             {/* Badge */}
-            <div className="inline-flex items-center gap-2 bg-orange-500/15 text-orange-600 border border-orange-400/40 px-3 py-1.5 text-[11px] md:text-xs font-bold uppercase tracking-wider">
+            <div className="inline-flex items-center gap-1.5 bg-primary/10 text-primary border border-primary/25 px-2.5 py-1 text-[10px] sm:text-xs font-bold uppercase tracking-wider">
               <BadgeCheck className="size-3.5" />
               <span>Verified Second-Hand Electronics</span>
             </div>
 
-            {/* Heading — dark text since banner left is white/light */}
-            <h1 className="text-[2rem] sm:text-5xl lg:text-[3.4rem] font-display font-bold leading-[1.06] tracking-tight text-gray-900">
+            {/* Heading */}
+            <h1 className="text-[1.85rem] sm:text-4xl lg:text-[3.2rem] font-display font-bold leading-[1.12] sm:leading-[1.08] tracking-tight text-foreground">
               Buy Used.
-              <span className="block">Know Exactly</span>
-              <span className="block text-orange-500">What You&apos;re Getting.</span>
+              <span className="block text-muted-foreground font-semibold">Know Exactly</span>
+              <span className="block text-primary">What You&apos;re Getting.</span>
             </h1>
 
             {/* Subtext */}
-            <p className="text-sm md:text-base text-gray-600 max-w-md leading-relaxed">
-              Inspected devices from trusted sellers, with transparent condition grades and real
-              product details.
+            <p className="text-xs sm:text-sm md:text-base text-muted-foreground max-w-md leading-relaxed">
+              Inspected devices from NID-verified sellers with transparent condition grades and
+              48-hour buyer protection.
             </p>
 
-            {/* Buttons */}
-            <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-3">
+            {/* Buttons (Side-by-side on mobile, touch-friendly) */}
+            <div className="flex flex-row items-center gap-2.5 sm:gap-3 pt-1">
               <Link
                 to="/products"
                 search={{ q: undefined, category: undefined, brand: undefined }}
-                className="inline-flex items-center justify-center gap-2 bg-orange-500 px-6 py-3 text-sm font-semibold text-white transition-all hover:bg-orange-600 hover:shadow-lg active:scale-[0.98]"
+                className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 sm:gap-2 bg-primary px-4 sm:px-6 py-2.5 sm:py-3 text-xs sm:text-sm font-semibold text-primary-foreground transition-all hover:opacity-90 active:scale-[0.98] shadow-sm"
               >
                 <span>Shop Devices</span>
-                <ArrowRight className="size-4" />
+                <ArrowRight className="size-3.5 sm:size-4" />
               </Link>
               <Link
                 to="/sell"
-                className="inline-flex items-center justify-center gap-2 bg-white text-gray-900 border border-gray-300 px-6 py-3 text-sm font-semibold transition-all hover:border-gray-400 hover:shadow-sm active:scale-[0.98]"
+                className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 sm:gap-2 bg-card/90 backdrop-blur-xs text-foreground border border-border px-4 sm:px-6 py-2.5 sm:py-3 text-xs sm:text-sm font-semibold transition-all hover:bg-muted/80 active:scale-[0.98]"
               >
-                <span>Sell Your Device</span>
+                <span>Sell Device</span>
               </Link>
             </div>
 
-            {/* Stats row */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1">
+            {/* Stats row (Desktop/Tablet embedded) */}
+            <div className="hidden sm:grid grid-cols-4 gap-2 pt-4 border-t border-border/50 max-w-md">
               {[
                 { icon: ShieldCheck, value: "100%", label: "Inspected" },
-                { icon: Star, value: "4.8/5", label: "Buyer Rating" },
+                { icon: Star, value: "4.8★", label: "Rating" },
                 { icon: Lock, value: "48h", label: "Protection" },
-                { icon: Wallet, value: "COD", label: "Payments" },
+                { icon: Wallet, value: "COD", label: "Available" },
               ].map((s) => (
                 <div key={s.label} className="flex items-center gap-2">
-                  <s.icon className="size-4 text-orange-500 shrink-0" />
+                  <s.icon className="size-4 text-primary shrink-0" />
                   <div>
-                    <p className="text-xs sm:text-sm font-bold text-gray-900 leading-none">
-                      {s.value}
+                    <p className="text-sm font-bold text-foreground leading-none">{s.value}</p>
+                    <p className="text-[10px] text-muted-foreground mt-0.5 leading-tight">
+                      {s.label}
                     </p>
-                    <p className="text-[10px] text-gray-500 mt-0.5 leading-tight">{s.label}</p>
                   </div>
                 </div>
               ))}
@@ -290,10 +292,32 @@ function Index() {
         </div>
       </section>
 
+      {/* Mobile Trust Strip (Shown cleanly below hero on mobile) */}
+      <div className="block sm:hidden border-b border-border bg-card py-3 px-3">
+        <div className="grid grid-cols-4 gap-1.5">
+          {[
+            { icon: ShieldCheck, value: "100%", label: "Inspected" },
+            { icon: Star, value: "4.8★", label: "Rating" },
+            { icon: Lock, value: "48h", label: "Protection" },
+            { icon: Wallet, value: "COD", label: "Available" },
+          ].map((s) => (
+            <div key={s.label} className="flex items-center gap-1.5 min-w-0">
+              <s.icon className="size-3.5 text-primary shrink-0" />
+              <div className="min-w-0">
+                <p className="text-xs font-bold text-foreground leading-none truncate">{s.value}</p>
+                <p className="text-[9px] text-muted-foreground mt-0.5 leading-tight truncate">
+                  {s.label}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* ════════════════════════════════════════════════════════════
           TRUST CARDS (01–04)
       ════════════════════════════════════════════════════════════ */}
-      <section className="px-4 md:px-5 py-10">
+      <section className="hidden md:block px-4 md:px-5 py-10">
         <div className="mx-auto max-w-7xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {[
             {
@@ -444,6 +468,41 @@ function Index() {
               ))}
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* ════════════════════════════════════════════════════════════
+          DUAL PROMO PHOTO BANNERS (Side-by-Side between Just Listed & Featured)
+      ════════════════════════════════════════════════════════════ */}
+      <section className="px-4 md:px-5 py-6 sm:py-8 border-t border-border">
+        <div className="mx-auto max-w-7xl grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
+          {/* Photo Banner 1 */}
+          <Link
+            to="/products"
+            search={{ q: undefined, category: undefined, brand: undefined }}
+            className="relative block overflow-hidden border border-border bg-card"
+          >
+            <div className="w-full overflow-hidden bg-muted">
+              <img
+                src={bannerImage1}
+                alt="Promo Banner 1"
+                loading="lazy"
+                className="w-full h-auto object-cover block"
+              />
+            </div>
+          </Link>
+
+          {/* Photo Banner 2 */}
+          <Link to="/sell" className="relative block overflow-hidden border border-border bg-card">
+            <div className="w-full overflow-hidden bg-muted">
+              <img
+                src={bannerImage2}
+                alt="Promo Banner 2"
+                loading="lazy"
+                className="w-full h-auto object-cover block"
+              />
+            </div>
+          </Link>
         </div>
       </section>
 

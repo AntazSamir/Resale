@@ -4,26 +4,57 @@
 [![TanStack Router](https://img.shields.io/badge/TanStack-Router-FF4154?logo=react-router&logoColor=white)](https://tanstack.com/router)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v4-38B2AC?logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
-[![Vercel](https://img.shields.io/badge/Deploy-Vercel-000000?logo=vercel&logoColor=white)](https://vercel.com/)
+[![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3ECF8E?logo=supabase&logoColor=white)](https://supabase.com/)
 [![Cloudflare](https://img.shields.io/badge/Deploy-Cloudflare-F38020?logo=cloudflare&logoColor=white)](https://workers.cloudflare.com/)
 
-**Resale.com** is Bangladesh's premier C2C and B2B marketplace for quality-checked pre-owned, open-box, and refurbished electronics. Engineered with objective component-level condition grading (A+ to D), 32-point hardware inspection, NID-verified sellers, nationwide Cash on Delivery (COD), decoupled order lifecycle state machines, Pro Merchant storefronts, Verified Creator video reviews, and a comprehensive 48-hour dispute mediation hub.
+**Resale.com** is Bangladesh's premier C2C and B2B marketplace for quality-checked pre-owned, open-box, and refurbished electronics. Engineered with objective component-level condition grading (A+ to D), 32-point hardware inspection, NID-verified sellers, nationwide Cash on Delivery (COD), decoupled order lifecycle state machines, Pro Merchant storefronts, Verified Creator video reviews, server-authoritative authentication, and a comprehensive 48-hour dispute mediation hub.
 
 ---
 
 ## ✨ Key Features & Architecture
 
-### 🧭 1. Dual-Tier Navigation & Rich Portal Dropdowns
+### 🧭 1. Dual-Tier Navigation & Tree-Connector Dropdowns
 
-- **Desktop Secondary Category Header**: Sticky navigation strip with hover/click dropdowns mounted directly to `document.body` via React Portals (`createPortal`), guaranteeing top-level foreground rendering (`z-[99999]`) over hero banners and media components:
-  - **[Accessories ▾]**: Chargers & Cables, Power Banks, Cases & Covers, Screen Protectors, Stylus & Pens, USB Hubs & Docks, Memory Cards, Mounts & Stands, Keyboard & Mouse, Camera Bags & Straps, All Accessories.
-  - **[Essentials ▾]**: Smartwatches, Earbuds, Headphones, Bluetooth Speakers, Soundbars, Wearable Fitness Bands, Smart Home Devices, Home Products.
+- **Desktop Secondary Category Header**: Sticky navigation strip with hover/click dropdowns mounted directly to `document.body` via React Portals (`createPortal`), guaranteeing top-level foreground rendering (`z-[99999]`) over all media layers.
+- **Tree-Connector Dropdown UX**: Features vertical spine lines, L-shaped branching arms, and colored icon badges for each category item matching modern design system standards:
+  - **[Accessories ▾]**: Chargers & Cables (Orange), Power Banks (Green), Cases & Covers (Blue), Screen Protectors (Purple), Stylus & Pens (Pink), USB Hubs (Yellow), Memory Cards (Teal), Mounts & Stands (Indigo), Keyboard & Mouse (Rose), Camera Bags (Sky), All Accessories.
+  - **[Essentials ▾]**: Smartwatches (Orange), Earbuds (Blue), Headphones (Purple), Bluetooth Speakers (Green), Soundbars (Pink), Fitness Bands (Yellow), Smart Home (Teal), Home Products (Indigo).
   - **Direct Category Links**: Smartphones, Laptops, Cameras, Tablets, Gaming Consoles, Sell with Us, Partner Program.
-- **Mobile Drawer Navigation**: Slide-over drawer featuring expandable accordion submenus for Accessories and Essentials with fluid chevron rotation animations and instant navigation handling.
+- **Mobile Drawer Navigation**: Slide-over drawer with expandable accordion submenus, smooth chevron animations, and instant route transitions.
 
 ---
 
-### 🔍 2. Trust Architecture & Progressive Listing UX (Phase 2)
+### 🔐 2. Server-Authoritative Auth & Password Management
+
+- **ID & Password Authentication (`/login`)**:
+  - Sign in using verified **Mobile Number** (e.g. `01XXXXXXXXX`) or **Email Address** along with a secure password.
+  - Show/hide password visibility toggle with high-contrast icons.
+  - Direct redirect preservation (`?redirect=/checkout`) returning users immediately to their previous session upon login.
+- **OTP-Verified Password Reset & Change**:
+  - In-place multi-step modal flow: Enter ID &rarr; Verify 6-digit SMS/Email OTP &rarr; Set & Confirm New Password.
+  - Server-side rate limiting and 5-minute OTP TTL (`sendOtpFn`, `changePasswordFn`).
+- **NID-Gated Registration (`/register`)**:
+  - Enforces mandatory Bangladesh National ID (10, 13, or 17 digits) collection, Full Name, Contact ID, Password creation, and OTP verification.
+- **Server Session Tokens**:
+  - Cryptographically secure 30-day session tokens (`rst_...`) stored and validated exclusively on the backend (`validateSessionFn`), preventing client-side role spoofing.
+
+---
+
+### 📱 3. Responsive Homepage & Promo Discovery
+
+- **Optimized Mobile Hero**:
+  - Theme-aware gradient contrast ensuring crystal-clear text readability over background media.
+  - Side-by-side touch-friendly CTA buttons (*Shop Devices* & *Sell Device*).
+  - Dedicated **Mobile Trust Strip** (100% Inspected, 4.8★ Rating, 48h Protection, COD Available) positioned neatly below the hero section on mobile viewports.
+- **Dual Side-by-Side Photo Banners**:
+  - Clean photographic promotional banners (`Image 1.webp` and `Image 2.webp`) situated in between the *Just Listed* and *Featured Devices* sections.
+  - Stacked on mobile and presented as a 2-column grid on tablets/desktops.
+- **Dynamic Product Discovery**:
+  - Category Carousels, *Just Listed* new arrivals, *Featured Devices*, and *Biggest Savings* discount rails.
+
+---
+
+### 🔍 4. Trust Architecture & Progressive Listing UX (Phase 2)
 
 The listing details page (`/listing/$listingId`) presents a structured, high-trust buyer evaluation journey:
 
@@ -39,57 +70,51 @@ The listing details page (`/listing/$listingId`) presents a structured, high-tru
 
 ---
 
-### 📦 3. Order & Transaction Infrastructure (Phase 3.1)
+### 📦 5. Order & Transaction Infrastructure (Phase 3.1 & 4.1A)
 
 - **Decoupled Order Lifecycle Engine**:
   - `OrderStatus`: `PENDING` &rarr; `CONFIRMED` &rarr; `PROCESSING` &rarr; `READY_TO_SHIP` &rarr; `SHIPPED` &rarr; `DELIVERED` &rarr; `COMPLETED` (plus `CANCELLED`, `REFUND_REQUESTED`, `REFUNDED`, `DISPUTED`).
   - `PaymentStatus`: `PENDING` (Payment due on delivery), `AUTHORIZED`, `PAID`, `FAILED`, `REFUND_PENDING`, `REFUNDED`.
 - **Payment Method Abstraction**: Architecture supports `COD`, `BKASH`, `NAGAD`, `SSLCOMMERZ`, `CARD`, with **Cash on Delivery (COD) as the active method**.
+- **Supabase Shared PostgreSQL State**: Orders, listings, user records, and snapshots synced bidirectionally to remote Supabase database (`taqsfmxkiznbjyxbmbge.supabase.co`).
 - **Listing Snapshot Preservation**: Each order item permanently preserves the product name, grade, condition score, seller identity, images, and included accessories at the exact moment of checkout.
 - **Audited Event Timeline (`/account/orders/$orderId`)**: Chronological event logs recorded by Buyer, Seller, Courier, and Admin.
-- **Controlled Cancellation Flow**: Buyers can cancel orders during `PENDING` and `CONFIRMED` stages before courier dispatch with mandatory reason capture.
 - **Seller Order Fulfillment Hub (`/seller/orders`)**: Dedicated dashboard for sellers to progress orders through confirmation, packaging, and courier handover.
-- **Admin Transaction Monitoring (`/admin/orders`)**: Platform-wide transaction directory with dual Order/Payment state filters, GMV tracking, and direct dispute mediation links.
 
 ---
 
-### 🏪 4. Pro Storefronts & Creator Suite (Phase 3.4)
+### 🏪 6. Pro Storefronts & Creator Suite (Phase 3.4 & 4.1B)
 
-- **Public Branded Storefronts (`/store/:slug`)**: Verified merchant profiles with cover banners, operational badges, warranty policies, and live catalog filtering.
+- **Public Branded Storefronts (`/store/:slug`)**: Verified merchant profiles with cover banners, operational badges, warranty policies, and live catalog filtering backed by Supabase `public.stores`.
 - **Verified Creator Video Hub (`/creator/:slug`)**: Direct creator channels featuring short-form and long-form hands-on device unboxings with exact-unit inspection tag links.
 - **Hands-on Video Review Strip**: Listing pages embed creator review cards with modal video players and timestamps.
 - **Bulk CSV / JSON Inventory Importer (`/seller/inventory/import`)**: Drag-and-drop importer with validation previews, schema mapping, and one-click bulk drafting.
 
 ---
 
-### ⚖️ 5. Dispute Mediation Hub & Fraud Shield (Phase 3.6)
+### ⚖️ 7. Dispute Mediation Hub & Fraud Shield (Phase 3.6)
 
 - **48-Hour Buyer Inspection Window (`/account/disputes`)**:
   - Enforced delivery timestamp validation with real-time countdown badges.
   - 32-point inspection defect checklist targeting specific component mismatches.
-  - Interactive drag-and-drop evidence dropzone (photos/videos with quota limits: max 5MB/photo, max 15MB/video) and quick sample proof loaders.
+  - Interactive drag-and-drop evidence dropzone (photos/videos with quota limits: max 5MB/photo, max 15MB/video).
   - PII masking on sensitive contact info (`017****1234`, `****-****-9201`).
 - **Seller Claims Hub (`/seller/disputes`)**:
   - 24-hour response SLA countdown timer with automatic escalation to admin review upon timeout.
-  - _"Accept Return & Authorize Full Refund (Simulation)"_ 1-click agreement flow.
   - Counter-evidence and explanation uploader (dispatch packaging photos, IMEI serial match proof).
 - **Admin Mediation Workbench (`/admin/disputes`)**:
   - Side-by-side comparison matrix: Original 32-Point Listing Baseline vs. Buyer Claim & Evidence vs. Seller Response.
-  - Deterministic Rule-Based Risk Analyzer (0–100 score, higher = higher risk) and Evidence Consistency Confidence (0–100%).
-  - Verdict execution console: Approve 100% Refund, Approve Return & Reverse Courier Pickup (`#REV-XXXXX`), or Reject Claim & Release Seller Payout.
+  - Deterministic Rule-Based Risk Analyzer (0–100 score) and Evidence Consistency Confidence (0–100%).
+  - Binding verdict execution: Full Refund, Reverse Courier Return Pickup (`#REV-XXXXX`), or Seller Payout Release.
 
 ---
 
-## 🎨 UI/UX Design System Tokens
+### 📈 8. Seller Analytics Intelligence (Phase 4.4)
 
-| Token / Layer              | Light Mode             | Dark Mode                | Usage                                         |
-| :------------------------- | :--------------------- | :----------------------- | :-------------------------------------------- |
-| **Primary (Brand Orange)** | `oklch(0.7 0.18 45)`   | Highlights & Action CTAs | Primary buttons, active tabs, badges          |
-| **Background Canvas**      | `hsl(0, 0%, 100%)`     | `hsl(240, 10%, 3.9%)`    | Page background                               |
-| **Card / Surface**         | `hsl(0, 0%, 98%)`      | `hsl(240, 10%, 6%)`      | Elevated cards, forms, drawer backgrounds     |
-| **Hairline Dividers**      | `hsl(240, 5.9%, 90%)`  | `hsl(240, 3.7%, 15.9%)`  | Crisp 1px structural grid lines               |
-| **Success / Verified**     | `hsl(142, 76%, 36%)`   | `hsl(142, 70%, 45%)`     | NID verification badges, 100% functional tags |
-| **Destructive / Error**    | `hsl(0, 84.2%, 60.2%)` | `hsl(0, 62.8%, 30.6%)`   | Validation errors, defect warnings            |
+- **Evidence-Based Metrics**: Dedicated `/seller/analytics` page derived strictly from recorded Resale telemetry.
+- **Listing Views & Cart Telemetry**: 7-day, 30-day, and all-time views (`LISTING_VIEWED`) and cart additions (`CART_ADDED`) with session duplicate suppression.
+- **Strict GMV Calculation**: Revenue calculated strictly from `DELIVERED` and `COMPLETED` orders.
+- **Deterministic Intelligent Insights**: Automated rule-based alerts for pricing adjustments, high-interest listings, completed sale milestones, and dispute monitoring.
 
 ---
 
@@ -101,27 +126,7 @@ The listing details page (`/listing/$listingId`) presents a structured, high-tru
 | **Frontend**     | React 19, TypeScript 5.7+ (Strict Optional Types)                                                   |
 | **Styling**      | Tailwind CSS v4, PostCSS, Radix UI Primitives, Lucide Icons, **Apple‑style CSS micro‑interactions** |
 | **State & Data** | In‑Memory Catalog & Store Engines, TanStack Query, Nitro Server Functions, **Supabase PostgreSQL**  |
-| **Deployment**   | Vercel (Edge & Serverless) / Cloudflare Workers / Nitro Multi‑target Preset                         |
-
----
-
-## 🆕 New in This Release
-
-### 📈 Phase 4.4 — Seller Analytics Intelligence
-
-- **Evidence-Based Seller Metrics**: Dedicated `/seller/analytics` dashboard derived strictly from actual recorded Resale data (zero simulated numbers or fabricated conversion rates).
-- **Listing Views & Cart Telemetry**: 7-day, 30-day, and all-time views (`LISTING_VIEWED`) and cart additions (`CART_ADDED`) aggregated with session duplicate suppression.
-- **Strict GMV Calculation**: Delivered revenue counted strictly from orders in `DELIVERED` or `COMPLETED` statuses (pending COD & active unfulfilled orders are excluded).
-- **Deterministic Intelligent Insights**: Automated rule-based alerts for pricing review (high views with 0 cart additions), active cart demand without orders, completed sales milestones, and dispute tracking.
-- **Server-Authoritative Privacy**: Session-derived seller isolation preventing cross-seller data access or IDOR parameter manipulation.
-
-### 📊 Phase 4.2 — Event & Analytics Foundation
-
-- **12‑type behavioral event model** instrumented across all pages (product views, cart actions, orders, store views, creator videos, favorites)
-- **Privacy‑first session tracking**: anonymous session IDs stored in `sessionStorage`, zero PII in event payloads
-- **Supabase `public.user_events` table** with composite indexes on `entity_type`, `entity_id`, `event_type`, and `occurred_at` for high-throughput queries
-- **Type‑safe event guards** (`isActiveEventType`, `isReservedEventType`, `isEventType`) for compile‑time safety
-- **Micro‑interactions**: Apple‑style press‑feedback (scale 0.97 on press) and card‑hover‑lift with reduced‑motion fallback, implemented purely in CSS (no animation libraries)
+| **Deployment**   | Cloudflare Workers / Nitro Multi‑target Preset / Vercel                                             |
 
 ---
 
@@ -130,10 +135,10 @@ The listing details page (`/listing/$listingId`) presents a structured, high-tru
 ```
 ├── public/                             # Static public assets (logos, maps, favicons)
 ├── src/
-│   ├── assets/                         # Brand assets & images (official logo, hero media, product images)
+│   ├── assets/                         # Brand assets & images (official logo, promo banners, product images)
 │   ├── components/
-│   │   ├── ui/                         # Accessible Radix & Tailwind UI components (Button, Sheet, Select, etc.)
-│   │   ├── site-header.tsx             # Dual header bar, portal dropdown engine & mobile drawer
+│   │   ├── ui/                         # Accessible Radix & Tailwind UI components (Button, Input, Sheet, etc.)
+│   │   ├── site-header.tsx             # Dual header bar, tree dropdowns & mobile drawer
 │   │   ├── site-footer.tsx             # Footer, newsletter subscription & platform directory
 │   │   ├── listing-card.tsx            # Listing-first product offer card
 │   │   ├── product-card.tsx            # Catalog model showcase card
@@ -150,20 +155,25 @@ The listing details page (`/listing/$listingId`) presents a structured, high-tru
 │   │   ├── grading.ts                  # 100-point condition grading calculation matrix
 │   │   ├── storefront.ts               # Merchant storefronts and store data
 │   │   └── creator.ts                  # Verified creator profiles and video reviews
+│   ├── db/
+│   │   ├── index.ts                    # In-memory database with passwords, sessions, and OTP maps
+│   │   ├── schema.ts                   # Drizzle ORM database schema definitions
+│   │   └── seed.ts                     # Database seed data
 │   ├── lib/
 │   │   ├── auth-store.tsx              # User authentication session store
 │   │   ├── cart-store.tsx              # Shopping cart store & persistence
-│   │   ├── grade-store.ts              # Graded listing drafts store
-│   │   ├── order-store.ts              # Orders, lifecycle state machine, & timeline engine
+│   │   ├── order-store.ts              # Orders, lifecycle state machine, & Supabase sync
 │   │   ├── dispute-store.ts            # Dispute lifecycle, SLA engine, & deterministic risk model
 │   │   ├── store-store.ts              # Pro merchant storefronts store
 │   │   ├── creator-store.ts            # Creator profiles & video review relations
 │   │   ├── bulk-importer.ts            # CSV / JSON inventory parsing & validation engine
-│   │   ├── event-tracker.ts            # 12-type behavioral telemetry engine & duplicate suppression
-│   │   └── server-functions.ts         # Nitro server functions (OTP auth, checkout handlers, seller analytics)
+│   │   ├── event-tracker.ts            # 12-type behavioral telemetry engine
+│   │   ├── supabase.ts                 # Supabase client configuration
+│   │   ├── supabase-admin.ts           # Supabase admin client
+│   │   └── server-functions.ts         # Nitro server functions (loginFn, changePasswordFn, verifyOtpFn, etc.)
 │   ├── routes/
 │   │   ├── __root.tsx                  # Root HTML layout & global error boundary
-│   │   ├── index.tsx                   # Homepage (18 discovery sections with mobile bento grid)
+│   │   ├── index.tsx                   # Homepage (Hero, mobile trust strip, dual banners, catalog rails)
 │   │   ├── products.tsx                # Unified Marketplace with full multi-facet filter engine
 │   │   ├── categories.tsx              # Category & Subcategory Catalog Hub
 │   │   ├── product.$productId.tsx      # Multi-seller aggregated product view
@@ -175,7 +185,7 @@ The listing details page (`/listing/$listingId`) presents a structured, high-tru
 │   │   ├── account.orders.$orderId.tsx # Buyer Detailed Timeline Tracking & 48h Inspection Timer
 │   │   ├── account.disputes.tsx        # Buyer Dispute Filing & Evidence Upload Dropzone
 │   │   ├── sell.index.tsx              # Interactive 4-Step Grading Wizard & Listing Submission
-│   │   ├── seller.dashboard.tsx        # Seller Hub Analytics & Navigation
+│   │   ├── seller.dashboard.tsx        # Seller Hub Overview & Analytics links
 │   │   ├── seller.analytics.tsx        # Seller Analytics Intelligence & Performance Telemetry
 │   │   ├── seller.orders.tsx           # Seller Order Fulfillment Hub & Step Progression
 │   │   ├── seller.disputes.tsx         # Seller Claims Response Portal & 24h SLA Countdown
@@ -189,8 +199,8 @@ The listing details page (`/listing/$listingId`) presents a structured, high-tru
 │   │   ├── admin.disputes.tsx          # Admin Mediation Workbench & Side-by-Side Inspector
 │   │   ├── admin.moderation.tsx        # Admin Listing Review Queue
 │   │   ├── admin.identity.tsx          # Admin NID Verification Queue
-│   │   ├── login.tsx                   # Phone OTP Login with return redirection
-│   │   ├── register.tsx                # NID-Verified Registration
+│   │   ├── login.tsx                   # ID & Password login with OTP password reset modal
+│   │   ├── register.tsx                # NID-Verified Registration with Password setup
 │   │   ├── partner.tsx                 # B2B Corporate Excess Inventory Application
 │   │   └── contact.tsx                 # Support Desk & Knowledge Base FAQ
 │   └── styles.css                      # Global styles, typography & hairline grid tokens
@@ -226,7 +236,7 @@ The listing details page (`/listing/$listingId`) presents a structured, high-tru
    npm run dev
    ```
 
-   Open [http://localhost:3000](http://localhost:3000) in your browser.
+   Open [http://localhost:8080](http://localhost:8080) in your browser.
 
 4. **Verify formatting, linting, and production build:**
    ```bash
