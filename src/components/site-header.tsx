@@ -47,7 +47,13 @@ type NavItem = {
   };
 };
 
-type DropdownItem = { label: string; q?: string; category?: string; icon: LucideIcon; color: string };
+type DropdownItem = {
+  label: string;
+  q?: string;
+  category?: string;
+  icon: LucideIcon;
+  color: string;
+};
 type DesktopNavItem = NavItem | { label: string; dropdown: DropdownItem[] };
 
 const desktopCategoryNav: DesktopNavItem[] = [
@@ -75,30 +81,35 @@ const desktopCategoryNav: DesktopNavItem[] = [
   {
     label: "Accessories",
     dropdown: [
-      { label: "Chargers & Cables", q: "Charger",         icon: Cable,            color: "#f97316" },
-      { label: "Power Banks",       q: "Power Bank",      icon: Battery,          color: "#22c55e" },
-      { label: "Cases & Covers",    q: "Case",            icon: Shield,           color: "#3b82f6" },
-      { label: "Screen Protectors", q: "Screen Protector",icon: MonitorSmartphone,color: "#8b5cf6" },
-      { label: "Stylus & Pens",     q: "Stylus",          icon: Sparkles,         color: "#ec4899" },
-      { label: "USB Hubs & Docks",  q: "USB Hub",         icon: Zap,              color: "#eab308" },
-      { label: "Memory Cards",      q: "Memory Card",     icon: MemoryStick,      color: "#14b8a6" },
-      { label: "Mounts & Stands",   q: "Stand",           icon: Package,          color: "#6366f1" },
-      { label: "Keyboard & Mouse",  q: "Keyboard",        icon: Activity,         color: "#f43f5e" },
-      { label: "Camera Bags",       q: "Camera Bag",      icon: ShieldCheck,      color: "#0ea5e9" },
-      { label: "All Accessories",   category: "Accessories", icon: ArrowRight,    color: "#a855f7" },
+      { label: "Chargers & Cables", q: "Charger", icon: Cable, color: "#f97316" },
+      { label: "Power Banks", q: "Power Bank", icon: Battery, color: "#22c55e" },
+      { label: "Cases & Covers", q: "Case", icon: Shield, color: "#3b82f6" },
+      {
+        label: "Screen Protectors",
+        q: "Screen Protector",
+        icon: MonitorSmartphone,
+        color: "#8b5cf6",
+      },
+      { label: "Stylus & Pens", q: "Stylus", icon: Sparkles, color: "#ec4899" },
+      { label: "USB Hubs & Docks", q: "USB Hub", icon: Zap, color: "#eab308" },
+      { label: "Memory Cards", q: "Memory Card", icon: MemoryStick, color: "#14b8a6" },
+      { label: "Mounts & Stands", q: "Stand", icon: Package, color: "#6366f1" },
+      { label: "Keyboard & Mouse", q: "Keyboard", icon: Activity, color: "#f43f5e" },
+      { label: "Camera Bags", q: "Camera Bag", icon: ShieldCheck, color: "#0ea5e9" },
+      { label: "All Accessories", category: "Accessories", icon: ArrowRight, color: "#a855f7" },
     ],
   },
   {
     label: "Essentials",
     dropdown: [
-      { label: "Smartwatches",         q: "Smartwatch",  icon: Watch,       color: "#f97316" },
-      { label: "Earbuds",              q: "Earbuds",     icon: Radio,       color: "#3b82f6" },
-      { label: "Headphones",           q: "Headphones",  icon: Headphones,  color: "#8b5cf6" },
-      { label: "Bluetooth Speakers",   q: "Speaker",     icon: Speaker,     color: "#22c55e" },
-      { label: "Soundbars",            q: "Soundbar",    icon: Activity,    color: "#ec4899" },
-      { label: "Fitness Bands",        q: "Fitness Band",icon: Activity,    color: "#eab308" },
-      { label: "Smart Home Devices",   q: "Smart Home",  icon: Home,        color: "#14b8a6" },
-      { label: "Home Products",        category: "Home Products", icon: Building2, color: "#6366f1" },
+      { label: "Smartwatches", q: "Smartwatch", icon: Watch, color: "#f97316" },
+      { label: "Earbuds", q: "Earbuds", icon: Radio, color: "#3b82f6" },
+      { label: "Headphones", q: "Headphones", icon: Headphones, color: "#8b5cf6" },
+      { label: "Bluetooth Speakers", q: "Speaker", icon: Speaker, color: "#22c55e" },
+      { label: "Soundbars", q: "Soundbar", icon: Activity, color: "#ec4899" },
+      { label: "Fitness Bands", q: "Fitness Band", icon: Activity, color: "#eab308" },
+      { label: "Smart Home Devices", q: "Smart Home", icon: Home, color: "#14b8a6" },
+      { label: "Home Products", category: "Home Products", icon: Building2, color: "#6366f1" },
     ],
   },
   { label: "Gaming", to: "/products", search: { category: "Gaming Consoles" } },
@@ -176,9 +187,34 @@ export function SiteHeader() {
   const [mobileExpandedCategory, setMobileExpandedCategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const closeDropdownTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const dropdownRefs = useRef<Record<string, HTMLButtonElement | null>>({});
   const catScrollRef = useRef<HTMLDivElement | null>(null);
   const [catFade, setCatFade] = useState({ left: false, right: false });
+
+  const handleOpenDropdown = (label: string) => {
+    if (closeDropdownTimeoutRef.current) {
+      clearTimeout(closeDropdownTimeoutRef.current);
+      closeDropdownTimeoutRef.current = null;
+    }
+    setOpenDropdown(label);
+  };
+
+  const handleCloseDropdown = (delay = 200) => {
+    if (closeDropdownTimeoutRef.current) {
+      clearTimeout(closeDropdownTimeoutRef.current);
+    }
+    closeDropdownTimeoutRef.current = setTimeout(() => {
+      setOpenDropdown(null);
+    }, delay);
+  };
+
+  const handleCancelClose = () => {
+    if (closeDropdownTimeoutRef.current) {
+      clearTimeout(closeDropdownTimeoutRef.current);
+      closeDropdownTimeoutRef.current = null;
+    }
+  };
 
   const updateCatFade = useCallback(() => {
     const el = catScrollRef.current;
@@ -205,7 +241,10 @@ export function SiteHeader() {
 
   useEffect(() => {
     if (!openDropdown) return;
-    const handleScrollOrResize = () => setOpenDropdown(null);
+    const handleScrollOrResize = () => {
+      if (closeDropdownTimeoutRef.current) clearTimeout(closeDropdownTimeoutRef.current);
+      setOpenDropdown(null);
+    };
     window.addEventListener("scroll", handleScrollOrResize, { passive: true });
     window.addEventListener("resize", handleScrollOrResize);
     return () => {
@@ -896,7 +935,7 @@ export function SiteHeader() {
       {/* Secondary Category Navigation Bar (Hidden on mobile, desktop only) */}
       <nav
         className="relative z-10 hidden md:block border-b border-border bg-background/95 backdrop-blur shadow-none"
-        onMouseLeave={() => setOpenDropdown(null)}
+        onMouseLeave={() => handleCloseDropdown(180)}
       >
         <div className="relative mx-auto max-w-7xl">
           <div
@@ -918,18 +957,27 @@ export function SiteHeader() {
                         ref={(el) => {
                           dropdownRefs.current[item.label] = el;
                         }}
-                        onMouseEnter={() => setOpenDropdown(item.label)}
-                        onClick={() => setOpenDropdown(isOpen ? null : item.label)}
-                        className={`flex min-h-11 items-center gap-1 px-3 sm:px-3.5 lg:px-4 transition-colors border-b-2 ${
+                        onMouseEnter={() => handleOpenDropdown(item.label)}
+                        onMouseLeave={() => handleCloseDropdown(180)}
+                        onClick={() => {
+                          if (isOpen) {
+                            if (closeDropdownTimeoutRef.current)
+                              clearTimeout(closeDropdownTimeoutRef.current);
+                            setOpenDropdown(null);
+                          } else {
+                            handleOpenDropdown(item.label);
+                          }
+                        }}
+                        className={`flex min-h-11 items-center gap-1 px-3 sm:px-3.5 lg:px-4 transition-colors duration-150 border-b-2 font-medium ${
                           isOpen
-                            ? "text-foreground font-semibold border-primary bg-muted/40"
-                            : "text-subtle-foreground hover:text-foreground hover:bg-muted/60 border-transparent hover:border-primary"
+                            ? "text-foreground border-primary bg-muted/50"
+                            : "text-subtle-foreground hover:text-foreground hover:bg-muted/60 border-transparent hover:border-primary/60"
                         }`}
                       >
                         {item.label}
                         <ChevronDown
-                          className={`size-3 transition-transform duration-200 ${
-                            isOpen ? "rotate-180" : ""
+                          className={`size-3 transition-transform duration-200 ease-out ${
+                            isOpen ? "rotate-180 text-primary" : "text-muted-foreground"
                           }`}
                         />
                       </button>
@@ -949,10 +997,10 @@ export function SiteHeader() {
                           q: navItem.search.q,
                           brand: undefined,
                         }}
-                        onMouseEnter={() => setOpenDropdown(null)}
+                        onMouseEnter={() => handleCloseDropdown(40)}
                         className="flex min-h-11 items-center px-3 sm:px-3.5 lg:px-4 text-subtle-foreground hover:text-foreground hover:bg-muted/60 transition-colors border-b-2 border-transparent hover:border-primary text-xs font-medium"
                         activeProps={{
-                          className: "!text-foreground !border-primary !font-semibold bg-muted/40",
+                          className: "!text-foreground !border-primary bg-muted/40",
                         }}
                       >
                         {navItem.label}
@@ -961,10 +1009,10 @@ export function SiteHeader() {
                       <Link
                         to="/"
                         activeOptions={{ exact: true }}
-                        onMouseEnter={() => setOpenDropdown(null)}
+                        onMouseEnter={() => handleCloseDropdown(40)}
                         className="flex min-h-11 items-center px-3 sm:px-3.5 lg:px-4 text-subtle-foreground hover:text-foreground hover:bg-muted/60 transition-colors border-b-2 border-transparent hover:border-primary text-xs font-medium"
                         activeProps={{
-                          className: "!text-foreground !border-primary !font-semibold bg-muted/40",
+                          className: "!text-foreground !border-primary bg-muted/40",
                         }}
                       >
                         {navItem.label}
@@ -972,10 +1020,10 @@ export function SiteHeader() {
                     ) : (
                       <Link
                         to={navItem.to}
-                        onMouseEnter={() => setOpenDropdown(null)}
+                        onMouseEnter={() => handleCloseDropdown(40)}
                         className="flex min-h-11 items-center px-3 sm:px-3.5 lg:px-4 text-subtle-foreground hover:text-foreground hover:bg-muted/60 transition-colors border-b-2 border-transparent hover:border-primary text-xs font-medium"
                         activeProps={{
-                          className: "!text-foreground !border-primary !font-semibold bg-muted/40",
+                          className: "!text-foreground !border-primary bg-muted/40",
                         }}
                       >
                         {navItem.label}
@@ -1004,57 +1052,65 @@ export function SiteHeader() {
                     left: rect.left,
                     zIndex: 99999,
                   }}
-                  className="min-w-50 bg-background border border-border border-t-0 shadow-2xl py-2 animate-in fade-in slide-in-from-top-2"
-                  onMouseEnter={() => setOpenDropdown(item.label)}
-                  onMouseLeave={() => setOpenDropdown(null)}
+                  className="min-w-56 bg-background/98 backdrop-blur-md border border-border border-t-0 shadow-2xl py-2.5 rounded-b-sm animate-in fade-in-0 zoom-in-[0.98] slide-in-from-top-1.5 duration-200 ease-out"
+                  onMouseEnter={handleCancelClose}
+                  onMouseLeave={() => handleCloseDropdown(180)}
                 >
                   {/* Tree root — vertical spine */}
-                  <div className="relative pl-8 pr-3">
+                  <div className="relative pl-7 pr-3">
                     {/* Full-height vertical spine */}
                     <div
-                      className="absolute left-4.5 top-0 bottom-0 w-px bg-border/60"
+                      className="absolute left-4 top-0 bottom-0 w-px bg-border/70"
                       style={{ top: "12px", bottom: "12px" }}
                     />
 
-                    {(item as { label: string; dropdown: DropdownItem[] }).dropdown.map((sub, idx, arr) => {
-                      const Icon = sub.icon;
-                      const isLast = idx === arr.length - 1;
-                      return (
-                        <Link
-                          key={sub.label}
-                          to="/products"
-                          search={{ q: sub.q, category: sub.category, brand: undefined }}
-                          onClick={() => setOpenDropdown(null)}
-                          className="group relative flex items-center gap-2.5 py-1.75 text-[12px] text-subtle-foreground hover:text-foreground transition-colors"
-                        >
-                          {/* L-branch connector */}
-                          <span
-                            className="absolute -left-5.5 top-1/2 flex items-center"
-                            style={{ transform: "translateY(-50%)" }}
+                    {(item as { label: string; dropdown: DropdownItem[] }).dropdown.map(
+                      (sub, idx, arr) => {
+                        const Icon = sub.icon;
+                        const isLast = idx === arr.length - 1;
+                        return (
+                          <Link
+                            key={sub.label}
+                            to="/products"
+                            search={{ q: sub.q, category: sub.category, brand: undefined }}
+                            onClick={() => {
+                              if (closeDropdownTimeoutRef.current)
+                                clearTimeout(closeDropdownTimeoutRef.current);
+                              setOpenDropdown(null);
+                            }}
+                            className="group relative flex items-center gap-2.5 py-1.5 px-2 -mx-2 rounded-xs text-[12px] text-subtle-foreground hover:text-foreground hover:bg-muted/50 transition-all duration-150 ease-out"
                           >
-                            {/* vertical segment for this row (only up to center, stop for last) */}
-                            {!isLast && (
-                              <span
-                                className="absolute w-px bg-border/60"
-                                style={{ left: 0, top: "50%", bottom: "-50%" }}
-                              />
-                            )}
-                            {/* horizontal arm */}
-                            <span className="block w-3.5 h-px bg-border/70 group-hover:bg-primary transition-colors" />
-                          </span>
+                            {/* L-branch connector */}
+                            <span
+                              className="absolute -left-5 top-1/2 flex items-center"
+                              style={{ transform: "translateY(-50%)" }}
+                            >
+                              {/* vertical segment for this row (only up to center, stop for last) */}
+                              {!isLast && (
+                                <span
+                                  className="absolute w-px bg-border/70"
+                                  style={{ left: 0, top: "50%", bottom: "-50%" }}
+                                />
+                              )}
+                              {/* horizontal arm */}
+                              <span className="block w-3.5 h-px bg-border/80 group-hover:bg-primary transition-colors duration-150" />
+                            </span>
 
-                          {/* Colored icon */}
-                          <span
-                            className="shrink-0 flex items-center justify-center size-6 rounded"
-                            style={{ backgroundColor: sub.color + "18" }}
-                          >
-                            <Icon size={13} style={{ color: sub.color }} strokeWidth={2} />
-                          </span>
+                            {/* Colored icon */}
+                            <span
+                              className="shrink-0 flex items-center justify-center size-6 rounded transition-transform duration-150 ease-out group-hover:scale-110"
+                              style={{ backgroundColor: sub.color + "18" }}
+                            >
+                              <Icon size={13} style={{ color: sub.color }} strokeWidth={2} />
+                            </span>
 
-                          <span className="font-medium leading-tight">{sub.label}</span>
-                        </Link>
-                      );
-                    })}
+                            <span className="font-medium leading-tight group-hover:text-foreground transition-colors duration-150">
+                              {sub.label}
+                            </span>
+                          </Link>
+                        );
+                      },
+                    )}
                   </div>
                 </div>,
                 document.body,
@@ -1309,7 +1365,7 @@ export function SiteFooter() {
                 </Link>
               </li>
               <li>
-                <Link to="/contact" className="hover:text-foreground transition-colors">
+                <Link to="/grading" className="hover:text-foreground transition-colors">
                   Grading System (A+ – D)
                 </Link>
               </li>
@@ -1507,7 +1563,7 @@ export function SiteFooter() {
                   </Link>
                 </li>
                 <li>
-                  <Link to="/contact" className="block py-1.5 hover:text-foreground">
+                  <Link to="/grading" className="block py-1.5 hover:text-foreground">
                     Condition Grading (A+ – D)
                   </Link>
                 </li>

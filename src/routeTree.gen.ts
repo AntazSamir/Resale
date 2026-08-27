@@ -15,6 +15,7 @@ import { Route as CartRouteImport } from './routes/cart'
 import { Route as CategoriesRouteImport } from './routes/categories'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as ContactRouteImport } from './routes/contact'
+import { Route as GradingRouteImport } from './routes/grading'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as PartnerRouteImport } from './routes/partner'
 import { Route as ProductsRouteImport } from './routes/products'
@@ -72,6 +73,11 @@ const CheckoutRoute = CheckoutRouteImport.update({
 const ContactRoute = ContactRouteImport.update({
   id: '/contact',
   path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GradingRoute = GradingRouteImport.update({
+  id: '/grading',
+  path: '/grading',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -222,6 +228,7 @@ export interface FileRoutesByFullPath {
   '/categories': typeof CategoriesRoute
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
+  '/grading': typeof GradingRoute
   '/login': typeof LoginRoute
   '/partner': typeof PartnerRoute
   '/products': typeof ProductsRoute
@@ -258,6 +265,7 @@ export interface FileRoutesByTo {
   '/categories': typeof CategoriesRoute
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
+  '/grading': typeof GradingRoute
   '/login': typeof LoginRoute
   '/partner': typeof PartnerRoute
   '/products': typeof ProductsRoute
@@ -295,6 +303,7 @@ export interface FileRoutesById {
   '/categories': typeof CategoriesRoute
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
+  '/grading': typeof GradingRoute
   '/login': typeof LoginRoute
   '/partner': typeof PartnerRoute
   '/products': typeof ProductsRoute
@@ -333,6 +342,7 @@ export interface FileRouteTypes {
     | '/categories'
     | '/checkout'
     | '/contact'
+    | '/grading'
     | '/login'
     | '/partner'
     | '/products'
@@ -369,6 +379,7 @@ export interface FileRouteTypes {
     | '/categories'
     | '/checkout'
     | '/contact'
+    | '/grading'
     | '/login'
     | '/partner'
     | '/products'
@@ -405,6 +416,7 @@ export interface FileRouteTypes {
     | '/categories'
     | '/checkout'
     | '/contact'
+    | '/grading'
     | '/login'
     | '/partner'
     | '/products'
@@ -442,6 +454,7 @@ export interface RootRouteChildren {
   CategoriesRoute: typeof CategoriesRoute
   CheckoutRoute: typeof CheckoutRoute
   ContactRoute: typeof ContactRoute
+  GradingRoute: typeof GradingRoute
   LoginRoute: typeof LoginRoute
   PartnerRoute: typeof PartnerRoute
   ProductsRoute: typeof ProductsRoute
@@ -513,6 +526,13 @@ declare module '@tanstack/react-router' {
       path: '/contact'
       fullPath: '/contact'
       preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/grading': {
+      id: '/grading'
+      path: '/grading'
+      fullPath: '/grading'
+      preLoaderRoute: typeof GradingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -733,6 +753,7 @@ const rootRouteChildren: RootRouteChildren = {
   CategoriesRoute: CategoriesRoute,
   CheckoutRoute: CheckoutRoute,
   ContactRoute: ContactRoute,
+  GradingRoute: GradingRoute,
   LoginRoute: LoginRoute,
   PartnerRoute: PartnerRoute,
   ProductsRoute: ProductsRoute,

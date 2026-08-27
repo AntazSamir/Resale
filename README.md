@@ -20,11 +20,29 @@
   - **[Accessories ▾]**: Chargers & Cables (Orange), Power Banks (Green), Cases & Covers (Blue), Screen Protectors (Purple), Stylus & Pens (Pink), USB Hubs (Yellow), Memory Cards (Teal), Mounts & Stands (Indigo), Keyboard & Mouse (Rose), Camera Bags (Sky), All Accessories.
   - **[Essentials ▾]**: Smartwatches (Orange), Earbuds (Blue), Headphones (Purple), Bluetooth Speakers (Green), Soundbars (Pink), Fitness Bands (Yellow), Smart Home (Teal), Home Products (Indigo).
   - **Direct Category Links**: Smartphones, Laptops, Cameras, Tablets, Gaming Consoles, Sell with Us, Partner Program.
+- **Smooth & Vibration-Free Interactions**:
+  - **180ms Hover Grace Window**: Intent-based debounce timer (`closeDropdownTimeoutRef`) prevents accidental closing during diagonal mouse movement.
+  - **Pixel-Stable Typography**: Fixed font-weight prevents layout shifts and vibration when opening or switching dropdown tabs.
+  - **Fluid Transitions**: Spring-like entry animation with backdrop blur (`animate-in fade-in-0 zoom-in-[0.98] slide-in-from-top-1.5 duration-200`) and subtle icon hover scales.
 - **Mobile Drawer Navigation**: Slide-over drawer with expandable accordion submenus, smooth chevron animations, and instant route transitions.
 
 ---
 
-### 🔐 2. Server-Authoritative Auth & Password Management
+### 📊 2. Standardized Condition Grading Guide & Simulator (`/grading`)
+
+- **Objective A+ to D Standard**:
+  - **Grade A+ (Like New / Pristine)**: Score 95–100 pts, zero signs of use, pristine OEM display, 95%+ battery health, full original box & accessories.
+  - **Grade A (Excellent)**: Score 85–94 pts, faint micro-hairlines invisible at 30cm, 90–94% battery health, 100% functional.
+  - **Grade B (Good)**: Score 72–84 pts, light cosmetic pocket wear, zero cracks/bends, 80–89% battery health, certified cable included.
+  - **Grade C (Fair)**: Score 55–71 pts, heavy chassis wear or officially disclosed repairs, 100% core operating system functionality.
+  - **Grade D (As-Is / Parts & Repair)**: Score <55 pts, known hardware limitation or sold for parts.
+- **Interactive Live Grade Simulator**: Real-time 100-point algorithm evaluator allowing users to test Chassis, Screen, Functionality, Battery, and Repairs to observe condition scores and grade-capping logic live.
+- **32-Point Hardware Inspection Breakdown**: Comprehensive checklist covering Physical Chassis, Display & Touch Diagnostics, Camera & Optical Sensors, Connectivity & Audio, and Security/Cloud Authentication.
+- **48-Hour Return Protection Enforcement**: Built-in guarantee providing full refunds if an item arrives in a condition lower than its certified grade.
+
+---
+
+### 🔐 3. Server-Authoritative Auth & Password Management
 
 - **ID & Password Authentication (`/login`)**:
   - Sign in using verified **Mobile Number** (e.g. `01XXXXXXXXX`) or **Email Address** along with a secure password.
@@ -40,7 +58,7 @@
 
 ---
 
-### 📱 3. Responsive Homepage & Promo Discovery
+### 📱 4. Responsive Homepage & Promo Discovery
 
 - **Optimized Mobile Hero**:
   - Theme-aware gradient contrast ensuring crystal-clear text readability over background media.
@@ -48,13 +66,13 @@
   - Dedicated **Mobile Trust Strip** (100% Inspected, 4.8★ Rating, 48h Protection, COD Available) positioned neatly below the hero section on mobile viewports.
 - **Dual Side-by-Side Photo Banners**:
   - Clean photographic promotional banners (`Image 1.webp` and `Image 2.webp`) situated in between the *Just Listed* and *Featured Devices* sections.
-  - Stacked on mobile and presented as a 2-column grid on tablets/desktops.
+  - Stacked on mobile and presented as a 2-column grid on tablets/desktops without jarring hover scales.
 - **Dynamic Product Discovery**:
   - Category Carousels, *Just Listed* new arrivals, *Featured Devices*, and *Biggest Savings* discount rails.
 
 ---
 
-### 🔍 4. Trust Architecture & Progressive Listing UX (Phase 2)
+### 🔍 5. Trust Architecture & Progressive Listing UX (Phase 2)
 
 The listing details page (`/listing/$listingId`) presents a structured, high-trust buyer evaluation journey:
 
@@ -70,7 +88,7 @@ The listing details page (`/listing/$listingId`) presents a structured, high-tru
 
 ---
 
-### 📦 5. Order & Transaction Infrastructure (Phase 3.1 & 4.1A)
+### 📦 6. Order & Transaction Infrastructure (Phase 3.1 & 4.1A)
 
 - **Decoupled Order Lifecycle Engine**:
   - `OrderStatus`: `PENDING` &rarr; `CONFIRMED` &rarr; `PROCESSING` &rarr; `READY_TO_SHIP` &rarr; `SHIPPED` &rarr; `DELIVERED` &rarr; `COMPLETED` (plus `CANCELLED`, `REFUND_REQUESTED`, `REFUNDED`, `DISPUTED`).
@@ -83,7 +101,7 @@ The listing details page (`/listing/$listingId`) presents a structured, high-tru
 
 ---
 
-### 🏪 6. Pro Storefronts & Creator Suite (Phase 3.4 & 4.1B)
+### 🏪 7. Pro Storefronts & Creator Suite (Phase 3.4 & 4.1B)
 
 - **Public Branded Storefronts (`/store/:slug`)**: Verified merchant profiles with cover banners, operational badges, warranty policies, and live catalog filtering backed by Supabase `public.stores`.
 - **Verified Creator Video Hub (`/creator/:slug`)**: Direct creator channels featuring short-form and long-form hands-on device unboxings with exact-unit inspection tag links.
@@ -92,7 +110,7 @@ The listing details page (`/listing/$listingId`) presents a structured, high-tru
 
 ---
 
-### ⚖️ 7. Dispute Mediation Hub & Fraud Shield (Phase 3.6)
+### ⚖️ 8. Dispute Mediation Hub & Fraud Shield (Phase 3.6)
 
 - **48-Hour Buyer Inspection Window (`/account/disputes`)**:
   - Enforced delivery timestamp validation with real-time countdown badges.
@@ -109,7 +127,7 @@ The listing details page (`/listing/$listingId`) presents a structured, high-tru
 
 ---
 
-### 📈 8. Seller Analytics Intelligence (Phase 4.4)
+### 📈 9. Seller Analytics Intelligence (Phase 4.4)
 
 - **Evidence-Based Metrics**: Dedicated `/seller/analytics` page derived strictly from recorded Resale telemetry.
 - **Listing Views & Cart Telemetry**: 7-day, 30-day, and all-time views (`LISTING_VIEWED`) and cart additions (`CART_ADDED`) with session duplicate suppression.
@@ -138,7 +156,7 @@ The listing details page (`/listing/$listingId`) presents a structured, high-tru
 │   ├── assets/                         # Brand assets & images (official logo, promo banners, product images)
 │   ├── components/
 │   │   ├── ui/                         # Accessible Radix & Tailwind UI components (Button, Input, Sheet, etc.)
-│   │   ├── site-header.tsx             # Dual header bar, tree dropdowns & mobile drawer
+│   │   ├── site-header.tsx             # Dual header bar, smooth tree dropdowns & mobile drawer
 │   │   ├── site-footer.tsx             # Footer, newsletter subscription & platform directory
 │   │   ├── listing-card.tsx            # Listing-first product offer card
 │   │   ├── product-card.tsx            # Catalog model showcase card
@@ -174,6 +192,7 @@ The listing details page (`/listing/$listingId`) presents a structured, high-tru
 │   ├── routes/
 │   │   ├── __root.tsx                  # Root HTML layout & global error boundary
 │   │   ├── index.tsx                   # Homepage (Hero, mobile trust strip, dual banners, catalog rails)
+│   │   ├── grading.tsx                 # Dedicated Standardized Grading (A+ to D) & Simulator
 │   │   ├── products.tsx                # Unified Marketplace with full multi-facet filter engine
 │   │   ├── categories.tsx              # Category & Subcategory Catalog Hub
 │   │   ├── product.$productId.tsx      # Multi-seller aggregated product view

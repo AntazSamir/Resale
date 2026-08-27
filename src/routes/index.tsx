@@ -667,8 +667,7 @@ function Index() {
                   device.
                 </p>
                 <Link
-                  to="/products"
-                  search={{ q: undefined, category: undefined, brand: undefined }}
+                  to="/grading"
                   className="mt-2 inline-flex items-center gap-1 text-xs font-bold text-primary hover:underline"
                 >
                   Learn about grading
