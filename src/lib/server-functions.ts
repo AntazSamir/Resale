@@ -83,8 +83,8 @@ export const createListingFn = createServerFn({ method: "POST" })
         has_invoice: Boolean(data.hasInvoice),
         accessories: data.accessories || "",
       });
-    } catch {
-      // ignore
+    } catch (err) {
+      console.warn("Supabase listing sync error:", err);
     }
 
     return { success: true, listingId: id };
@@ -195,11 +195,9 @@ export const verifyOtpFn = createServerFn({ method: "POST" })
 
     const record = db.otps.get(target);
 
-    // Accept server-stored OTP or dev fallback OTP (123456)
-    const isDevFallback = data.otp === "123456";
     const isServerOtpValid = record && record.otp === data.otp && Date.now() <= record.expiresAt;
 
-    if (!isDevFallback && !isServerOtpValid) {
+    if (!isServerOtpValid) {
       return {
         success: false,
         error: "Invalid or expired verification code. Please try again.",
@@ -221,11 +219,7 @@ export const verifyOtpFn = createServerFn({ method: "POST" })
         (cleanEmail && u.email && u.email.toLowerCase() === cleanEmail),
     );
 
-    const isAdminIdentifier =
-      cleanPhone === "01700000000" ||
-      cleanEmail === "admin@resale.com" ||
-      (user && user.role === "ADMIN");
-
+    // Admin status is determined solely by the stored user role
     if (!user) {
       user = {
         id: `u-${Date.now()}`,
@@ -233,7 +227,7 @@ export const verifyOtpFn = createServerFn({ method: "POST" })
         email: cleanEmail || null,
         name: data.name || "Customer",
         nidNumber: data.nid || null,
-        role: isAdminIdentifier ? "ADMIN" : "BUYER",
+        role: "BUYER",
         verified: true,
         createdAt: new Date().toISOString(),
       };
