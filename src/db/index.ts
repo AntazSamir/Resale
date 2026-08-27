@@ -1,4 +1,5 @@
 import { products as catalogProducts, listings as catalogListings } from "@/data/catalog";
+import { getSupabaseAdmin } from "@/lib/supabase-admin";
 import * as schema from "./schema";
 
 export type User = typeof schema.users.$inferSelect;
@@ -190,4 +191,100 @@ class MemoryDatabase {
 
 // Global singleton instance
 export const db = new MemoryDatabase();
+
+// Restore previously persisted records on server start so restarts don't lose data.
+// Uses service-role key via supabaseAdmin() to bypass RLS.
+async function hydrateFromSupabase(): Promise<void> {
+  try {
+    const admin = await getSupabaseAdmin();
+    const [usersRes, listingsRes, ordersRes, disputesRes] = await Promise.all([
+      admin.from("users").select("*"),
+      admin.from("listings").select("*"),
+      admin.from("orders").select("*"),
+      admin.from("disputes").select("*"),
+    ]);
+    const error = usersRes.error ?? listingsRes.error ?? ordersRes.error ?? disputesRes.error;
+    if (error) {
+      console.warn("Supabase hydration skipped:", error.message);
+      return;
+    }
+
+    for (const row of usersRes.data ?? []) {
+      if (!db.users.some((u) => u.id === row.id)) {
+        db.users.push({
+          id: row.id,
+          phone: row.phone,
+          email: row.email ?? null,
+          name: row.name,
+          nidNumber: row.nid_number,
+          role: row.role ?? "BUYER",
+          verified: Boolean(row.verified),
+          createdAt: row.created_at ?? new Date().toISOString(),
+        });
+      }
+    }
+
+    for (const row of listingsRes.data ?? []) {
+      if (!db.listings.some((l) => l.id === row.id)) {
+        db.listings.push({
+          id: row.id,
+          productId: row.product_id,
+          sellerId: row.seller_id,
+          grade: row.grade,
+          conditionScore: row.condition_score,
+          pricePoisha: row.price_poisha,
+          sellerNote: row.seller_note ?? "",
+          status: row.status ?? "PUBLISHED",
+          warrantyMonths: row.warranty_months ?? 0,
+          hasInvoice: Boolean(row.has_invoice),
+          batteryHealth: row.battery_health ?? null,
+          accessories: row.accessories ?? "",
+          repairs: row.repairs ?? "None reported",
+          physicalCondition: row.physical_condition ?? "Inspected",
+          screenCondition: row.screen_condition ?? "Inspected",
+          listedAt: row.listed_at ?? new Date().toISOString(),
+        });
+      }
+    }
+
+    for (const row of ordersRes.data ?? []) {
+      if (!db.orders.some((o) => o.id === row.id)) {
+        db.orders.push({
+          id: row.id,
+          listingId: row.listing_id,
+          buyerId: row.buyer_id,
+          amountPoisha: row.amount_poisha,
+          paymentMethod: row.payment_method,
+          status: row.status ?? "PENDING",
+          shippingAddressJson:
+            typeof row.shipping_address_json === "string"
+              ? row.shipping_address_json
+              : JSON.stringify(row.shipping_address_json ?? {}),
+          nidNumber: row.nid_number ?? "",
+          createdAt: row.created_at ?? new Date().toISOString(),
+        });
+      }
+    }
+
+    for (const row of disputesRes.data ?? []) {
+      if (!db.disputes.some((d) => d.id === row.id)) {
+        db.disputes.unshift({
+          id: row.id,
+          orderId: row.order_id,
+          reason: row.reason,
+          explanation: row.explanation,
+          status: row.status ?? "OPEN",
+          createdAt: row.created_at ?? new Date().toISOString(),
+        });
+      }
+    }
+  } catch (err) {
+    console.warn("Supabase hydration failed:", err);
+  }
+}
+
+if (typeof window === "undefined") {
+  void hydrateFromSupabase();
+}
+
 export { schema };
