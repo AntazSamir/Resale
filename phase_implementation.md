@@ -250,7 +250,7 @@ Phase 3.4 integrated professional merchant storefronts, tech reviewer creator hu
 
 ## 🚧 Phase 4: Real Persistence, Intelligence & Buyer Retention
 
-**Status:** `IN PROGRESS` (Phase 4.1A, 4.1B & 4.1E Complete) · **Architecture Audit:** August 2026
+**Status:** `IN PROGRESS` (Phase 4.1A, 4.1B, 4.1C, 4.1D, 4.1E, 4.2 & 4.4 Complete) · **Architecture Audit:** August 2026
 
 Phase 4 transitions Resale.com from browser-local `localStorage` into a **real shared, persistent, multi-user marketplace architecture backed by Supabase PostgreSQL**, followed by behavioral signal tracking, buyer retention tools, and evidence-based seller analytics.
 
@@ -286,20 +286,23 @@ Phase 4 transitions Resale.com from browser-local `localStorage` into a **real s
 
 ---
 
-### 4.1C — Disputes & Evidence Persistence 📋 PLANNED
+### 4.1C — Disputes & Evidence Persistence ✅ COMPLETED
 
-**Objective**: Migrate Dispute Mediation Hub from `localStorage` (`resale.disputes.v2`) to remote Supabase `disputes` and storage buckets.
+**Objective**: Migrate Dispute Mediation Hub from `localStorage` (`resale.disputes.v1`) to remote Supabase `disputes` with server functions and resilient fallbacks.
 
-- **Dispute Records**: Move 48h dispute filings, evidence metadata, seller response SLAs, and admin verdicts to PostgreSQL.
-- **Audit Logs**: Store immutable mediation timeline events in database records.
+- **Dispute Server Functions**: Added `upsertDisputeFn` and `listDisputesFn` in `src/lib/db-server.ts` with graceful failure handling.
+- **Background Sync**: `saveDisputes` in `src/lib/dispute-store.ts` automatically mirrors dispute filings, evidence metadata, SLA timestamps, and admin verdicts to PostgreSQL.
+- **Audit Logs & Meta**: Stores complete structured dispute records and audit timeline events in `meta` JSONB format with deterministic risk assessments.
 
 ---
 
-### 4.1D — Cart Cloud Synchronization 📋 PLANNED
+### 4.1D — Cart Cloud Synchronization ✅ COMPLETED
 
 **Objective**: Upgrade `resale.cart` with cloud persistence for authenticated users.
 
-- **Guest-to-User Merge**: Local cart preserves items for guests, automatically merging into persistent cloud cart upon login.
+- **Cart Server Functions**: Added `upsertCartItemFn`, `removeCartItemFn`, `clearCartItemsFn`, and `listCartItemsFn` in `src/lib/db-server.ts`.
+- **Guest-to-User Merge**: Local cart preserves items for guests, automatically merging into persistent cloud cart upon login hydration in `CartProvider`.
+- **Optimistic Responsiveness**: Local storage serves as the immediate source of truth for instant UI feedback, while background async updates maintain remote PostgreSQL state.
 
 ---
 
@@ -407,8 +410,8 @@ Phase 4 transitions Resale.com from browser-local `localStorage` into a **real s
 | **Phase 4.1A** | Supabase Orders Persistence  | Remote PostgreSQL orders sync, user foreign-key resolution, snapshot immutability, cross-browser shared state                                                                     | ✅ Completed |
 | **Phase 4.1B** | Remote Stores & Creators     | Supabase persistence for Pro Storefronts (`stores`) and Creator Hub (`creator_profiles`, `product_videos`)                                                                        | ✅ Completed |
 | **Phase 4.1E** | Backend Admin Auth & Email   | Server-issued session tokens, backend role enforcement, spoofing prevention, email registration/login with OTP                                                                    | ✅ Completed |
-| **Phase 4.1C** | Remote Dispute Persistence   | Supabase persistence for Disputes (`disputes`) and evidence metadata                                                                                                              |  📋 Planned  |
-| **Phase 4.1D** | Cloud Cart Sync              | Guest-to-user cart cloud persistence & automatic login merging                                                                                                                    |  📋 Planned  |
+| **Phase 4.1C** | Remote Dispute Persistence   | Supabase persistence for Disputes (`disputes`) and evidence metadata                                                                                                              | ✅ Completed |
+| **Phase 4.1D** | Cloud Cart Sync              | Guest-to-user cart cloud persistence & automatic login merging                                                                                                                    | ✅ Completed |
 | **Phase 4.2**  | Event & Analytics Model      | 12-type behavioral event model, privacy-safe session tracking, analytics foundation                                                                                               | ✅ Completed |
 | **Phase 4.3**  | Favorites & Saved Searches   | Listing/product favorites, saved search persistence, new-listing alerts                                                                                                           |  📋 Planned  |
 | **Phase 4.4**  | Seller Intelligence          | Real listing view/conversion metrics, seller analytics page, dashboard overhaul                                                                                                   | ✅ Completed |
