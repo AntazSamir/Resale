@@ -855,6 +855,29 @@ export const getListingAuditHistoryFn = createServerFn({ method: "POST" })
     return { success: true, data: history };
   });
 
+export const getApprovedListingsForProductFn = createServerFn({ method: "POST" })
+  .validator((data: { productId: string }) => data)
+  .handler(async ({ data }) => {
+    try {
+      const supabase = await supabaseAdmin();
+
+      // Fetch active listings for this product from Supabase
+      const { data: listings, error } = await supabase
+        .from("listings")
+        .select("*")
+        .eq("product_id", data.productId)
+        .in("status", ["ACTIVE", "PUBLISHED"])
+        .order("price_poisha", { ascending: true });
+
+      if (error) throw error;
+
+      return { success: true, data: listings };
+    } catch (err) {
+      console.error("[getApprovedListingsForProductFn] error:", err);
+      return { success: false, error: String(err), data: [] };
+    }
+  });
+
 // Backward-compatible create listing alias
 export const createListingFn = submitListingForReviewFn;
 

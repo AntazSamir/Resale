@@ -46,12 +46,12 @@ export function isListingPubliclyEligible(listing: unknown): boolean {
     "SOLD",
     "DELISTED",
   ];
-  if (blockedStatuses.includes(status)) {
+  if (blockedStatuses.includes(status) || blockedStatuses.includes(moderationStatus)) {
     return false;
   }
 
-  // Seed listings that are not blocked are eligible
-  if (isSeed && (status === "ACTIVE" || status === "PUBLISHED" || status === "")) {
+  // Seed listings (including static catalog listings with default/unset status) that are not blocked are eligible
+  if (isSeed || (status === "" && moderationStatus === "")) {
     return true;
   }
 
