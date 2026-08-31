@@ -28,6 +28,9 @@ import { products, listings, productFor, taka, type Product } from "@/data/catal
 import { getCreators } from "@/lib/creator-store";
 import { getStores } from "@/lib/store-store";
 import { useCart } from "@/lib/cart-store";
+import { useAuth } from "@/lib/auth-store";
+import { getOrders, onOrdersChange, fetchOrdersAsync, type OrderRecord } from "@/lib/order-store";
+import { getUserPersonalizedShelves } from "@/lib/recommendation-engine";
 import banner1 from "@/assets/banner-1.png";
 import bannerImage1 from "@/assets/image-1.webp";
 import bannerImage2 from "@/assets/image-2.webp";
@@ -168,7 +171,23 @@ function conditionLabel(score: number): string {
 function Index() {
   const navigate = useNavigate();
   const { addToCart, isInCart } = useCart();
+  const { user } = useAuth();
+  const [orders, setOrders] = useState<OrderRecord[]>([]);
   const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    setOrders(getOrders());
+    fetchOrdersAsync()
+      .then((res) => {
+        if (Array.isArray(res) && res.length > 0) setOrders(res);
+      })
+      .catch(() => {});
+    const unsubscribe = onOrdersChange(setOrders);
+    return () => unsubscribe();
+  }, []);
+
+  const personalizedResult = getUserPersonalizedShelves(user, orders, { limit: 6 });
+  const recentOrderShelf = personalizedResult.recentOrderShelf;
 
   const featuredListings = listings.slice(0, 4);
   const justListed = listings.slice(4, 10);
@@ -422,6 +441,60 @@ function Index() {
           </div>
         </div>
       </section>
+
+      {/* ════════════════════════════════════════════════════════════
+          BASED ON YOUR RECENT ORDER (Personalized Shelf - Phase 4.6)
+          Only rendered if the authenticated user has an actual qualifying order.
+          Strict Data-Truth rule: Never rendered for guests or users without qualifying orders.
+      ════════════════════════════════════════════════════════════ */}
+      {recentOrderShelf && recentOrderShelf.items.length > 0 && (
+        <section className="px-4 md:px-5 py-10 border-t border-border bg-card/40">
+          <div className="mx-auto max-w-7xl">
+            <div className="flex items-end justify-between gap-4 mb-6">
+              <div>
+                <div className="inline-flex items-center gap-1.5 bg-primary/10 text-primary text-[10px] font-bold px-2.5 py-0.5 mb-2 uppercase tracking-wider">
+                  <Sparkles className="size-3" />
+                  <span>Personalized Discovery</span>
+                </div>
+                <h2 className="text-2xl md:text-3xl font-display font-bold text-foreground">
+                  {recentOrderShelf.shelfTitle}
+                </h2>
+                <p className="mt-1 text-xs md:text-sm text-muted-foreground">
+                  {recentOrderShelf.subtitle}
+                </p>
+              </div>
+              <Link
+                to="/account/orders"
+                className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline whitespace-nowrap"
+              >
+                View order history
+                <ArrowRight className="size-4" />
+              </Link>
+            </div>
+
+            <div className="relative">
+              <div className="flex gap-3 overflow-x-auto scrollbar-none snap-x pb-2">
+                {recentOrderShelf.items.map(({ listing: l, product: p }) => (
+                  <div key={l.id} className="w-40 shrink-0 snap-start sm:w-52">
+                    <FeaturedDeviceCard
+                      listingId={l.id}
+                      product={p}
+                      grade={l.grade}
+                      price={l.price}
+                      retail={p.retail}
+                      sellerDistrict={l.seller.district}
+                      saved={savedIds.has(l.id)}
+                      inCart={isInCart(l.id)}
+                      onToggleSaved={() => toggleSaved(l.id)}
+                      onBuyNow={() => handleBuyNow(l.id)}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ════════════════════════════════════════════════════════════
           JUST LISTED

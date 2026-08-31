@@ -142,6 +142,26 @@ The listing details page (`/listing/$listingId`) presents a structured, high-tru
 
 ---
 
+### 🔔 10. Database-Backed In-App Notifications (Phase 4.5)
+
+- **13 Specialized Notification Types**: Categorized real-time notifications for order lifecycle transitions (`ORDER_PLACED`, `ORDER_CONFIRMED`, `ORDER_SHIPPED`, `ORDER_DELIVERED`, `ORDER_CANCELLED`), dispute stages (`DISPUTE_FILED`, `DISPUTE_STATUS_UPDATED`, `DISPUTE_RESOLVED`), listing approvals (`LISTING_APPROVED`, `LISTING_REJECTED`), seller payouts (`PAYOUT_PROCESSED`), and future buyer signals (`PRICE_DROP`, `SAVED_SEARCH_MATCH`).
+- **PostgreSQL & Row-Level Security**: Backed by `public.notifications` and `public.notification_preferences` Supabase tables with strict per-user RLS policies.
+- **Server-Authoritative Service**: Core functions (`fetchNotificationsFn`, `fetchUnreadCountFn`, `markNotificationReadFn`, `markAllNotificationsReadFn`, `fetchPreferencesFn`, `updatePreferenceFn`) running via `getSupabaseAdmin()` with validated session tokens.
+- **Deterministic Deduplication & Privacy Guard**: Generates deterministic reference keys (`userId:type:entityType:entityId`) to eliminate duplicate alerts and enforces strict zero-PII content formatting.
+- **Interactive UI Header Dropdown**: `<NotificationPanel />` component in the primary desktop header and mobile drawer featuring real-time unread badges, timestamp formatting, single-click read markers, and mark-all-as-read actions.
+
+---
+
+### 🎯 11. Rule-Based Personalization Engine (Phase 4.6)
+
+- **Deterministic Purchase-Driven Discovery**: `src/lib/recommendation-engine.ts` analyzes authenticated users' actual qualifying purchases (excluding cancelled and refunded orders) to recommend related catalog listings.
+- **Structured Matching Priority**: Tier 1: Same Category & Same Brand &rarr; Tier 2: Same Category & Different Brand &rarr; Tier 3: Category Fallback, automatically excluding the exact purchased listing ID.
+- **Personalized Homepage Shelf**: Dynamically injects a responsive "Based on your recent order" shelf on `/` with transparent reason attribution (e.g. `Because you ordered {productName}`).
+- **Strict Data-Truth & Privacy Guarantees**: Zero fake recommendations for guests or zero-history users; non-existent dependencies (Favorites, Saved Searches) are cleanly declared unavailable rather than fabricated; purchase history is isolated strictly to the authenticated user.
+- **Consolidated Catalog Recommendations**: Powers canonical product page `/product/$productId` "You May Also Like" discovery from a unified, testable module.
+
+---
+
 ## 🛠️ Technology Stack
 
 | Layer            | Technology                                                                                          |
@@ -199,6 +219,7 @@ The listing details page (`/listing/$listingId`) presents a structured, high-tru
 │   │   ├── db-server.ts                # Server functions for Supabase orders, carts, disputes & stores
 │   │   ├── notification-service.ts     # Notification creation, dedup, preference checks
 │   │   ├── notification-store.ts       # Zustand store for notification UI state
+│   │   ├── recommendation-engine.ts    # Deterministic rule-based recommendation & personalization engine
 │   │   └── server-functions.ts         # Nitro server functions (loginFn, changePasswordFn, verifyOtpFn, etc.)
 │   ├── routes/
 │   │   ├── __root.tsx                  # Root HTML layout & global error boundary

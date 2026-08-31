@@ -18,6 +18,7 @@ import {
 import { getApprovedVideosForProduct } from "@/lib/creator-store";
 import { CreatorReviewStrip } from "@/components/creator/creator-review-strip";
 import { StoreBadge } from "@/components/storefront/store-badge";
+import { getProductRecommendations } from "@/lib/recommendation-engine";
 
 export const Route = createFileRoute("/product/$productId")({
   loader: ({ params }) => {
@@ -49,20 +50,8 @@ function ProductPage() {
   const high = rows.length > 0 ? rows[rows.length - 1] : undefined;
   const available = grades.filter((g) => rows.some((l) => l.grade === g));
 
-  // "You May Also Like" recommendations: same category & brand first, then same category, then others
-  const others = products.filter((p) => p.id !== product.id && listingsFor(p.id).length > 0);
-  const sameCategorySameBrand = others.filter(
-    (p) => p.category === product.category && p.brand === product.brand,
-  );
-  const sameCategoryOtherBrand = others.filter(
-    (p) => p.category === product.category && p.brand !== product.brand,
-  );
-  const otherCategories = others.filter((p) => p.category !== product.category);
-  const recommendedProducts = [
-    ...sameCategorySameBrand,
-    ...sameCategoryOtherBrand,
-    ...otherCategories,
-  ].slice(0, 4);
+  // "You May Also Like" recommendations: consolidated deterministic rule-based engine
+  const recommendedProducts = getProductRecommendations(product.id, 4);
 
   // Best value: product with lowest listing price among products with listings
   const productsWithListings = products.filter((p) => listingsFor(p.id).length > 0);

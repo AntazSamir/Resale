@@ -2,7 +2,7 @@
 
 > **Bangladesh's Trusted C2C & B2B Marketplace for Quality-Checked Pre-Owned, Open-Box & Like-New Electronics**
 
-This document tracks the completed engineering milestones across **Phase 1**, **Phase 2**, and **Phase 3.1**, and outlines the strategic and technical roadmap for **Phase 3.2 – 3.6**.
+This document tracks the completed engineering milestones across **Phase 1**, **Phase 2**, **Phase 3.1**, **Phase 3.4**, **Phase 3.6**, and **Phase 4 (4.1A–E, 4.2, 4.4, 4.5, 4.6)**, and outlines the strategic and technical roadmap for remaining milestones.
 
 ---
 
@@ -250,7 +250,7 @@ Phase 3.4 integrated professional merchant storefronts, tech reviewer creator hu
 
 ## 🚧 Phase 4: Real Persistence, Intelligence & Buyer Retention
 
-**Status:** `IN PROGRESS` (Phase 4.1A, 4.1B, 4.1C, 4.1D, 4.1E, 4.2 & 4.4 Complete) · **Architecture Audit:** August 2026
+**Status:** `IN PROGRESS` (Phase 4.1A, 4.1B, 4.1C, 4.1D, 4.1E, 4.2, 4.4, 4.5 & 4.6 Complete) · **Architecture Audit:** August 2026
 
 Phase 4 transitions Resale.com from browser-local `localStorage` into a **real shared, persistent, multi-user marketplace architecture backed by Supabase PostgreSQL**, followed by behavioral signal tracking, buyer retention tools, and evidence-based seller analytics.
 
@@ -381,13 +381,20 @@ Phase 4 transitions Resale.com from browser-local `localStorage` into a **real s
 
 ---
 
-### 4.6 — Rule-Based Personalization ⭐ MEDIUM
+### 4.6 — Rule-Based Personalization Engine ✅ COMPLETED
 
-**Objective**: Surface relevant products and listings based on the user's actual recorded behavior.
+**Objective**: Surface relevant products and listings based strictly on the user's actual recorded behavior and honest data-truth constraints.
 
-- **Personalized Homepage**: "Based on your recent order" shelf. "New matches for your saved search" shelf.
-- **Recommendation Engine**: Rule-based engine in `src/lib/recommendation-engine.ts`.
-- **Data Truth Rule**: If a user has no history, show curated editorial picks — never fabricate personalization signals.
+- **Deterministic Recommendation Engine (`src/lib/recommendation-engine.ts`)**:
+  - `getRecommendationsFromRecentOrder`: Evaluates user's most recent qualifying order (excluding cancelled/refunded orders), prioritizes Same Category + Same Brand &rarr; Same Category &rarr; Other Categories fallback, and excludes the exact purchased listing ID.
+  - `getProductRecommendations`: Consolidated shared rule-based "You May Also Like" algorithm for canonical product pages (`/product/$productId`).
+  - `getEditorialFallback`: Returns curated catalog listings without deceptive personalization labels.
+  - `getUserPersonalizedShelves`: Typed orchestrator mapping real authenticated user purchase telemetry into UI shelves while explicitly declaring non-existent dependencies (Favorites, Saved Searches) as unavailable.
+- **Personalized Homepage Shelf (`src/routes/index.tsx`)**:
+  - "Based on your recent order" shelf rendered dynamically with honest contextual subtitles (e.g. `Because you ordered {productName}`).
+  - Strict Data-Truth Protection: Never rendered for guest visitors or users without qualifying purchase history. Editorial sections (Just Listed, Featured Devices, Biggest Savings) remain completely intact.
+- **Privacy & Authorization**: Derives purchase history strictly from the authenticated user's session. No cross-user data leakage, no PII in recommendation payloads, zero client ID tampering.
+- **Consolidated Product Page (`src/routes/product.$productId.tsx`)**: Refactored to consume `getProductRecommendations()` without duplicate inline code.
 
 ---
 
@@ -402,27 +409,27 @@ Phase 4 transitions Resale.com from browser-local `localStorage` into a **real s
 
 ## 📊 Updated Summary Milestone Table
 
-| Milestone      | Key Focus Area               | Deliverables                                                                                                                                                                      |    Status    |
-| -------------- | ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------: |
-| **Phase 1**    | Marketplace Core & Catalog   | Alternating Homepage, Catalog Filters, Cart, COD Checkout, NID Auth, Seller Wizard                                                                                                | ✅ Completed |
-| **Phase 2**    | Trust & Inspection UX        | 32-Point Inspection, Condition Gauge, Seller Trust Line, Device Verification, Product Multi-Seller Page                                                                           | ✅ Completed |
-| **Phase 3.1**  | Order & Transaction Backbone | Decoupled Lifecycle State Machine, Payment Abstraction (COD Active), Mandatory Auth & Redirect, Buyer Timeline & Cancellation, Seller Fulfillment Hub, Admin Oversight            | ✅ Completed |
-| **Phase 3.4**  | Creator & Pro Storefronts    | Public Branded Storefronts (`/store/:slug`), Verified Creator Profiles (`/creator/:slug`), Hands-on Product Video Reviews, Exact-Unit Review Badging, Bulk CSV Inventory Importer | ✅ Completed |
-| **Phase 3.6**  | Dispute Mediation Hub        | 48h Inspection Window, 24h Seller SLA, Evidence Dropzone, Side-by-Side Admin Workbench, Deterministic Risk Analyzer, Simulated Payout Holds & Reverse Logistics                   | ✅ Completed |
-| **Phase 3.2**  | Courier Logistics            | Steadfast/Pathao API integration, live tracking webhooks, automated COD reconciliation                                                                                            |  📋 Planned  |
-| **Phase 3.3**  | Automated Diagnostics        | Live IMEI verification API, device hardware test runner, certified badges                                                                                                         |  📋 Planned  |
-| **Phase 3.5**  | AI Valuation Engine          | Real-time price recommender, price history graphs, "Fair Deal" badges                                                                                                             |  📋 Planned  |
-| **Phase 4.1A** | Supabase Orders Persistence  | Remote PostgreSQL orders sync, user foreign-key resolution, snapshot immutability, cross-browser shared state                                                                     | ✅ Completed |
-| **Phase 4.1B** | Remote Stores & Creators     | Supabase persistence for Pro Storefronts (`stores`) and Creator Hub (`creator_profiles`, `product_videos`)                                                                        | ✅ Completed |
-| **Phase 4.1E** | Backend Admin Auth & Email   | Server-issued session tokens, backend role enforcement, spoofing prevention, email registration/login with OTP                                                                    | ✅ Completed |
-| **Phase 4.1C** | Remote Dispute Persistence   | Supabase persistence for Disputes (`disputes`) and evidence metadata                                                                                                              | ✅ Completed |
-| **Phase 4.1D** | Cloud Cart Sync              | Guest-to-user cart cloud persistence & automatic login merging                                                                                                                    | ✅ Completed |
-| **Phase 4.2**  | Event & Analytics Model      | 12-type behavioral event model, privacy-safe session tracking, analytics foundation                                                                                               | ✅ Completed |
-| **Phase 4.3**  | Favorites & Saved Searches   | Listing/product favorites, saved search persistence, new-listing alerts                                                                                                           |  📋 Planned  |
-| **Phase 4.4**  | Seller Intelligence          | Real listing view/conversion metrics, seller analytics page, dashboard overhaul                                                                                                   | ✅ Completed |
- | **Phase 4.5**  | Notifications Infrastructure | Database-backed notifications table, RLS policies, notification preferences, order/dispute/price-drop triggers, in-app notification panel with bell icon, server-side authorization | ✅ Completed |
-| **Phase 4.6**  | Rule-Based Personalization   | Personalized homepage shelves, recommendation engine, saved-search-driven discovery                                                                                               |  📋 Planned  |
-| **Phase 4.7**  | Device Lifecycle Passport    | Honest per-device Resale history page, inspection/sale/dispute timeline                                                                                                           |  📋 Planned  |
+| Milestone      | Key Focus Area               | Deliverables                                                                                                                                                                        |    Status    |
+| -------------- | ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------: |
+| **Phase 1**    | Marketplace Core & Catalog   | Alternating Homepage, Catalog Filters, Cart, COD Checkout, NID Auth, Seller Wizard                                                                                                  | ✅ Completed |
+| **Phase 2**    | Trust & Inspection UX        | 32-Point Inspection, Condition Gauge, Seller Trust Line, Device Verification, Product Multi-Seller Page                                                                             | ✅ Completed |
+| **Phase 3.1**  | Order & Transaction Backbone | Decoupled Lifecycle State Machine, Payment Abstraction (COD Active), Mandatory Auth & Redirect, Buyer Timeline & Cancellation, Seller Fulfillment Hub, Admin Oversight              | ✅ Completed |
+| **Phase 3.4**  | Creator & Pro Storefronts    | Public Branded Storefronts (`/store/:slug`), Verified Creator Profiles (`/creator/:slug`), Hands-on Product Video Reviews, Exact-Unit Review Badging, Bulk CSV Inventory Importer   | ✅ Completed |
+| **Phase 3.6**  | Dispute Mediation Hub        | 48h Inspection Window, 24h Seller SLA, Evidence Dropzone, Side-by-Side Admin Workbench, Deterministic Risk Analyzer, Simulated Payout Holds & Reverse Logistics                     | ✅ Completed |
+| **Phase 3.2**  | Courier Logistics            | Steadfast/Pathao API integration, live tracking webhooks, automated COD reconciliation                                                                                              |  📋 Planned  |
+| **Phase 3.3**  | Automated Diagnostics        | Live IMEI verification API, device hardware test runner, certified badges                                                                                                           |  📋 Planned  |
+| **Phase 3.5**  | AI Valuation Engine          | Real-time price recommender, price history graphs, "Fair Deal" badges                                                                                                               |  📋 Planned  |
+| **Phase 4.1A** | Supabase Orders Persistence  | Remote PostgreSQL orders sync, user foreign-key resolution, snapshot immutability, cross-browser shared state                                                                       | ✅ Completed |
+| **Phase 4.1B** | Remote Stores & Creators     | Supabase persistence for Pro Storefronts (`stores`) and Creator Hub (`creator_profiles`, `product_videos`)                                                                          | ✅ Completed |
+| **Phase 4.1E** | Backend Admin Auth & Email   | Server-issued session tokens, backend role enforcement, spoofing prevention, email registration/login with OTP                                                                      | ✅ Completed |
+| **Phase 4.1C** | Remote Dispute Persistence   | Supabase persistence for Disputes (`disputes`) and evidence metadata                                                                                                                | ✅ Completed |
+| **Phase 4.1D** | Cloud Cart Sync              | Guest-to-user cart cloud persistence & automatic login merging                                                                                                                      | ✅ Completed |
+| **Phase 4.2**  | Event & Analytics Model      | 12-type behavioral event model, privacy-safe session tracking, analytics foundation                                                                                                 | ✅ Completed |
+| **Phase 4.3**  | Favorites & Saved Searches   | Listing/product favorites, saved search persistence, new-listing alerts                                                                                                             |  📋 Planned  |
+| **Phase 4.4**  | Seller Intelligence          | Real listing view/conversion metrics, seller analytics page, dashboard overhaul                                                                                                     | ✅ Completed |
+| **Phase 4.5**  | Notifications Infrastructure | Database-backed notifications table, RLS policies, notification preferences, order/dispute/price-drop triggers, in-app notification panel with bell icon, server-side authorization | ✅ Completed |
+| **Phase 4.6**  | Rule-Based Personalization   | Deterministic recommendation engine, recent-order homepage shelf, consolidated product page "You May Also Like", strict data-truth fallback                                         | ✅ Completed |
+| **Phase 4.7**  | Device Lifecycle Passport    | Honest per-device Resale history page, inspection/sale/dispute timeline                                                                                                             |  📋 Planned  |
 
 ---
 
