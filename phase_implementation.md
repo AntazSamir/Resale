@@ -366,13 +366,18 @@ Phase 4 transitions Resale.com from browser-local `localStorage` into a **real s
 
 ---
 
-### 4.5 — Notifications Infrastructure ⭐ MEDIUM
+### 4.5 — Notifications Infrastructure ✅ COMPLETED
 
-**Objective**: Deliver timely, relevant alerts to buyers and sellers via an in-app notification center.
+**Objective**: Build a real, database-backed in-app notification system that triggers only from actual recorded events/state changes.
 
-- **Buyer Alerts**: Order status updates, dispute resolutions, price drops on favorited listings.
-- **Seller Alerts**: New order placed, order SLA approaching, dispute filed.
-- **Architecture**: In-app notification bell in `SiteHeader`.
+- **Database**: `public.notifications` table with 13 notification types, `public.notification_preferences` table with per-type enable/disable controls, RLS policies on both tables.
+- **Server Functions**: `fetchNotificationsFn`, `fetchUnreadCountFn`, `markNotificationReadFn`, `markAllNotificationsReadFn`, `fetchPreferencesFn`, `updatePreferenceFn` — all using service-role key with session-based authorization.
+- **Notification Service**: `createNotification`, `createOrderNotification`, `createDisputeNotification` with deterministic dedup key (`userId:type:entityType:entityId`) and preference checking.
+- **Triggers**: ORDER_PLACED on `placeOrderFn`, ORDER_STATUS_UPDATED on `upsertOrderFn`, DISPUTE_FILED/DISPUTE_STATUS_UPDATED/DISPUTE_RESOLVED on `upsertDisputeFn`.
+- **UI**: `<NotificationPanel />` component with bell icon, unread count badge, dropdown panel showing notification list with mark-as-read functionality. Added to `site-header.tsx` for both desktop and mobile views.
+- **Privacy**: Notification content excludes NID numbers, full phone numbers, passwords, OTP codes, payment credentials, and unnecessary private buyer information. Duplicate prevention via deterministic reference keys.
+- **No Email/SMS**: MVP delivers in-app notifications only; delivery abstraction structured for future email/SMS addition.
+- **No Price Drop/Saved Search**: These types defined but disabled until Phase 4.3 (Favorites & Saved Searches) is implemented.
 
 ---
 
@@ -392,21 +397,6 @@ Phase 4 transitions Resale.com from browser-local `localStorage` into a **real s
 
 - **What Can Be Recorded**: Listing date, grade, condition score, number of inspection checks recorded, sale date, sold price, disputes filed.
 - **Implementation**: `/product/$productId/history` sub-page showing the device's Resale timeline.
-
----
-
-### 4.5 — Notifications Infrastructure ✅ COMPLETED
-
-**Objective**: Build a real, database-backed in-app notification system that triggers only from actual recorded events/state changes.
-
-- **Database**: `public.notifications` table with 13 notification types, `public.notification_preferences` table with per-type enable/disable controls, RLS policies on both tables.
-- **Server Functions**: `fetchNotificationsFn`, `fetchUnreadCountFn`, `markNotificationReadFn`, `markAllNotificationsReadFn`, `fetchPreferencesFn`, `updatePreferenceFn` — all using service-role key with session-based authorization.
-- **Notification Service**: `createNotification`, `createOrderNotification`, `createDisputeNotification` with deterministic dedup key (`userId:type:entityType:entityId`) and preference checking.
-- **Triggers**: ORDER_PLACED on `placeOrderFn`, ORDER_STATUS_UPDATED on `upsertOrderFn`, DISPUTE_FILED/DISPUTE_STATUS_UPDATED/DISPUTE_RESOLVED on `upsertDisputeFn`.
-- **UI**: `<NotificationPanel />` component with bell icon, unread count badge, dropdown panel showing notification list with mark-as-read functionality. Added to `site-header.tsx` for both desktop and mobile views.
-- **Privacy**: Notification content excludes NID numbers, full phone numbers, passwords, OTP codes, payment credentials, and unnecessary private buyer information. Duplicate prevention via deterministic reference keys.
-- **No Email/SMS**: MVP delivers in-app notifications only; delivery abstraction structured for future email/SMS addition.
-- **No Price Drop/Saved Search**: These types defined but disabled until Phase 4.3 (Favorites & Saved Searches) is implemented.
 
 ---
 
