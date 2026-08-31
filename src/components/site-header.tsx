@@ -2,6 +2,7 @@ import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { useCart } from "@/lib/cart-store";
+import { NotificationPanel } from "@/components/notification-panel";
 import {
   Search,
   ShoppingBag,
@@ -32,6 +33,7 @@ import {
   Activity,
   Home,
   LucideIcon,
+  Bell,
 } from "lucide-react";
 import { BangladeshMapSVG } from "./bangladesh-map";
 import resaleLogo from "@/assets/resale-logo.svg";
@@ -587,6 +589,7 @@ export function SiteHeader() {
             >
               <User className="size-5" />
             </Link>
+            <NotificationPanel />
             <Link
               to="/cart"
               aria-label="Cart"
@@ -610,6 +613,7 @@ export function SiteHeader() {
             >
               <Search className="size-5" />
             </button>
+            <NotificationPanel />
             <Link to="/cart" aria-label="Cart" className="relative p-2 text-foreground">
               <ShoppingBag className="size-5" />
               {itemCount > 0 && (

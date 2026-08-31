@@ -108,3 +108,70 @@ export function useEventUserContext(): EventUserContext {
 // because sessionStorage is browser‑only.
 // Use the exported functions to read/clear at runtime.
 // =======================================
+
+// === Notification Types (Phase 4.5) ===
+
+export const NOTIFICATION_TYPES = [
+  "ORDER_PLACED",
+  "ORDER_CONFIRMED",
+  "ORDER_STATUS_UPDATED",
+  "ORDER_DELIVERED",
+  "ORDER_CANCELLED",
+  "DISPUTE_FILED",
+  "DISPUTE_STATUS_UPDATED",
+  "DISPUTE_RESOLVED",
+  "DISPUTE_SLA_WARNING",
+  "PRICE_DROP",
+  "SAVED_SEARCH_MATCH",
+  "LISTING_MODERATION_APPROVED",
+  "LISTING_MODERATION_REJECTED",
+] as const;
+
+export type NotificationType = (typeof NOTIFICATION_TYPES)[number];
+
+export type NotificationStatus = "unread" | "read";
+
+export interface Notification {
+  id: string;
+  user_id: string;
+  type: NotificationType;
+  title: string;
+  message: string;
+  entity_type?: string;
+  entity_id?: string;
+  reference?: string;
+  is_read: boolean;
+  created_at: string;
+}
+
+export interface NotificationPreference {
+  id: string;
+  user_id: string;
+  type: NotificationType;
+  enabled: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface NotificationFilters {
+  type?: NotificationType;
+  isRead?: boolean;
+  limit?: number;
+  offset?: number;
+}
+
+export interface CreateNotificationInput {
+  userId: string;
+  type: NotificationType;
+  title: string;
+  message: string;
+  entityType?: string;
+  entityId?: string;
+  reference?: string;
+}
+
+export interface NotificationSummary {
+  total: number;
+  unreadCount: number;
+  notifications: Notification[];
+}

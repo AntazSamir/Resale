@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { db } from "@/db";
+import { createOrderNotification } from "./notification-service";
 
 async function supabaseAdmin() {
   const { getSupabaseAdmin } = await import("@/lib/supabase-admin");
@@ -135,6 +136,17 @@ export const placeOrderFn = createServerFn({ method: "POST" })
       });
     } catch (err) {
       console.warn("Supabase placeOrder server sync error:", err);
+    }
+
+    try {
+      await createOrderNotification(
+        data.buyerId || "u-admin",
+        "ORDER_PLACED",
+        orderId,
+        `Your order ${orderId} has been placed successfully.`,
+      );
+    } catch {
+      // Notification failure should not fail the order
     }
 
     return { success: true, orderId };

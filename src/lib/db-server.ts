@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { createOrderNotification, createDisputeNotification } from "./notification-service";
 
 /**
  * Privileged database operations. These run ONLY on the server using the
@@ -86,8 +87,37 @@ export const upsertOrderFn = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     try {
       const supabase = await admin();
+
+      const oldStatus = (
+        await supabase
+          .from("orders")
+          .select("status")
+          .eq("id", data["id"] as string)
+          .limit(1)
+          .single()
+      ).data?.["status"] as string | undefined;
+      const newStatus = data["status"] as string;
+      const buyerId =
+        (data["buyer_id"] as string) ||
+        (data["buyerId"] as string) ||
+        (oldStatus ? undefined : undefined);
+
       const { error } = await supabase.from("orders").upsert(data);
       if (error) return { success: false, error: error.message };
+
+      if (oldStatus && oldStatus !== newStatus) {
+        try {
+          await createOrderNotification(
+            (data["buyer_id"] as string) || (data["buyerId"] as string) || "u-admin",
+            "ORDER_STATUS_UPDATED",
+            data["id"] as string,
+            `Order status changed from ${oldStatus} to ${newStatus}.`,
+          );
+        } catch {
+          // Notification failure should not fail the upsert
+        }
+      }
+
       return { success: true };
     } catch (err) {
       return { success: false, error: String(err) };
@@ -193,8 +223,55 @@ export const upsertDisputeFn = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     try {
       const supabase = await admin();
+
+      const existing = await supabase
+        .from("disputes")
+        .select("status, buyer_id")
+        .eq("id", data["id"] as string)
+        .limit(1)
+        .single();
+      const oldStatus = existing?.data?.["status"] as string | undefined;
+      const newStatus = data["status"] as string;
+      const buyerId =
+        (data["buyer_id"] as string) ||
+        (data["buyerId"] as string) ||
+        (existing?.data?.["buyer_id"] as string);
+      const isNew = !existing?.data;
+
       const { error } = await supabase.from("disputes").upsert(data, { onConflict: "id" });
       if (error) return { success: false, error: error.message };
+
+      if (isNew && buyerId) {
+        try {
+          await createDisputeNotification(
+            buyerId,
+            "DISPUTE_FILED",
+            data["id"] as string,
+            "A new dispute has been filed on your order.",
+          );
+        } catch {
+          // Notification failure should not fail the upsert
+        }
+      } else if (oldStatus && oldStatus !== newStatus && buyerId) {
+        try {
+          const isResolved = [
+            "RESOLVED_BUYER_REFUND",
+            "RESOLVED_SELLER_PAYOUT",
+            "RESOLVED_RETURN_ACCEPTED",
+          ].includes(newStatus);
+          await createDisputeNotification(
+            buyerId,
+            isResolved ? "DISPUTE_RESOLVED" : "DISPUTE_STATUS_UPDATED",
+            data["id"] as string,
+            isResolved
+              ? "Your dispute has been resolved."
+              : `Dispute status changed to ${newStatus}.`,
+          );
+        } catch {
+          // Notification failure should not fail the upsert
+        }
+      }
+
       return { success: true };
     } catch {
       return { success: false, error: "disputes table unavailable" };

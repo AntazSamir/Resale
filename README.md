@@ -163,7 +163,7 @@ The listing details page (`/listing/$listingId`) presents a structured, high-tru
 │   ├── components/
 │   │   ├── ui/                         # Accessible Radix & Tailwind UI components (Button, Input, Sheet, etc.)
 │   │   ├── storefront/                 # Storefront components (StoreBadge, store verification chips)
-│   │   ├── site-header.tsx             # Dual header bar, smooth tree dropdowns & mobile drawer
+│   │   ├── site-header.tsx             # Dual header bar, tree dropdowns, notification bell & mobile drawer
 │   │   ├── site-footer.tsx             # Footer, newsletter subscription & platform directory
 │   │   ├── listing-card.tsx            # Listing-first product offer card
 │   │   ├── product-card.tsx            # Catalog model showcase card
@@ -172,6 +172,7 @@ The listing details page (`/listing/$listingId`) presents a structured, high-tru
 │   │   ├── seller-trust-card.tsx       # SellerTrustLine and SellerTrustCard
 │   │   ├── device-verification.tsx     # Security and cloud activation matrix
 │   │   ├── inspection-report.tsx       # 32-point inspection breakdown
+│   │   ├── notification-panel.tsx      # In-app notification bell with dropdown
 │   │   ├── repair-history.tsx          # Component servicing disclosure table
 │   │   ├── whats-included.tsx          # Accessory tags and inclusions
 │   │   └── protected-route.tsx         # Auth guard with redirect support
@@ -196,6 +197,8 @@ The listing details page (`/listing/$listingId`) presents a structured, high-tru
 │   │   ├── supabase.ts                 # Supabase client configuration
 │   │   ├── supabase-admin.ts           # Supabase admin client
 │   │   ├── db-server.ts                # Server functions for Supabase orders, carts, disputes & stores
+│   │   ├── notification-service.ts     # Notification creation, dedup, preference checks
+│   │   ├── notification-store.ts       # Zustand store for notification UI state
 │   │   └── server-functions.ts         # Nitro server functions (loginFn, changePasswordFn, verifyOtpFn, etc.)
 │   ├── routes/
 │   │   ├── __root.tsx                  # Root HTML layout & global error boundary

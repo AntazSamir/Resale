@@ -395,6 +395,21 @@ Phase 4 transitions Resale.com from browser-local `localStorage` into a **real s
 
 ---
 
+### 4.5 — Notifications Infrastructure ✅ COMPLETED
+
+**Objective**: Build a real, database-backed in-app notification system that triggers only from actual recorded events/state changes.
+
+- **Database**: `public.notifications` table with 13 notification types, `public.notification_preferences` table with per-type enable/disable controls, RLS policies on both tables.
+- **Server Functions**: `fetchNotificationsFn`, `fetchUnreadCountFn`, `markNotificationReadFn`, `markAllNotificationsReadFn`, `fetchPreferencesFn`, `updatePreferenceFn` — all using service-role key with session-based authorization.
+- **Notification Service**: `createNotification`, `createOrderNotification`, `createDisputeNotification` with deterministic dedup key (`userId:type:entityType:entityId`) and preference checking.
+- **Triggers**: ORDER_PLACED on `placeOrderFn`, ORDER_STATUS_UPDATED on `upsertOrderFn`, DISPUTE_FILED/DISPUTE_STATUS_UPDATED/DISPUTE_RESOLVED on `upsertDisputeFn`.
+- **UI**: `<NotificationPanel />` component with bell icon, unread count badge, dropdown panel showing notification list with mark-as-read functionality. Added to `site-header.tsx` for both desktop and mobile views.
+- **Privacy**: Notification content excludes NID numbers, full phone numbers, passwords, OTP codes, payment credentials, and unnecessary private buyer information. Duplicate prevention via deterministic reference keys.
+- **No Email/SMS**: MVP delivers in-app notifications only; delivery abstraction structured for future email/SMS addition.
+- **No Price Drop/Saved Search**: These types defined but disabled until Phase 4.3 (Favorites & Saved Searches) is implemented.
+
+---
+
 ## 📊 Updated Summary Milestone Table
 
 | Milestone      | Key Focus Area               | Deliverables                                                                                                                                                                      |    Status    |
@@ -415,7 +430,7 @@ Phase 4 transitions Resale.com from browser-local `localStorage` into a **real s
 | **Phase 4.2**  | Event & Analytics Model      | 12-type behavioral event model, privacy-safe session tracking, analytics foundation                                                                                               | ✅ Completed |
 | **Phase 4.3**  | Favorites & Saved Searches   | Listing/product favorites, saved search persistence, new-listing alerts                                                                                                           |  📋 Planned  |
 | **Phase 4.4**  | Seller Intelligence          | Real listing view/conversion metrics, seller analytics page, dashboard overhaul                                                                                                   | ✅ Completed |
-| **Phase 4.5**  | Notifications                | In-app notification center, order/dispute/price-drop alerts, email/SMS pipeline                                                                                                   |  📋 Planned  |
+ | **Phase 4.5**  | Notifications Infrastructure | Database-backed notifications table, RLS policies, notification preferences, order/dispute/price-drop triggers, in-app notification panel with bell icon, server-side authorization | ✅ Completed |
 | **Phase 4.6**  | Rule-Based Personalization   | Personalized homepage shelves, recommendation engine, saved-search-driven discovery                                                                                               |  📋 Planned  |
 | **Phase 4.7**  | Device Lifecycle Passport    | Honest per-device Resale history page, inspection/sale/dispute timeline                                                                                                           |  📋 Planned  |
 
