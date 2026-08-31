@@ -8,6 +8,8 @@ import type {
   ListingAuditAction,
   ListingAuditEntry,
   ListingRejectionReasonCode,
+  SellerTrustScoreData,
+  SellerTrustTier,
 } from "./types";
 
 async function supabaseAdmin() {
@@ -890,6 +892,12 @@ export const placeOrderFn = createServerFn({ method: "POST" })
       shippingAddressJson: JSON.stringify(data.shippingAddress),
       nidNumber: data.nidNumber,
       createdAt,
+      confirmedAt: null,
+      shippedAt: null,
+      deliveredAt: null,
+      cancelledAt: null,
+      cancelledBy: null,
+      cancellationReason: null,
     };
 
     db.orders.unshift(newOrder);
@@ -940,6 +948,126 @@ export const placeOrderFn = createServerFn({ method: "POST" })
     }
 
     return { success: true, orderId };
+  });
+
+export const getSellerTrustProfileFn = createServerFn({ method: "POST" })
+  .validator((data: { sellerId: string }) => data)
+  .handler(async ({ data }) => {
+    try {
+      const supabase = await supabaseAdmin();
+      const sellerId = data.sellerId;
+
+      // 1. Fetch Seller Identity & Store Status
+      const { data: userData } = await supabase
+        .from("users")
+        .select("verified, created_at")
+        .eq("id", sellerId)
+        .single();
+      const { data: storeData } = await supabase
+        .from("stores")
+        .select("verified, address")
+        .eq("seller_id", sellerId)
+        .single();
+
+      // 2. Fetch Order Telemetry (Delivered vs Seller-Fault Cancellations)
+      // Resolve the seller's listing IDs first, then fetch all associated orders.
+      const { data: listingsData } = await supabase
+        .from("listings")
+        .select("id")
+        .eq("seller_id", sellerId);
+      const listingIds = listingsData?.map((l: { id: string }) => l.id) ?? [];
+
+      const { data: sellerOrders } = await supabase
+        .from("orders")
+        .select("id, status, cancelled_by")
+        .in("listing_id", listingIds);
+
+      const deliveredCount =
+        sellerOrders?.filter((o: { status: string }) => o.status === "DELIVERED").length || 0;
+      const sellerCancellations =
+        sellerOrders?.filter(
+          (o: { status: string; cancelled_by: string | null }) =>
+            o.status === "CANCELLED" && o.cancelled_by === "SELLER",
+        ).length || 0;
+      const completedCount = deliveredCount; // Simplified for MVP
+
+      // 3. Fetch Upheld Disputes
+      const { data: disputeData } = await supabase
+        .from("disputes")
+        .select("id")
+        .eq("status", "RESOLVED_BUYER_REFUND") // Only count upheld refund/returns
+        .in("order_id", sellerOrders?.map((o: { id: string }) => o.id) || []);
+      const upheldDisputesCount = disputeData?.length || 0;
+
+      // 4. Deterministic Score Calculation
+      if (completedCount < 3) {
+        // Cold-Start Gate: New Seller
+        const profile: SellerTrustScoreData = {
+          score: null,
+          tier: "NEW_SELLER",
+          breakdown: { fulfillmentScore: 0, disputeScore: 0, identityScore: 0, slaScore: null },
+          completedOrdersCount: completedCount,
+          upheldDisputesCount: upheldDisputesCount,
+          isNidVerified: userData?.verified || false,
+          isStoreVerified: storeData?.verified || false,
+          dataCoverageStatement: `New Seller: ${completedCount}/3 completed orders recorded.`,
+        };
+
+        await supabase.from("seller_reputation").upsert({
+          seller_id: sellerId,
+          trust_tier: "NEW_SELLER",
+          completed_orders_count: completedCount,
+          upheld_disputes_count: upheldDisputesCount,
+          nid_verified: userData?.verified || false,
+          store_verified: storeData?.verified || false,
+          calculated_at: new Date().toISOString(),
+        });
+
+        return { success: true, data: profile };
+      }
+
+      // established seller calculation
+      const fulfillmentRatio = deliveredCount / Math.max(1, deliveredCount + sellerCancellations);
+      const fulfillmentScore = Math.round(fulfillmentRatio * 45);
+      const disputeScore = Math.max(0, 35 - upheldDisputesCount * 15);
+      let identityScore = 0;
+      if (storeData?.verified && storeData?.address) {
+        identityScore = 20;
+      } else if (userData?.verified) {
+        identityScore = 12;
+      }
+
+      const totalScore = fulfillmentScore + disputeScore + identityScore;
+      let tier: SellerTrustTier = "RISING";
+      if (totalScore >= 90) tier = "TOP_RATED";
+      else if (totalScore >= 70) tier = "VERIFIED_MERCHANT";
+
+      const profile = {
+        score: totalScore,
+        tier,
+        breakdown: { fulfillmentScore, disputeScore, identityScore, slaScore: null },
+        completedOrdersCount: completedCount,
+        upheldDisputesCount: upheldDisputesCount,
+        isNidVerified: userData?.verified || false,
+        isStoreVerified: storeData?.verified || false,
+        dataCoverageStatement: `Established Seller: Score based on ${completedCount} verified delivered orders.`,
+      };
+
+      await supabase.from("seller_reputation").upsert({
+        seller_id: sellerId,
+        trust_score: totalScore,
+        trust_tier: tier,
+        completed_orders_count: completedCount,
+        upheld_disputes_count: upheldDisputesCount,
+        nid_verified: userData?.verified || false,
+        store_verified: storeData?.verified || false,
+        calculated_at: new Date().toISOString(),
+      });
+
+      return { success: true, data: profile };
+    } catch (err) {
+      return { success: false, error: String(err) };
+    }
   });
 
 // Send SMS or Email OTP (Server-side generated, NEVER returned to client)

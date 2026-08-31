@@ -1,8 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Star, ShieldCheck, MapPin, CheckCircle2, UserCheck } from "lucide-react";
 import { type Listing } from "@/data/catalog";
+import { createServerFn } from "@tanstack/react-start";
 
 import { StoreBadge } from "@/components/storefront/store-badge";
+import { SellerTrustBadge } from "@/components/seller/seller-trust-badge";
+import { SellerTrustBreakdownDialog } from "@/components/seller/seller-trust-breakdown-dialog";
+import type { SellerTrustScoreData } from "@/lib/types";
 
 interface SellerTrustProps {
   seller: Listing["seller"];
@@ -12,11 +16,39 @@ interface SellerTrustProps {
 }
 
 /**
+ * Internal server function to fetch the real trust profile.
+ * This is defined here for simplicity but could be moved to server-functions.ts
+ */
+const fetchTrustProfile = createServerFn({ method: "POST" })
+  .validator((data: { sellerId: string }) => data)
+  .handler(async ({ data }) => {
+    // This is a proxy to the actual getSellerTrustProfileFn in server-functions.ts
+    // in a real app we would import it.
+    const { getSellerTrustProfileFn } = await import("@/lib/server-functions");
+    const result = await getSellerTrustProfileFn({ data: { sellerId: data.sellerId } });
+    return result;
+  });
+
+/**
  * Compact trust line designed to sit at the very top of the product info column.
  * [Avatar] Name  [🏪 StoreBadge] ✓ Verified Seller · Location · Rating
  */
 export function SellerTrustLine({ seller, storeId, storeName, className = "" }: SellerTrustProps) {
-  const [showTooltip, setShowTooltip] = useState(false);
+  const [trustData, setTrustData] = useState<SellerTrustScoreData | null>(null);
+
+  useEffect(() => {
+    const id = seller.id ?? "";
+    if (!id) return;
+    async function loadTrust() {
+      try {
+        const res = await fetchTrustProfile({ data: { sellerId: id } });
+        if (res.success) setTrustData(res.data);
+      } catch (e) {
+        console.error("Failed to load trust profile", e);
+      }
+    }
+    loadTrust();
+  }, [seller.id]);
 
   return (
     <div className={`flex flex-wrap items-center gap-2 text-xs ${className}`}>
@@ -31,32 +63,13 @@ export function SellerTrustLine({ seller, storeId, storeName, className = "" }: 
       {/* Optional Store Badge */}
       {(storeId || storeName) && <StoreBadge storeId={storeId} storeName={storeName} />}
 
-      {/* Verified Badge */}
-      {seller.verified ? (
-        <div className="relative inline-flex items-center">
-          <button
-            type="button"
-            onClick={() => setShowTooltip((prev) => !prev)}
-            onMouseEnter={() => setShowTooltip(true)}
-            onMouseLeave={() => setShowTooltip(false)}
-            className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-[10px] font-medium transition-colors hover:bg-emerald-500/20 press-feedback"
-            title="NID Verified Seller"
-          >
-            <ShieldCheck className="size-3 shrink-0" />
-            <span>Verified Seller</span>
-          </button>
-
-          {showTooltip && (
-            <div className="absolute left-0 top-full mt-1.5 z-30 w-64 p-2.5 bg-popover border border-border text-[11px] text-popover-foreground shadow-lg leading-relaxed rounded">
-              Seller submitted identity documentation during platform onboarding. Demo verification
-              data.
-            </div>
-          )}
-        </div>
-      ) : (
-        <span className="text-[10px] text-muted-foreground bg-secondary/80 px-1.5 py-0.5 border border-border/40 rounded">
-          Unverified Seller
-        </span>
+      {/* Verified Trust Badge (Replacing old static verified check) */}
+      {trustData && (
+        <SellerTrustBadge
+          tier={trustData.tier}
+          isNidVerified={trustData.isNidVerified}
+          isStoreVerified={trustData.isStoreVerified}
+        />
       )}
 
       {/* Location */}
@@ -67,12 +80,18 @@ export function SellerTrustLine({ seller, storeId, storeName, className = "" }: 
         {seller.district}
       </span>
 
-      {/* Rating */}
+      {/* Rating - Replaced with Trust Score if Established */}
       <span className="text-muted-foreground">·</span>
       <span className="inline-flex items-center gap-0.5 text-muted-foreground">
         <Star className="size-3 fill-amber-400 text-amber-400 shrink-0" />
-        <span className="font-medium text-foreground">{seller.rating.toFixed(1)}</span>
-        <span>({seller.sales})</span>
+        <span className="font-medium text-foreground">
+          {trustData !== null && trustData.score !== null
+            ? trustData.score
+            : seller.rating.toFixed(1)}
+        </span>
+        <span className="text-[10px] opacity-70">
+          ({trustData?.completedOrdersCount ?? seller.sales})
+        </span>
       </span>
     </div>
   );
@@ -82,7 +101,21 @@ export function SellerTrustLine({ seller, storeId, storeName, className = "" }: 
  * Standard Seller Trust Card
  */
 export function SellerTrustCard({ seller, className = "" }: SellerTrustProps) {
-  const [showTooltip, setShowTooltip] = useState(false);
+  const [trustData, setTrustData] = useState<SellerTrustScoreData | null>(null);
+
+  useEffect(() => {
+    const id = seller.id ?? "";
+    if (!id) return;
+    async function loadTrust() {
+      try {
+        const res = await fetchTrustProfile({ data: { sellerId: id } });
+        if (res.success) setTrustData(res.data);
+      } catch (e) {
+        console.error("Failed to load trust profile", e);
+      }
+    }
+    loadTrust();
+  }, [seller.id]);
 
   return (
     <div
@@ -95,38 +128,19 @@ export function SellerTrustCard({ seller, className = "" }: SellerTrustProps) {
             {seller.name.charAt(0)}
           </div>
 
-          <div>
+          <div className="space-y-1">
             <div className="flex items-center gap-1.5">
               <span className="font-semibold text-sm text-foreground">{seller.name}</span>
-              {seller.verified ? (
-                <div className="relative inline-flex items-center">
-                  <button
-                    type="button"
-                    onClick={() => setShowTooltip((prev) => !prev)}
-                    onMouseEnter={() => setShowTooltip(true)}
-                    onMouseLeave={() => setShowTooltip(false)}
-                    className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-[10px] font-semibold"
-                    title="NID Verified Seller"
-                  >
-                    <ShieldCheck className="size-3" />
-                    <span>Verified Seller</span>
-                  </button>
-
-                  {showTooltip && (
-                    <div className="absolute left-0 top-full mt-1.5 z-30 w-64 p-2.5 bg-popover border border-border text-[11px] text-popover-foreground shadow-lg leading-relaxed rounded">
-                      This seller submitted identity documents for verification in the
-                      platform&apos;s onboarding process. Sample/demo data.
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <span className="text-[10px] text-muted-foreground bg-secondary px-1.5 py-0.5 border border-border/40 rounded">
-                  Identity not verified
-                </span>
+              {trustData && (
+                <SellerTrustBadge
+                  tier={trustData.tier}
+                  isNidVerified={trustData.isNidVerified}
+                  isStoreVerified={trustData.isStoreVerified}
+                />
               )}
             </div>
 
-            <div className="flex items-center gap-1 text-[11px] text-muted-foreground mt-0.5">
+            <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
               <MapPin className="size-3 shrink-0" />
               <span>
                 {seller.area ? `${seller.area}, ` : ""}
@@ -136,15 +150,23 @@ export function SellerTrustCard({ seller, className = "" }: SellerTrustProps) {
           </div>
         </div>
 
-        {/* Rating & Sales */}
-        <div className="text-right">
+        {/* Trust Score & Breakdown */}
+        <div className="text-right space-y-1">
           <div className="inline-flex items-center gap-1 font-semibold text-xs text-foreground">
             <Star className="size-3 fill-amber-400 text-amber-400" />
-            <span>{seller.rating.toFixed(1)}</span>
+            <span>
+              {trustData !== null && trustData.score !== null
+                ? trustData.score
+                : seller.rating.toFixed(1)}
+            </span>
           </div>
-          <p className="text-[10.5px] text-muted-foreground mt-0.5">
-            {seller.sales} completed sale{seller.sales !== 1 ? "s" : ""}
-          </p>
+          <div className="flex flex-col items-end gap-1">
+            <p className="text-[10.5px] text-muted-foreground">
+              {trustData?.completedOrdersCount ?? seller.sales} completed sale
+              {trustData?.completedOrdersCount !== 1 ? "s" : ""}
+            </p>
+            {trustData && <SellerTrustBreakdownDialog data={trustData} />}
+          </div>
         </div>
       </div>
 

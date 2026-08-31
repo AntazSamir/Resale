@@ -498,7 +498,7 @@ Phase 5.1 transforms the listing flow from a direct-publish system into a proper
 
 ---
 
-### 5.2 — Seller Reputation & Trust Tiering System ⭐ PLANNED
+### 5.2 — Seller Reputation & Trust Tiering System ✅ COMPLETED
 
 **Objective**: Establish a mathematically deterministic trust score (0–100) for every seller based strictly on verified platform telemetry, replacing arbitrary star ratings.
 
@@ -565,11 +565,11 @@ Phase 5.1 transforms the listing flow from a direct-publish system into a proper
 | **Phase 4.6**  | Rule-Based Personalization   | Deterministic recommendation engine, recent-order homepage shelf, consolidated product page "You May Also Like", strict data-truth fallback                                                    | ✅ Completed |
 | **Phase 4.7**  | Device Lifecycle Passport    | Honest per-device Resale history page, inspection/sale/dispute timeline                                                                                                                        |  📋 Planned  |
 | **Phase 5.1**  | Listing Governance & Trust   | Dual-status lifecycle (DRAFT→PENDING_REVIEW→ACTIVE/REJECTED), admin moderation workbench, immutable audit history, RESERVED race-condition lock, public discovery gating, seller resubmit flow | ✅ Completed |
-| **Phase 5.2**  | Seller Trust Score & Badges  | Deterministic 0–100 trust formula (Orders, Disputes, SLA, NID tier), transparent score breakdown dialog, verified merchant badges                                                              |  📋 Planned  |
+| **Phase 5.2**  | Seller Trust Score & Badges  | Deterministic 0–100 trust formula (Orders, Disputes, SLA, NID tier), transparent score breakdown dialog, verified merchant badges                                                              | ✅ Completed |
 | **Phase 5.3**  | Fair-Market Price Guidance   | Historical sold price benchmarks, sell wizard price competitiveness indicator, 6–24 mo model depreciation curves                                                                               |  📋 Planned  |
 | **Phase 5.4**  | Device Lifecycle Passport    | Digital ledger per physical unit (`/passport/$id`), immutable chain of custody, QR verification label                                                                                          |  📋 Planned  |
 | **Phase 5.5**  | Certified Physical QA Hubs   | Hub drop-off logistics routing, technician inspection workbench (`/admin/qa-hub`), tamper-evident physical certification seals                                                                 |  📋 Planned  |
 
 ---
 
-_Last Updated: August 2026 (Phase 5.1 Complete) · Resale.com Engineering Team_
+_Last Updated: August 2026 (Phase 5.2 Complete) · Resale.com Engineering Team_

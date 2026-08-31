@@ -117,6 +117,12 @@ export const orders = sqliteTable("orders", {
   shippingAddressJson: text("shipping_address_json").notNull(),
   nidNumber: text("nid_number").notNull(),
   createdAt: text("created_at").notNull(),
+  confirmedAt: text("confirmed_at"),
+  shippedAt: text("shipped_at"),
+  deliveredAt: text("delivered_at"),
+  cancelledAt: text("cancelled_at"),
+  cancelledBy: text("cancelled_by", { enum: ["BUYER", "SELLER", "ADMIN", "SYSTEM"] }),
+  cancellationReason: text("cancellation_reason"),
 });
 
 export const disputes = sqliteTable("disputes", {
@@ -130,4 +136,19 @@ export const disputes = sqliteTable("disputes", {
     .default("OPEN")
     .notNull(),
   createdAt: text("created_at").notNull(),
+});
+
+export const sellerReputation = sqliteTable("seller_reputation", {
+  sellerId: text("seller_id")
+    .primaryKey()
+    .references(() => users.id),
+  trustScore: integer("trust_score"),
+  trustTier: text("trust_tier", {
+    enum: ["NEW_SELLER", "RISING", "VERIFIED_MERCHANT", "TOP_RATED"],
+  }),
+  completedOrdersCount: integer("completed_orders_count").default(0).notNull(),
+  upheldDisputesCount: integer("upheld_disputes_count").default(0).notNull(),
+  nidVerified: integer("nid_verified", { mode: "boolean" }).default(false).notNull(),
+  storeVerified: integer("store_verified", { mode: "boolean" }).default(false).notNull(),
+  calculatedAt: text("calculated_at").notNull(),
 });

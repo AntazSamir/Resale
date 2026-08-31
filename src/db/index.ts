@@ -133,6 +133,12 @@ class MemoryDatabase {
       }),
       nidNumber: "199526920199201",
       createdAt: "2026-08-14T10:00:00.000Z",
+      confirmedAt: "2026-08-14T10:05:00.000Z",
+      shippedAt: "2026-08-14T15:00:00.000Z",
+      deliveredAt: null,
+      cancelledAt: null,
+      cancelledBy: null,
+      cancellationReason: null,
     },
     {
       id: "ORD-71204",
@@ -151,6 +157,12 @@ class MemoryDatabase {
       }),
       nidNumber: "199526920199201",
       createdAt: "2026-07-20T14:30:00.000Z",
+      confirmedAt: "2026-07-20T14:35:00.000Z",
+      shippedAt: "2026-07-20T18:00:00.000Z",
+      deliveredAt: "2026-07-22T11:00:00.000Z",
+      cancelledAt: null,
+      cancelledBy: null,
+      cancellationReason: null,
     },
   ];
 
@@ -301,6 +313,12 @@ async function hydrateFromSupabase(): Promise<void> {
               : JSON.stringify(row.shipping_address_json ?? {}),
           nidNumber: row.nid_number ?? "",
           createdAt: row.created_at ?? new Date().toISOString(),
+          confirmedAt: row.confirmed_at ?? null,
+          shippedAt: row.shipped_at ?? null,
+          deliveredAt: row.delivered_at ?? null,
+          cancelledAt: row.cancelled_at ?? null,
+          cancelledBy: row.cancelled_by ?? null,
+          cancellationReason: row.cancellation_reason ?? null,
         });
       }
     }

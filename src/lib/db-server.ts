@@ -88,27 +88,42 @@ export const upsertOrderFn = createServerFn({ method: "POST" })
     try {
       const supabase = await admin();
 
-      const oldStatus = (
-        await supabase
-          .from("orders")
-          .select("status")
-          .eq("id", data["id"] as string)
-          .limit(1)
-          .single()
-      ).data?.["status"] as string | undefined;
+      const existing = await supabase
+        .from("orders")
+        .select("status")
+        .eq("id", data["id"] as string)
+        .limit(1)
+        .single();
+      const oldStatus = existing?.data?.["status"] as string | undefined;
       const newStatus = data["status"] as string;
-      const buyerId =
-        (data["buyer_id"] as string) ||
-        (data["buyerId"] as string) ||
-        (oldStatus ? undefined : undefined);
+      const buyerId = (data["buyer_id"] as string) || (data["buyerId"] as string);
 
-      const { error } = await supabase.from("orders").upsert(data);
+      // --- Trust Telemetry: Order State Machine Hooks ---
+      const now = new Date().toISOString();
+      const telemetry: Record<string, string> = {};
+
+      if (oldStatus && oldStatus !== newStatus) {
+        if (newStatus === "CONFIRMED") telemetry["confirmed_at"] = now;
+        if (newStatus === "SHIPPED") telemetry["shipped_at"] = now;
+        if (newStatus === "DELIVERED") telemetry["delivered_at"] = now;
+        if (newStatus === "CANCELLED") {
+          telemetry["cancelled_at"] = now;
+          telemetry["cancelled_by"] = (data["cancelled_by"] as string) || "SYSTEM";
+          telemetry["cancellation_reason"] =
+            (data["cancellation_reason"] as string) || "Not specified";
+        }
+      }
+
+      // Merge telemetry into the upsert data
+      const updatePayload = { ...data, ...telemetry };
+
+      const { error } = await supabase.from("orders").upsert(updatePayload);
       if (error) return { success: false, error: error.message };
 
       if (oldStatus && oldStatus !== newStatus) {
         try {
           await createOrderNotification(
-            (data["buyer_id"] as string) || (data["buyerId"] as string) || "u-admin",
+            buyerId || "u-admin",
             "ORDER_STATUS_UPDATED",
             data["id"] as string,
             `Order status changed from ${oldStatus} to ${newStatus}.`,

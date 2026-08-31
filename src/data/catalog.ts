@@ -125,6 +125,7 @@ export type Listing = {
   physical: string;
   screen: string;
   seller: {
+    id?: string | undefined;
     name: string;
     verified: boolean;
     rating: number;

@@ -266,3 +266,23 @@ export const LISTING_REJECTION_REASONS = [
 ] as const;
 
 export type ListingRejectionReasonCode = (typeof LISTING_REJECTION_REASONS)[number]["code"];
+
+export type SellerTrustTier = "NEW_SELLER" | "RISING" | "VERIFIED_MERCHANT" | "TOP_RATED";
+
+export interface SellerTrustBreakdown {
+  fulfillmentScore: number; // Max 45
+  disputeScore: number; // Max 35
+  identityScore: number; // Max 20
+  slaScore: number | null; // Max 0 for now (until SLA tracking is mature)
+}
+
+export interface SellerTrustScoreData {
+  score: number | null; // null if NEW_SELLER
+  tier: SellerTrustTier;
+  breakdown: SellerTrustBreakdown;
+  completedOrdersCount: number;
+  upheldDisputesCount: number;
+  isNidVerified: boolean;
+  isStoreVerified: boolean;
+  dataCoverageStatement: string;
+}
