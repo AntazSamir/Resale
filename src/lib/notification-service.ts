@@ -174,6 +174,27 @@ function getDefaultDisputeTitle(type: string): string {
   }
 }
 
+// ── Listing moderation notification helpers ─────────────────────
+
+export async function createListingNotification(
+  userId: string,
+  type: Extract<NotificationType, "LISTING_MODERATION_APPROVED" | "LISTING_MODERATION_REJECTED">,
+  listingId: string,
+  message: string,
+  title?: string,
+): Promise<{ success: boolean; id?: string; error?: string }> {
+  return createNotification({
+    userId,
+    type,
+    title:
+      title ??
+      (type === "LISTING_MODERATION_APPROVED" ? "Listing Approved" : "Listing Needs Revision"),
+    message,
+    entityType: "listing",
+    entityId: listingId,
+  });
+}
+
 // ── Server functions for client-side data access ──────────────
 
 export const fetchNotificationsFn = createServerFn({ method: "POST" })

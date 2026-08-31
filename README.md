@@ -7,7 +7,7 @@
 [![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3ECF8E?logo=supabase&logoColor=white)](https://supabase.com/)
 [![Cloudflare](https://img.shields.io/badge/Deploy-Cloudflare-F38020?logo=cloudflare&logoColor=white)](https://workers.cloudflare.com/)
 
-**Resale.com** is Bangladesh's premier C2C and B2B marketplace for quality-checked pre-owned, open-box, and refurbished electronics. Engineered with objective component-level condition grading (A+ to D), 32-point hardware inspection, NID-verified sellers, nationwide Cash on Delivery (COD), decoupled order lifecycle state machines, Pro Merchant storefronts, Verified Creator video reviews, server-authoritative authentication, and a comprehensive 48-hour dispute mediation hub.
+**Resale.com** is Bangladesh's premier C2C and B2B marketplace for quality-checked pre-owned, open-box, and refurbished electronics. Engineered with objective component-level condition grading (A+ to D), 32-point hardware inspection, NID-verified sellers, nationwide Cash on Delivery (COD), decoupled order lifecycle state machines, Pro Merchant storefronts, Verified Creator video reviews, server-authoritative authentication, a comprehensive 48-hour dispute mediation hub, and a full marketplace listing governance system with admin moderation, immutable audit history, and controlled public discovery.
 
 ---
 
@@ -162,6 +162,27 @@ The listing details page (`/listing/$listingId`) presents a structured, high-tru
 
 ---
 
+### 🛡️ 12. Marketplace Trust & Listing Governance (Phase 5.1)
+
+Every seller listing now passes through a server-enforced governance lifecycle before becoming publicly discoverable.
+
+- **Dual-Status Architecture**:
+  - _Moderation Status_: `DRAFT` → `PENDING_REVIEW` → `APPROVED` / `REJECTED`
+  - _Operational Status_: `DRAFT` → `PENDING_REVIEW` → `ACTIVE` → `PAUSED` / `RESERVED` / `SOLD` / `DELISTED`
+  - A listing is **never publicly discoverable** unless both `status === ACTIVE` and `moderationStatus === APPROVED`.
+- **Seller Workflow**:
+  - **Save as Draft** from the sell wizard without submitting for review.
+  - **Submit for Review** — listing enters the admin moderation queue.
+  - **Edit & Resubmit** for rejected listings — editing any trust-sensitive field on a live listing automatically triggers re-moderation.
+  - Seller receives in-app notifications on `APPROVED` and `REJECTED` outcomes.
+- **Admin Moderation Workbench (`/admin/moderation`)**: Live `PENDING_REVIEW` queue with approve and reject (standardized reason codes + required admin explanation). Full audit trail per listing.
+- **Immutable Audit History**: Every state transition recorded append-only in `listing_audit_history` with actor, role, previous/new status, and reason. Accessible to the listing owner or admin only.
+- **Race Condition Lock (`RESERVED`)**: At order placement, the listing is atomically set to `RESERVED`, preventing two buyers from purchasing the same unique second-hand unit simultaneously. Transitions to `SOLD` only on confirmed delivery — not checkout.
+- **Seller Listings Dashboard (`/seller/listings`)**: Filter tabs (Active & Public / Under Review / Revisions Needed / Drafts / Paused & Sold), colour-coded status badges, rejection feedback, audit history slide-over.
+- **Public Discovery Gating**: `isListingPubliclyEligible()` applied across the products catalog browser, product page offers, recommendation shelves, and listing detail route.
+
+---
+
 ## 🛠️ Technology Stack
 
 | Layer            | Technology                                                                                          |
@@ -183,6 +204,8 @@ The listing details page (`/listing/$listingId`) presents a structured, high-tru
 │   ├── components/
 │   │   ├── ui/                         # Accessible Radix & Tailwind UI components (Button, Input, Sheet, etc.)
 │   │   ├── storefront/                 # Storefront components (StoreBadge, store verification chips)
+│   │   ├── seller/                     # Seller components (ListingStatusBadge)
+│   │   ├── moderation/                 # Admin moderation components (RejectionDialog, AuditHistorySheet)
 │   │   ├── site-header.tsx             # Dual header bar, tree dropdowns, notification bell & mobile drawer
 │   │   ├── site-footer.tsx             # Footer, newsletter subscription & platform directory
 │   │   ├── listing-card.tsx            # Listing-first product offer card
@@ -217,10 +240,11 @@ The listing details page (`/listing/$listingId`) presents a structured, high-tru
 │   │   ├── supabase.ts                 # Supabase client configuration
 │   │   ├── supabase-admin.ts           # Supabase admin client
 │   │   ├── db-server.ts                # Server functions for Supabase orders, carts, disputes & stores
+│   │   ├── listing-eligibility.ts      # Canonical isListingPubliclyEligible() governance check
 │   │   ├── notification-service.ts     # Notification creation, dedup, preference checks
 │   │   ├── notification-store.ts       # Zustand store for notification UI state
 │   │   ├── recommendation-engine.ts    # Deterministic rule-based recommendation & personalization engine
-│   │   └── server-functions.ts         # Nitro server functions (loginFn, changePasswordFn, verifyOtpFn, etc.)
+│   │   └── server-functions.ts         # Nitro server functions (auth, listing lifecycle, moderation, orders)
 │   ├── routes/
 │   │   ├── __root.tsx                  # Root HTML layout & global error boundary
 │   │   ├── index.tsx                   # Homepage (Hero, mobile trust strip, dual banners, catalog rails)

@@ -175,3 +175,94 @@ export interface NotificationSummary {
   unreadCount: number;
   notifications: Notification[];
 }
+
+// === Phase 5.1: Listing Governance & Lifecycle Types ===
+
+export const LISTING_MODERATION_STATUSES = [
+  "DRAFT",
+  "PENDING_REVIEW",
+  "APPROVED",
+  "REJECTED",
+] as const;
+
+export type ListingModerationStatus = (typeof LISTING_MODERATION_STATUSES)[number];
+
+export const LISTING_AVAILABILITY_STATUSES = [
+  "DRAFT",
+  "PENDING_REVIEW",
+  "ACTIVE",
+  "PAUSED",
+  "RESERVED",
+  "SOLD",
+  "DELISTED",
+  "REJECTED",
+] as const;
+
+export type ListingAvailabilityStatus = (typeof LISTING_AVAILABILITY_STATUSES)[number];
+
+export const LISTING_AUDIT_ACTIONS = [
+  "DRAFT_CREATED",
+  "SUBMITTED",
+  "APPROVED",
+  "REJECTED",
+  "RESUBMITTED",
+  "PAUSED",
+  "RESUMED",
+  "DELISTED",
+  "RESERVED_FOR_ORDER",
+  "SOLD",
+  "EDIT_TRIGGERED_REVIEW",
+  "SEED_INGESTED",
+] as const;
+
+export type ListingAuditAction = (typeof LISTING_AUDIT_ACTIONS)[number];
+
+export interface ListingAuditEntry {
+  id: string;
+  listingId: string;
+  actorId: string;
+  actorRole: "BUYER" | "SELLER" | "ADMIN" | "SYSTEM";
+  action: ListingAuditAction;
+  previousStatus: string | null;
+  newStatus: string;
+  reasonCode?: string | null;
+  reasonText?: string | null;
+  createdAt: string;
+}
+
+export const LISTING_REJECTION_REASONS = [
+  {
+    code: "INCOMPLETE_INSPECTION",
+    label: "Incomplete Inspection Checklist",
+    description: "Mandatory hardware checks were left unrecorded or ambiguous.",
+  },
+  {
+    code: "SUSPICIOUS_PRICING",
+    label: "Price / Market Discrepancy",
+    description:
+      "Listed price deviates significantly from realistic market value for this condition.",
+  },
+  {
+    code: "UNCLEAR_OR_STOCK_PHOTOS",
+    label: "Insufficient Device Photography",
+    description: "Photos are blurry, stock renders, or do not clearly show the physical unit.",
+  },
+  {
+    code: "INCONSISTENT_GRADE_DECLARATION",
+    label: "Grade / Defect Inconsistency",
+    description: "Declared cosmetic grade conflicts with disclosed scratches, battery, or repairs.",
+  },
+  {
+    code: "MISSING_ACCESSORY_DISCLOSURE",
+    label: "Missing Inclusions Disclosure",
+    description: "Unclear whether charger, cable, or original box are included.",
+  },
+  {
+    code: "PROHIBITED_OR_POLICY_VIOLATION",
+    label: "Policy Violation",
+    description:
+      "Listing violates marketplace terms (e.g., locked, bypass attempted, or prohibited accessories).",
+  },
+] as const;
+
+export type ListingRejectionReasonCode = (typeof LISTING_REJECTION_REASONS)[number]["code"];

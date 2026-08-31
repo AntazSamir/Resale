@@ -2,6 +2,7 @@ import phone from "@/assets/p-phone.jpg";
 import laptop from "@/assets/p-laptop.jpg";
 import camera from "@/assets/p-camera.jpg";
 import headphones from "@/assets/p-headphones.jpg";
+import { isListingPubliclyEligible } from "@/lib/listing-eligibility";
 
 export type Grade = "A+" | "A" | "B" | "C" | "D";
 
@@ -137,6 +138,10 @@ export type Listing = {
   deviceVerification?: DeviceVerification | undefined;
   includedItems?: string[] | undefined;
   knownIssues?: string[] | undefined;
+  status?: string | undefined;
+  moderationStatus?: string | undefined;
+  isSeed?: boolean | undefined;
+  sellerId?: string | undefined;
 };
 
 export type Product = {
@@ -3870,7 +3875,9 @@ export const listings: Listing[] = [
 export const taka = (n: number) => `৳${n.toLocaleString("en-US")}`;
 
 export const listingsFor = (productId: string) =>
-  listings.filter((l) => l.productId === productId).sort((a, b) => a.price - b.price);
+  listings
+    .filter((l) => l.productId === productId && isListingPubliclyEligible(l))
+    .sort((a, b) => a.price - b.price);
 
 export const productFor = (id: string) => products.find((p) => p.id === id);
 

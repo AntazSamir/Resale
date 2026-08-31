@@ -1,5 +1,5 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
+import { useState, useEffect } from "react";
 import { ProtectedRoute } from "@/components/protected-route";
 import { SiteHeader, SiteFooter } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
@@ -23,8 +23,9 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { GradeSelector } from "@/components/grade-selector";
 import { evaluateGrading, type GradingAnswers } from "@/data/grading";
-import { saveGradedDraft } from "@/lib/grade-store";
-import { taka } from "@/data/catalog";
+import { taka, products } from "@/data/catalog";
+import { useAuth } from "@/lib/auth-store";
+import { submitListingForReviewFn, saveListingDraftFn, getListingFn } from "@/lib/server-functions";
 import {
   Check,
   CheckCircle2,
@@ -40,10 +41,19 @@ import {
   Image as ImageIcon,
   X,
   Plus,
+  Save,
+  Send,
 } from "lucide-react";
 import resaleLogo from "@/assets/resale-logo.svg";
 
+interface SellSearch {
+  editId?: string | undefined;
+}
+
 export const Route = createFileRoute("/sell/")({
+  validateSearch: (search: Record<string, unknown>): SellSearch => ({
+    editId: typeof search["editId"] === "string" ? search["editId"] : undefined,
+  }),
   head: () => ({
     meta: [{ title: "Sell with Us & Partner Program | Resale.com" }],
   }),
@@ -58,6 +68,10 @@ type UploadedPhoto = {
 };
 
 function SellWizardPage() {
+  const { token, user } = useAuth();
+  const search = useSearch({ from: "/sell/" });
+  const navigate = useNavigate();
+
   const [step, setStep] = useState(1);
   const [answers, setAnswers] = useState<GradingAnswers>({});
   const [category, setCategory] = useState("");
@@ -69,9 +83,31 @@ function SellWizardPage() {
   const [isDragging, setIsDragging] = useState(false);
   const [price, setPrice] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [savingDraft, setSavingDraft] = useState(false);
   const [step1Touched, setStep1Touched] = useState(false);
-  const navigate = useNavigate();
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
+
   const grading = evaluateGrading(answers);
+
+  // If editId is provided, prefetch existing listing details
+  useEffect(() => {
+    if (search.editId && token) {
+      getListingFn({ data: { id: search.editId, token } }).then((res) => {
+        if (res && !("unavailable" in res)) {
+          const l = res as Record<string, unknown>;
+          const prod = l["product"] as Record<string, unknown> | undefined;
+          if (prod) {
+            setCategory(String(prod["category"] || ""));
+            setProductName(String(prod["name"] || ""));
+          }
+          if (l["sellerNote"]) setDescription(String(l["sellerNote"]));
+          if (l["accessories"]) setAccessories(String(l["accessories"]));
+          if (l["pricePoisha"]) setPrice(String(Math.round(Number(l["pricePoisha"]) / 100)));
+          if (l["warrantyMonths"]) setWarranty(Number(l["warrantyMonths"]) > 0 ? "active" : "none");
+        }
+      });
+    }
+  }, [search.editId, token]);
 
   const repairNeedsDetail =
     answers["repairs"] === "official" || answers["repairs"] === "third-party";
@@ -113,25 +149,78 @@ function SellWizardPage() {
     setStep((s) => s + 1);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const matchedProductId =
+    products.find((p) => p.name.toLowerCase().includes(productName.toLowerCase()))?.id || "p-1";
+
+  const handleSaveDraft = async () => {
+    if (!token) return;
+    try {
+      setSavingDraft(true);
+      setStatusMessage(null);
+      const res = await saveListingDraftFn({
+        data: {
+          token,
+          ...(search.editId ? { id: search.editId } : {}),
+          productId: matchedProductId,
+          grade: grading.grade,
+          conditionScore: grading.conditionScore,
+          price: Number(price) || 0,
+          sellerNote: description || productName,
+          warrantyMonths: warranty === "active" ? 6 : 0,
+          hasInvoice: warranty === "active",
+          accessories: accessories || "Device only",
+          repairs: answers["repairs"] || "None reported",
+          physicalCondition: answers["body"] || "Inspected",
+          screenCondition: answers["screen"] || "Inspected",
+        },
+      });
+
+      if (res.success) {
+        navigate({ to: "/seller/listings" });
+      } else {
+        setStatusMessage(res.error || "Failed to save draft.");
+      }
+    } catch (err: unknown) {
+      setStatusMessage((err as Error)?.message || "Error saving draft.");
+    } finally {
+      setSavingDraft(false);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (submitting) return;
-    setSubmitting(true);
-    saveGradedDraft({
-      productLabel: productName || category || "Untitled listing",
-      price: Number(price) || 0,
-      grade: grading.grade,
-      conditionScore: grading.conditionScore,
-      answers: {
-        ...answers,
-        category,
-        productName,
-        description,
-        warranty,
-        accessoriesIncluded: accessories,
-      },
-    });
-    navigate({ to: "/seller/listings" });
+    if (submitting || !token) return;
+    try {
+      setSubmitting(true);
+      setStatusMessage(null);
+      const res = await submitListingForReviewFn({
+        data: {
+          token,
+          ...(search.editId ? { id: search.editId } : {}),
+          productId: matchedProductId,
+          grade: grading.grade,
+          conditionScore: grading.conditionScore,
+          price: Number(price) || 0,
+          sellerNote: description || productName,
+          warrantyMonths: warranty === "active" ? 6 : 0,
+          hasInvoice: warranty === "active",
+          accessories: accessories || "Device only",
+          repairs: answers["repairs"] || "None reported",
+          physicalCondition: answers["body"] || "Inspected",
+          screenCondition: answers["screen"] || "Inspected",
+        },
+      });
+
+      if (res.success) {
+        navigate({ to: "/seller/listings" });
+      } else {
+        setStatusMessage(res.error || "Failed to submit listing.");
+      }
+    } catch (err: unknown) {
+      setStatusMessage((err as Error)?.message || "Error submitting listing.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -492,10 +581,17 @@ function SellWizardPage() {
                 <CardHeader>
                   <CardTitle>Preview & Submit</CardTitle>
                   <CardDescription>
-                    Your listing will be reviewed by our moderation team before going live.
+                    Your listing will be reviewed by our moderation team before going live on the
+                    marketplace.
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
+                  {statusMessage && (
+                    <div className="p-3 text-xs bg-destructive/10 text-destructive rounded-md border border-destructive/20 font-medium">
+                      {statusMessage}
+                    </div>
+                  )}
+
                   <div className="bg-muted/50 p-6 rounded-md space-y-4">
                     {category && (
                       <p className="text-xs font-semibold uppercase tracking-wider text-primary">
@@ -534,19 +630,38 @@ function SellWizardPage() {
                       </div>
                     )}
                   </div>
-                  <div className="mt-6">
-                    <p className="text-sm text-muted-foreground mb-2">
-                      Note: Submitting will consume 1 Seller Credit.
+                  <div className="mt-4 p-3 bg-amber-500/10 border border-amber-500/20 rounded text-xs text-amber-800 dark:text-amber-300">
+                    <p className="font-semibold mb-0.5">Marketplace Governance & Trust Notice</p>
+                    <p className="text-muted-foreground">
+                      Submitting places this unit in the admin verification queue. It will become
+                      publicly searchable once approved. You can also save it as a private draft.
                     </p>
                   </div>
                 </CardContent>
-                <CardFooter className="justify-between">
+                <CardFooter className="flex-col sm:flex-row gap-3 justify-between">
                   <Button type="button" variant="outline" onClick={() => setStep(3)}>
                     Back
                   </Button>
-                  <Button type="submit" disabled={submitting}>
-                    {submitting ? "Submitting…" : "Submit for Moderation"}
-                  </Button>
+                  <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      onClick={handleSaveDraft}
+                      disabled={savingDraft || submitting}
+                      className="gap-1.5 text-xs"
+                    >
+                      <Save className="size-3.5" />
+                      {savingDraft ? "Saving…" : "Save as Draft"}
+                    </Button>
+                    <Button
+                      type="submit"
+                      disabled={submitting || savingDraft}
+                      className="gap-1.5 text-xs"
+                    >
+                      <Send className="size-3.5" />
+                      {submitting ? "Submitting…" : "Submit for Moderation"}
+                    </Button>
+                  </div>
                 </CardFooter>
               </form>
             )}

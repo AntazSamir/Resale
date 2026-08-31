@@ -35,8 +35,26 @@ export const listings = sqliteTable("listings", {
   conditionScore: integer("condition_score").notNull(),
   pricePoisha: integer("price_poisha").notNull(),
   sellerNote: text("seller_note").notNull(),
-  status: text("status", { enum: ["DRAFT", "PENDING_MODERATION", "PUBLISHED", "REJECTED", "SOLD"] })
-    .default("PENDING_MODERATION")
+  moderationStatus: text("moderation_status", {
+    enum: ["DRAFT", "PENDING_REVIEW", "APPROVED", "REJECTED"],
+  })
+    .default("PENDING_REVIEW")
+    .notNull(),
+  status: text("status", {
+    enum: [
+      "DRAFT",
+      "PENDING_MODERATION",
+      "PENDING_REVIEW",
+      "PUBLISHED",
+      "ACTIVE",
+      "PAUSED",
+      "RESERVED",
+      "SOLD",
+      "DELISTED",
+      "REJECTED",
+    ],
+  })
+    .default("PENDING_REVIEW")
     .notNull(),
   warrantyMonths: integer("warranty_months").default(0).notNull(),
   hasInvoice: integer("has_invoice", { mode: "boolean" }).default(false).notNull(),
@@ -45,7 +63,30 @@ export const listings = sqliteTable("listings", {
   repairs: text("repairs"),
   physicalCondition: text("physical_condition"),
   screenCondition: text("screen_condition"),
+  submittedAt: text("submitted_at"),
+  reviewedAt: text("reviewed_at"),
+  reviewedBy: text("reviewed_by").references(() => users.id),
+  rejectionReasonCode: text("rejection_reason_code"),
+  rejectionReasonText: text("rejection_reason_text"),
+  isSeed: integer("is_seed", { mode: "boolean" }).default(false).notNull(),
   listedAt: text("listed_at").notNull(),
+});
+
+export const listingAuditHistory = sqliteTable("listing_audit_history", {
+  id: text("id").primaryKey(),
+  listingId: text("listing_id")
+    .notNull()
+    .references(() => listings.id),
+  actorId: text("actor_id")
+    .notNull()
+    .references(() => users.id),
+  actorRole: text("actor_role", { enum: ["BUYER", "SELLER", "ADMIN", "SYSTEM"] }).notNull(),
+  action: text("action").notNull(),
+  previousStatus: text("previous_status"),
+  newStatus: text("new_status").notNull(),
+  reasonCode: text("reason_code"),
+  reasonText: text("reason_text"),
+  createdAt: text("created_at").notNull(),
 });
 
 export const inspectionItems = sqliteTable("inspection_items", {

@@ -24,7 +24,7 @@ export function NotificationPanel() {
       fetchUnreadCount(token);
       fetchNotifications(token);
     }
-  }, [token]);
+  }, [token, fetchNotifications, fetchUnreadCount]);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {

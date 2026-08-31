@@ -2,7 +2,7 @@
 
 > **Bangladesh's Trusted C2C & B2B Marketplace for Quality-Checked Pre-Owned, Open-Box & Like-New Electronics**
 
-This document tracks the completed engineering milestones across **Phase 1**, **Phase 2**, **Phase 3.1**, **Phase 3.4**, **Phase 3.6**, and **Phase 4 (4.1A–E, 4.2, 4.4, 4.5, 4.6)**, and outlines the strategic and technical roadmap for remaining milestones.
+This document tracks the completed engineering milestones across **Phase 1**, **Phase 2**, **Phase 3.1**, **Phase 3.4**, **Phase 3.6**, **Phase 4 (4.1A–E, 4.2, 4.4, 4.5, 4.6)**, and **Phase 5.1 (Marketplace Trust & Listing Governance)**, and outlines the strategic and technical roadmap for remaining milestones.
 
 ---
 
@@ -250,7 +250,7 @@ Phase 3.4 integrated professional merchant storefronts, tech reviewer creator hu
 
 ## 🚧 Phase 4: Real Persistence, Intelligence & Buyer Retention
 
-**Status:** `IN PROGRESS` (Phase 4.1A, 4.1B, 4.1C, 4.1D, 4.1E, 4.2, 4.4, 4.5 & 4.6 Complete) · **Architecture Audit:** August 2026
+**Status:** `COMPLETED` (Phase 4.1A, 4.1B, 4.1C, 4.1D, 4.1E, 4.2, 4.4, 4.5 & 4.6 Complete) · **Architecture Audit:** August 2026
 
 Phase 4 transitions Resale.com from browser-local `localStorage` into a **real shared, persistent, multi-user marketplace architecture backed by Supabase PostgreSQL**, followed by behavioral signal tracking, buyer retention tools, and evidence-based seller analytics.
 
@@ -407,30 +407,169 @@ Phase 4 transitions Resale.com from browser-local `localStorage` into a **real s
 
 ---
 
-## 📊 Updated Summary Milestone Table
+## 🛡️ Phase 5: Marketplace Trust, Governance & Scaling Architecture
 
-| Milestone      | Key Focus Area               | Deliverables                                                                                                                                                                        |    Status    |
-| -------------- | ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------: |
-| **Phase 1**    | Marketplace Core & Catalog   | Alternating Homepage, Catalog Filters, Cart, COD Checkout, NID Auth, Seller Wizard                                                                                                  | ✅ Completed |
-| **Phase 2**    | Trust & Inspection UX        | 32-Point Inspection, Condition Gauge, Seller Trust Line, Device Verification, Product Multi-Seller Page                                                                             | ✅ Completed |
-| **Phase 3.1**  | Order & Transaction Backbone | Decoupled Lifecycle State Machine, Payment Abstraction (COD Active), Mandatory Auth & Redirect, Buyer Timeline & Cancellation, Seller Fulfillment Hub, Admin Oversight              | ✅ Completed |
-| **Phase 3.4**  | Creator & Pro Storefronts    | Public Branded Storefronts (`/store/:slug`), Verified Creator Profiles (`/creator/:slug`), Hands-on Product Video Reviews, Exact-Unit Review Badging, Bulk CSV Inventory Importer   | ✅ Completed |
-| **Phase 3.6**  | Dispute Mediation Hub        | 48h Inspection Window, 24h Seller SLA, Evidence Dropzone, Side-by-Side Admin Workbench, Deterministic Risk Analyzer, Simulated Payout Holds & Reverse Logistics                     | ✅ Completed |
-| **Phase 3.2**  | Courier Logistics            | Steadfast/Pathao API integration, live tracking webhooks, automated COD reconciliation                                                                                              |  📋 Planned  |
-| **Phase 3.3**  | Automated Diagnostics        | Live IMEI verification API, device hardware test runner, certified badges                                                                                                           |  📋 Planned  |
-| **Phase 3.5**  | AI Valuation Engine          | Real-time price recommender, price history graphs, "Fair Deal" badges                                                                                                               |  📋 Planned  |
-| **Phase 4.1A** | Supabase Orders Persistence  | Remote PostgreSQL orders sync, user foreign-key resolution, snapshot immutability, cross-browser shared state                                                                       | ✅ Completed |
-| **Phase 4.1B** | Remote Stores & Creators     | Supabase persistence for Pro Storefronts (`stores`) and Creator Hub (`creator_profiles`, `product_videos`)                                                                          | ✅ Completed |
-| **Phase 4.1E** | Backend Admin Auth & Email   | Server-issued session tokens, backend role enforcement, spoofing prevention, email registration/login with OTP                                                                      | ✅ Completed |
-| **Phase 4.1C** | Remote Dispute Persistence   | Supabase persistence for Disputes (`disputes`) and evidence metadata                                                                                                                | ✅ Completed |
-| **Phase 4.1D** | Cloud Cart Sync              | Guest-to-user cart cloud persistence & automatic login merging                                                                                                                      | ✅ Completed |
-| **Phase 4.2**  | Event & Analytics Model      | 12-type behavioral event model, privacy-safe session tracking, analytics foundation                                                                                                 | ✅ Completed |
-| **Phase 4.3**  | Favorites & Saved Searches   | Listing/product favorites, saved search persistence, new-listing alerts                                                                                                             |  📋 Planned  |
-| **Phase 4.4**  | Seller Intelligence          | Real listing view/conversion metrics, seller analytics page, dashboard overhaul                                                                                                     | ✅ Completed |
-| **Phase 4.5**  | Notifications Infrastructure | Database-backed notifications table, RLS policies, notification preferences, order/dispute/price-drop triggers, in-app notification panel with bell icon, server-side authorization | ✅ Completed |
-| **Phase 4.6**  | Rule-Based Personalization   | Deterministic recommendation engine, recent-order homepage shelf, consolidated product page "You May Also Like", strict data-truth fallback                                         | ✅ Completed |
-| **Phase 4.7**  | Device Lifecycle Passport    | Honest per-device Resale history page, inspection/sale/dispute timeline                                                                                                             |  📋 Planned  |
+**Status:** `IN PROGRESS` (Phase 5.1 Complete) · **Architecture Audit:** August 2026
+
+Phase 5 establishes enterprise-grade governance, strict quality control, verified seller reputation scoring, price intelligence, and physical QA capabilities to scale Resale.com into Bangladesh's most reliable secondhand electronics exchange.
 
 ---
 
-_Last Updated: August 2026 · Resale.com Engineering Team_
+### 5.1 — Marketplace Trust & Listing Governance ✅ COMPLETED
+
+**Status:** `COMPLETED` · **Build Verified:** August 2026 (`tsc --noEmit` exit 0, `npm run build` exit 0)
+
+Phase 5.1 transforms the listing flow from a direct-publish system into a properly governed marketplace lifecycle with seller workflows, admin moderation, immutable audit history, and controlled public discovery.
+
+#### 1. Dual-Status Governance Architecture
+
+- **Moderation Status** (admin workflow): `DRAFT` → `PENDING_REVIEW` → `APPROVED` / `REJECTED`
+- **Operational Status** (listing availability): `DRAFT` → `PENDING_REVIEW` → `ACTIVE` → `PAUSED` / `RESERVED` / `SOLD` / `DELISTED` / `REJECTED`
+- **No listing can become publicly discoverable without an `APPROVED` moderation status and `ACTIVE` operational status.**
+
+#### 2. Listing Lifecycle Enforcement
+
+- **`saveListingDraftFn`**: Session-authenticated draft save (create or update). Only works on `DRAFT` listings. Seller identity sourced from validated server session token — never from client payload.
+- **`submitListingForReviewFn`**: Submits a `DRAFT` for moderation, recording a `SUBMITTED` or `RESUBMITTED` audit event. Detects resubmission from `REJECTED` state automatically.
+- **`moderateListingFn`**: Admin-only approve (`APPROVED` → `ACTIVE`) or reject (requires standardized reason code + free-text feedback). Fires a `LISTING_APPROVED` or `LISTING_REJECTED` in-app notification to the seller.
+- **`updateListingAvailabilityFn`**: Seller `PAUSE` / `RESUME` / `DELIST` operations with state precondition enforcement.
+- **`updateListingDetailsFn`**: Seller listing edits. Editing any trust-sensitive field (`grade`, `conditionScore`, `accessories`, `repairs`, `physicalCondition`, `screenCondition`, `warrantyMonths`, `hasInvoice`, `productId`) on an `ACTIVE` listing automatically resets it to `PENDING_REVIEW` and records an `EDIT_TRIGGERED_REVIEW` audit event.
+
+#### 3. Race Condition Prevention (RESERVED Status)
+
+- **`placeOrderFn`** (updated): Verifies `status === ACTIVE` before checkout begins. Atomically sets listing status to `RESERVED` at the moment of order placement, blocking concurrent purchases of the same unique second-hand unit.
+- **Listing only transitions to `SOLD`** upon order reaching a terminal delivery/completion state — never on checkout placement alone, preventing false SOLD states on cancelled or failed COD deliveries.
+
+#### 4. Immutable Listing Audit History
+
+- Every state transition is recorded append-only in the `listing_audit_history` Supabase table with: `listingId`, `action` (typed enum), `actorId`, `actorRole`, `previousStatus`, `newStatus`, `reason`, `timestamp`.
+- **`getListingAuditHistoryFn`**: Returns audit trail accessible only to the listing owner or admin — enforced server-side.
+- Audit actions: `CREATED`, `SUBMITTED`, `RESUBMITTED`, `APPROVED`, `REJECTED`, `ACTIVATED`, `PAUSED`, `RESUMED`, `DELISTED`, `SOLD`, `RESERVED_FOR_ORDER`, `EDIT_TRIGGERED_REVIEW`, `SEED_INGESTED`.
+
+#### 5. Public Discovery Gating
+
+- **`isListingPubliclyEligible(unknown)`** (`src/lib/listing-eligibility.ts`): Canonical eligibility check applied everywhere listings surface publicly. Returns `true` only if `status === ACTIVE` (or legacy `PUBLISHED`) **and** `moderationStatus === APPROVED` (or `isSeed === true`).
+- Applied in: `/products` catalog browser, `listingsFor()` product-page offers, `recommendation-engine.ts` shelves, `/listing/$listingId` public detail route.
+- Seed catalog listings are marked `isSeed: true` + `APPROVED + ACTIVE` — never fabricated, always honest.
+
+#### 6. Moderation Workbench (`/admin/moderation`)
+
+- Replaced static mock queue with live `getModerationQueueFn` — pulls all `PENDING_REVIEW` listings from Supabase with full seller and product detail.
+- **Approve & Publish** action calls `moderateListingFn` (APPROVE).
+- **Reject** opens `RejectionDialog` with standardized reason code + required admin explanation text.
+- `AuditHistorySheet` slide-over shows the immutable audit trail per listing.
+- Refresh button, empty-queue state, and loading skeletons.
+
+#### 7. Seller Listings Dashboard (`/seller/listings`)
+
+- Replaced `localStorage` inventory with live `getSellerListingsFn` — shows full governance metadata per listing.
+- Filter tabs: **All** / **Active & Public** / **Under Review** / **Revisions Needed** / **Drafts** / **Paused & Sold**.
+- `ListingStatusBadge` component: colour-coded badge with icon for every lifecycle state.
+- **Rejection feedback card**: Displays the standardized reason code and admin explanation for rejected listings.
+- **Edit & Resubmit** link for `REJECTED` or `DRAFT` listings → `/sell?editId=...`.
+- **Pause / Resume / Delist** actions via `updateListingAvailabilityFn`.
+- `AuditHistorySheet` accessible per listing.
+
+#### 8. Sell Wizard Governance Integration (`/sell`)
+
+- **Save as Draft** button on Step 4 → calls `saveListingDraftFn`.
+- **Submit for Review** → calls `submitListingForReviewFn`.
+- `?editId=` query parameter support for editing/resubmitting rejected or draft listings.
+- Inline error/status feedback on all server responses.
+
+#### 9. Listing Detail Preview Mode (`/listing/$listingId`)
+
+- Non-eligible listings (DRAFT, PENDING_REVIEW, REJECTED, PAUSED, SOLD, DELISTED) show an **Unavailable page** to the public.
+- Listing owner or admin sees a **Preview Mode banner** explaining the current governance status with edit/resubmit action.
+- Event tracking only fires for publicly eligible listings.
+
+#### 10. Database & Supabase Schema
+
+- **New columns** on `public.listings`: `moderation_status`, `submitted_at`, `reviewed_at`, `reviewed_by`, `rejection_reason_code`, `rejection_reason_text`, `is_seed`.
+- **`RESERVED`** added to the listing operational status enum.
+- **New table**: `public.listing_audit_history` with indexes on `listing_id` and `created_at`, RLS policies ensuring sellers see only their own listing's audit history and admins see all.
+- **Migration file**: `supabase/migrations/20260831_phase5_1_listing_governance.sql`.
+
+#### 11. Core Data-Truth Preserved
+
+- No fabricated verification results, inspection scores, or trust metrics introduced.
+- All governance metadata is populated only from actual admin moderation actions.
+- Seed catalog data flagged `isSeed: true` and never represented as user-generated or live-moderated.
+
+---
+
+### 5.2 — Seller Reputation & Trust Tiering System ⭐ PLANNED
+
+**Objective**: Establish a mathematically deterministic trust score (0–100) for every seller based strictly on verified platform telemetry, replacing arbitrary star ratings.
+
+- **Deterministic Trust Formula**:
+  - `Completed Orders Ratio` (40% weight): Ratio of fulfilled vs. cancelled seller orders.
+  - `Dispute Free Rate` (30% weight): Percentage of orders completed without buyer dispute escalation.
+  - `Fulfillment SLA Speed` (15% weight): Average hours from order confirmation to courier handover.
+  - `Identity Verification Tier` (15% weight): NID Verified + Pro Outlet verification status.
+- **Seller Badges**: Top Rated Merchant, Verified Local Outlet, Fast Shipper.
+- **Transparent Breakdown Dialog**: Buyers can click any seller's score to view the exact math and history without opaque algorithms.
+
+---
+
+### 5.3 — Fair-Market Valuation & Automated Price Guidance ⭐ PLANNED
+
+**Objective**: Provide algorithmic price recommendations in the `/sell` wizard based on actual historical completed transactions on Resale.com.
+
+- **Market Price Recommender**: Shows real min, average, and max sold prices for the selected product and grade tier.
+- **Price Competitiveness Indicator**: Flags listings in the sell flow as "High Demand Range", "Fair Market Value", or "Priced Above Average".
+- **Depreciation Charts**: Visualizes price decline trends for popular smartphone, laptop, and camera models over 6–24 months.
+
+---
+
+### 5.4 — Device Lifecycle Passport & Chain of Custody ⭐ PLANNED
+
+**Objective**: Introduce a permanent digital ledger (`/passport/$listingId`) for every physical device registered on Resale.com.
+
+- **Historical Chain**: Records initial listing date, verified ownership changes on Resale, servicing events, condition grade changes across resales, and battery health decay over time.
+- **QR Code Verification**: Printable QR code linkable to physical device packaging, allowing second-hand buyers to audit its platform history before purchasing.
+
+---
+
+### 5.5 — Certified Inspection Hubs & Physical QA Workflow ⭐ PLANNED
+
+**Objective**: Bridge C2C and B2C transactions through physical diagnostic hubs in major divisions (Dhaka, Chittagong, Sylhet).
+
+- **Hub Drop-Off Option**: Buyers can choose "Standard Shipping" (Direct C2C) or "Resale Certified Inspection" (Routed through physical hub).
+- **Technician Workbench (`/admin/qa-hub`)**: Physical QA checklist runner for certified technicians with hardware testing tools.
+- **Certified Resale Seal**: Tamper-proof packaging tape and physical certificate of inspection accompanying hub-verified deliveries.
+
+---
+
+## 📊 Summary Milestone Table
+
+| Milestone      | Key Focus Area               | Deliverables                                                                                                                                                                                   |    Status    |
+| -------------- | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------: |
+| **Phase 1**    | Marketplace Core & Catalog   | Alternating Homepage, Catalog Filters, Cart, COD Checkout, NID Auth, Seller Wizard                                                                                                             | ✅ Completed |
+| **Phase 2**    | Trust & Inspection UX        | 32-Point Inspection, Condition Gauge, Seller Trust Line, Device Verification, Product Multi-Seller Page                                                                                        | ✅ Completed |
+| **Phase 3.1**  | Order & Transaction Backbone | Decoupled Lifecycle State Machine, Payment Abstraction (COD Active), Mandatory Auth & Redirect, Buyer Timeline & Cancellation, Seller Fulfillment Hub, Admin Oversight                         | ✅ Completed |
+| **Phase 3.4**  | Creator & Pro Storefronts    | Public Branded Storefronts (`/store/:slug`), Verified Creator Profiles (`/creator/:slug`), Hands-on Product Video Reviews, Exact-Unit Review Badging, Bulk CSV Inventory Importer              | ✅ Completed |
+| **Phase 3.6**  | Dispute Mediation Hub        | 48h Inspection Window, 24h Seller SLA, Evidence Dropzone, Side-by-Side Admin Workbench, Deterministic Risk Analyzer, Simulated Payout Holds & Reverse Logistics                                | ✅ Completed |
+| **Phase 3.2**  | Courier Logistics            | Steadfast/Pathao API integration, live tracking webhooks, automated COD reconciliation                                                                                                         |  📋 Planned  |
+| **Phase 3.3**  | Automated Diagnostics        | Live IMEI verification API, device hardware test runner, certified badges                                                                                                                      |  📋 Planned  |
+| **Phase 3.5**  | AI Valuation Engine          | Real-time price recommender, price history graphs, "Fair Deal" badges                                                                                                                          |  📋 Planned  |
+| **Phase 4.1A** | Supabase Orders Persistence  | Remote PostgreSQL orders sync, user foreign-key resolution, snapshot immutability, cross-browser shared state                                                                                  | ✅ Completed |
+| **Phase 4.1B** | Remote Stores & Creators     | Supabase persistence for Pro Storefronts (`stores`) and Creator Hub (`creator_profiles`, `product_videos`)                                                                                     | ✅ Completed |
+| **Phase 4.1E** | Backend Admin Auth & Email   | Server-issued session tokens, backend role enforcement, spoofing prevention, email registration/login with OTP                                                                                 | ✅ Completed |
+| **Phase 4.1C** | Remote Dispute Persistence   | Supabase persistence for Disputes (`disputes`) and evidence metadata                                                                                                                           | ✅ Completed |
+| **Phase 4.1D** | Cloud Cart Sync              | Guest-to-user cart cloud persistence & automatic login merging                                                                                                                                 | ✅ Completed |
+| **Phase 4.2**  | Event & Analytics Model      | 12-type behavioral event model, privacy-safe session tracking, analytics foundation                                                                                                            | ✅ Completed |
+| **Phase 4.3**  | Favorites & Saved Searches   | Listing/product favorites, saved search persistence, new-listing alerts                                                                                                                        |  📋 Planned  |
+| **Phase 4.4**  | Seller Intelligence          | Real listing view/conversion metrics, seller analytics page, dashboard overhaul                                                                                                                | ✅ Completed |
+| **Phase 4.5**  | Notifications Infrastructure | Database-backed notifications table, RLS policies, notification preferences, order/dispute/price-drop triggers, in-app notification panel with bell icon, server-side authorization            | ✅ Completed |
+| **Phase 4.6**  | Rule-Based Personalization   | Deterministic recommendation engine, recent-order homepage shelf, consolidated product page "You May Also Like", strict data-truth fallback                                                    | ✅ Completed |
+| **Phase 4.7**  | Device Lifecycle Passport    | Honest per-device Resale history page, inspection/sale/dispute timeline                                                                                                                        |  📋 Planned  |
+| **Phase 5.1**  | Listing Governance & Trust   | Dual-status lifecycle (DRAFT→PENDING_REVIEW→ACTIVE/REJECTED), admin moderation workbench, immutable audit history, RESERVED race-condition lock, public discovery gating, seller resubmit flow | ✅ Completed |
+| **Phase 5.2**  | Seller Trust Score & Badges  | Deterministic 0–100 trust formula (Orders, Disputes, SLA, NID tier), transparent score breakdown dialog, verified merchant badges                                                              |  📋 Planned  |
+| **Phase 5.3**  | Fair-Market Price Guidance   | Historical sold price benchmarks, sell wizard price competitiveness indicator, 6–24 mo model depreciation curves                                                                               |  📋 Planned  |
+| **Phase 5.4**  | Device Lifecycle Passport    | Digital ledger per physical unit (`/passport/$id`), immutable chain of custody, QR verification label                                                                                          |  📋 Planned  |
+| **Phase 5.5**  | Certified Physical QA Hubs   | Hub drop-off logistics routing, technician inspection workbench (`/admin/qa-hub`), tamper-evident physical certification seals                                                                 |  📋 Planned  |
+
+---
+
+_Last Updated: August 2026 (Phase 5.1 Complete) · Resale.com Engineering Team_

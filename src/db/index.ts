@@ -8,6 +8,7 @@ export type Listing = typeof schema.listings.$inferSelect;
 export type Order = typeof schema.orders.$inferSelect;
 export type Dispute = typeof schema.disputes.$inferSelect;
 export type InspectionItem = typeof schema.inspectionItems.$inferSelect;
+export type ListingAuditHistory = typeof schema.listingAuditHistory.$inferSelect;
 
 export interface OtpRecord {
   target: string;
@@ -83,7 +84,8 @@ class MemoryDatabase {
     conditionScore: l.conditionScore,
     pricePoisha: l.price * 100,
     sellerNote: l.sellerNote,
-    status: "PUBLISHED",
+    moderationStatus: "APPROVED",
+    status: "ACTIVE",
     warrantyMonths: l.warrantyMonths,
     hasInvoice: l.invoice,
     batteryHealth: l.battery ?? null,
@@ -91,7 +93,26 @@ class MemoryDatabase {
     repairs: l.repairs,
     physicalCondition: l.physical,
     screenCondition: l.screen,
+    submittedAt: l.listedAt,
+    reviewedAt: l.listedAt,
+    reviewedBy: "u-admin",
+    rejectionReasonCode: null,
+    rejectionReasonText: null,
+    isSeed: true,
     listedAt: l.listedAt,
+  }));
+
+  listingAuditHistory: ListingAuditHistory[] = catalogListings.map((l) => ({
+    id: `aud-seed-${l.id}`,
+    listingId: l.id,
+    actorId: "u-admin",
+    actorRole: "SYSTEM",
+    action: "SEED_INGESTED",
+    previousStatus: null,
+    newStatus: "ACTIVE",
+    reasonCode: null,
+    reasonText: "Initial seed catalog ingestion",
+    createdAt: l.listedAt || new Date().toISOString(),
   }));
 
   orders: Order[] = [
@@ -153,6 +174,7 @@ class MemoryDatabase {
         else if (table === schema.users) items = [...this.users];
         else if (table === schema.orders) items = [...this.orders];
         else if (table === schema.disputes) items = [...this.disputes];
+        else if (table === schema.listingAuditHistory) items = [...this.listingAuditHistory];
 
         return {
           where: (predicate?: (item: unknown) => boolean) => {
@@ -184,6 +206,8 @@ class MemoryDatabase {
           this.orders.unshift(values as unknown as Order);
         } else if (table === schema.disputes) {
           this.disputes.unshift(values as unknown as Dispute);
+        } else if (table === schema.listingAuditHistory) {
+          this.listingAuditHistory.unshift(values as unknown as ListingAuditHistory);
         }
 
         return {
@@ -240,6 +264,9 @@ async function hydrateFromSupabase(): Promise<void> {
           conditionScore: row.condition_score,
           pricePoisha: row.price_poisha,
           sellerNote: row.seller_note ?? "",
+          moderationStatus:
+            row.moderation_status ??
+            (row.status === "PUBLISHED" || row.status === "ACTIVE" ? "APPROVED" : "PENDING_REVIEW"),
           status: row.status ?? "PUBLISHED",
           warrantyMonths: row.warranty_months ?? 0,
           hasInvoice: Boolean(row.has_invoice),
@@ -248,6 +275,12 @@ async function hydrateFromSupabase(): Promise<void> {
           repairs: row.repairs ?? "None reported",
           physicalCondition: row.physical_condition ?? "Inspected",
           screenCondition: row.screen_condition ?? "Inspected",
+          submittedAt: row.submitted_at ?? null,
+          reviewedAt: row.reviewed_at ?? null,
+          reviewedBy: row.reviewed_by ?? null,
+          rejectionReasonCode: row.rejection_reason_code ?? null,
+          rejectionReasonText: row.rejection_reason_text ?? null,
+          isSeed: Boolean(row.is_seed),
           listedAt: row.listed_at ?? new Date().toISOString(),
         });
       }

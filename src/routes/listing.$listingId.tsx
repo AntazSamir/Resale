@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
+import { type Grade, type Listing } from "@/data/catalog";
 import {
   Check,
   Truck,
@@ -38,9 +39,47 @@ import {
   taka,
 } from "@/data/catalog";
 
+import { useAuth } from "@/lib/auth-store";
+import { isListingPubliclyEligible } from "@/lib/listing-eligibility";
+import { Eye, Clock, AlertCircle } from "lucide-react";
+
 export const Route = createFileRoute("/listing/$listingId")({
-  loader: ({ params }) => {
-    const listing = listings.find((l) => l.id === params.listingId);
+  loader: async ({ params }) => {
+    let listing = listings.find((l) => l.id === params.listingId);
+    if (!listing) {
+      const { db } = await import("@/db");
+      const dbListing = db.listings.find((l) => l.id === params.listingId);
+      if (dbListing) {
+        listing = {
+          id: dbListing.id,
+          productId: dbListing.productId,
+          conditionScore: dbListing.conditionScore,
+          inspection: [],
+          sellerNote: dbListing.sellerNote,
+          listedAt: dbListing.listedAt,
+          price: Math.round(dbListing.pricePoisha / 100),
+          grade: dbListing.grade as Grade,
+          warrantyMonths: dbListing.warrantyMonths,
+          invoice: dbListing.hasInvoice,
+          battery: dbListing.batteryHealth ?? undefined,
+          accessories: dbListing.accessories || "Device only",
+          repairs: dbListing.repairs || "None reported",
+          physical: dbListing.physicalCondition || "Inspected",
+          screen: dbListing.screenCondition || "Inspected",
+          seller: {
+            name: "Verified Seller",
+            verified: true,
+            rating: 5.0,
+            sales: 12,
+            district: "Dhaka",
+          },
+          sellerId: dbListing.sellerId,
+          status: dbListing.status,
+          moderationStatus: dbListing.moderationStatus,
+          isSeed: dbListing.isSeed,
+        } as Listing;
+      }
+    }
     const product = listing ? productFor(listing.productId) : undefined;
     if (!listing || !product) throw notFound();
     return { listing, product };
@@ -66,6 +105,7 @@ export const Route = createFileRoute("/listing/$listingId")({
 
 function ListingPage() {
   const { listing, product } = Route.useLoaderData();
+  const { user } = useAuth();
   const [shot, setShot] = useState(0);
   const [addedToCart, setAddedToCart] = useState(false);
   const [videoModalOpen, setVideoModalOpen] = useState(false);
@@ -76,8 +116,15 @@ function ListingPage() {
 
   const exactVideo = getApprovedVideoForListing(listing.id);
 
+  // Check public discovery eligibility
+  const isPublic = isListingPubliclyEligible(listing);
+  const dbFields = listing as Record<string, unknown>;
+  const isOwner = user && dbFields["sellerId"] === user.id;
+  const isAdmin = user && user.role === "ADMIN";
+  const isPreviewMode = !isPublic && (isOwner || isAdmin);
+
   useEffect(() => {
-    if (listing?.id) {
+    if (listing?.id && isPublic) {
       trackActiveEvent({
         eventType: "LISTING_VIEWED",
         entityType: "listing",
@@ -90,7 +137,33 @@ function ListingPage() {
         },
       }).catch(() => {});
     }
-  }, [listing?.id, product?.category, product?.brand, listing?.grade, listing?.price]);
+  }, [listing?.id, product?.category, product?.brand, listing?.grade, listing?.price, isPublic]);
+
+  if (!isPublic && !isPreviewMode) {
+    return (
+      <div className="min-h-screen bg-background text-foreground flex flex-col">
+        <SiteHeader />
+        <main className="flex-1 max-w-2xl mx-auto px-5 py-24 text-center space-y-4">
+          <div className="size-16 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center mx-auto">
+            <Clock className="size-8" />
+          </div>
+          <h1 className="text-2xl font-bold">Listing Unavailable or Under Review</h1>
+          <p className="text-sm text-muted-foreground max-w-md mx-auto">
+            This unit is either undergoing moderator review, has been paused by the seller, or is no
+            longer available for public purchase.
+          </p>
+          <div className="pt-4">
+            <Link to="/products">
+              <button className="bg-primary text-primary-foreground text-xs font-semibold px-5 py-2.5 rounded">
+                Browse Active Listings
+              </button>
+            </Link>
+          </div>
+        </main>
+        <SiteFooter />
+      </div>
+    );
+  }
 
   // Check if there are known defects/issues to disclose
   const hasKnownIssues =
@@ -105,7 +178,9 @@ function ListingPage() {
   });
 
   // "You May Also Like" recommendations: same category & brand first, then same category, then others
-  const otherProducts = products.filter((p) => p.id !== product.id && listingsFor(p.id).length > 0);
+  const otherProducts = products.filter(
+    (p) => p.id !== product.id && listingsFor(p.id).filter(isListingPubliclyEligible).length > 0,
+  );
   const sameCategorySameBrand = otherProducts.filter(
     (p) => p.category === product.category && p.brand === product.brand,
   );
@@ -122,6 +197,21 @@ function ListingPage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <SiteHeader />
+
+      {/* Preview Mode Banner for Owner or Admin */}
+      {isPreviewMode && (
+        <div className="bg-amber-500/15 border-b border-amber-500/30 px-5 py-3 text-center text-xs font-medium text-amber-900 dark:text-amber-200 flex items-center justify-center gap-2">
+          <Eye className="size-4 text-amber-600 dark:text-amber-400" />
+          <span>
+            <strong>PREVIEW MODE:</strong> This listing is currently{" "}
+            <span className="font-mono underline">
+              {String(dbFields["status"] || dbFields["moderationStatus"] || "PENDING_REVIEW")}
+            </span>{" "}
+            and is not discoverable by public buyers. Only you (
+            {isAdmin ? "Administrator" : "Seller Owner"}) can see this page.
+          </span>
+        </div>
+      )}
 
       {exactVideo && (
         <CreatorVideoModal

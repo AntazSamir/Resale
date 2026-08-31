@@ -6,6 +6,7 @@ import {
   type Product,
   type Listing,
 } from "@/data/catalog";
+import { isListingPubliclyEligible } from "./listing-eligibility";
 import type { OrderRecord } from "./order-store";
 import type { AuthUser } from "./auth-store";
 
@@ -98,7 +99,10 @@ export function getRecommendationsFromRecentOrder(
 
   // Filter available listings in active catalog
   const availableListings = listings.filter(
-    (l) => !excludeListingIds.has(l.id) && !excludeProductIds.has(l.productId),
+    (l) =>
+      isListingPubliclyEligible(l) &&
+      !excludeListingIds.has(l.id) &&
+      !excludeProductIds.has(l.productId),
   );
 
   // Group candidate listings by recommendation priority

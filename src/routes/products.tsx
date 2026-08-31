@@ -11,6 +11,7 @@ import {
   taka,
   type Grade,
 } from "@/data/catalog";
+import { isListingPubliclyEligible } from "@/lib/listing-eligibility";
 import {
   Search,
   SlidersHorizontal,
@@ -178,6 +179,7 @@ function ProductsPage() {
   // ── Listing filter engine ──────────────────────────────────────────────────
   const filteredListings = useMemo(() => {
     return listings.filter((listing) => {
+      if (!isListingPubliclyEligible(listing)) return false;
       const product = productFor(listing.productId);
       if (!product) return false;
 

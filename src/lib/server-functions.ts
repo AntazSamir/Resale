@@ -1,10 +1,71 @@
 import { createServerFn } from "@tanstack/react-start";
 import { db } from "@/db";
-import { createOrderNotification } from "./notification-service";
+import { createOrderNotification, createListingNotification } from "./notification-service";
+import { isListingPubliclyEligible } from "./listing-eligibility";
+import type {
+  ListingModerationStatus,
+  ListingAvailabilityStatus,
+  ListingAuditAction,
+  ListingAuditEntry,
+  ListingRejectionReasonCode,
+} from "./types";
 
 async function supabaseAdmin() {
   const { getSupabaseAdmin } = await import("@/lib/supabase-admin");
   return getSupabaseAdmin();
+}
+
+function getSessionUser(token: string) {
+  if (!token) return null;
+  const session = db.sessions.get(token);
+  if (!session || Date.now() > session.expiresAt) return null;
+  return session;
+}
+
+async function recordListingAudit(entry: {
+  listingId: string;
+  actorId: string;
+  actorRole: "BUYER" | "SELLER" | "ADMIN" | "SYSTEM";
+  action: ListingAuditAction;
+  previousStatus: string | null;
+  newStatus: string;
+  reasonCode?: string | null;
+  reasonText?: string | null;
+}) {
+  const auditId = `aud-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
+  const createdAt = new Date().toISOString();
+  const record = {
+    id: auditId,
+    listingId: entry.listingId,
+    actorId: entry.actorId,
+    actorRole: entry.actorRole,
+    action: entry.action,
+    previousStatus: entry.previousStatus,
+    newStatus: entry.newStatus,
+    reasonCode: entry.reasonCode ?? null,
+    reasonText: entry.reasonText ?? null,
+    createdAt,
+  };
+
+  db.listingAuditHistory.unshift(record);
+
+  try {
+    const supabase = await supabaseAdmin();
+    await supabase.from("listing_audit_history").insert({
+      id: auditId,
+      listing_id: entry.listingId,
+      actor_id: entry.actorId,
+      actor_role: entry.actorRole,
+      action: entry.action,
+      previous_status: entry.previousStatus,
+      new_status: entry.newStatus,
+      reason_code: entry.reasonCode ?? null,
+      reason_text: entry.reasonText ?? null,
+      created_at: createdAt,
+    });
+  } catch (err) {
+    console.warn("[recordListingAudit] Supabase audit sync error:", err);
+  }
 }
 
 // Fetch all products
@@ -12,29 +73,51 @@ export const getProductsFn = createServerFn({ method: "GET" }).handler(async () 
   return db.products;
 });
 
-// Fetch single listing with details
-export const getListingFn = createServerFn({ method: "GET" })
-  .validator((id: string) => id)
-  .handler(async ({ data: id }) => {
-    const listing = db.listings.find((l) => l.id === id);
+// Fetch single listing with details & governance preview logic
+export const getListingFn = createServerFn({ method: "POST" })
+  .validator((data: { id: string; token?: string }) => data)
+  .handler(async ({ data }) => {
+    const listing = db.listings.find((l) => l.id === data.id);
     if (!listing) return null;
 
     const product = db.products.find((p) => p.id === listing.productId);
     const seller = db.users.find((u) => u.id === listing.sellerId);
 
+    const isPublic = isListingPubliclyEligible(listing);
+    let isOwnerOrAdmin = false;
+
+    if (data.token) {
+      const session = getSessionUser(data.token);
+      if (session) {
+        if (session.isAdmin || session.userId === listing.sellerId) {
+          isOwnerOrAdmin = true;
+        }
+      }
+    }
+
+    if (!isPublic && !isOwnerOrAdmin) {
+      return {
+        unavailable: true,
+        status: listing.status,
+        moderationStatus: listing.moderationStatus,
+      };
+    }
+
     return {
       ...listing,
       product,
       seller,
+      previewMode: !isPublic && isOwnerOrAdmin,
     };
   });
 
-// Create a new listing
-export const createListingFn = createServerFn({ method: "POST" })
+// ── Phase 5.1: Save Listing as Draft ─────────────────────────────
+export const saveListingDraftFn = createServerFn({ method: "POST" })
   .validator(
     (data: {
+      token: string;
+      id?: string;
       productId: string;
-      sellerId: string;
       grade: string;
       conditionScore: number;
       price: number;
@@ -42,56 +125,738 @@ export const createListingFn = createServerFn({ method: "POST" })
       warrantyMonths: number;
       hasInvoice: boolean;
       accessories: string;
+      repairs?: string;
+      physicalCondition?: string;
+      screenCondition?: string;
+      batteryHealth?: number | null;
     }) => data,
   )
   .handler(async ({ data }) => {
-    const id = `lst-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
-    const listedAt = new Date().toISOString().split("T")[0] || "";
+    const session = getSessionUser(data.token);
+    if (!session) {
+      return { success: false, error: "Unauthorized: Invalid or expired session." };
+    }
 
-    const newListing = {
-      id,
+    const listedAt = new Date().toISOString().split("T")[0] || "";
+    let listingId = data.id;
+
+    if (listingId) {
+      // Update existing draft
+      const existing = db.listings.find((l) => l.id === listingId);
+      if (!existing) {
+        return { success: false, error: "Listing not found." };
+      }
+      if (existing.sellerId !== session.userId) {
+        return { success: false, error: "Forbidden: You do not own this listing." };
+      }
+      if (existing.moderationStatus !== "DRAFT") {
+        return { success: false, error: "Only draft listings can be updated via saveDraft." };
+      }
+
+      existing.productId = data.productId;
+      existing.grade = data.grade;
+      existing.conditionScore = data.conditionScore ?? 90;
+      existing.pricePoisha = (data.price || 0) * 100;
+      existing.sellerNote = data.sellerNote || "";
+      existing.warrantyMonths = data.warrantyMonths ?? 0;
+      existing.hasInvoice = Boolean(data.hasInvoice);
+      existing.accessories = data.accessories || "";
+      existing.repairs = data.repairs || "None reported";
+      existing.physicalCondition = data.physicalCondition || "Inspected";
+      existing.screenCondition = data.screenCondition || "Inspected";
+      existing.batteryHealth = data.batteryHealth ?? null;
+
+      try {
+        const supabase = await supabaseAdmin();
+        await supabase.from("listings").upsert({
+          id: listingId,
+          product_id: data.productId,
+          seller_id: session.userId,
+          grade: data.grade,
+          condition_score: data.conditionScore ?? 90,
+          price_poisha: (data.price || 0) * 100,
+          seller_note: data.sellerNote || "",
+          moderation_status: "DRAFT",
+          status: "DRAFT",
+          warranty_months: data.warrantyMonths ?? 0,
+          has_invoice: Boolean(data.hasInvoice),
+          accessories: data.accessories || "",
+          repairs: data.repairs || "None reported",
+          physical_condition: data.physicalCondition || "Inspected",
+          screen_condition: data.screenCondition || "Inspected",
+          battery_health: data.batteryHealth ?? null,
+        });
+      } catch (err) {
+        console.warn("Supabase saveDraft sync error:", err);
+      }
+
+      return { success: true, listingId };
+    }
+
+    // Create new draft
+    listingId = `lst-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
+    const newDraft = {
+      id: listingId,
       productId: data.productId,
-      sellerId: data.sellerId || "u-1",
+      sellerId: session.userId,
       grade: data.grade,
       conditionScore: data.conditionScore ?? 90,
       pricePoisha: (data.price || 0) * 100,
       sellerNote: data.sellerNote || "",
-      status: "PENDING_MODERATION" as const,
+      moderationStatus: "DRAFT" as const,
+      status: "DRAFT" as const,
       warrantyMonths: data.warrantyMonths ?? 0,
       hasInvoice: Boolean(data.hasInvoice),
-      batteryHealth: null,
+      batteryHealth: data.batteryHealth ?? null,
       accessories: data.accessories || "",
-      repairs: "None reported",
-      physicalCondition: "Inspected",
-      screenCondition: "Inspected",
+      repairs: data.repairs || "None reported",
+      physicalCondition: data.physicalCondition || "Inspected",
+      screenCondition: data.screenCondition || "Inspected",
+      submittedAt: null,
+      reviewedAt: null,
+      reviewedBy: null,
+      rejectionReasonCode: null,
+      rejectionReasonText: null,
+      isSeed: false,
+      listedAt,
+    };
+
+    db.listings.unshift(newDraft);
+
+    await recordListingAudit({
+      listingId,
+      actorId: session.userId,
+      actorRole: "SELLER",
+      action: "DRAFT_CREATED",
+      previousStatus: null,
+      newStatus: "DRAFT",
+      reasonText: "Seller created new listing draft",
+    });
+
+    try {
+      const supabase = await supabaseAdmin();
+      await supabase.from("listings").upsert({
+        id: listingId,
+        product_id: data.productId,
+        seller_id: session.userId,
+        grade: data.grade,
+        condition_score: data.conditionScore ?? 90,
+        price_poisha: (data.price || 0) * 100,
+        seller_note: data.sellerNote || "",
+        moderation_status: "DRAFT",
+        status: "DRAFT",
+        warranty_months: data.warrantyMonths ?? 0,
+        has_invoice: Boolean(data.hasInvoice),
+        accessories: data.accessories || "",
+        repairs: data.repairs || "None reported",
+        physical_condition: data.physicalCondition || "Inspected",
+        screen_condition: data.screenCondition || "Inspected",
+        battery_health: data.batteryHealth ?? null,
+        is_seed: false,
+      });
+    } catch (err) {
+      console.warn("Supabase saveDraft sync error:", err);
+    }
+
+    return { success: true, listingId };
+  });
+
+// ── Phase 5.1: Submit Listing for Moderation Review ──────────────
+export const submitListingForReviewFn = createServerFn({ method: "POST" })
+  .validator(
+    (data: {
+      token: string;
+      id?: string;
+      productId: string;
+      grade: string;
+      conditionScore: number;
+      price: number;
+      sellerNote: string;
+      warrantyMonths: number;
+      hasInvoice: boolean;
+      accessories: string;
+      repairs?: string;
+      physicalCondition?: string;
+      screenCondition?: string;
+      batteryHealth?: number | null;
+    }) => data,
+  )
+  .handler(async ({ data }) => {
+    const session = getSessionUser(data.token);
+    if (!session) {
+      return { success: false, error: "Unauthorized: Invalid or expired session." };
+    }
+
+    const listedAt = new Date().toISOString().split("T")[0] || "";
+    const submittedAt = new Date().toISOString();
+    let listingId = data.id;
+
+    if (listingId) {
+      const existing = db.listings.find((l) => l.id === listingId);
+      if (!existing) {
+        return { success: false, error: "Listing not found." };
+      }
+      if (existing.sellerId !== session.userId) {
+        return { success: false, error: "Forbidden: You do not own this listing." };
+      }
+
+      const prevStatus = existing.status;
+      existing.productId = data.productId;
+      existing.grade = data.grade;
+      existing.conditionScore = data.conditionScore ?? 90;
+      existing.pricePoisha = (data.price || 0) * 100;
+      existing.sellerNote = data.sellerNote || "";
+      existing.warrantyMonths = data.warrantyMonths ?? 0;
+      existing.hasInvoice = Boolean(data.hasInvoice);
+      existing.accessories = data.accessories || "";
+      existing.repairs = data.repairs || "None reported";
+      existing.physicalCondition = data.physicalCondition || "Inspected";
+      existing.screenCondition = data.screenCondition || "Inspected";
+      existing.batteryHealth = data.batteryHealth ?? null;
+      existing.moderationStatus = "PENDING_REVIEW";
+      existing.status = "PENDING_REVIEW";
+      existing.submittedAt = submittedAt;
+      existing.rejectionReasonCode = null;
+      existing.rejectionReasonText = null;
+
+      await recordListingAudit({
+        listingId,
+        actorId: session.userId,
+        actorRole: "SELLER",
+        action: prevStatus === "REJECTED" ? "RESUBMITTED" : "SUBMITTED",
+        previousStatus: prevStatus,
+        newStatus: "PENDING_REVIEW",
+        reasonText: "Seller submitted listing for review",
+      });
+
+      try {
+        const supabase = await supabaseAdmin();
+        await supabase.from("listings").upsert({
+          id: listingId,
+          product_id: data.productId,
+          seller_id: session.userId,
+          grade: data.grade,
+          condition_score: data.conditionScore ?? 90,
+          price_poisha: (data.price || 0) * 100,
+          seller_note: data.sellerNote || "",
+          moderation_status: "PENDING_REVIEW",
+          status: "PENDING_REVIEW",
+          warranty_months: data.warrantyMonths ?? 0,
+          has_invoice: Boolean(data.hasInvoice),
+          accessories: data.accessories || "",
+          repairs: data.repairs || "None reported",
+          physical_condition: data.physicalCondition || "Inspected",
+          screen_condition: data.screenCondition || "Inspected",
+          battery_health: data.batteryHealth ?? null,
+          submitted_at: submittedAt,
+          rejection_reason_code: null,
+          rejection_reason_text: null,
+        });
+      } catch (err) {
+        console.warn("Supabase submit sync error:", err);
+      }
+
+      return { success: true, listingId };
+    }
+
+    // Create new listing directly into PENDING_REVIEW
+    listingId = `lst-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
+    const newListing = {
+      id: listingId,
+      productId: data.productId,
+      sellerId: session.userId,
+      grade: data.grade,
+      conditionScore: data.conditionScore ?? 90,
+      pricePoisha: (data.price || 0) * 100,
+      sellerNote: data.sellerNote || "",
+      moderationStatus: "PENDING_REVIEW" as const,
+      status: "PENDING_REVIEW" as const,
+      warrantyMonths: data.warrantyMonths ?? 0,
+      hasInvoice: Boolean(data.hasInvoice),
+      batteryHealth: data.batteryHealth ?? null,
+      accessories: data.accessories || "",
+      repairs: data.repairs || "None reported",
+      physicalCondition: data.physicalCondition || "Inspected",
+      screenCondition: data.screenCondition || "Inspected",
+      submittedAt,
+      reviewedAt: null,
+      reviewedBy: null,
+      rejectionReasonCode: null,
+      rejectionReasonText: null,
+      isSeed: false,
       listedAt,
     };
 
     db.listings.unshift(newListing);
 
+    await recordListingAudit({
+      listingId,
+      actorId: session.userId,
+      actorRole: "SELLER",
+      action: "SUBMITTED",
+      previousStatus: null,
+      newStatus: "PENDING_REVIEW",
+      reasonText: "Seller created and submitted listing for moderation review",
+    });
+
     try {
       const supabase = await supabaseAdmin();
       await supabase.from("listings").upsert({
-        id,
+        id: listingId,
         product_id: data.productId,
-        seller_id: data.sellerId || "u-1",
+        seller_id: session.userId,
         grade: data.grade,
         condition_score: data.conditionScore ?? 90,
         price_poisha: (data.price || 0) * 100,
         seller_note: data.sellerNote || "",
-        status: "PENDING_MODERATION",
+        moderation_status: "PENDING_REVIEW",
+        status: "PENDING_REVIEW",
         warranty_months: data.warrantyMonths ?? 0,
         has_invoice: Boolean(data.hasInvoice),
         accessories: data.accessories || "",
+        repairs: data.repairs || "None reported",
+        physical_condition: data.physicalCondition || "Inspected",
+        screen_condition: data.screenCondition || "Inspected",
+        battery_health: data.batteryHealth ?? null,
+        submitted_at: submittedAt,
+        is_seed: false,
       });
     } catch (err) {
-      console.warn("Supabase listing sync error:", err);
+      console.warn("Supabase submit sync error:", err);
     }
 
-    return { success: true, listingId: id };
+    return { success: true, listingId };
   });
 
-// Place order
+// ── Phase 5.1: Fetch Admin Moderation Queue ──────────────────────
+export const getModerationQueueFn = createServerFn({ method: "POST" })
+  .validator((data: { token: string }) => data)
+  .handler(async ({ data }) => {
+    const session = getSessionUser(data.token);
+    if (!session || (!session.isAdmin && session.role !== "ADMIN")) {
+      return { success: false, error: "Unauthorized: Admin privileges required.", data: [] };
+    }
+
+    const pending = db.listings.filter(
+      (l) => l.moderationStatus === "PENDING_REVIEW" || l.status === "PENDING_MODERATION",
+    );
+
+    const queueItems = pending.map((l) => {
+      const product = db.products.find((p) => p.id === l.productId);
+      const seller = db.users.find((u) => u.id === l.sellerId);
+      const inspectionItems = db.select().from(db.products); // inspection placeholder or array
+
+      return {
+        id: l.id,
+        productId: l.productId,
+        productName: product?.name ?? "Unknown Device",
+        brand: product?.brand ?? "",
+        category: product?.category ?? "",
+        image: product?.image ?? "",
+        retailPrice: product ? Math.round(product.retailPricePoisha / 100) : 0,
+        price: Math.round(l.pricePoisha / 100),
+        grade: l.grade,
+        conditionScore: l.conditionScore,
+        sellerId: l.sellerId,
+        sellerName: seller?.name ?? "Seller",
+        sellerPhone: seller?.phone ?? "",
+        sellerVerified: seller?.verified ?? false,
+        sellerNote: l.sellerNote,
+        warrantyMonths: l.warrantyMonths,
+        hasInvoice: l.hasInvoice,
+        accessories: l.accessories,
+        repairs: l.repairs,
+        physicalCondition: l.physicalCondition,
+        screenCondition: l.screenCondition,
+        batteryHealth: l.batteryHealth,
+        submittedAt: l.submittedAt || l.listedAt,
+      };
+    });
+
+    return { success: true, data: queueItems };
+  });
+
+// ── Phase 5.1: Moderate Listing (Approve or Reject) ──────────────
+export const moderateListingFn = createServerFn({ method: "POST" })
+  .validator(
+    (data: {
+      token: string;
+      listingId: string;
+      action: "APPROVE" | "REJECT";
+      reasonCode?: ListingRejectionReasonCode;
+      reasonText?: string;
+    }) => data,
+  )
+  .handler(async ({ data }) => {
+    const session = getSessionUser(data.token);
+    if (!session || (!session.isAdmin && session.role !== "ADMIN")) {
+      return { success: false, error: "Unauthorized: Admin privileges required." };
+    }
+
+    const listing = db.listings.find((l) => l.id === data.listingId);
+    if (!listing) {
+      return { success: false, error: "Listing not found." };
+    }
+
+    const reviewedAt = new Date().toISOString();
+    const product = db.products.find((p) => p.id === listing.productId);
+    const productName = product?.name ?? "Listing";
+
+    if (data.action === "APPROVE") {
+      const prevStatus = listing.status;
+      listing.moderationStatus = "APPROVED";
+      listing.status = "ACTIVE";
+      listing.reviewedAt = reviewedAt;
+      listing.reviewedBy = session.userId;
+      listing.rejectionReasonCode = null;
+      listing.rejectionReasonText = null;
+
+      await recordListingAudit({
+        listingId: listing.id,
+        actorId: session.userId,
+        actorRole: "ADMIN",
+        action: "APPROVED",
+        previousStatus: prevStatus,
+        newStatus: "ACTIVE",
+        reasonText: "Approved by administrator",
+      });
+
+      try {
+        const supabase = await supabaseAdmin();
+        await supabase
+          .from("listings")
+          .update({
+            moderation_status: "APPROVED",
+            status: "ACTIVE",
+            reviewed_at: reviewedAt,
+            reviewed_by: session.userId,
+            rejection_reason_code: null,
+            rejection_reason_text: null,
+          })
+          .eq("id", listing.id);
+      } catch (err) {
+        console.warn("Supabase moderate approve sync error:", err);
+      }
+
+      try {
+        await createListingNotification(
+          listing.sellerId,
+          "LISTING_MODERATION_APPROVED",
+          listing.id,
+          `Your listing for ${productName} has been approved and is now active on the marketplace!`,
+        );
+      } catch {
+        // non-blocking
+      }
+
+      return { success: true, action: "APPROVED" };
+    }
+
+    if (data.action === "REJECT") {
+      if (!data.reasonCode || !data.reasonText?.trim()) {
+        return { success: false, error: "Rejection requires a reason code and explanation." };
+      }
+
+      const prevStatus = listing.status;
+      listing.moderationStatus = "REJECTED";
+      listing.status = "REJECTED";
+      listing.reviewedAt = reviewedAt;
+      listing.reviewedBy = session.userId;
+      listing.rejectionReasonCode = data.reasonCode;
+      listing.rejectionReasonText = data.reasonText.trim();
+
+      await recordListingAudit({
+        listingId: listing.id,
+        actorId: session.userId,
+        actorRole: "ADMIN",
+        action: "REJECTED",
+        previousStatus: prevStatus,
+        newStatus: "REJECTED",
+        reasonCode: data.reasonCode,
+        reasonText: data.reasonText.trim(),
+      });
+
+      try {
+        const supabase = await supabaseAdmin();
+        await supabase
+          .from("listings")
+          .update({
+            moderation_status: "REJECTED",
+            status: "REJECTED",
+            reviewed_at: reviewedAt,
+            reviewed_by: session.userId,
+            rejection_reason_code: data.reasonCode,
+            rejection_reason_text: data.reasonText.trim(),
+          })
+          .eq("id", listing.id);
+      } catch (err) {
+        console.warn("Supabase moderate reject sync error:", err);
+      }
+
+      try {
+        await createListingNotification(
+          listing.sellerId,
+          "LISTING_MODERATION_REJECTED",
+          listing.id,
+          `Your listing for ${productName} needs revisions: ${data.reasonText.trim()}`,
+        );
+      } catch {
+        // non-blocking
+      }
+
+      return { success: true, action: "REJECTED" };
+    }
+
+    return { success: false, error: "Invalid moderation action." };
+  });
+
+// ── Phase 5.1: Seller Availability Toggles (Pause, Resume, Delist) ──
+export const updateListingAvailabilityFn = createServerFn({ method: "POST" })
+  .validator(
+    (data: { token: string; listingId: string; action: "PAUSE" | "RESUME" | "DELIST" }) => data,
+  )
+  .handler(async ({ data }) => {
+    const session = getSessionUser(data.token);
+    if (!session) {
+      return { success: false, error: "Unauthorized: Invalid session." };
+    }
+
+    const listing = db.listings.find((l) => l.id === data.listingId);
+    if (!listing) {
+      return { success: false, error: "Listing not found." };
+    }
+
+    // Sellers can only manage their own listings; admins can delist
+    if (listing.sellerId !== session.userId && !session.isAdmin) {
+      return { success: false, error: "Forbidden: You do not own this listing." };
+    }
+
+    const prevStatus = listing.status;
+
+    if (data.action === "PAUSE") {
+      if (listing.moderationStatus !== "APPROVED" || listing.status !== "ACTIVE") {
+        return { success: false, error: "Only active approved listings can be paused." };
+      }
+      listing.status = "PAUSED";
+      await recordListingAudit({
+        listingId: listing.id,
+        actorId: session.userId,
+        actorRole: session.isAdmin ? "ADMIN" : "SELLER",
+        action: "PAUSED",
+        previousStatus: prevStatus,
+        newStatus: "PAUSED",
+        reasonText: "Seller paused listing",
+      });
+    } else if (data.action === "RESUME") {
+      if (listing.moderationStatus !== "APPROVED" || listing.status !== "PAUSED") {
+        return { success: false, error: "Only paused approved listings can be resumed." };
+      }
+      listing.status = "ACTIVE";
+      await recordListingAudit({
+        listingId: listing.id,
+        actorId: session.userId,
+        actorRole: session.isAdmin ? "ADMIN" : "SELLER",
+        action: "RESUMED",
+        previousStatus: prevStatus,
+        newStatus: "ACTIVE",
+        reasonText: "Seller resumed listing",
+      });
+    } else if (data.action === "DELIST") {
+      listing.status = "DELISTED";
+      await recordListingAudit({
+        listingId: listing.id,
+        actorId: session.userId,
+        actorRole: session.isAdmin ? "ADMIN" : "SELLER",
+        action: "DELISTED",
+        previousStatus: prevStatus,
+        newStatus: "DELISTED",
+        reasonText: session.isAdmin ? "Admin delisted listing" : "Seller delisted listing",
+      });
+    }
+
+    try {
+      const supabase = await supabaseAdmin();
+      await supabase.from("listings").update({ status: listing.status }).eq("id", listing.id);
+    } catch (err) {
+      console.warn("Supabase availability sync error:", err);
+    }
+
+    return { success: true, status: listing.status };
+  });
+
+// ── Phase 5.1: Edit Listing with Trust-Sensitive Re-Moderation ────
+export const updateListingDetailsFn = createServerFn({ method: "POST" })
+  .validator(
+    (data: {
+      token: string;
+      listingId: string;
+      price?: number;
+      sellerNote?: string;
+      accessories?: string;
+      grade?: string;
+      conditionScore?: number;
+      warrantyMonths?: number;
+      hasInvoice?: boolean;
+      batteryHealth?: number | null;
+      repairs?: string;
+      productId?: string;
+    }) => data,
+  )
+  .handler(async ({ data }) => {
+    const session = getSessionUser(data.token);
+    if (!session) {
+      return { success: false, error: "Unauthorized: Invalid session." };
+    }
+
+    const listing = db.listings.find((l) => l.id === data.listingId);
+    if (!listing) {
+      return { success: false, error: "Listing not found." };
+    }
+    if (listing.sellerId !== session.userId) {
+      return { success: false, error: "Forbidden: You do not own this listing." };
+    }
+
+    const prevStatus = listing.status;
+    const isLive = listing.status === "ACTIVE" || listing.status === "PAUSED";
+
+    // Detect trust-sensitive modifications
+    const trustSensitiveChanged =
+      (data.grade && data.grade !== listing.grade) ||
+      (data.conditionScore !== undefined && data.conditionScore !== listing.conditionScore) ||
+      (data.warrantyMonths !== undefined && data.warrantyMonths !== listing.warrantyMonths) ||
+      (data.hasInvoice !== undefined && data.hasInvoice !== listing.hasInvoice) ||
+      (data.batteryHealth !== undefined && data.batteryHealth !== listing.batteryHealth) ||
+      (data.repairs !== undefined && data.repairs !== listing.repairs) ||
+      (data.productId && data.productId !== listing.productId);
+
+    if (data.price !== undefined) listing.pricePoisha = data.price * 100;
+    if (data.sellerNote !== undefined) listing.sellerNote = data.sellerNote;
+    if (data.accessories !== undefined) listing.accessories = data.accessories;
+    if (data.grade) listing.grade = data.grade;
+    if (data.conditionScore !== undefined) listing.conditionScore = data.conditionScore;
+    if (data.warrantyMonths !== undefined) listing.warrantyMonths = data.warrantyMonths;
+    if (data.hasInvoice !== undefined) listing.hasInvoice = data.hasInvoice;
+    if (data.batteryHealth !== undefined) listing.batteryHealth = data.batteryHealth;
+    if (data.repairs !== undefined) listing.repairs = data.repairs;
+    if (data.productId) listing.productId = data.productId;
+
+    if (isLive && trustSensitiveChanged) {
+      // Drop back to PENDING_REVIEW
+      listing.moderationStatus = "PENDING_REVIEW";
+      listing.status = "PENDING_REVIEW";
+      listing.submittedAt = new Date().toISOString();
+
+      await recordListingAudit({
+        listingId: listing.id,
+        actorId: session.userId,
+        actorRole: "SELLER",
+        action: "EDIT_TRIGGERED_REVIEW",
+        previousStatus: prevStatus,
+        newStatus: "PENDING_REVIEW",
+        reasonText: "Trust-sensitive fields modified on live listing; enqueued for re-moderation",
+      });
+    }
+
+    try {
+      const supabase = await supabaseAdmin();
+      await supabase
+        .from("listings")
+        .update({
+          price_poisha: listing.pricePoisha,
+          seller_note: listing.sellerNote,
+          accessories: listing.accessories,
+          grade: listing.grade,
+          condition_score: listing.conditionScore,
+          warranty_months: listing.warrantyMonths,
+          has_invoice: listing.hasInvoice,
+          battery_health: listing.batteryHealth,
+          repairs: listing.repairs,
+          product_id: listing.productId,
+          moderation_status: listing.moderationStatus,
+          status: listing.status,
+          submitted_at: listing.submittedAt,
+        })
+        .eq("id", listing.id);
+    } catch (err) {
+      console.warn("Supabase update listing sync error:", err);
+    }
+
+    return {
+      success: true,
+      moderationStatus: listing.moderationStatus,
+      status: listing.status,
+      reModerationTriggered: isLive && Boolean(trustSensitiveChanged),
+    };
+  });
+
+// ── Phase 5.1: Fetch Seller's Own Listings ───────────────────────
+export const getSellerListingsFn = createServerFn({ method: "POST" })
+  .validator((data: { token: string }) => data)
+  .handler(async ({ data }) => {
+    const session = getSessionUser(data.token);
+    if (!session) {
+      return { success: false, error: "Unauthorized: Invalid session.", data: [] };
+    }
+
+    const sellerListings = db.listings.filter((l) => l.sellerId === session.userId);
+
+    const items = sellerListings.map((l) => {
+      const product = db.products.find((p) => p.id === l.productId);
+      return {
+        id: l.id,
+        productId: l.productId,
+        productName: product?.name ?? "Custom Listing",
+        brand: product?.brand ?? "",
+        category: product?.category ?? "",
+        image: product?.image ?? "/assets/p-phone.jpg",
+        price: Math.round(l.pricePoisha / 100),
+        grade: l.grade,
+        conditionScore: l.conditionScore,
+        moderationStatus: l.moderationStatus,
+        status: l.status,
+        sellerNote: l.sellerNote,
+        warrantyMonths: l.warrantyMonths,
+        hasInvoice: l.hasInvoice,
+        accessories: l.accessories,
+        repairs: l.repairs,
+        batteryHealth: l.batteryHealth,
+        rejectionReasonCode: l.rejectionReasonCode,
+        rejectionReasonText: l.rejectionReasonText,
+        submittedAt: l.submittedAt,
+        reviewedAt: l.reviewedAt,
+        listedAt: l.listedAt,
+      };
+    });
+
+    return { success: true, data: items };
+  });
+
+// ── Phase 5.1: Fetch Listing Audit History ───────────────────────
+export const getListingAuditHistoryFn = createServerFn({ method: "POST" })
+  .validator((data: { token: string; listingId: string }) => data)
+  .handler(async ({ data }) => {
+    const session = getSessionUser(data.token);
+    if (!session) {
+      return { success: false, error: "Unauthorized: Invalid session.", data: [] };
+    }
+
+    const listing = db.listings.find((l) => l.id === data.listingId);
+    if (!listing) {
+      return { success: false, error: "Listing not found.", data: [] };
+    }
+
+    if (listing.sellerId !== session.userId && !session.isAdmin) {
+      return { success: false, error: "Forbidden: Unauthorized access to audit trail.", data: [] };
+    }
+
+    const history = db.listingAuditHistory.filter((h) => h.listingId === data.listingId);
+    return { success: true, data: history };
+  });
+
+// Backward-compatible create listing alias
+export const createListingFn = submitListingForReviewFn;
+
+// Place order with atomic inventory reservation
 export const placeOrderFn = createServerFn({ method: "POST" })
   .validator(
     (data: {
@@ -105,6 +870,14 @@ export const placeOrderFn = createServerFn({ method: "POST" })
     }) => data,
   )
   .handler(async ({ data }) => {
+    const listing = db.listings.find((l) => l.id === data.listingId);
+    if (listing && listing.status !== "ACTIVE" && listing.status !== "PUBLISHED") {
+      return {
+        success: false,
+        error: "This device is no longer available or is currently reserved by another order.",
+      };
+    }
+
     const orderId = data.orderId || `ORD-${Math.floor(10000 + Math.random() * 90000)}`;
     const createdAt = new Date().toISOString();
     const newOrder = {
@@ -121,6 +894,20 @@ export const placeOrderFn = createServerFn({ method: "POST" })
 
     db.orders.unshift(newOrder);
 
+    // Atomically reserve listing
+    if (listing) {
+      listing.status = "RESERVED";
+      await recordListingAudit({
+        listingId: listing.id,
+        actorId: data.buyerId || "u-admin",
+        actorRole: "BUYER",
+        action: "RESERVED_FOR_ORDER" as ListingAuditAction,
+        previousStatus: "ACTIVE",
+        newStatus: "RESERVED",
+        reasonText: `Reserved under order ${orderId}`,
+      });
+    }
+
     try {
       const supabase = await supabaseAdmin();
       await supabase.from("orders").upsert({
@@ -134,6 +921,9 @@ export const placeOrderFn = createServerFn({ method: "POST" })
         nid_number: data.nidNumber,
         created_at: createdAt,
       });
+      if (listing) {
+        await supabase.from("listings").update({ status: "RESERVED" }).eq("id", listing.id);
+      }
     } catch (err) {
       console.warn("Supabase placeOrder server sync error:", err);
     }
