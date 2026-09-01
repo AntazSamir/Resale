@@ -7,7 +7,7 @@
 [![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3ECF8E?logo=supabase&logoColor=white)](https://supabase.com/)
 [![Cloudflare](https://img.shields.io/badge/Deploy-Cloudflare-F38020?logo=cloudflare&logoColor=white)](https://workers.cloudflare.com/)
 
-**Resale.com** is Bangladesh's premier C2C and B2B marketplace for quality-checked pre-owned, open-box, and refurbished electronics. Engineered with objective component-level condition grading (A+ to D), 32-point hardware inspection, NID-verified sellers, nationwide Cash on Delivery (COD), decoupled order lifecycle state machines, Pro Merchant storefronts, Verified Creator video reviews, server-authoritative authentication, a comprehensive 48-hour dispute mediation hub, and a full marketplace listing governance system with admin moderation, immutable audit history, and controlled public discovery.
+**Resale.com** is Bangladesh's premier C2C and B2B marketplace for quality-checked pre-owned, open-box, and refurbished electronics. Engineered with objective component-level condition grading (A+ to D), 32-point hardware inspection, NID-verified sellers, nationwide Cash on Delivery (COD), decoupled order lifecycle state machines, Pro Merchant storefronts, Verified Creator video reviews, server-authoritative authentication, a comprehensive 48-hour dispute mediation hub, a full marketplace listing governance system with admin moderation and immutable audit history, and a deterministic 0–100 seller reputation scoring engine with transparent calculation breakdown.
 
 ---
 
@@ -183,6 +183,26 @@ Every seller listing now passes through a server-enforced governance lifecycle b
 
 ---
 
+### 🏅 13. Deterministic Seller Reputation & Trust Tiering (Phase 5.2)
+
+Resale.com replaces subjective, easily-manipulated 5-star ratings with a mathematically deterministic 0–100 Trust Score and transparent tiering engine based strictly on verified platform telemetry:
+
+- **Deterministic Trust Formula (100 pts max)**:
+  - **Fulfillment Ratio (Max 45 pts)**: Proportion of completed & delivered orders versus seller-initiated cancellations.
+  - **Dispute-Free Record (Max 35 pts)**: Weighted by the absence of upheld buyer dispute claims or condition mismatches.
+  - **Identity Verification Tier (Max 20 pts)**: Awarded for completed Bangladesh National ID (NID) verification and verified physical outlet operations.
+  - **SLA Fulfillment Speed (Reserved)**: Architecture prepared for automated dispatch timing integration.
+- **Transparent Score Breakdown Dialog (`<SellerTrustBreakdownDialog />`)**:
+  - Buyers can click **"View Trust Math"** on any seller card or listing detail page to inspect the exact point-by-point breakdown, verified completed order count, upheld dispute history, and data coverage statement.
+- **Seller Reputation Tiers & Badges**:
+  - **`NEW_SELLER`**: Score displayed honestly as `N/A` with `"New Seller (First 3 sales pending)"` badge to prevent misleading buyer trust.
+  - **`RISING`**: Sellers actively establishing verified fulfillment volume.
+  - **`VERIFIED_MERCHANT`**: NID-verified merchants with proven track records.
+  - **`TOP_RATED`**: Elite sellers maintaining high scores (85+ pts) and zero unresolved disputes.
+- **Strict Data-Truth Integrity**: Seller scores are computed on-demand from real PostgreSQL transaction records via server functions — never hardcoded, seeded, or artificially inflated.
+
+---
+
 ## 🛠️ Technology Stack
 
 | Layer            | Technology                                                                                          |
@@ -204,7 +224,7 @@ Every seller listing now passes through a server-enforced governance lifecycle b
 │   ├── components/
 │   │   ├── ui/                         # Accessible Radix & Tailwind UI components (Button, Input, Sheet, etc.)
 │   │   ├── storefront/                 # Storefront components (StoreBadge, store verification chips)
-│   │   ├── seller/                     # Seller components (ListingStatusBadge)
+│   │   ├── seller/                     # Seller components (ListingStatusBadge, SellerTrustBadge, SellerTrustBreakdownDialog)
 │   │   ├── moderation/                 # Admin moderation components (RejectionDialog, AuditHistorySheet)
 │   │   ├── site-header.tsx             # Dual header bar, tree dropdowns, notification bell & mobile drawer
 │   │   ├── site-footer.tsx             # Footer, newsletter subscription & platform directory
