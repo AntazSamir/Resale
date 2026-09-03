@@ -1,71 +1,59 @@
-# Admin Panel Plan — Separate App with Shared Backend
+# Admin Console — Audit Findings and Revised Plan
 
-## Decision Summary
+## Audit of the current repository
 
-Build the admin panel as a **separate Lovable project/deployment** that talks to the same Supabase backend as the buyer-seller marketplace. It will have its own URL, its own admin login page, and its own minimal UI chrome. This gives you security isolation (admin code never ships to public users) while keeping one shared database so listings, orders, disputes, and NID docs are consistent.
+What I verified by reading the code, not assuming:
 
-## What we will build
+- **Authentication is custom, not Supabase Auth.** `loginFn`, `sendOtpFn`, `verifyOtpFn`, `validateSessionFn`, `signOutFn` in `src/lib/server-functions.ts` issue and validate opaque session tokens against `public.users`. Admin identity is `users.role === 'ADMIN'`, surfaced as `session.isAdmin`. There is no `user_roles` table and no Supabase Auth session.
+- **Phase 5.1 listing governance is real and server-authoritative.** `getModerationQueueFn` and `moderateListingFn` both reject non-admin sessions server-side, write to `listing_audit_history`, and fire seller notifications. `/admin/moderation` is fully wired to these.
+- **`/admin/orders` and `/admin/disputes` are client-side.** They read `order-store.ts` and `dispute-store.ts` (localStorage plus a Supabase mirror through the browser client). There is no admin-scoped server function and no server-side authorization for those two surfaces.
+- **`/admin/identity` is entirely mock.** `pendingDocs` is a hardcoded array in the route file. The schema has only `users.nid_number`; there is no NID document table, no verification-status column, no storage bucket.
+- **`/admin` dashboard numbers are hardcoded strings** (৳4.2M GMV, 24 pending, 8 NID).
+- **Service-role access already exists** — `src/lib/supabase-admin.ts` plus `SUPABASE_SERVICE_ROLE_KEY` in the environment, used by `src/lib/db-server.ts`.
+- **`roadmap.md` does not exist yet.**
 
-1. **Fix the home-page hydration bug** that is currently crashing the public preview (creator avatar/href mismatch between server and client).
-2. **Scaffold a new admin project** and connect it to the same Supabase project.
-3. **Admin authentication**: dedicated `/login` page, email+password only for admin accounts, server-side role check using a `user_roles` table.
-4. **Admin console pages**:
-   - `/` — dashboard with pending counts (moderation, NID, disputes, GMV).
-   - `/listings` — approve or reject pending seller listings.
-   - `/identity` — review uploaded NID documents and mark verified/rejected.
-   - `/disputes` — view and mediate buyer-seller disputes.
-   - `/orders` — view transactions and platform activity.
-5. **Security hardening**: admin routes protected by server-side auth middleware, no client-only gates, service-role operations verified by role.
+## Answering your earlier question, corrected
 
-## Technical approach
+I previously proposed a separate Lovable project. The audit changes that recommendation. All authoritative logic — session validation, admin role check, moderation state machine, audit history — lives in this repo's server functions, which are same-origin RPC endpoints. A separate project could not call them without either duplicating that logic or building a new public HTTP API surface. Both violate your constraint.
 
-### Shared backend
+**Recommendation: keep the admin console in this repo as a genuinely separate UI layer.** It gets its own shell (no marketplace header/footer/cart), its own sign-in entry at `/admin/login`, and its own route subtree. It reuses the existing session and admin-role logic unchanged. This gives you a distinct admin experience and a single authoritative backend.
 
-- Both apps point at the same Supabase project URL and publishable key.
-- Admin app uses `requireSupabaseAuth` server functions and service-role helpers for privileged reads/writes.
-- Main marketplace app keeps using the public client and authenticated user functions.
-- Add a `public.user_roles` table with an `app_role` enum (`admin`, `moderator`) and a security-definer `has_role()` function for RLS and server checks, following the project user-roles knowledge.
+## Scope
 
-### Admin app structure
+### In scope
 
-- New Lovable project (e.g. `resale-admin`) with its own `src/routes/`.
-- Minimal monochrome UI consistent with the marketplace design tokens, but no public header/footer.
-- Auth layout: public `/login`; all other routes under `_authenticated/` with the managed gate.
-- Server functions live in `src/lib/admin.functions.ts` and load `supabaseAdmin` inside handlers only.
+1. `roadmap.md` created at project root with the tasks below.
+2. **Admin shell**: a dedicated layout replacing `SiteHeader`/`SiteFooter` on all `/admin/*` routes, with sidebar, admin identity chip, and sign-out. `AdminSidebar` moves out of `admin.index.tsx` into `src/components/admin/admin-shell.tsx`.
+3. **Admin sign-in at `/admin/login`**: a distinct page that calls the existing `loginFn`, then rejects the session client-side if `isAdmin` is false and shows "This account is not an administrator." No new auth logic, no new tables, no new tokens.
+4. **`/admin/moderation`**: unchanged behaviour, restyled into the new shell.
+5. **`/admin/orders` and `/admin/disputes`**: move their reads behind new admin-authorized server functions that wrap the existing store conversion helpers, reusing the same `validateSession` + `isAdmin` guard already used by `getModerationQueueFn`. No new order or dispute business rules; resolution still runs through the existing `resolveDisputeByAdmin` transition logic.
+6. **`/admin` dashboard**: replace hardcoded numbers with counts derived from data that actually exists — pending-review listing count from the moderation queue, open dispute count, order count by status. Anything without a real source is removed, not faked.
 
-### Hydration bug fix (public app)
+### Explicitly out of scope
 
-- In `src/routes/index.tsx`, replace the module-level `const creators = getCreators().slice(0, 3)` call with a client-only state/effect so the server and first client render use the same `INITIAL_DEMO_CREATORS`, then hydrate to localStorage contents after mount.
+- **NID / identity verification.** No document table, no storage bucket, no verification workflow exists. `/admin/identity` will be **removed** rather than left showing fabricated pending documents. It returns when the underlying schema and secure document storage land.
+- **GMV / revenue metrics.** No settled-payment or commission data exists; order amounts alone are not GMV. No revenue tile.
+- **New service-role code paths.** Admin server functions use the existing `db-server.ts` privileged helpers only where those helpers already exist; no new `getSupabaseAdmin()` call sites beyond that pattern.
+- **A `user_roles` table or Supabase Auth migration.** The existing role model stays authoritative.
+- **Any change to the listing governance state machine, order state machine, or dispute resolution rules.**
+
+## Technical notes
+
+- New admin server functions live in `src/lib/server-functions.ts` alongside the existing ones and copy the exact guard shape already in use:
+  `if (!session || (!session.isAdmin && session.role !== "ADMIN")) return { error: "Unauthorized" }`.
+- `ProtectedRoute requireAdmin` stays as the UI gate; server-side checks remain the security boundary.
+- Admin routes stay under the `/admin/*` path so existing links and the moderation workbench keep working.
+- One separate fix, unrelated to admin: the home page currently throws a hydration mismatch because `getCreators()` is read during render and returns localStorage data on the client but demo data on the server. It will be moved into a mount effect.
 
 ## Phases
 
-### Phase 1 — Stabilize public preview
-- Fix creator-section hydration mismatch in `src/routes/index.tsx`.
-- Verify no console hydration errors on `/`.
+1. Create `roadmap.md`; fix the home-page hydration mismatch.
+2. Extract the admin shell and sidebar; apply to all `/admin/*` routes.
+3. Add `/admin/login` and admin-aware sign-out.
+4. Add admin-authorized server functions for orders and disputes; rewire those two pages.
+5. Replace dashboard placeholder metrics with real counts; remove `/admin/identity` and its sidebar entry.
+6. Verify: sign in as non-admin and confirm 403, sign in as admin and confirm each page loads real data; typecheck and build.
 
-### Phase 2 — Admin project scaffold
-- Create/list the new Lovable admin project and connect it to the existing Supabase backend.
-- Copy design tokens and base layout (sidebar + top bar).
-- Add `user_roles` table, `app_role` enum, and `has_role()` security definer in a migration.
+## Open question
 
-### Phase 3 — Admin auth
-- Build admin `/login` with email+password.
-- Add `_authenticated/` route gate.
-- Seed the first admin account and role.
-
-### Phase 4 — Admin features
-- Dashboard counts from real tables.
-- Listing moderation: list pending, approve/reject with reason.
-- NID verification: review front/back images and NID number, approve/reject.
-- Dispute mediation: view disputes, assign status, add resolution note.
-- Orders/transactions: read-only list with search and filters.
-
-### Phase 5 — Security & deploy
-- Audit all admin server functions for `requireSupabaseAuth` + role checks.
-- Remove any admin-only code from the public app bundle.
-- Publish/preview both apps.
-
-## Open questions before starting
-
-- Should the first admin account be seeded automatically, or do you want to create it manually?
-- Do you need a `/moderators` page inside the admin app to invite other staff later, or is one admin enough for now?
+`/admin/identity` removal deletes a page you can currently see. Confirm you would rather have it gone than have it keep showing placeholder documents — that is the recommendation, but it is your call.
