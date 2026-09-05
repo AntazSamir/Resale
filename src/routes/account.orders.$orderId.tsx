@@ -31,6 +31,7 @@ import { getDisputeByOrderId, isOrderEligibleForDispute } from "@/lib/dispute-st
 import resaleLogo from "@/assets/resale-logo.svg";
 
 import { ProtectedRoute } from "@/components/protected-route";
+import { Loader } from "@/components/ui/loader";
 
 export const Route = createFileRoute("/account/orders/$orderId")({
   head: ({ params }) => ({
@@ -186,8 +187,8 @@ function OrderDetailsPage() {
     return (
       <div className="min-h-screen bg-background flex flex-col">
         <SiteHeader />
-        <main className="flex-1 mx-auto max-w-4xl px-5 py-10 w-full text-center">
-          <p className="text-muted-foreground text-sm">Loading order details…</p>
+        <main className="flex-1 mx-auto max-w-4xl px-5 py-10 w-full">
+          <Loader className="mx-auto mt-20" label="Loading order details…" />
         </main>
         <SiteFooter />
       </div>

@@ -11,6 +11,7 @@ import { useAuth } from "@/lib/auth-store";
 import { getSellerAnalyticsFn, type SellerAnalyticsData } from "@/lib/server-functions";
 import { taka, type Grade } from "@/data/catalog";
 import { GradeBadge } from "@/components/grade-badge";
+import { Loader } from "@/components/ui/loader";
 import {
   Eye,
   ShoppingCart,
@@ -128,11 +129,8 @@ function SellerAnalyticsPage() {
 
             {/* Loading State */}
             {loading && !data && (
-              <div className="p-12 text-center border border-border rounded-lg bg-card space-y-3">
-                <div className="flex justify-center">
-                  <RefreshCw className="size-8 text-primary animate-spin" />
-                </div>
-                <h3 className="text-base font-semibold text-foreground">Loading analytics...</h3>
+              <div className="p-12 text-center border border-border rounded-lg bg-card space-y-4">
+                <Loader className="mx-auto" label="Loading analytics..." />
                 <p className="text-xs text-muted-foreground max-w-sm mx-auto">
                   Aggregating verified behavioral events, orders, and dispute telemetry.
                 </p>

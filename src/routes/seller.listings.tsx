@@ -12,6 +12,7 @@ import { useAuth } from "@/lib/auth-store";
 import { getSellerListingsFn, updateListingAvailabilityFn } from "@/lib/server-functions";
 import { ListingStatusBadge } from "@/components/seller/listing-status-badge";
 import { AuditHistorySheet } from "@/components/moderation/audit-history-sheet";
+import { Loader } from "@/components/ui/loader";
 import {
   Plus,
   RefreshCw,
@@ -264,8 +265,7 @@ function SellerListingsPage() {
             {loading ? (
               <Card>
                 <CardContent className="py-16 text-center text-muted-foreground space-y-3">
-                  <RefreshCw className="size-6 animate-spin mx-auto text-primary" />
-                  <p className="text-sm font-medium">Loading your listings...</p>
+                  <Loader className="mx-auto" label="Loading your listings..." />
                 </CardContent>
               </Card>
             ) : error ? (

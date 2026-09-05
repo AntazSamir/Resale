@@ -25,6 +25,7 @@ import { RejectionDialog } from "@/components/moderation/rejection-dialog";
 import { AuditHistorySheet } from "@/components/moderation/audit-history-sheet";
 import { GradeBadge } from "@/components/grade-badge";
 import type { ListingRejectionReasonCode } from "@/lib/types";
+import { Loader } from "@/components/ui/loader";
 
 export const Route = createFileRoute("/admin/moderation")({
   head: () => ({
@@ -188,8 +189,7 @@ function AdminModerationPage() {
             {loading ? (
               <Card>
                 <CardContent className="py-16 text-center text-muted-foreground space-y-3">
-                  <RefreshCw className="size-6 animate-spin mx-auto text-primary" />
-                  <p className="text-sm font-medium">Loading moderation queue from database...</p>
+                  <Loader className="mx-auto" label="Loading moderation queue from database..." />
                 </CardContent>
               </Card>
             ) : error ? (
