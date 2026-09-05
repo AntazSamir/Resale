@@ -968,13 +968,15 @@ export const getApprovedListingsForProductFn = createServerFn({ method: "POST" }
 // Backward-compatible create listing alias
 export const createListingFn = submitListingForReviewFn;
 
-// Place order with atomic inventory reservation
+// Place order with atomic inventory reservation and multi-item seller dispatch
 export const placeOrderFn = createServerFn({ method: "POST" })
   .validator(
     (data: {
-      orderId?: string;
-      listingId: string;
-      buyerId?: string;
+      orderId?: string | undefined;
+      listingId?: string | undefined;
+      listingIds?: string[] | undefined;
+      buyerId?: string | undefined;
+      buyerEmail?: string | undefined;
       amount: number;
       paymentMethod: string;
       shippingAddress: Record<string, unknown>;
@@ -982,20 +984,32 @@ export const placeOrderFn = createServerFn({ method: "POST" })
     }) => data,
   )
   .handler(async ({ data }) => {
-    const listing = db.listings.find((l) => l.id === data.listingId);
-    if (listing && listing.status !== "ACTIVE" && listing.status !== "PUBLISHED") {
-      return {
-        success: false,
-        error: "This device is no longer available or is currently reserved by another order.",
-      };
-    }
-
+    const allListingIds =
+      data.listingIds && data.listingIds.length > 0
+        ? data.listingIds
+        : data.listingId
+          ? [data.listingId]
+          : [];
+    const primaryListingId = allListingIds[0] || data.listingId || "l-1";
+    const buyerId = data.buyerId || "u-admin";
     const orderId = data.orderId || `ORD-${Math.floor(10000 + Math.random() * 90000)}`;
     const createdAt = new Date().toISOString();
+
+    // Check availability for all items
+    for (const lid of allListingIds) {
+      const listing = db.listings.find((l) => l.id === lid);
+      if (listing && listing.status !== "ACTIVE" && listing.status !== "PUBLISHED") {
+        return {
+          success: false,
+          error: `Item ${lid} is no longer available or is currently reserved by another order.`,
+        };
+      }
+    }
+
     const newOrder = {
       id: orderId,
-      listingId: data.listingId,
-      buyerId: data.buyerId || "u-admin",
+      listingId: primaryListingId,
+      buyerId,
       amountPoisha: Math.round(data.amount * 100),
       paymentMethod: data.paymentMethod,
       status: "PENDING" as const,
@@ -1012,26 +1026,31 @@ export const placeOrderFn = createServerFn({ method: "POST" })
 
     db.orders.unshift(newOrder);
 
-    // Atomically reserve listing
-    if (listing) {
-      listing.status = "RESERVED";
-      await recordListingAudit({
-        listingId: listing.id,
-        actorId: data.buyerId || "u-admin",
-        actorRole: "BUYER",
-        action: "RESERVED_FOR_ORDER" as ListingAuditAction,
-        previousStatus: "ACTIVE",
-        newStatus: "RESERVED",
-        reasonText: `Reserved under order ${orderId}`,
-      });
+    // Atomically reserve all listings in order and collect seller IDs
+    const sellerIds = new Set<string>();
+    for (const lid of allListingIds) {
+      const listing = db.listings.find((l) => l.id === lid);
+      if (listing) {
+        listing.status = "RESERVED";
+        if (listing.sellerId) sellerIds.add(listing.sellerId);
+        await recordListingAudit({
+          listingId: listing.id,
+          actorId: buyerId,
+          actorRole: "BUYER",
+          action: "RESERVED_FOR_ORDER" as ListingAuditAction,
+          previousStatus: "ACTIVE",
+          newStatus: "RESERVED",
+          reasonText: `Reserved under order ${orderId}`,
+        });
+      }
     }
 
     try {
       const supabase = await supabaseAdmin();
       await supabase.from("orders").upsert({
         id: orderId,
-        listing_id: data.listingId,
-        buyer_id: data.buyerId || "u-admin",
+        listing_id: primaryListingId,
+        buyer_id: buyerId,
         amount_poisha: Math.round(data.amount * 100),
         payment_method: data.paymentMethod.toUpperCase(),
         status: "PENDING",
@@ -1039,25 +1058,86 @@ export const placeOrderFn = createServerFn({ method: "POST" })
         nid_number: data.nidNumber,
         created_at: createdAt,
       });
-      if (listing) {
-        await supabase.from("listings").update({ status: "RESERVED" }).eq("id", listing.id);
+
+      for (const lid of allListingIds) {
+        await supabase.from("listings").update({ status: "RESERVED" }).eq("id", lid);
       }
     } catch (err) {
       console.warn("Supabase placeOrder server sync error:", err);
     }
 
+    // Notify buyer
     try {
       await createOrderNotification(
-        data.buyerId || "u-admin",
+        buyerId,
         "ORDER_PLACED",
         orderId,
-        `Your order ${orderId} has been placed successfully.`,
+        `Your order #${orderId} has been placed. Waiting for seller confirmation.`,
+        "Order Placed",
       );
     } catch {
       // Notification failure should not fail the order
     }
 
+    // Notify seller(s)
+    for (const sId of sellerIds) {
+      try {
+        await createOrderNotification(
+          sId,
+          "ORDER_PLACED",
+          orderId,
+          `New order #${orderId} received! Please verify device condition and confirm the order.`,
+          "New Order Pending Confirmation",
+        );
+      } catch {
+        // Notification failure should not fail the order
+      }
+    }
+
     return { success: true, orderId };
+  });
+
+// Server-side seller confirmation of order
+export const confirmOrderAsSellerFn = createServerFn({ method: "POST" })
+  .validator(
+    (data: { orderId: string; note?: string | undefined; sellerId?: string | undefined }) => data,
+  )
+  .handler(async ({ data }) => {
+    const order = db.orders.find((o) => o.id === data.orderId);
+    const now = new Date().toISOString();
+    if (order) {
+      order.status = "CONFIRMED";
+      order.confirmedAt = now;
+    }
+
+    try {
+      const supabase = await supabaseAdmin();
+      await supabase
+        .from("orders")
+        .update({ status: "CONFIRMED", confirmed_at: now })
+        .eq("id", data.orderId);
+    } catch (err) {
+      console.warn("Supabase confirmOrderAsSellerFn error:", err);
+    }
+
+    // Notify buyer that seller has confirmed
+    const buyerId = order?.buyerId;
+    if (buyerId) {
+      try {
+        await createOrderNotification(
+          buyerId,
+          "ORDER_CONFIRMED",
+          data.orderId,
+          data.note ||
+            `Great news! The seller has verified and confirmed your order #${data.orderId}.`,
+          "Order Confirmed by Seller",
+        );
+      } catch {
+        // Notification failure should not block
+      }
+    }
+
+    return { success: true };
   });
 
 export const getSellerTrustProfileFn = createServerFn({ method: "POST" })

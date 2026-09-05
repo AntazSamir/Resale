@@ -83,11 +83,15 @@ export interface OrderRecord {
   total: number;
   currency: "BDT";
   shippingAddress: ShippingAddress;
+  buyerId?: string | undefined;
+  buyerEmail?: string | undefined;
   buyerContact?:
     | {
         name: string;
         phone: string;
         nidNumber?: string | undefined;
+        email?: string | undefined;
+        buyerId?: string | undefined;
       }
     | undefined;
   nidNumber?: string | undefined; // Legacy compatibility alias
@@ -448,13 +452,27 @@ export function rowToOrderRecord(row: Record<string, unknown>): OrderRecord {
         ];
   const nidNumber = typeof row["nid_number"] === "string" ? row["nid_number"] : "199526920199201";
 
+  const buyerId =
+    (meta && typeof meta["buyerId"] === "string" ? meta["buyerId"] : undefined) ||
+    (typeof row["buyer_id"] === "string" ? row["buyer_id"] : undefined);
+  const buyerEmail =
+    meta && typeof meta["buyerEmail"] === "string" ? meta["buyerEmail"] : undefined;
+
   const buyerContact =
     meta && typeof meta["buyerContact"] === "object" && meta["buyerContact"] !== null
-      ? (meta["buyerContact"] as { name: string; phone: string; nidNumber?: string })
+      ? (meta["buyerContact"] as {
+          name: string;
+          phone: string;
+          nidNumber?: string;
+          email?: string;
+          buyerId?: string;
+        })
       : {
           name: cleanedAddress.name,
           phone: cleanedAddress.phone,
           nidNumber,
+          email: buyerEmail,
+          buyerId,
         };
 
   const createdAt =
@@ -491,6 +509,8 @@ export function rowToOrderRecord(row: Record<string, unknown>): OrderRecord {
     total,
     currency: "BDT",
     shippingAddress: cleanedAddress,
+    buyerId,
+    buyerEmail,
     buyerContact,
     nidNumber,
     timeline,
@@ -538,9 +558,10 @@ function mapToDbStatus(status: OrderStatus): string {
  */
 export function orderRecordToSupabase(order: OrderRecord): Record<string, unknown> {
   const listingId = order.items[0]?.listingId || "l-1";
-  const buyerId = order.buyerContact?.phone
-    ? `u-${order.buyerContact.phone.replace(/\D/g, "")}`
-    : "u-admin";
+  const buyerId =
+    order.buyerId ||
+    order.buyerContact?.buyerId ||
+    (order.buyerContact?.phone ? `u-${order.buyerContact.phone.replace(/\D/g, "")}` : "u-admin");
 
   return {
     id: order.id,
@@ -562,6 +583,8 @@ export function orderRecordToSupabase(order: OrderRecord): Record<string, unknow
         discount: order.discount,
         total: order.total,
         date: order.date,
+        buyerId: order.buyerId || buyerId,
+        buyerEmail: order.buyerEmail || order.buyerContact?.email,
         buyerContact: order.buyerContact,
         refundStatus: order.refundStatus,
         completedAt: order.completedAt,
@@ -681,7 +704,10 @@ async function syncOrderToSupabase(
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const buyerPhone = order.buyerContact?.phone || "01700000000";
-    const buyerId = `u-${buyerPhone.replace(/\D/g, "") || "admin"}`;
+    const buyerId =
+      order.buyerId ||
+      order.buyerContact?.buyerId ||
+      `u-${buyerPhone.replace(/\D/g, "") || "admin"}`;
 
     // 1. Ensure buyer exists in public.users to satisfy foreign key
     const userResult = await upsertUserRecordFn({

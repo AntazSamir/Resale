@@ -121,9 +121,11 @@ function CheckoutPage() {
       conditionScore: listing.conditionScore,
       price: listing.price,
       image: product.image,
-      sellerId: listing.seller.name
-        ? `seller-${listing.seller.name.toLowerCase().replace(/\s+/g, "-")}`
-        : undefined,
+      sellerId:
+        (listing as { sellerId?: string }).sellerId ||
+        (listing.seller?.name
+          ? `seller-${listing.seller.name.toLowerCase().replace(/\s+/g, "-")}`
+          : undefined),
       sellerName: listing.seller.name,
       sellerDistrict: listing.seller.district,
       warrantyMonths: listing.warrantyMonths,
@@ -140,6 +142,9 @@ function CheckoutPage() {
       "BUYER",
       { total: totals.total, itemsCount: orderItems.length },
     );
+
+    const effectiveBuyerId =
+      user?.id || (address.phone ? `u-${address.phone.replace(/\D/g, "")}` : "u-admin");
 
     const newOrder: OrderRecord = {
       id,
@@ -162,9 +167,13 @@ function CheckoutPage() {
         area: address.district,
         address: address.addressLine,
       },
+      buyerId: effectiveBuyerId,
+      buyerEmail: user?.email,
       buyerContact: {
         name: address.name,
         phone: address.phone,
+        email: user?.email,
+        buyerId: effectiveBuyerId,
         nidNumber: nid,
       },
       nidNumber: nid,
@@ -175,20 +184,22 @@ function CheckoutPage() {
 
     saveOrder(newOrder);
 
-    // Notify server function
+    // Notify server function and reserve all items atomically
     try {
-      if (cartItems[0]) {
-        await placeOrderFn({
-          data: {
-            orderId: id,
-            listingId: cartItems[0].listing.id,
-            amount: totals.total,
-            paymentMethod: "cod",
-            shippingAddress: address,
-            nidNumber: nid,
-          },
-        });
-      }
+      const allListingIds = cartItems.map((c) => c.listing.id);
+      await placeOrderFn({
+        data: {
+          orderId: id,
+          listingId: cartItems[0]?.listing.id,
+          listingIds: allListingIds,
+          buyerId: effectiveBuyerId,
+          buyerEmail: user?.email,
+          amount: totals.total,
+          paymentMethod: "cod",
+          shippingAddress: address,
+          nidNumber: nid,
+        },
+      });
     } catch (err) {
       console.error("Server order sync notice:", err);
     }
@@ -234,7 +245,8 @@ function CheckoutPage() {
                 <span className="text-muted-foreground">Account:</span>
                 <span className="font-medium text-foreground flex items-center gap-1">
                   <UserCheck className="size-3 text-emerald-500" />
-                  {user?.name || "Verified Buyer"} ({user?.phone})
+                  {user?.name || address.name || "Verified Buyer"} (
+                  {user?.phone || address.phone || "Doorstep Contact"})
                 </span>
               </div>
               <div className="flex justify-between items-center">

@@ -163,10 +163,20 @@ function OrdersPage() {
     if (order.isSampleData) return false;
 
     // Filter by authenticated user identity if available
-    if (user?.phone) {
-      const match =
-        order.buyerContact?.phone === user.phone || order.shippingAddress?.phone === user.phone;
-      if (!match) return false;
+    if (user) {
+      const matchId =
+        Boolean(user.id) && (order.buyerId === user.id || order.buyerContact?.buyerId === user.id);
+      const matchPhone =
+        Boolean(user.phone) &&
+        (order.buyerContact?.phone === user.phone || order.shippingAddress?.phone === user.phone);
+      const matchEmail =
+        Boolean(user.email) &&
+        (order.buyerEmail === user.email || order.buyerContact?.email === user.email);
+
+      // If user has any identifying credentials, require at least one match
+      if (user.id || user.phone || user.email) {
+        if (!matchId && !matchPhone && !matchEmail) return false;
+      }
     }
 
     if (filter === "ACTIVE") {

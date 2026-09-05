@@ -27,6 +27,7 @@ import {
   type OrderRecord,
   type OrderStatus,
 } from "@/lib/order-store";
+import { confirmOrderAsSellerFn } from "@/lib/server-functions";
 
 export const Route = createFileRoute("/seller/orders")({
   head: () => ({
@@ -136,6 +137,15 @@ function SellerOrdersPage() {
   const handleTransition = (orderId: string, nextStatus: OrderStatus, label: string) => {
     const res = transitionOrderStatus(orderId, nextStatus, "SELLER");
     if (res.success) {
+      if (nextStatus === "CONFIRMED") {
+        confirmOrderAsSellerFn({
+          data: {
+            orderId,
+            ...(user?.id ? { sellerId: user.id } : {}),
+            note: "Seller verified device condition and reservation.",
+          },
+        }).catch(() => {});
+      }
       setActionFeedback(`Order #${orderId} updated to: ${label}`);
       setTimeout(() => setActionFeedback(null), 3000);
       refresh();
@@ -144,9 +154,12 @@ function SellerOrdersPage() {
     }
   };
 
-  // Only show orders belonging to this seller
+  // Only show orders belonging to this seller (or all non-sample orders for admins)
   const sellerOrders = useMemo(() => {
     if (!user) return [];
+    if (user.isAdmin) {
+      return orders.filter((o) => !o.isSampleData);
+    }
     const ids = new Set<string>();
     if (user.id) {
       ids.add(user.id);
@@ -214,7 +227,7 @@ function SellerOrdersPage() {
             <div className="flex gap-2 border-b border-border/60 pb-3 text-xs overflow-x-auto">
               {(
                 [
-                  { key: "ALL", label: `All Orders (${orders.length})` },
+                  { key: "ALL", label: `All Orders (${sellerOrders.length})` },
                   { key: "PENDING", label: "New (Pending)" },
                   { key: "IN_PROGRESS", label: "Processing & Packing" },
                   { key: "SHIPPED", label: "In Transit" },

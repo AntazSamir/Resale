@@ -259,6 +259,33 @@ function OrderDetailsPage() {
           <div className="flex items-center gap-2">{getOrderStatusBadge(order.orderStatus)}</div>
         </div>
 
+        {/* Status Highlights */}
+        {order.orderStatus === "PENDING" && (
+          <div className="border border-amber-500/30 bg-amber-500/5 p-4 text-xs space-y-1 rounded-sm">
+            <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 font-semibold text-sm">
+              <Clock className="size-4 shrink-0" />
+              <span>Awaiting Seller Confirmation</span>
+            </div>
+            <p className="text-muted-foreground pl-6 leading-relaxed">
+              The seller has received your order request and will verify the physical device and
+              diagnostics report. Once confirmed, your item will be boxed for courier pickup.
+            </p>
+          </div>
+        )}
+
+        {order.orderStatus === "CONFIRMED" && (
+          <div className="border border-primary/30 bg-primary/5 p-4 text-xs space-y-1 rounded-sm">
+            <div className="flex items-center gap-2 text-primary font-semibold text-sm">
+              <CheckCircle2 className="size-4 shrink-0" />
+              <span>Order Confirmed by Seller</span>
+            </div>
+            <p className="text-muted-foreground pl-6 leading-relaxed">
+              Great news! The seller has verified and confirmed this order. Your device is currently
+              being prepared and packaged with tamper-evident seals.
+            </p>
+          </div>
+        )}
+
         {/* Cancellation Notice if Cancelled */}
         {order.orderStatus === "CANCELLED" && order.cancellation && (
           <div className="border border-destructive/30 bg-destructive/5 p-4 text-xs space-y-1">

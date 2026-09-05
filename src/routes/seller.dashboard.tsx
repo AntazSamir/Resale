@@ -20,11 +20,22 @@ import {
   Eye,
   ShoppingCart,
   Percent,
+  CheckCircle2,
 } from "lucide-react";
 import { taka } from "@/data/catalog";
 import { ProtectedRoute } from "@/components/protected-route";
-import { getOrders, fetchOrdersAsync, onOrdersChange, type OrderRecord } from "@/lib/order-store";
-import { getSellerAnalyticsFn, type SellerAnalyticsData } from "@/lib/server-functions";
+import {
+  getOrders,
+  fetchOrdersAsync,
+  onOrdersChange,
+  transitionOrderStatus,
+  type OrderRecord,
+} from "@/lib/order-store";
+import {
+  getSellerAnalyticsFn,
+  confirmOrderAsSellerFn,
+  type SellerAnalyticsData,
+} from "@/lib/server-functions";
 import { useAuth } from "@/lib/auth-store";
 import { Badge } from "@/components/ui/badge";
 import resaleLogo from "@/assets/resale-logo.svg";
@@ -171,9 +182,12 @@ function SellerDashboardPage() {
     }
   }, [token]);
 
-  // Filter orders strictly belonging to this authenticated seller
+  // Filter orders strictly belonging to this authenticated seller (or all for admins)
   const sellerOrders = useMemo(() => {
     if (!user) return [];
+    if (user.isAdmin) {
+      return orders.filter((o) => !o.isSampleData);
+    }
     const ids = new Set<string>();
     if (user.id) {
       ids.add(user.id);
@@ -212,6 +226,20 @@ function SellerDashboardPage() {
   const activeOrdersCount = analytics
     ? analytics.ordersBreakdown.placedOrPending
     : pendingOrdersCount;
+
+  const handleQuickConfirm = (orderId: string) => {
+    const res = transitionOrderStatus(orderId, "CONFIRMED", "SELLER");
+    if (res.success) {
+      confirmOrderAsSellerFn({
+        data: {
+          orderId,
+          ...(user?.id ? { sellerId: user.id } : {}),
+          note: "Seller confirmed order from dashboard.",
+        },
+      }).catch(() => {});
+      setOrders(getOrders().filter((o) => !o.isSampleData));
+    }
+  };
 
   return (
     <ProtectedRoute>
@@ -356,7 +384,7 @@ function SellerDashboardPage() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-border/40">
-                      {orders.length === 0 ? (
+                      {sellerOrders.length === 0 ? (
                         <tr>
                           <td colSpan={6} className="px-6 py-8 text-center text-muted-foreground">
                             No fulfillment orders yet. When customers purchase your listings, orders
@@ -364,7 +392,7 @@ function SellerDashboardPage() {
                           </td>
                         </tr>
                       ) : (
-                        orders.slice(0, 5).map((order) => (
+                        sellerOrders.slice(0, 5).map((order) => (
                           <tr key={order.id} className="hover:bg-muted/20">
                             <td className="px-6 py-4 font-mono font-semibold text-foreground">
                               {order.id}
@@ -386,14 +414,34 @@ function SellerDashboardPage() {
                               {taka(order.total)}
                             </td>
                             <td className="px-6 py-4">
-                              <Badge variant="outline" className="text-[10.5px]">
+                              <Badge
+                                variant="outline"
+                                className={`text-[10.5px] ${
+                                  order.orderStatus === "CONFIRMED"
+                                    ? "bg-primary/10 text-primary border-primary/20"
+                                    : order.orderStatus === "PENDING"
+                                      ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20"
+                                      : ""
+                                }`}
+                              >
                                 {order.orderStatus}
                               </Badge>
                             </td>
                             <td className="px-6 py-4 text-right">
-                              <Button size="sm" variant="ghost" asChild className="text-xs">
-                                <Link to="/seller/orders">Manage</Link>
-                              </Button>
+                              <div className="flex items-center justify-end gap-1.5">
+                                {order.orderStatus === "PENDING" && (
+                                  <Button
+                                    size="sm"
+                                    onClick={() => handleQuickConfirm(order.id)}
+                                    className="text-xs h-7 px-2.5 bg-primary text-primary-foreground font-semibold"
+                                  >
+                                    <CheckCircle2 className="size-3 mr-1" /> Confirm
+                                  </Button>
+                                )}
+                                <Button size="sm" variant="ghost" asChild className="text-xs h-7">
+                                  <Link to="/seller/orders">Manage</Link>
+                                </Button>
+                              </div>
                             </td>
                           </tr>
                         ))
