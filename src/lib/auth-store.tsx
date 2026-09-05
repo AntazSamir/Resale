@@ -1,5 +1,29 @@
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react";
 import { validateSessionFn, signOutFn } from "./server-functions";
+import { supabase } from "./supabase";
+
+function userFromGoogleSession(session: {
+  user: {
+    id: string;
+    email?: string | undefined;
+    phone?: string | undefined;
+    user_metadata?: Record<string, unknown> | undefined;
+  };
+}): AuthUser {
+  const meta = session.user.user_metadata ?? {};
+  const name =
+    (typeof meta["full_name"] === "string" && meta["full_name"]) ||
+    (typeof meta["name"] === "string" && meta["name"]) ||
+    undefined;
+  return {
+    id: session.user.id,
+    phone: session.user.phone ?? "",
+    email: session.user.email,
+    name,
+    role: "BUYER",
+    isAdmin: false,
+  };
+}
 
 export interface AuthUser {
   id?: string | undefined;
@@ -70,7 +94,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     if (!storedToken) {
-      setHydrated(true);
+      // No custom session — fall back to a Google (Supabase OAuth) session,
+      // e.g. right after returning from the Google consent redirect.
+      supabase.auth
+        .getSession()
+        .then(({ data }) => {
+          if (!isMounted) return;
+          if (data.session) {
+            const googleUser = userFromGoogleSession(data.session);
+            setUser(googleUser);
+            try {
+              window.localStorage.setItem(CACHED_USER_KEY, JSON.stringify(googleUser));
+            } catch {
+              // ignore
+            }
+          }
+        })
+        .finally(() => {
+          if (isMounted) setHydrated(true);
+        });
       return;
     }
 
@@ -124,6 +166,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
+  // Keep the app session in sync with Google (Supabase OAuth) auth events,
+  // e.g. right after the OAuth redirect lands back on the app.
+  useEffect(() => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_IN" && session) {
+        // Only adopt the Google session when there's no custom session user.
+        if (!readCachedToken()) {
+          const googleUser = userFromGoogleSession(session);
+          setUser(googleUser);
+          try {
+            window.localStorage.setItem(CACHED_USER_KEY, JSON.stringify(googleUser));
+          } catch {
+            // ignore
+          }
+        }
+      } else if (event === "SIGNED_OUT") {
+        if (!readCachedToken()) {
+          setUser(null);
+          try {
+            window.localStorage.removeItem(CACHED_USER_KEY);
+            window.sessionStorage.removeItem(CACHED_USER_KEY);
+          } catch {
+            // ignore
+          }
+        }
+      }
+    });
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+
   const signIn = useCallback((payload: SignInPayload | string | Partial<AuthUser>) => {
     let sessionToken: string | undefined;
     let rawUserData: Partial<AuthUser>;
@@ -172,6 +248,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } catch {
         // ignore
       }
+    }
+
+    // Also end any Google (Supabase OAuth) session
+    try {
+      await supabase.auth.signOut();
+    } catch {
+      // ignore
     }
 
     setUser(null);

@@ -17,6 +17,7 @@ import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp
 import { sendOtpFn, loginFn, changePasswordFn } from "@/lib/server-functions";
 import { AlertCircle, Lock, Eye, EyeOff, KeyRound, X, CheckCircle2 } from "lucide-react";
 import resaleLogo from "@/assets/resale-logo.svg";
+import { GoogleAuthButton, AuthDivider } from "@/components/google-auth-button";
 
 interface LoginSearch {
   redirect?: string | undefined;
@@ -514,6 +515,9 @@ function LoginPage() {
                 {loading ? "Signing in…" : "Sign In"}
               </Button>
             </form>
+
+            <AuthDivider />
+            <GoogleAuthButton redirect={search.redirect} onError={setError} />
           </CardContent>
 
           <CardFooter className="justify-center border-t border-border/60 p-5">
