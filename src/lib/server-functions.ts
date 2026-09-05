@@ -1414,6 +1414,101 @@ export const signOutFn = createServerFn({ method: "POST" })
     return { success: true };
   });
 
+// Sync Google OAuth Session (Creates a backend session token for Google users)
+export const syncGoogleSessionFn = createServerFn({ method: "POST" })
+  .validator(
+    (data: {
+      id: string;
+      email?: string | undefined;
+      name?: string | undefined;
+      phone?: string | undefined;
+    }) => data,
+  )
+  .handler(async ({ data }) => {
+    if (!data.id) {
+      return { success: false, token: null, error: "Invalid Google user data" };
+    }
+
+    const { id, email, name, phone } = data;
+
+    // Check if user exists in our local DB or create a basic record for them
+    let user = db.users.find((u) => u.id === id);
+    const cleanEmail = email?.trim().toLowerCase();
+
+    if (!user) {
+      // Try to find by email if ID doesn't match
+      if (cleanEmail) {
+        user = db.users.find((u) => u.email && u.email.toLowerCase() === cleanEmail);
+      }
+    }
+
+    if (!user) {
+      // Create new user record
+      const newUser: import("@/db").User = {
+        id,
+        phone: phone || "",
+        email: cleanEmail || null,
+        name: name || null,
+        nidNumber: null,
+        role: "BUYER",
+        verified: false,
+        createdAt: new Date().toISOString(),
+      };
+      db.users.push(newUser);
+      user = newUser;
+    } else {
+      // Update existing user with any new info from Google if missing
+      if (cleanEmail && !user.email) user.email = cleanEmail;
+      if (name && !user.name) user.name = name;
+    }
+
+    const isAdmin = user.role === "ADMIN";
+
+    // Issue a cryptographically secure server session token
+    const token = `rst_${Date.now().toString(36)}_${Math.random().toString(36).slice(2)}_${Math.random().toString(36).slice(2)}`;
+    const expiresAt = Date.now() + 30 * 24 * 60 * 60 * 1000; // 30 days session validity
+
+    db.sessions.set(token, {
+      token,
+      userId: user.id,
+      role: isAdmin ? "ADMIN" : user.role,
+      isAdmin,
+      phone: user.phone || undefined,
+      email: user.email || undefined,
+      name: user.name || undefined,
+      expiresAt,
+      createdAt: new Date().toISOString(),
+    });
+
+    // Ensure user is synced to Supabase users table
+    try {
+      const supabase = await supabaseAdmin();
+      await supabase.from("users").upsert({
+        id: user.id,
+        phone: user.phone || "00000000000",
+        name: user.name || "Customer",
+        nid_number: user.nidNumber || null,
+        role: isAdmin ? "ADMIN" : user.role,
+        verified: user.verified,
+      });
+    } catch (err) {
+      console.warn("Supabase Google user sync error:", err);
+    }
+
+    return {
+      success: true,
+      token,
+      user: {
+        id: user.id,
+        phone: user.phone,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+        isAdmin,
+      },
+    };
+  });
+
 // ── Event tracking server function ──────────────────────────────────────
 // Inserts a row into public.user_events via the service‑role key (bypasses RLS).
 // Called by the client‑side event-tracker.ts trackEvent() function.

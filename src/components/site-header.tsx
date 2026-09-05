@@ -2,7 +2,17 @@ import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { useCart } from "@/lib/cart-store";
+import { useAuth } from "@/lib/auth-store";
 import { NotificationPanel } from "@/components/notification-panel";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Search,
   ShoppingBag,
@@ -34,6 +44,8 @@ import {
   Home,
   LucideIcon,
   Bell,
+  LogOut,
+  LayoutDashboard,
 } from "lucide-react";
 import { BangladeshMapSVG } from "./bangladesh-map";
 import resaleLogo from "@/assets/resale-logo.svg";
@@ -257,6 +269,25 @@ export function SiteHeader() {
 
   const navigate = useNavigate();
   const { itemCount } = useCart();
+  const { user, isLoggedIn, signOut } = useAuth();
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate({ to: "/" });
+  };
+
+  // Derive avatar initials from name or email
+  const avatarInitials = (() => {
+    if (user?.name)
+      return user.name
+        .split(" ")
+        .map((w) => w[0])
+        .join("")
+        .slice(0, 2)
+        .toUpperCase();
+    if (user?.email) return (user.email[0] ?? "U").toUpperCase();
+    return "U";
+  })();
   const [searchFocused, setSearchFocused] = useState(false);
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const searchContainerRef = useRef<HTMLDivElement | null>(null);
@@ -582,13 +613,59 @@ export function SiteHeader() {
 
           {/* Desktop Right: Actions */}
           <div className="ml-auto hidden md:flex items-center gap-5">
-            <Link
-              to="/login"
-              aria-label="Account"
-              className="text-subtle-foreground hover:text-foreground"
-            >
-              <User className="size-5" />
-            </Link>
+            {isLoggedIn ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    aria-label="Account menu"
+                    className="focus:outline-none rounded-full ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  >
+                    <Avatar className="size-8 cursor-pointer hover:opacity-80 transition-opacity">
+                      <AvatarImage src={undefined} alt={user?.name ?? "User"} />
+                      <AvatarFallback className="bg-primary text-primary-foreground text-[11px] font-bold">
+                        {avatarInitials}
+                      </AvatarFallback>
+                    </Avatar>
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56 mt-1">
+                  <DropdownMenuLabel className="font-normal">
+                    <p className="text-sm font-semibold truncate">
+                      {user?.name ?? user?.email ?? "Account"}
+                    </p>
+                    {user?.email && (
+                      <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                    )}
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link to="/account/orders" className="flex items-center gap-2 cursor-pointer">
+                      <Package className="size-4" /> My Orders
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/seller/dashboard" className="flex items-center gap-2 cursor-pointer">
+                      <LayoutDashboard className="size-4" /> Seller Dashboard
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={handleSignOut}
+                    className="text-destructive focus:text-destructive flex items-center gap-2 cursor-pointer"
+                  >
+                    <LogOut className="size-4" /> Sign Out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Link
+                to="/login"
+                aria-label="Account"
+                className="text-subtle-foreground hover:text-foreground"
+              >
+                <User className="size-5" />
+              </Link>
+            )}
             <NotificationPanel />
             <Link
               to="/cart"
@@ -923,14 +1000,57 @@ export function SiteHeader() {
 
             {/* Bottom Account Button */}
             <div className="border-t border-border pt-4 mt-6">
-              <Link
-                to="/login"
-                onClick={() => setMobileMenuOpen(false)}
-                className="w-full bg-primary text-primary-foreground font-semibold text-xs uppercase tracking-wider py-3 flex items-center justify-center gap-2 hover:opacity-90"
-              >
-                <User className="size-4" />
-                Sign In / Register
-              </Link>
+              {isLoggedIn ? (
+                <div className="space-y-2">
+                  <div className="flex items-center gap-3 px-3 py-2">
+                    <Avatar className="size-8 shrink-0">
+                      <AvatarFallback className="bg-primary text-primary-foreground text-[11px] font-bold">
+                        {avatarInitials}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold truncate text-foreground">
+                        {user?.name ?? user?.email ?? "Account"}
+                      </p>
+                      {user?.email && (
+                        <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                      )}
+                    </div>
+                  </div>
+                  <Link
+                    to="/account/orders"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="w-full flex items-center gap-2 px-3 py-2 text-xs hover:bg-muted text-foreground"
+                  >
+                    <Package className="size-4" /> My Orders
+                  </Link>
+                  <Link
+                    to="/seller/dashboard"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="w-full flex items-center gap-2 px-3 py-2 text-xs hover:bg-muted text-foreground"
+                  >
+                    <LayoutDashboard className="size-4" /> Seller Dashboard
+                  </Link>
+                  <button
+                    onClick={() => {
+                      void handleSignOut();
+                      setMobileMenuOpen(false);
+                    }}
+                    className="w-full flex items-center gap-2 px-3 py-2 text-xs text-destructive hover:bg-destructive/10"
+                  >
+                    <LogOut className="size-4" /> Sign Out
+                  </button>
+                </div>
+              ) : (
+                <Link
+                  to="/login"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="w-full bg-primary text-primary-foreground font-semibold text-xs uppercase tracking-wider py-3 flex items-center justify-center gap-2 hover:opacity-90"
+                >
+                  <User className="size-4" />
+                  Sign In / Register
+                </Link>
+              )}
             </div>
           </div>
         </div>

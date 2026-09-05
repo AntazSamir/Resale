@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react";
-import { validateSessionFn, signOutFn } from "./server-functions";
+import { validateSessionFn, signOutFn, syncGoogleSessionFn } from "./server-functions";
 import { supabase } from "./supabase";
 
 function userFromGoogleSession(session: {
@@ -98,15 +98,42 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // e.g. right after returning from the Google consent redirect.
       supabase.auth
         .getSession()
-        .then(({ data }) => {
+        .then(async ({ data }) => {
           if (!isMounted) return;
           if (data.session) {
             const googleUser = userFromGoogleSession(data.session);
             setUser(googleUser);
+
+            // Bridge: get a backend session token
             try {
-              window.localStorage.setItem(CACHED_USER_KEY, JSON.stringify(googleUser));
+              const res = await syncGoogleSessionFn({
+                data: {
+                  id: googleUser.id as string,
+                  email: googleUser.email,
+                  name: googleUser.name,
+                  phone: googleUser.phone,
+                },
+              });
+
+              if (res.success && res.token && res.user) {
+                setToken(res.token);
+                window.localStorage.setItem(TOKEN_KEY, res.token);
+
+                const verifiedUser: AuthUser = {
+                  id: res.user.id,
+                  phone: res.user.phone ?? "",
+                  email: res.user.email ?? undefined,
+                  name: res.user.name ?? undefined,
+                  role: res.user.role as "BUYER" | "SELLER" | "ADMIN",
+                  isAdmin: res.user.isAdmin,
+                };
+                setUser(verifiedUser);
+                window.localStorage.setItem(CACHED_USER_KEY, JSON.stringify(verifiedUser));
+              } else {
+                window.localStorage.setItem(CACHED_USER_KEY, JSON.stringify(googleUser));
+              }
             } catch {
-              // ignore
+              window.localStorage.setItem(CACHED_USER_KEY, JSON.stringify(googleUser));
             }
           }
         })
@@ -177,11 +204,50 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (!readCachedToken()) {
           const googleUser = userFromGoogleSession(session);
           setUser(googleUser);
-          try {
-            window.localStorage.setItem(CACHED_USER_KEY, JSON.stringify(googleUser));
-          } catch {
-            // ignore
-          }
+
+          // Bridge: get a backend session token
+          syncGoogleSessionFn({
+            data: {
+              id: googleUser.id as string,
+              email: googleUser.email,
+              name: googleUser.name,
+              phone: googleUser.phone,
+            },
+          })
+            .then((res) => {
+              if (res.success && res.token && res.user) {
+                setToken(res.token);
+                try {
+                  window.localStorage.setItem(TOKEN_KEY, res.token);
+
+                  const verifiedUser: AuthUser = {
+                    id: res.user.id,
+                    phone: res.user.phone ?? "",
+                    email: res.user.email ?? undefined,
+                    name: res.user.name ?? undefined,
+                    role: res.user.role as "BUYER" | "SELLER" | "ADMIN",
+                    isAdmin: res.user.isAdmin,
+                  };
+                  setUser(verifiedUser);
+                  window.localStorage.setItem(CACHED_USER_KEY, JSON.stringify(verifiedUser));
+                } catch {
+                  // ignore
+                }
+              } else {
+                try {
+                  window.localStorage.setItem(CACHED_USER_KEY, JSON.stringify(googleUser));
+                } catch {
+                  // ignore
+                }
+              }
+            })
+            .catch(() => {
+              try {
+                window.localStorage.setItem(CACHED_USER_KEY, JSON.stringify(googleUser));
+              } catch {
+                // ignore
+              }
+            });
         }
       } else if (event === "SIGNED_OUT") {
         if (!readCachedToken()) {

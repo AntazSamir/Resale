@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { SiteHeader, SiteFooter } from "@/components/site-header";
 import { useAuth } from "@/lib/auth-store";
 import { Button } from "@/components/ui/button";
@@ -337,7 +337,14 @@ function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [showForgot, setShowForgot] = useState(false);
   const navigate = useNavigate();
-  const { signIn } = useAuth();
+  const { signIn, isLoggedIn, hydrated } = useAuth();
+
+  // Redirect already-logged-in users away from the login page
+  useEffect(() => {
+    if (hydrated && isLoggedIn) {
+      navigate({ to: search.redirect ?? "/" });
+    }
+  }, [hydrated, isLoggedIn, navigate, search.redirect]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
