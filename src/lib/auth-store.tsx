@@ -1,5 +1,29 @@
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react";
 import { validateSessionFn, signOutFn } from "./server-functions";
+import { supabase } from "./supabase";
+
+function userFromGoogleSession(session: {
+  user: {
+    id: string;
+    email?: string | undefined;
+    phone?: string | undefined;
+    user_metadata?: Record<string, unknown> | undefined;
+  };
+}): AuthUser {
+  const meta = session.user.user_metadata ?? {};
+  const name =
+    (typeof meta["full_name"] === "string" && meta["full_name"]) ||
+    (typeof meta["name"] === "string" && meta["name"]) ||
+    undefined;
+  return {
+    id: session.user.id,
+    phone: session.user.phone ?? "",
+    email: session.user.email,
+    name,
+    role: "BUYER",
+    isAdmin: false,
+  };
+}
 
 export interface AuthUser {
   id?: string | undefined;
