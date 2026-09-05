@@ -250,6 +250,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     }
 
+    // Also end any Google (Supabase OAuth) session
+    try {
+      await supabase.auth.signOut();
+    } catch {
+      // ignore
+    }
+
     setUser(null);
     setToken(null);
 
