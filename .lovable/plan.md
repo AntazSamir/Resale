@@ -54,6 +54,9 @@ I previously proposed a separate Lovable project. The audit changes that recomme
 5. Replace dashboard placeholder metrics with real counts; remove `/admin/identity` and its sidebar entry.
 6. Verify: sign in as non-admin and confirm 403, sign in as admin and confirm each page loads real data; typecheck and build.
 
-## Open question
+## Decisions taken
 
-`/admin/identity` removal deletes a page you can currently see. Confirm you would rather have it gone than have it keep showing placeholder documents — that is the recommendation, but it is your call.
+- Admin console lives in this project as its own section with its own sign-in and layout — a separate project could not reach the existing accounts and moderation rules without rebuilding them.
+- `/admin/identity` is removed for now and returns when real ID-document storage exists.
+- Dashboard shows only counts derived from real data; no sales/revenue figure until settled-payment data exists.
+
