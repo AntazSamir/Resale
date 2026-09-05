@@ -54,10 +54,9 @@ function SellerDisputesPage() {
   const [actionError, setActionError] = useState<string>("");
 
   useEffect(() => {
-    // Show seller disputes, fallback to all disputes for demo/testing
-    const sellerId = user?.id || "u-1";
-    const myDisputes = getDisputesForSeller(sellerId);
-    setDisputes(myDisputes.length > 0 ? myDisputes : getDisputes());
+    const sellerId = user?.id || (user?.phone ? `user-${user.phone}` : "");
+    const myDisputes = sellerId ? getDisputesForSeller(sellerId) : [];
+    setDisputes(myDisputes);
   }, [user]);
 
   const activeDispute = disputes.find((d) => d.id === selectedDisputeId);

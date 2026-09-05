@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { SiteHeader, SiteFooter } from "@/components/site-header";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { SellerSidebar } from "./seller.dashboard";
@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { taka } from "@/data/catalog";
 import { ProtectedRoute } from "@/components/protected-route";
+import { useAuth } from "@/lib/auth-store";
 import {
   getOrders,
   fetchOrdersAsync,
@@ -106,6 +107,7 @@ function getStatusBadge(status: OrderStatus) {
 }
 
 function SellerOrdersPage() {
+  const { user } = useAuth();
   const [orders, setOrders] = useState<OrderRecord[]>([]);
   const [filter, setFilter] = useState<
     "ALL" | "PENDING" | "IN_PROGRESS" | "SHIPPED" | "COMPLETED" | "CANCELLED"
@@ -113,17 +115,21 @@ function SellerOrdersPage() {
   const [actionFeedback, setActionFeedback] = useState<string | null>(null);
 
   const refresh = () => {
-    setOrders(getOrders());
+    setOrders(getOrders().filter((o) => !o.isSampleData));
     fetchOrdersAsync()
       .then((res) => {
-        if (Array.isArray(res) && res.length > 0) setOrders(res);
+        if (Array.isArray(res) && res.length > 0) {
+          setOrders(res.filter((o) => !o.isSampleData));
+        }
       })
       .catch(() => {});
   };
 
   useEffect(() => {
     refresh();
-    const unsubscribe = onOrdersChange(setOrders);
+    const unsubscribe = onOrdersChange((updated) => {
+      setOrders(updated.filter((o) => !o.isSampleData));
+    });
     return () => unsubscribe();
   }, []);
 
@@ -138,7 +144,36 @@ function SellerOrdersPage() {
     }
   };
 
-  const filteredOrders = orders.filter((order) => {
+  // Only show orders belonging to this seller
+  const sellerOrders = useMemo(() => {
+    if (!user) return [];
+    const ids = new Set<string>();
+    if (user.id) {
+      ids.add(user.id);
+      ids.add(user.id.toLowerCase());
+    }
+    if (user.phone) {
+      ids.add(user.phone);
+      ids.add(`seller-${user.phone}`);
+      ids.add(`u-${user.phone.replace(/\D/g, "")}`);
+    }
+
+    return orders.filter((o) => {
+      if (o.isSampleData) return false;
+      return o.items.some((item) => {
+        if (item.sellerId && ids.has(item.sellerId)) return true;
+        if (
+          user.name &&
+          item.sellerName &&
+          item.sellerName.toLowerCase() === user.name.toLowerCase()
+        )
+          return true;
+        return false;
+      });
+    });
+  }, [orders, user]);
+
+  const filteredOrders = sellerOrders.filter((order) => {
     if (filter === "PENDING") return order.orderStatus === "PENDING";
     if (filter === "IN_PROGRESS")
       return ["CONFIRMED", "PROCESSING", "READY_TO_SHIP"].includes(order.orderStatus);
@@ -233,11 +268,6 @@ function SellerOrdersPage() {
                       </div>
 
                       <div className="flex items-center gap-2">
-                        {order.isSampleData && (
-                          <span className="text-[10px] uppercase tracking-wider font-medium px-1.5 py-0.5 bg-secondary text-muted-foreground border border-border/40">
-                            Demo Order
-                          </span>
-                        )}
                         {getStatusBadge(order.orderStatus)}
                       </div>
                     </CardHeader>

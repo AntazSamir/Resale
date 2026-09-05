@@ -21,6 +21,7 @@ import {
   type OrderRecord,
   type OrderStatus,
 } from "@/lib/order-store";
+import { useAuth } from "@/lib/auth-store";
 
 import { ProtectedRoute } from "@/components/protected-route";
 
@@ -138,21 +139,36 @@ function getOrderStatusBadge(status: OrderStatus) {
 }
 
 function OrdersPage() {
+  const { user } = useAuth();
   const [orders, setOrders] = useState<OrderRecord[]>([]);
   const [filter, setFilter] = useState<"ALL" | "ACTIVE" | "COMPLETED" | "CANCELLED">("ALL");
 
   useEffect(() => {
-    setOrders(getOrders());
+    setOrders(getOrders().filter((o) => !o.isSampleData));
     fetchOrdersAsync()
       .then((res) => {
-        if (Array.isArray(res) && res.length > 0) setOrders(res);
+        if (Array.isArray(res) && res.length > 0) {
+          setOrders(res.filter((o) => !o.isSampleData));
+        }
       })
       .catch(() => {});
-    const unsubscribe = onOrdersChange(setOrders);
+    const unsubscribe = onOrdersChange((updated) => {
+      setOrders(updated.filter((o) => !o.isSampleData));
+    });
     return () => unsubscribe();
   }, []);
 
   const filteredOrders = orders.filter((order) => {
+    // Strictly exclude any sample/demo orders
+    if (order.isSampleData) return false;
+
+    // Filter by authenticated user identity if available
+    if (user?.phone) {
+      const match =
+        order.buyerContact?.phone === user.phone || order.shippingAddress?.phone === user.phone;
+      if (!match) return false;
+    }
+
     if (filter === "ACTIVE") {
       return ["PENDING", "CONFIRMED", "PROCESSING", "READY_TO_SHIP", "SHIPPED"].includes(
         order.orderStatus,
@@ -243,11 +259,6 @@ function OrdersPage() {
                   </div>
 
                   <div className="flex items-center gap-2">
-                    {order.isSampleData && (
-                      <span className="text-[10px] uppercase tracking-wider font-medium px-1.5 py-0.5 bg-secondary text-muted-foreground border border-border/40">
-                        Demo Data
-                      </span>
-                    )}
                     {getOrderStatusBadge(order.orderStatus)}
                   </div>
                 </CardHeader>

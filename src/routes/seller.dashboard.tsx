@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { SiteHeader, SiteFooter } from "@/components/site-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -135,19 +135,23 @@ export function SellerSidebar({
 }
 
 function SellerDashboardPage() {
-  const { token } = useAuth();
+  const { token, user } = useAuth();
   const [orders, setOrders] = useState<OrderRecord[]>([]);
   const [analytics, setAnalytics] = useState<SellerAnalyticsData | null>(null);
   const [loadingAnalytics, setLoadingAnalytics] = useState(false);
 
   useEffect(() => {
-    setOrders(getOrders());
+    setOrders(getOrders().filter((o) => !o.isSampleData));
     fetchOrdersAsync()
       .then((res) => {
-        if (Array.isArray(res) && res.length > 0) setOrders(res);
+        if (Array.isArray(res) && res.length > 0) {
+          setOrders(res.filter((o) => !o.isSampleData));
+        }
       })
       .catch(() => {});
-    const unsubscribe = onOrdersChange(setOrders);
+    const unsubscribe = onOrdersChange((updated) => {
+      setOrders(updated.filter((o) => !o.isSampleData));
+    });
     return () => unsubscribe();
   }, []);
 
@@ -167,15 +171,47 @@ function SellerDashboardPage() {
     }
   }, [token]);
 
-  const totalSales = orders
+  // Filter orders strictly belonging to this authenticated seller
+  const sellerOrders = useMemo(() => {
+    if (!user) return [];
+    const ids = new Set<string>();
+    if (user.id) {
+      ids.add(user.id);
+      ids.add(user.id.toLowerCase());
+    }
+    if (user.phone) {
+      ids.add(user.phone);
+      ids.add(`seller-${user.phone}`);
+      ids.add(`u-${user.phone.replace(/\D/g, "")}`);
+    }
+
+    return orders.filter((o) => {
+      if (o.isSampleData) return false;
+      return o.items.some((item) => {
+        if (item.sellerId && ids.has(item.sellerId)) return true;
+        if (
+          user.name &&
+          item.sellerName &&
+          item.sellerName.toLowerCase() === user.name.toLowerCase()
+        )
+          return true;
+        return false;
+      });
+    });
+  }, [orders, user]);
+
+  const totalSales = sellerOrders
     .filter((o) => o.orderStatus === "DELIVERED" || o.orderStatus === "COMPLETED")
     .reduce((acc, o) => acc + o.total, 0);
 
-  const pendingOrdersCount = orders.filter((o) =>
+  const pendingOrdersCount = sellerOrders.filter((o) =>
     ["PENDING", "CONFIRMED", "PROCESSING", "READY_TO_SHIP"].includes(o.orderStatus),
   ).length;
 
-  const displayGmv = analytics ? analytics.deliveredGMV : totalSales;
+  const displayGmv = analytics?.deliveredGMV ?? totalSales;
+  const activeOrdersCount = analytics
+    ? analytics.ordersBreakdown.placedOrPending
+    : pendingOrdersCount;
 
   return (
     <ProtectedRoute>
@@ -320,39 +356,48 @@ function SellerDashboardPage() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-border/40">
-                      {orders.slice(0, 5).map((order) => (
-                        <tr key={order.id} className="hover:bg-muted/20">
-                          <td className="px-6 py-4 font-mono font-semibold text-foreground">
-                            {order.id}
-                          </td>
-                          <td className="px-6 py-4">
-                            <span className="font-semibold text-foreground block">
-                              {order.items[0]?.name || "Catalog Product"}
-                            </span>
-                            {order.items[0]?.grade && (
-                              <span className="text-[11px] text-muted-foreground">
-                                Grade {order.items[0].grade}
-                              </span>
-                            )}
-                          </td>
-                          <td className="px-6 py-4 text-muted-foreground">
-                            {order.shippingAddress?.district || "Dhaka"}
-                          </td>
-                          <td className="px-6 py-4 font-display font-bold text-primary">
-                            {taka(order.total)}
-                          </td>
-                          <td className="px-6 py-4">
-                            <Badge variant="outline" className="text-[10.5px]">
-                              {order.orderStatus}
-                            </Badge>
-                          </td>
-                          <td className="px-6 py-4 text-right">
-                            <Button size="sm" variant="ghost" asChild className="text-xs">
-                              <Link to="/seller/orders">Manage</Link>
-                            </Button>
+                      {orders.length === 0 ? (
+                        <tr>
+                          <td colSpan={6} className="px-6 py-8 text-center text-muted-foreground">
+                            No fulfillment orders yet. When customers purchase your listings, orders
+                            will appear here.
                           </td>
                         </tr>
-                      ))}
+                      ) : (
+                        orders.slice(0, 5).map((order) => (
+                          <tr key={order.id} className="hover:bg-muted/20">
+                            <td className="px-6 py-4 font-mono font-semibold text-foreground">
+                              {order.id}
+                            </td>
+                            <td className="px-6 py-4">
+                              <span className="font-semibold text-foreground block">
+                                {order.items[0]?.name || "Catalog Product"}
+                              </span>
+                              {order.items[0]?.grade && (
+                                <span className="text-[11px] text-muted-foreground">
+                                  Grade {order.items[0].grade}
+                                </span>
+                              )}
+                            </td>
+                            <td className="px-6 py-4 text-muted-foreground">
+                              {order.shippingAddress?.district || "Dhaka"}
+                            </td>
+                            <td className="px-6 py-4 font-display font-bold text-primary">
+                              {taka(order.total)}
+                            </td>
+                            <td className="px-6 py-4">
+                              <Badge variant="outline" className="text-[10.5px]">
+                                {order.orderStatus}
+                              </Badge>
+                            </td>
+                            <td className="px-6 py-4 text-right">
+                              <Button size="sm" variant="ghost" asChild className="text-xs">
+                                <Link to="/seller/orders">Manage</Link>
+                              </Button>
+                            </td>
+                          </tr>
+                        ))
+                      )}
                     </tbody>
                   </table>
                 </div>

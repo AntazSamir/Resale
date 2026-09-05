@@ -85,11 +85,11 @@ export function DisputesPage() {
 
   // Load data
   useEffect(() => {
-    const allOrders = getOrders();
+    const allOrders = getOrders().filter((o) => !o.isSampleData);
     setOrders(allOrders);
 
-    const buyerId = user?.id || "u-admin";
-    const userDisputes = getDisputesForBuyer(buyerId);
+    const buyerId = user?.id || (user?.phone ? `user-${user.phone}` : "");
+    const userDisputes = buyerId ? getDisputesForBuyer(buyerId) : [];
     setMyDisputes(userDisputes);
 
     // Auto-select eligible order if URL param or first delivered order

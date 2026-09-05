@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import crypto from "crypto";
 import { db } from "@/db";
 import { createOrderNotification, createListingNotification } from "./notification-service";
 import { isListingPubliclyEligible } from "./listing-eligibility";
@@ -12,6 +13,94 @@ import type {
   SellerTrustTier,
 } from "./types";
 
+const SESSION_SECRET =
+  process.env["SESSION_SECRET"] || "resale-secure-session-signing-secret-2026-auth";
+
+export function issueSessionToken(data: {
+  userId: string;
+  role: "BUYER" | "SELLER" | "ADMIN";
+  isAdmin: boolean;
+  phone?: string | undefined;
+  email?: string | undefined;
+  name?: string | undefined;
+  expiresAt: number;
+}): string {
+  const payload = JSON.stringify({
+    uid: data.userId,
+    r: data.role,
+    adm: data.isAdmin,
+    p: data.phone || "",
+    e: data.email || "",
+    n: data.name || "",
+    exp: data.expiresAt,
+  });
+  const b64 = Buffer.from(payload).toString("base64url");
+  const sig = crypto.createHmac("sha256", SESSION_SECRET).update(b64).digest("base64url");
+  const token = `rst_${b64}.${sig}`;
+
+  db.sessions.set(token, {
+    token,
+    userId: data.userId,
+    role: data.role,
+    isAdmin: data.isAdmin,
+    phone: data.phone,
+    email: data.email,
+    name: data.name,
+    expiresAt: data.expiresAt,
+    createdAt: new Date().toISOString(),
+  });
+
+  return token;
+}
+
+export function getOrRestoreSession(token: string) {
+  if (!token) return null;
+  const existing = db.sessions.get(token);
+  if (existing && Date.now() <= existing.expiresAt) {
+    return existing;
+  }
+
+  // Parse structured token
+  if (!token.startsWith("rst_")) return null;
+  const payloadAndSig = token.slice(4);
+  const dotIndex = payloadAndSig.lastIndexOf(".");
+  if (dotIndex === -1) {
+    return existing && Date.now() <= existing.expiresAt ? existing : null;
+  }
+
+  const b64 = payloadAndSig.slice(0, dotIndex);
+  const sig = payloadAndSig.slice(dotIndex + 1);
+
+  const expectedSig = crypto.createHmac("sha256", SESSION_SECRET).update(b64).digest("base64url");
+  if (sig !== expectedSig) {
+    return null;
+  }
+
+  try {
+    const raw = JSON.parse(Buffer.from(b64, "base64url").toString("utf-8"));
+    if (!raw.uid || !raw.exp || Date.now() > raw.exp) {
+      return null;
+    }
+
+    const session = {
+      token,
+      userId: raw.uid as string,
+      role: (raw.r || "BUYER") as "BUYER" | "SELLER" | "ADMIN",
+      isAdmin: Boolean(raw.adm),
+      phone: (raw.p as string) || undefined,
+      email: (raw.e as string) || undefined,
+      name: (raw.n as string) || undefined,
+      expiresAt: raw.exp as number,
+      createdAt: new Date().toISOString(),
+    };
+
+    db.sessions.set(token, session);
+    return session;
+  } catch {
+    return null;
+  }
+}
+
 async function supabaseAdmin() {
   const { getSupabaseAdmin } = await import("@/lib/supabase-admin");
   return getSupabaseAdmin();
@@ -19,9 +108,7 @@ async function supabaseAdmin() {
 
 function getSessionUser(token: string) {
   if (!token) return null;
-  const session = db.sessions.get(token);
-  if (!session || Date.now() > session.expiresAt) return null;
-  return session;
+  return getOrRestoreSession(token);
 }
 
 async function recordListingAudit(entry: {
@@ -1200,11 +1287,8 @@ export const verifyOtpFn = createServerFn({ method: "POST" })
     const isAdmin: boolean = user.role === "ADMIN";
 
     // Issue a cryptographically secure server session token
-    const token = `rst_${Date.now().toString(36)}_${Math.random().toString(36).slice(2)}_${Math.random().toString(36).slice(2)}`;
     const expiresAt = Date.now() + 30 * 24 * 60 * 60 * 1000; // 30 days session validity
-
-    db.sessions.set(token, {
-      token,
+    const token = issueSessionToken({
       userId: user.id,
       role: isAdmin ? "ADMIN" : user.role,
       isAdmin,
@@ -1212,7 +1296,6 @@ export const verifyOtpFn = createServerFn({ method: "POST" })
       email: user.email || undefined,
       name: user.name || undefined,
       expiresAt,
-      createdAt: new Date().toISOString(),
     });
 
     // Ensure user is synced to Supabase users table
@@ -1301,11 +1384,8 @@ export const loginFn = createServerFn({ method: "POST" })
       user.email === "asr.resale@gmail.com" ||
       user.email === "admin@resale.com";
 
-    const token = `rst_${Date.now().toString(36)}_${Math.random().toString(36).slice(2)}_${Math.random().toString(36).slice(2)}`;
     const expiresAt = Date.now() + 30 * 24 * 60 * 60 * 1000;
-
-    db.sessions.set(token, {
-      token,
+    const token = issueSessionToken({
       userId: user.id,
       role: isAdmin ? "ADMIN" : user.role,
       isAdmin,
@@ -1313,7 +1393,6 @@ export const loginFn = createServerFn({ method: "POST" })
       email: user.email || undefined,
       name: user.name || undefined,
       expiresAt,
-      createdAt: new Date().toISOString(),
     });
 
     return {
@@ -1385,7 +1464,7 @@ export const validateSessionFn = createServerFn({ method: "POST" })
       return { valid: false, user: null };
     }
 
-    const session = db.sessions.get(data.token);
+    const session = getOrRestoreSession(data.token);
     if (!session || Date.now() > session.expiresAt) {
       if (session) db.sessions.delete(data.token);
       return { valid: false, user: null };
@@ -1465,11 +1544,8 @@ export const syncGoogleSessionFn = createServerFn({ method: "POST" })
     const isAdmin = user.role === "ADMIN";
 
     // Issue a cryptographically secure server session token
-    const token = `rst_${Date.now().toString(36)}_${Math.random().toString(36).slice(2)}_${Math.random().toString(36).slice(2)}`;
     const expiresAt = Date.now() + 30 * 24 * 60 * 60 * 1000; // 30 days session validity
-
-    db.sessions.set(token, {
-      token,
+    const token = issueSessionToken({
       userId: user.id,
       role: isAdmin ? "ADMIN" : user.role,
       isAdmin,
@@ -1477,7 +1553,6 @@ export const syncGoogleSessionFn = createServerFn({ method: "POST" })
       email: user.email || undefined,
       name: user.name || undefined,
       expiresAt,
-      createdAt: new Date().toISOString(),
     });
 
     // Ensure user is synced to Supabase users table

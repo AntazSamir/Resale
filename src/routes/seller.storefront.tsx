@@ -61,8 +61,7 @@ function SellerStorefrontPage() {
   const [facebook, setFacebook] = useState("");
 
   useEffect(() => {
-    // Look up if this seller has an existing store, or fallback to first demo store if in test mode
-    const existing = getStoreByOwnerId(sellerId) || getStoreByOwnerId("seller-rafiq-1");
+    const existing = getStoreByOwnerId(sellerId);
     if (existing) {
       setStore(existing);
       setName(existing.name);
@@ -81,8 +80,32 @@ function SellerStorefrontPage() {
       setBannerUrl(existing.bannerUrl || "");
       setWhatsapp(existing.socialLinks?.whatsapp || "");
       setFacebook(existing.socialLinks?.facebook || "");
+    } else {
+      setStore(null);
+      setName(user?.name ? `${user.name}'s Store` : "");
+      const autoSlug = user?.name
+        ? user.name
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, "-")
+            .replace(/(^-|-$)+/g, "")
+        : "";
+      setSlug(autoSlug);
+      setTagline("");
+      setDescription("");
+      setDistrict("Dhaka");
+      setArea("");
+      setAddress("");
+      setPhone(user?.phone || "");
+      setEmail(user?.email || "");
+      setBusinessHours("");
+      setReturnPolicy("");
+      setWarrantyPolicy("");
+      setLogoUrl("");
+      setBannerUrl("");
+      setWhatsapp("");
+      setFacebook("");
     }
-  }, [sellerId]);
+  }, [sellerId, user?.name, user?.phone, user?.email]);
 
   const handleNameChange = (val: string) => {
     setName(val);

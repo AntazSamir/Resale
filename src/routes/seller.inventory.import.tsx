@@ -35,10 +35,10 @@ export const Route = createFileRoute("/seller/inventory/import")({
 function SellerBulkImportPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const sellerId = user?.id || (user?.phone ? `seller-${user.phone}` : "seller-me");
+  const sellerId = user?.id || (user?.phone ? `seller-${user.phone}` : "");
 
   // Check if seller has a storefront
-  const store = getStoreByOwnerId(sellerId) || getStoreByOwnerId("seller-rafiq-1");
+  const store = sellerId ? getStoreByOwnerId(sellerId) : null;
 
   const [fileName, setFileName] = useState("");
   const [report, setReport] = useState<ImportValidationReport | null>(null);

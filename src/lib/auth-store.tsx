@@ -93,100 +93,105 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setToken(storedToken);
     }
 
-    if (!storedToken) {
-      // No custom session — fall back to a Google (Supabase OAuth) session,
-      // e.g. right after returning from the Google consent redirect.
-      supabase.auth
-        .getSession()
-        .then(async ({ data }) => {
+    async function initializeAuth() {
+      // 1. If stored token exists, attempt authoritative validation
+      if (storedToken) {
+        try {
+          const res = await validateSessionFn({ data: { token: storedToken } });
           if (!isMounted) return;
-          if (data.session) {
-            const googleUser = userFromGoogleSession(data.session);
-            setUser(googleUser);
-
-            // Bridge: get a backend session token
+          if (res && res.valid && res.user) {
+            const verifiedUser: AuthUser = {
+              id: res.user.id,
+              phone: res.user.phone,
+              email: res.user.email,
+              name: res.user.name,
+              role: res.user.role as "BUYER" | "SELLER" | "ADMIN",
+              isAdmin: res.user.isAdmin,
+            };
+            setUser(verifiedUser);
+            setToken(storedToken);
             try {
-              const res = await syncGoogleSessionFn({
-                data: {
-                  id: googleUser.id as string,
-                  email: googleUser.email,
-                  name: googleUser.name,
-                  phone: googleUser.phone,
-                },
-              });
-
-              if (res.success && res.token && res.user) {
-                setToken(res.token);
-                window.localStorage.setItem(TOKEN_KEY, res.token);
-
-                const verifiedUser: AuthUser = {
-                  id: res.user.id,
-                  phone: res.user.phone ?? "",
-                  email: res.user.email ?? undefined,
-                  name: res.user.name ?? undefined,
-                  role: res.user.role as "BUYER" | "SELLER" | "ADMIN",
-                  isAdmin: res.user.isAdmin,
-                };
-                setUser(verifiedUser);
-                window.localStorage.setItem(CACHED_USER_KEY, JSON.stringify(verifiedUser));
-              } else {
-                window.localStorage.setItem(CACHED_USER_KEY, JSON.stringify(googleUser));
-              }
+              window.localStorage.setItem(CACHED_USER_KEY, JSON.stringify(verifiedUser));
             } catch {
-              window.localStorage.setItem(CACHED_USER_KEY, JSON.stringify(googleUser));
+              // ignore
             }
+            return;
           }
-        })
-        .finally(() => {
-          if (isMounted) setHydrated(true);
-        });
-      return;
+        } catch (e) {
+          console.warn("validateSessionFn error:", e);
+        }
+      }
+
+      // 2. Check Supabase (Google OAuth) session if stored token validation failed or missing
+      try {
+        const { data } = await supabase.auth.getSession();
+        if (!isMounted) return;
+        if (data?.session) {
+          const googleUser = userFromGoogleSession(data.session);
+          setUser(googleUser);
+
+          const res = await syncGoogleSessionFn({
+            data: {
+              id: googleUser.id as string,
+              email: googleUser.email,
+              name: googleUser.name,
+              phone: googleUser.phone,
+            },
+          });
+
+          if (res.success && res.token && res.user) {
+            setToken(res.token);
+            try {
+              window.localStorage.setItem(TOKEN_KEY, res.token);
+            } catch {
+              // ignore
+            }
+            const verifiedUser: AuthUser = {
+              id: res.user.id,
+              phone: res.user.phone ?? "",
+              email: res.user.email ?? undefined,
+              name: res.user.name ?? undefined,
+              role: res.user.role as "BUYER" | "SELLER" | "ADMIN",
+              isAdmin: res.user.isAdmin,
+            };
+            setUser(verifiedUser);
+            try {
+              window.localStorage.setItem(CACHED_USER_KEY, JSON.stringify(verifiedUser));
+            } catch {
+              // ignore
+            }
+            return;
+          }
+        }
+      } catch (e) {
+        console.warn("Supabase session restore warning:", e);
+      }
+
+      // 3. Fallback: If we still have an optimistic cachedUser in storage, keep it active
+      if (cachedUser && storedToken) {
+        setUser(cachedUser);
+        setToken(storedToken);
+        return;
+      }
+
+      // 4. Truly no session
+      setUser(null);
+      setToken(null);
+      try {
+        window.localStorage.removeItem(TOKEN_KEY);
+        window.localStorage.removeItem(CACHED_USER_KEY);
+        window.sessionStorage.removeItem(TOKEN_KEY);
+        window.sessionStorage.removeItem(CACHED_USER_KEY);
+      } catch {
+        // ignore
+      }
     }
 
-    // Server authoritative session verification
-    validateSessionFn({ data: { token: storedToken } })
-      .then((res) => {
-        if (!isMounted) return;
-        if (res && res.valid && res.user) {
-          const verifiedUser: AuthUser = {
-            id: res.user.id,
-            phone: res.user.phone,
-            email: res.user.email,
-            name: res.user.name,
-            role: res.user.role as "BUYER" | "SELLER" | "ADMIN",
-            isAdmin: res.user.isAdmin,
-          };
-          setUser(verifiedUser);
-          setToken(storedToken);
-
-          // Update cached snapshot
-          try {
-            window.localStorage.setItem(CACHED_USER_KEY, JSON.stringify(verifiedUser));
-          } catch {
-            // ignore
-          }
-        } else {
-          // Token is invalid, expired, or tampered — revoke local session
-          setUser(null);
-          setToken(null);
-          try {
-            window.localStorage.removeItem(TOKEN_KEY);
-            window.localStorage.removeItem(CACHED_USER_KEY);
-            window.sessionStorage.removeItem(TOKEN_KEY);
-            window.sessionStorage.removeItem(CACHED_USER_KEY);
-          } catch {
-            // ignore
-          }
-        }
-      })
-      .catch(() => {
-        // Network error — keep cached user in offline mode
-      })
-      .finally(() => {
-        if (isMounted) {
-          setHydrated(true);
-        }
-      });
+    initializeAuth().finally(() => {
+      if (isMounted) {
+        setHydrated(true);
+      }
+    });
 
     return () => {
       isMounted = false;
@@ -200,55 +205,52 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === "SIGNED_IN" && session) {
-        // Only adopt the Google session when there's no custom session user.
-        if (!readCachedToken()) {
-          const googleUser = userFromGoogleSession(session);
-          setUser(googleUser);
+        const googleUser = userFromGoogleSession(session);
+        setUser(googleUser);
 
-          // Bridge: get a backend session token
-          syncGoogleSessionFn({
-            data: {
-              id: googleUser.id as string,
-              email: googleUser.email,
-              name: googleUser.name,
-              phone: googleUser.phone,
-            },
-          })
-            .then((res) => {
-              if (res.success && res.token && res.user) {
-                setToken(res.token);
-                try {
-                  window.localStorage.setItem(TOKEN_KEY, res.token);
+        // Bridge: get a backend session token
+        syncGoogleSessionFn({
+          data: {
+            id: googleUser.id as string,
+            email: googleUser.email,
+            name: googleUser.name,
+            phone: googleUser.phone,
+          },
+        })
+          .then((res) => {
+            if (res.success && res.token && res.user) {
+              setToken(res.token);
+              try {
+                window.localStorage.setItem(TOKEN_KEY, res.token);
 
-                  const verifiedUser: AuthUser = {
-                    id: res.user.id,
-                    phone: res.user.phone ?? "",
-                    email: res.user.email ?? undefined,
-                    name: res.user.name ?? undefined,
-                    role: res.user.role as "BUYER" | "SELLER" | "ADMIN",
-                    isAdmin: res.user.isAdmin,
-                  };
-                  setUser(verifiedUser);
-                  window.localStorage.setItem(CACHED_USER_KEY, JSON.stringify(verifiedUser));
-                } catch {
-                  // ignore
-                }
-              } else {
-                try {
-                  window.localStorage.setItem(CACHED_USER_KEY, JSON.stringify(googleUser));
-                } catch {
-                  // ignore
-                }
+                const verifiedUser: AuthUser = {
+                  id: res.user.id,
+                  phone: res.user.phone ?? "",
+                  email: res.user.email ?? undefined,
+                  name: res.user.name ?? undefined,
+                  role: res.user.role as "BUYER" | "SELLER" | "ADMIN",
+                  isAdmin: res.user.isAdmin,
+                };
+                setUser(verifiedUser);
+                window.localStorage.setItem(CACHED_USER_KEY, JSON.stringify(verifiedUser));
+              } catch {
+                // ignore
               }
-            })
-            .catch(() => {
+            } else {
               try {
                 window.localStorage.setItem(CACHED_USER_KEY, JSON.stringify(googleUser));
               } catch {
                 // ignore
               }
-            });
-        }
+            }
+          })
+          .catch(() => {
+            try {
+              window.localStorage.setItem(CACHED_USER_KEY, JSON.stringify(googleUser));
+            } catch {
+              // ignore
+            }
+          });
       } else if (event === "SIGNED_OUT") {
         if (!readCachedToken()) {
           setUser(null);

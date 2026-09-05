@@ -52,7 +52,7 @@ export const Route = createFileRoute("/seller/creator-profile")({
 
 function SellerCreatorProfilePage() {
   const { user } = useAuth();
-  const userId = user?.id || (user?.phone ? `user-${user.phone}` : "user-creator-me");
+  const userId = user?.id || (user?.phone ? `user-${user.phone}` : "");
 
   const [creator, setCreator] = useState<CreatorProfile | null>(null);
   const [videos, setVideos] = useState<ProductVideo[]>([]);
@@ -79,7 +79,8 @@ function SellerCreatorProfilePage() {
   const [videoUrlError, setVideoUrlError] = useState<string | null>(null);
 
   useEffect(() => {
-    const existing = getCreatorByUserId(userId) || getCreatorByUserId("user-creator-sam");
+    if (!userId) return;
+    const existing = getCreatorByUserId(userId);
     if (existing) {
       setCreator(existing);
       setDisplayName(existing.displayName);
@@ -91,8 +92,19 @@ function SellerCreatorProfilePage() {
       setFacebook(existing.channels.facebook || "");
       setTiktok(existing.channels.tiktok || "");
       setVideos(getVideosByCreator(existing.id));
+    } else {
+      setCreator(null);
+      setDisplayName(user?.name || "");
+      setHandle(user?.name ? user.name.toLowerCase().replace(/[^a-z0-9_-]/g, "") : "");
+      setAvatarUrl("");
+      setBannerUrl("");
+      setBio("");
+      setYoutube("");
+      setFacebook("");
+      setTiktok("");
+      setVideos([]);
     }
-  }, [userId]);
+  }, [userId, user?.name]);
 
   const handleHandleChange = (val: string) => {
     const clean = val
