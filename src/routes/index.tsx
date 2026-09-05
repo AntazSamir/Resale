@@ -46,7 +46,7 @@ import { useCart } from "@/lib/cart-store";
 import { useAuth } from "@/lib/auth-store";
 import { getOrders, onOrdersChange, fetchOrdersAsync, type OrderRecord } from "@/lib/order-store";
 import { getUserPersonalizedShelves } from "@/lib/recommendation-engine";
-import banner1 from "@/assets/banner-1.png";
+import heroBanner from "@/assets/hero-banner.webp";
 import bannerImage1 from "@/assets/image-1.webp";
 import bannerImage2 from "@/assets/image-2.webp";
 
@@ -203,7 +203,7 @@ function Index() {
       ════════════════════════════════════════════════════════════ */}
       <section className="relative w-full border-b border-border/80 overflow-hidden">
         {/* Image drives the section height — scales proportionally with viewport width */}
-        <img src={banner1} alt="" aria-hidden="true" className="w-full h-auto block" />
+        <img src={heroBanner} alt="" aria-hidden="true" className="w-full h-auto block" />
 
         {/* Content overlaid on the image */}
         <div className="absolute inset-0 z-10 flex items-center px-4 sm:px-6 lg:px-8">
