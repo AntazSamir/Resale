@@ -17,6 +17,7 @@ import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp
 import { sendOtpFn, verifyOtpFn } from "@/lib/server-functions";
 import { AlertCircle, Lock } from "lucide-react";
 import resaleLogo from "@/assets/resale-logo.svg";
+import { GoogleAuthButton, AuthDivider } from "@/components/google-auth-button";
 
 interface RegisterSearch {
   redirect?: string | undefined;
@@ -313,6 +314,12 @@ function RegisterPage() {
               </form>
             )}
           </CardContent>
+          {step === "details" && (
+            <div className="px-6 pb-6">
+              <AuthDivider />
+              <GoogleAuthButton redirect={search.redirect} onError={setError} />
+            </div>
+          )}
           <CardFooter className="justify-center border-t border-border/60 p-5">
             <p className="text-xs text-muted-foreground">
               Already have an account?{" "}
