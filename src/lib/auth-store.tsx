@@ -94,7 +94,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     if (!storedToken) {
-      setHydrated(true);
+      // No custom session — fall back to a Google (Supabase OAuth) session,
+      // e.g. right after returning from the Google consent redirect.
+      supabase.auth
+        .getSession()
+        .then(({ data }) => {
+          if (!isMounted) return;
+          if (data.session) {
+            const googleUser = userFromGoogleSession(data.session);
+            setUser(googleUser);
+            try {
+              window.localStorage.setItem(CACHED_USER_KEY, JSON.stringify(googleUser));
+            } catch {
+              // ignore
+            }
+          }
+        })
+        .finally(() => {
+          if (isMounted) setHydrated(true);
+        });
       return;
     }
 
