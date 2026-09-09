@@ -67,6 +67,258 @@ interface TooltipState {
   clientY: number;
 }
 
+// ── Division → district membership map ───────────────────────────────────────
+// Matches district strings from shipping_address_json against known division districts.
+const DIVISION_DISTRICT_MAP: Record<string, string[]> = {
+  "BD-A": ["Barisal", "Bhola", "Barguna", "Jhalokati", "Patuakhali", "Pirojpur"],
+  "BD-B": [
+    "Chattogram",
+    "Chittagong",
+    "Cox's Bazar",
+    "Coxsbazar",
+    "Cumilla",
+    "Comilla",
+    "Feni",
+    "Noakhali",
+    "Rangamati",
+    "Bandarban",
+    "Lakshmipur",
+    "Chandpur",
+    "Khagrachhari",
+  ],
+  "BD-C": [
+    "Dhaka",
+    "Gazipur",
+    "Narayanganj",
+    "Tangail",
+    "Faridpur",
+    "Manikganj",
+    "Narsingdi",
+    "Munshiganj",
+    "Rajbari",
+    "Shariatpur",
+    "Kishoreganj",
+    "Gopalganj",
+    "Netrokona",
+    "Mymensingh",
+    "Jamalpur",
+    "Sherpur",
+  ],
+  "BD-D": [
+    "Khulna",
+    "Jessore",
+    "Jashore",
+    "Satkhira",
+    "Bagerhat",
+    "Narail",
+    "Magura",
+    "Jhenaidah",
+    "Chuadanga",
+    "Kushtia",
+    "Meherpur",
+  ],
+  "BD-E": [
+    "Rajshahi",
+    "Bogra",
+    "Bogura",
+    "Chapainawabganj",
+    "Naogaon",
+    "Natore",
+    "Pabna",
+    "Sirajganj",
+    "Joypurhat",
+  ],
+  "BD-F": [
+    "Rangpur",
+    "Dinajpur",
+    "Gaibandha",
+    "Kurigram",
+    "Lalmonirhat",
+    "Nilphamari",
+    "Panchagarh",
+    "Thakurgaon",
+  ],
+  "BD-G": ["Sylhet", "Moulvibazar", "Habiganj", "Sunamganj"],
+};
+
+function normStr(s: string): string {
+  return s.toLowerCase().replace(/[^a-z]/g, "");
+}
+
+function districtToDivision(district: string): string | null {
+  const d = normStr(district);
+  for (const [divId, districts] of Object.entries(DIVISION_DISTRICT_MAP)) {
+    if (
+      districts.some(
+        (x) => normStr(x) === d || d.startsWith(normStr(x)) || normStr(x).startsWith(d),
+      )
+    ) {
+      return divId;
+    }
+  }
+  return null;
+}
+
+export interface AdminMapDistrict {
+  district: string;
+  orders: number;
+  settledSalesBDT: number;
+  isUnknown: boolean;
+}
+
+interface AdminMapProps {
+  districts: AdminMapDistrict[];
+  mode: "orders" | "sales";
+  /** Formatter fn for BDT values (e.g. taka from catalog) */
+  formatBDT: (n: number) => string;
+}
+
+export function BangladeshAdminMap({ districts, mode, formatBDT }: AdminMapProps) {
+  const [hovered, setHovered] = useState<string | null>(null);
+  const [tooltip, setTooltip] = useState<{
+    divId: string;
+    clientX: number;
+    clientY: number;
+  } | null>(null);
+
+  // Aggregate to division level
+  const divisionStats = DIVISIONS.reduce<
+    Record<string, { orders: number; settledSalesBDT: number; districts: string[] }>
+  >((acc, div) => {
+    acc[div.id] = { orders: 0, settledSalesBDT: 0, districts: [] };
+    return acc;
+  }, {});
+
+  for (const item of districts) {
+    if (item.isUnknown) continue;
+    const divId = districtToDivision(item.district);
+    if (divId && divisionStats[divId]) {
+      divisionStats[divId]!.orders += item.orders;
+      divisionStats[divId]!.settledSalesBDT += item.settledSalesBDT;
+      divisionStats[divId]!.districts.push(item.district);
+    }
+  }
+
+  const values = Object.values(divisionStats).map((s) =>
+    mode === "orders" ? s.orders : s.settledSalesBDT,
+  );
+  const maxVal = Math.max(...values, 1);
+
+  function divisionFill(divId: string): string {
+    const stats = divisionStats[divId];
+    if (!stats) return "#27272a";
+    const val = mode === "orders" ? stats.orders : stats.settledSalesBDT;
+    if (val === 0) return "#27272a";
+    const ratio = val / maxVal;
+    // Resale orange: f97316 (rgb 249,115,22)
+    // opacity from 0.25 to 0.95
+    const opacity = 0.25 + ratio * 0.7;
+    return `rgba(249,115,22,${opacity.toFixed(2)})`;
+  }
+
+  const hoveredDiv = hovered ? DIVISIONS.find((d) => d.id === hovered) : null;
+  const hoveredStats = hovered ? divisionStats[hovered] : null;
+
+  return (
+    <div className="relative inline-block select-none">
+      <svg
+        viewBox="0 0 437.80637 601.16034"
+        className="h-auto w-full pointer-events-auto overflow-visible"
+        aria-label="Bangladesh Geographic Performance Map"
+        role="img"
+      >
+        <defs>
+          <filter id="bd-admin-glow" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="4" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+        </defs>
+
+        {DIVISIONS.map((div) => {
+          const isHovered = hovered === div.id;
+          const fill = divisionFill(div.id);
+          const stats = divisionStats[div.id];
+          const hasData = stats && stats.orders > 0;
+          return (
+            <path
+              key={div.id}
+              d={div.path}
+              fill={isHovered ? "rgba(249,115,22,0.95)" : fill}
+              fillOpacity={isHovered ? 1 : hasData ? 0.9 : 0.55}
+              stroke={isHovered ? "rgba(249,115,22,1)" : "#55555e"}
+              strokeWidth={isHovered ? 2 : 0.6}
+              strokeOpacity={isHovered ? 1 : 0.7}
+              filter={isHovered ? "url(#bd-admin-glow)" : undefined}
+              style={{
+                cursor: "pointer",
+                transition:
+                  "fill 0.25s ease, fill-opacity 0.25s ease, stroke 0.25s ease, stroke-width 0.2s ease",
+              }}
+              onMouseEnter={() => setHovered(div.id)}
+              onMouseMove={(e) =>
+                setTooltip({ divId: div.id, clientX: e.clientX, clientY: e.clientY })
+              }
+              onMouseLeave={() => {
+                setHovered(null);
+                setTooltip(null);
+              }}
+              aria-label={`${div.name} division`}
+            />
+          );
+        })}
+      </svg>
+
+      {/* Colour legend */}
+      <div className="mt-2 flex items-center gap-1.5 text-[10px] text-muted-foreground">
+        <span>Low</span>
+        <div
+          className="h-2 rounded-full flex-1"
+          style={{
+            background:
+              "linear-gradient(to right, #27272a, rgba(249,115,22,0.3), rgba(249,115,22,0.95))",
+          }}
+        />
+        <span>High</span>
+      </div>
+
+      {/* Floating Tooltip */}
+      {tooltip && hoveredDiv && hoveredStats && (
+        <div
+          className="fixed z-50 pointer-events-none px-3 py-2 bg-zinc-950/95 border border-white/10 text-white rounded-xl shadow-2xl backdrop-blur-md text-xs whitespace-nowrap space-y-1"
+          style={{ left: tooltip.clientX + 14, top: tooltip.clientY - 24 }}
+        >
+          <div className="font-bold text-[13px] text-orange-400">{hoveredDiv.name}</div>
+          <div className="text-zinc-400 text-[10px] leading-tight">
+            {DIVISION_DISTRICT_MAP[hoveredDiv.id]?.slice(0, 4).join(", ")}
+            {(DIVISION_DISTRICT_MAP[hoveredDiv.id]?.length ?? 0) > 4 ? " …" : ""}
+          </div>
+          <div className="border-t border-white/10 pt-1 flex flex-col gap-0.5">
+            <div className="flex items-center justify-between gap-6">
+              <span className="text-zinc-400">Orders</span>
+              <span className="font-mono font-semibold text-white">
+                {hoveredStats.orders.toLocaleString()}
+              </span>
+            </div>
+            <div className="flex items-center justify-between gap-6">
+              <span className="text-zinc-400">Settled Sales</span>
+              <span className="font-mono font-semibold text-emerald-400">
+                {formatBDT(hoveredStats.settledSalesBDT)}
+              </span>
+            </div>
+            <div className="flex items-center justify-between gap-6">
+              <span className="text-zinc-400">Users</span>
+              <span className="text-zinc-500 italic">Not recorded</span>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function BangladeshMapSVG() {
   const [hovered, setHovered] = useState<string | null>(null);
   const [tooltip, setTooltip] = useState<TooltipState | null>(null);

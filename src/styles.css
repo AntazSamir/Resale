@@ -255,21 +255,22 @@
   aspect-ratio: 1;
   --c: no-repeat linear-gradient(orange 0 0);
   background:
-    var(--c) left   20px top    0,
-    var(--c) top    20px right  0,
-    var(--c) right  20px bottom 0,
-    var(--c) bottom 20px left   0;
+    var(--c) left 20px top 0,
+    var(--c) top 20px right 0,
+    var(--c) right 20px bottom 0,
+    var(--c) bottom 20px left 0;
   background-size: calc(100% / 3) calc(100% / 3);
   animation:
     l29-1 0.75s infinite alternate linear,
-    l29-2 1.5s   infinite;
+    l29-2 1.5s infinite;
 }
 
 @keyframes l29-1 {
   90%,
   100% {
-    background-size: calc(2 * 100% / 3) calc(100% / 3),
-                     calc(100% / 3) calc(2 * 100% / 3);
+    background-size:
+      calc(2 * 100% / 3) calc(100% / 3),
+      calc(100% / 3) calc(2 * 100% / 3);
   }
 }
 

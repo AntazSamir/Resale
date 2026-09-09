@@ -169,8 +169,13 @@ function Index() {
     .sort((a, b) => b.pct - a.pct)
     .slice(0, 8);
 
-  const creators = getCreators().slice(0, 3);
-  const stores = getStores().slice(0, 3);
+  const [creators, setCreators] = useState<ReturnType<typeof getCreators>>([]);
+  const [stores, setStores] = useState<ReturnType<typeof getStores>>([]);
+
+  useEffect(() => {
+    setCreators(getCreators().slice(0, 3));
+    setStores(getStores().slice(0, 3));
+  }, []);
 
   const toggleSaved = (id: string) => {
     setSavedIds((prev) => {

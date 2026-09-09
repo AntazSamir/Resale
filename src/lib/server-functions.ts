@@ -699,6 +699,382 @@ export const moderateListingFn = createServerFn({ method: "POST" })
     return { success: false, error: "Invalid moderation action." };
   });
 
+// ── Admin Console: Dashboard Real Telemetry ───────────────────────
+export const getAdminDashboardMetricsFn = createServerFn({ method: "POST" })
+  .validator((data: { token: string }) => data)
+  .handler(async ({ data }) => {
+    const session = getSessionUser(data.token);
+    if (!session || (!session.isAdmin && session.role !== "ADMIN")) {
+      return { success: false, error: "Unauthorized: Admin privileges required." };
+    }
+
+    let pendingModerationCount = 0;
+    let activeListingsCount = 0;
+    let totalOrdersCount = 0;
+    let settledGmvBDT = 0;
+    let openDisputesCount = 0;
+    let unverifiedSellersCount = 0;
+    const orderStatusBreakdown: Record<string, number> = {};
+    const listingStatusBreakdown: Record<string, number> = {};
+    let recentAuditFeed: Array<{
+      id: string;
+      listingId: string;
+      action: string;
+      actorRole: string;
+      previousStatus: string | null;
+      newStatus: string;
+      reasonText: string | null;
+      createdAt: string;
+    }> = [];
+    let recentOrders: Array<{
+      id: string;
+      status: string;
+      amountBDT: number;
+      district: string;
+      createdAt: string;
+    }> = [];
+
+    // 1. Authoritative persistent Supabase queries
+    let supabaseSuccess = false;
+    try {
+      const supabase = await supabaseAdmin();
+
+      const [pendingRes, activeRes, ordersRes, auditRes, listingsRes, disputesRes, unverifiedRes] =
+        await Promise.all([
+          supabase
+            .from("listings")
+            .select("id", { count: "exact", head: true })
+            .in("moderation_status", ["PENDING_REVIEW", "PENDING_MODERATION"]),
+          supabase
+            .from("listings")
+            .select("id", { count: "exact", head: true })
+            .eq("moderation_status", "APPROVED")
+            .eq("status", "ACTIVE"),
+          supabase
+            .from("orders")
+            .select("id, status, amount_poisha, shipping_address_json, created_at")
+            .order("created_at", { ascending: false }),
+          supabase
+            .from("listing_audit_history")
+            .select(
+              "id, listing_id, action, actor_role, previous_status, new_status, reason_text, created_at",
+            )
+            .order("created_at", { ascending: false })
+            .limit(30),
+          supabase.from("listings").select("status, moderation_status"),
+          supabase
+            .from("disputes")
+            .select("id", { count: "exact", head: true })
+            .eq("status", "OPEN"),
+          supabase
+            .from("users")
+            .select("id", { count: "exact", head: true })
+            .eq("role", "SELLER")
+            .eq("verified", false),
+        ]);
+
+      if (!pendingRes.error && !activeRes.error && !ordersRes.error) {
+        supabaseSuccess = true;
+        pendingModerationCount = pendingRes.count ?? 0;
+        activeListingsCount = activeRes.count ?? 0;
+        openDisputesCount = disputesRes.count ?? 0;
+        unverifiedSellersCount = unverifiedRes.count ?? 0;
+
+        if (Array.isArray(ordersRes.data)) {
+          totalOrdersCount = ordersRes.data.length;
+          for (const ord of ordersRes.data) {
+            const st = (ord.status || "UNKNOWN").toUpperCase();
+            orderStatusBreakdown[st] = (orderStatusBreakdown[st] || 0) + 1;
+
+            // GMV calculated ONLY from genuinely defined delivered / completed statuses
+            if (st === "DELIVERED" || st === "COMPLETED") {
+              const poisha = typeof ord.amount_poisha === "number" ? ord.amount_poisha : 0;
+              settledGmvBDT += Math.round(poisha / 100);
+            }
+          }
+
+          recentOrders = ordersRes.data.slice(0, 5).map((o) => {
+            let district = "Unknown";
+            if (typeof o.shipping_address_json === "string") {
+              try {
+                const p = JSON.parse(o.shipping_address_json);
+                if (p?.district) district = String(p.district).trim();
+              } catch {
+                // ignore
+              }
+            } else if (
+              typeof o.shipping_address_json === "object" &&
+              o.shipping_address_json !== null
+            ) {
+              const p = o.shipping_address_json as { district?: string };
+              if (p.district) district = String(p.district).trim();
+            }
+            return {
+              id: o.id,
+              status: o.status,
+              amountBDT: Math.round((o.amount_poisha ?? 0) / 100),
+              district: district || "Unknown",
+              createdAt: o.created_at,
+            };
+          });
+        }
+
+        if (Array.isArray(listingsRes.data)) {
+          for (const l of listingsRes.data) {
+            const mod = (l.moderation_status || "").toUpperCase();
+            const op = (l.status || "").toUpperCase();
+            const key =
+              mod === "PENDING_REVIEW" || mod === "PENDING_MODERATION"
+                ? "PENDING_REVIEW"
+                : mod === "REJECTED"
+                  ? "REJECTED"
+                  : op || "ACTIVE";
+            listingStatusBreakdown[key] = (listingStatusBreakdown[key] || 0) + 1;
+          }
+        }
+
+        if (Array.isArray(auditRes.data)) {
+          recentAuditFeed = auditRes.data.map((a) => ({
+            id: a.id,
+            listingId: a.listing_id,
+            action: a.action,
+            actorRole: a.actor_role,
+            previousStatus: a.previous_status,
+            newStatus: a.new_status,
+            reasonText: a.reason_text,
+            createdAt: a.created_at,
+          }));
+        }
+      }
+    } catch (err) {
+      console.warn(
+        "[getAdminDashboardMetricsFn] Supabase query exception, falling back to memory db:",
+        err,
+      );
+    }
+
+    // 2. Fallback to in-memory db if Supabase was unavailable
+    if (!supabaseSuccess) {
+      pendingModerationCount = db.listings.filter(
+        (l) => l.moderationStatus === "PENDING_REVIEW" || l.status === "PENDING_MODERATION",
+      ).length;
+
+      activeListingsCount = db.listings.filter(
+        (l) => l.moderationStatus === "APPROVED" && l.status === "ACTIVE",
+      ).length;
+
+      openDisputesCount = db.disputes.filter((d) => d.status === "OPEN").length;
+      unverifiedSellersCount = db.users.filter((u) => u.role === "SELLER" && !u.verified).length;
+
+      totalOrdersCount = db.orders.length;
+      for (const ord of db.orders) {
+        const st = (ord.status || "UNKNOWN").toUpperCase();
+        orderStatusBreakdown[st] = (orderStatusBreakdown[st] || 0) + 1;
+        if (st === "DELIVERED" || st === "COMPLETED") {
+          const poisha = typeof ord.amountPoisha === "number" ? ord.amountPoisha : 0;
+          settledGmvBDT += Math.round(poisha / 100);
+        }
+      }
+
+      recentOrders = db.orders.slice(0, 5).map((o) => {
+        let district = "Unknown";
+        if (typeof o.shippingAddressJson === "string") {
+          try {
+            const p = JSON.parse(o.shippingAddressJson);
+            if (p?.district) district = String(p.district).trim();
+          } catch {
+            // ignore
+          }
+        }
+        return {
+          id: o.id,
+          status: o.status,
+          amountBDT: Math.round((o.amountPoisha ?? 0) / 100),
+          district: district || "Unknown",
+          createdAt: o.createdAt,
+        };
+      });
+
+      for (const l of db.listings) {
+        const mod = (l.moderationStatus || "").toUpperCase();
+        const op = (l.status || "").toUpperCase();
+        const key =
+          mod === "PENDING_REVIEW" || mod === "PENDING_MODERATION"
+            ? "PENDING_REVIEW"
+            : mod === "REJECTED"
+              ? "REJECTED"
+              : op || "ACTIVE";
+        listingStatusBreakdown[key] = (listingStatusBreakdown[key] || 0) + 1;
+      }
+
+      recentAuditFeed = db.listingAuditHistory.slice(0, 30).map((a) => ({
+        id: a.id,
+        listingId: a.listingId,
+        action: a.action,
+        actorRole: a.actorRole,
+        previousStatus: a.previousStatus,
+        newStatus: a.newStatus,
+        reasonText: a.reasonText,
+        createdAt: a.createdAt,
+      }));
+    }
+
+    return {
+      success: true,
+      data: {
+        pendingModerationCount,
+        activeListingsCount,
+        totalOrdersCount,
+        settledGmvBDT,
+        orderStatusBreakdown,
+        listingStatusBreakdown,
+        openDisputesCount,
+        unverifiedSellersCount,
+        recentOrders,
+        recentAuditFeed,
+        dataSource: supabaseSuccess ? "SUPABASE_POSTGRESQL" : "IN_MEMORY_COMPATIBILITY",
+      },
+    };
+  });
+
+// ── Admin Console: Transactions & Orders Oversight (Data-Minimized) ─
+export const getAdminOrdersFn = createServerFn({ method: "POST" })
+  .validator((data: { token: string }) => data)
+  .handler(async ({ data }) => {
+    const session = getSessionUser(data.token);
+    if (!session || (!session.isAdmin && session.role !== "ADMIN")) {
+      return { success: false, error: "Unauthorized: Admin privileges required." };
+    }
+
+    let rawOrders: Array<{
+      id: string;
+      listing_id?: string;
+      listingId?: string;
+      buyer_id?: string;
+      buyerId?: string;
+      amount_poisha?: number;
+      amountPoisha?: number;
+      payment_method?: string;
+      paymentMethod?: string;
+      status: string;
+      shipping_address_json?: string | Record<string, unknown>;
+      shippingAddress?: Record<string, unknown>;
+      created_at?: string;
+      createdAt?: string;
+      confirmed_at?: string | null;
+      shipped_at?: string | null;
+      delivered_at?: string | null;
+      cancelled_at?: string | null;
+    }> = [];
+
+    let supabaseSuccess = false;
+    try {
+      const supabase = await supabaseAdmin();
+      const { data: rows, error } = await supabase
+        .from("orders")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (!error && Array.isArray(rows)) {
+        supabaseSuccess = true;
+        rawOrders = rows;
+      }
+    } catch (err) {
+      console.warn("[getAdminOrdersFn] Supabase orders fetch error, falling back:", err);
+    }
+
+    if (!supabaseSuccess) {
+      rawOrders = db.orders.map((o) => ({
+        id: o.id,
+        listing_id: o.listingId,
+        buyer_id: o.buyerId,
+        amount_poisha: o.amountPoisha,
+        payment_method: o.paymentMethod,
+        status: o.status,
+        shipping_address_json: o.shippingAddressJson,
+        created_at: o.createdAt,
+        confirmed_at: o.confirmedAt,
+        shipped_at: o.shippedAt,
+        delivered_at: o.deliveredAt,
+        cancelled_at: o.cancelledAt,
+      }));
+    }
+
+    // Map and sanitize records (EXCLUDE NID information completely for data minimization)
+    const sanitizedOrders = rawOrders.map((o) => {
+      let shippingAddress: {
+        name?: string | undefined;
+        phone?: string | undefined;
+        division?: string | undefined;
+        district?: string | undefined;
+        area?: string | undefined;
+        address?: string | undefined;
+      } = {};
+
+      if (typeof o.shipping_address_json === "string") {
+        try {
+          const parsed = JSON.parse(o.shipping_address_json);
+          shippingAddress = {
+            name: parsed.name,
+            phone: parsed.phone,
+            division: parsed.division,
+            district: parsed.district,
+            area: parsed.area,
+            address: parsed.address,
+          };
+        } catch {
+          // ignore
+        }
+      } else if (typeof o.shipping_address_json === "object" && o.shipping_address_json !== null) {
+        const p = o.shipping_address_json as Record<string, unknown>;
+        shippingAddress = {
+          name: typeof p["name"] === "string" ? p["name"] : undefined,
+          phone: typeof p["phone"] === "string" ? p["phone"] : undefined,
+          division: typeof p["division"] === "string" ? p["division"] : undefined,
+          district: typeof p["district"] === "string" ? p["district"] : undefined,
+          area: typeof p["area"] === "string" ? p["area"] : undefined,
+          address: typeof p["address"] === "string" ? p["address"] : undefined,
+        };
+      }
+
+      const listingId = o.listing_id || o.listingId || "";
+      const listing = db.listings.find((l) => l.id === listingId);
+      const product = listing ? db.products.find((p) => p.id === listing.productId) : null;
+      const buyerId = o.buyer_id || o.buyerId || "";
+      const buyer = db.users.find((u) => u.id === buyerId);
+
+      const amountPoisha = o.amount_poisha ?? o.amountPoisha ?? 0;
+
+      return {
+        id: o.id,
+        listingId,
+        productName: product?.name || "Marketplace Item",
+        productImage: product?.image || "",
+        grade: listing?.grade || "A",
+        conditionScore: listing?.conditionScore || 90,
+        amountBDT: Math.round(amountPoisha / 100),
+        paymentMethod: (o.payment_method || o.paymentMethod || "COD").toUpperCase(),
+        status: (o.status || "PENDING").toUpperCase(),
+        createdAt: o.created_at || o.createdAt || new Date().toISOString(),
+        confirmedAt: o.confirmed_at || null,
+        shippedAt: o.shipped_at || null,
+        deliveredAt: o.delivered_at || null,
+        cancelledAt: o.cancelled_at || null,
+        buyerId,
+        buyerName: buyer?.name || shippingAddress.name || "Customer",
+        buyerPhone: buyer?.phone || shippingAddress.phone || "",
+        shippingAddress,
+        // NID is explicitly excluded to comply with data minimization
+      };
+    });
+
+    return {
+      success: true,
+      data: sanitizedOrders,
+      dataSource: supabaseSuccess ? "SUPABASE_POSTGRESQL" : "IN_MEMORY_COMPATIBILITY",
+    };
+  });
+
 // ── Phase 5.1: Seller Availability Toggles (Pause, Resume, Delist) ──
 export const updateListingAvailabilityFn = createServerFn({ method: "POST" })
   .validator(
@@ -2337,5 +2713,793 @@ export const getSellerAnalyticsFn = createServerFn({ method: "POST" })
           data: null,
         };
       }
+    },
+  );
+
+// ── Admin Console: Listings Inventory ─────────────────────────────────────────
+export const getAdminListingsFn = createServerFn({ method: "POST" })
+  .validator((data: { token: string }) => data)
+  .handler(async ({ data }) => {
+    const session = getSessionUser(data.token);
+    if (!session || (!session.isAdmin && session.role !== "ADMIN")) {
+      return { success: false, error: "Unauthorized: Admin privileges required.", data: [] };
+    }
+
+    let rows: Array<{
+      id: string;
+      productName: string;
+      productId: string;
+      sellerId: string;
+      sellerName: string;
+      grade: string;
+      conditionScore: number;
+      priceBDT: number;
+      moderationStatus: string;
+      status: string;
+      isSeed: boolean;
+      listedAt: string;
+      submittedAt: string | null;
+    }> = [];
+
+    let supabaseSuccess = false;
+    try {
+      const supabase = await supabaseAdmin();
+      const { data: listings, error } = await supabase
+        .from("listings")
+        .select(
+          "id, product_id, seller_id, grade, condition_score, price_poisha, moderation_status, status, is_seed, listed_at, submitted_at",
+        )
+        .order("listed_at", { ascending: false })
+        .limit(500);
+
+      if (!error && Array.isArray(listings)) {
+        supabaseSuccess = true;
+        // Fetch products + users for join
+        const { data: products } = await supabase.from("products").select("id, name");
+        const { data: users } = await supabase.from("users").select("id, name");
+        const productMap = Object.fromEntries((products ?? []).map((p) => [p.id, p.name]));
+        const userMap = Object.fromEntries((users ?? []).map((u) => [u.id, u.name]));
+
+        rows = listings.map((l) => ({
+          id: l.id,
+          productId: l.product_id,
+          productName: productMap[l.product_id] || "Unknown Product",
+          sellerId: l.seller_id,
+          sellerName: userMap[l.seller_id] || "Unknown Seller",
+          grade: l.grade || "?",
+          conditionScore: l.condition_score ?? 0,
+          priceBDT: Math.round((l.price_poisha ?? 0) / 100),
+          moderationStatus: l.moderation_status || "UNKNOWN",
+          status: l.status || "UNKNOWN",
+          isSeed: Boolean(l.is_seed),
+          listedAt: l.listed_at || "",
+          submittedAt: l.submitted_at || null,
+        }));
+      }
+    } catch (err) {
+      console.warn("[getAdminListingsFn] Supabase error, falling back:", err);
+    }
+
+    if (!supabaseSuccess) {
+      rows = db.listings.map((l) => {
+        const product = db.products.find((p) => p.id === l.productId);
+        const seller = db.users.find((u) => u.id === l.sellerId);
+        return {
+          id: l.id,
+          productId: l.productId,
+          productName: product?.name || "Unknown Product",
+          sellerId: l.sellerId,
+          sellerName: seller?.name || "Unknown Seller",
+          grade: l.grade,
+          conditionScore: l.conditionScore,
+          priceBDT: Math.round(l.pricePoisha / 100),
+          moderationStatus: l.moderationStatus,
+          status: l.status,
+          isSeed: l.isSeed,
+          listedAt: l.listedAt,
+          submittedAt: l.submittedAt,
+        };
+      });
+    }
+
+    return {
+      success: true,
+      data: rows,
+      dataSource: supabaseSuccess ? "SUPABASE_POSTGRESQL" : "IN_MEMORY_COMPATIBILITY",
+    };
+  });
+
+// ── Admin Console: Inspection Items ───────────────────────────────────────────
+export const getAdminInspectionsFn = createServerFn({ method: "POST" })
+  .validator((data: { token: string }) => data)
+  .handler(async ({ data }) => {
+    const session = getSessionUser(data.token);
+    if (!session || (!session.isAdmin && session.role !== "ADMIN")) {
+      return { success: false, error: "Unauthorized: Admin privileges required.", data: [] };
+    }
+
+    let rows: Array<{
+      id: string;
+      listingId: string;
+      productName: string;
+      component: string;
+      status: string;
+      notes: string | null;
+    }> = [];
+
+    let supabaseSuccess = false;
+    try {
+      const supabase = await supabaseAdmin();
+      const { data: items, error } = await supabase
+        .from("inspection_items")
+        .select("id, listing_id, component, status, notes")
+        .order("listing_id")
+        .limit(1000);
+
+      if (!error && Array.isArray(items)) {
+        supabaseSuccess = true;
+        const listingIds = [...new Set(items.map((i) => i.listing_id))];
+        const { data: listings } = await supabase
+          .from("listings")
+          .select("id, product_id")
+          .in("id", listingIds);
+        const productIds = [...new Set((listings ?? []).map((l) => l.product_id))];
+        const { data: products } = await supabase
+          .from("products")
+          .select("id, name")
+          .in("id", productIds);
+        const productMap = Object.fromEntries((products ?? []).map((p) => [p.id, p.name]));
+        const listingProductMap = Object.fromEntries(
+          (listings ?? []).map((l) => [l.id, productMap[l.product_id] || "Unknown"]),
+        );
+        rows = items.map((i) => ({
+          id: i.id,
+          listingId: i.listing_id,
+          productName: listingProductMap[i.listing_id] || "Unknown",
+          component: i.component,
+          status: i.status,
+          notes: i.notes || null,
+        }));
+      }
+    } catch (err) {
+      console.warn("[getAdminInspectionsFn] Supabase error:", err);
+    }
+
+    return {
+      success: true,
+      data: rows,
+      dataSource: supabaseSuccess ? "SUPABASE_POSTGRESQL" : "IN_MEMORY_COMPATIBILITY",
+    };
+  });
+
+// ── Admin Console: All Disputes ────────────────────────────────────────────────
+export const getAdminDisputesFn = createServerFn({ method: "POST" })
+  .validator((data: { token: string }) => data)
+  .handler(async ({ data }) => {
+    const session = getSessionUser(data.token);
+    if (!session || (!session.isAdmin && session.role !== "ADMIN")) {
+      return { success: false, error: "Unauthorized: Admin privileges required.", data: [] };
+    }
+
+    let rows: Array<{
+      id: string;
+      orderId: string;
+      reason: string;
+      explanation: string;
+      status: string;
+      createdAt: string;
+      amountBDT: number | null;
+    }> = [];
+
+    let supabaseSuccess = false;
+    try {
+      const supabase = await supabaseAdmin();
+      const { data: disputes, error } = await supabase
+        .from("disputes")
+        .select("id, order_id, reason, explanation, status, created_at")
+        .order("created_at", { ascending: false });
+
+      if (!error && Array.isArray(disputes)) {
+        supabaseSuccess = true;
+        const orderIds = [...new Set(disputes.map((d) => d.order_id))];
+        let orderAmounts: Record<string, number> = {};
+        if (orderIds.length > 0) {
+          const { data: orders } = await supabase
+            .from("orders")
+            .select("id, amount_poisha")
+            .in("id", orderIds);
+          orderAmounts = Object.fromEntries(
+            (orders ?? []).map((o) => [o.id, Math.round((o.amount_poisha ?? 0) / 100)]),
+          );
+        }
+        rows = disputes.map((d) => ({
+          id: d.id,
+          orderId: d.order_id,
+          reason: d.reason,
+          explanation: d.explanation,
+          status: d.status,
+          createdAt: d.created_at,
+          amountBDT: orderAmounts[d.order_id] ?? null,
+        }));
+      }
+    } catch (err) {
+      console.warn("[getAdminDisputesFn] Supabase error:", err);
+    }
+
+    if (!supabaseSuccess) {
+      rows = db.disputes.map((d) => {
+        const order = db.orders.find((o) => o.id === d.orderId);
+        return {
+          id: d.id,
+          orderId: d.orderId,
+          reason: d.reason,
+          explanation: d.explanation,
+          status: d.status,
+          createdAt: d.createdAt,
+          amountBDT: order ? Math.round(order.amountPoisha / 100) : null,
+        };
+      });
+    }
+
+    return {
+      success: true,
+      data: rows,
+      dataSource: supabaseSuccess ? "SUPABASE_POSTGRESQL" : "IN_MEMORY_COMPATIBILITY",
+    };
+  });
+
+// ── Admin Console: User Roster ─────────────────────────────────────────────────
+export const getAdminUsersFn = createServerFn({ method: "POST" })
+  .validator((data: { token: string }) => data)
+  .handler(async ({ data }) => {
+    const session = getSessionUser(data.token);
+    if (!session || (!session.isAdmin && session.role !== "ADMIN")) {
+      return { success: false, error: "Unauthorized: Admin privileges required.", data: [] };
+    }
+
+    let rows: Array<{
+      id: string;
+      name: string | null;
+      phone: string | null;
+      email: string | null;
+      role: string;
+      verified: boolean;
+      createdAt: string;
+    }> = [];
+
+    let supabaseSuccess = false;
+    try {
+      const supabase = await supabaseAdmin();
+      // Exclude nid_number from select — data minimization
+      const { data: users, error } = await supabase
+        .from("users")
+        .select("id, name, phone, email, role, verified, created_at")
+        .order("created_at", { ascending: false });
+
+      if (!error && Array.isArray(users)) {
+        supabaseSuccess = true;
+        rows = users.map((u) => ({
+          id: u.id,
+          name: u.name || null,
+          phone: u.phone || null,
+          email: u.email || null,
+          role: u.role || "BUYER",
+          verified: Boolean(u.verified),
+          createdAt: u.created_at || "",
+        }));
+      }
+    } catch (err) {
+      console.warn("[getAdminUsersFn] Supabase error, falling back:", err);
+    }
+
+    if (!supabaseSuccess) {
+      rows = db.users.map((u) => ({
+        id: u.id,
+        name: u.name || null,
+        phone: u.phone || null,
+        email: u.email || null,
+        role: u.role,
+        verified: u.verified,
+        createdAt: u.createdAt,
+      }));
+    }
+
+    return {
+      success: true,
+      data: rows,
+      dataSource: supabaseSuccess ? "SUPABASE_POSTGRESQL" : "IN_MEMORY_COMPATIBILITY",
+    };
+  });
+
+// ── Admin Console: Seller Verification / Trust Tier ───────────────────────────
+export const getAdminSellerVerificationFn = createServerFn({ method: "POST" })
+  .validator((data: { token: string }) => data)
+  .handler(async ({ data }) => {
+    const session = getSessionUser(data.token);
+    if (!session || (!session.isAdmin && session.role !== "ADMIN")) {
+      return { success: false, error: "Unauthorized: Admin privileges required.", data: [] };
+    }
+
+    let rows: Array<{
+      sellerId: string;
+      sellerName: string | null;
+      sellerPhone: string | null;
+      trustScore: number | null;
+      trustTier: string | null;
+      nidVerified: boolean;
+      storeVerified: boolean;
+      completedOrdersCount: number;
+      upheldDisputesCount: number;
+      calculatedAt: string;
+    }> = [];
+
+    let supabaseSuccess = false;
+    try {
+      const supabase = await supabaseAdmin();
+      const { data: reputations, error } = await supabase
+        .from("seller_reputation")
+        .select(
+          "seller_id, trust_score, trust_tier, nid_verified, store_verified, completed_orders_count, upheld_disputes_count, calculated_at",
+        )
+        .order("trust_score", { ascending: false });
+
+      if (!error && Array.isArray(reputations)) {
+        supabaseSuccess = true;
+        const sellerIds = reputations.map((r) => r.seller_id);
+        const { data: users } = await supabase
+          .from("users")
+          .select("id, name, phone")
+          .in("id", sellerIds);
+        const userMap = Object.fromEntries(
+          (users ?? []).map((u) => [u.id, { name: u.name, phone: u.phone }]),
+        );
+        rows = reputations.map((r) => ({
+          sellerId: r.seller_id,
+          sellerName: userMap[r.seller_id]?.name || null,
+          sellerPhone: userMap[r.seller_id]?.phone || null,
+          trustScore: r.trust_score ?? null,
+          trustTier: r.trust_tier || null,
+          // Only expose boolean — NID number is never returned
+          nidVerified: Boolean(r.nid_verified),
+          storeVerified: Boolean(r.store_verified),
+          completedOrdersCount: r.completed_orders_count ?? 0,
+          upheldDisputesCount: r.upheld_disputes_count ?? 0,
+          calculatedAt: r.calculated_at || "",
+        }));
+      }
+    } catch (err) {
+      console.warn("[getAdminSellerVerificationFn] Supabase error:", err);
+    }
+
+    return {
+      success: true,
+      data: rows,
+      dataSource: supabaseSuccess ? "SUPABASE_POSTGRESQL" : "IN_MEMORY_COMPATIBILITY",
+    };
+  });
+
+// ── Admin Console: Payment Method Audit ───────────────────────────────────────
+export const getAdminPaymentSummaryFn = createServerFn({ method: "POST" })
+  .validator((data: { token: string }) => data)
+  .handler(async ({ data }) => {
+    const session = getSessionUser(data.token);
+    if (!session || (!session.isAdmin && session.role !== "ADMIN")) {
+      return { success: false, error: "Unauthorized: Admin privileges required.", data: null };
+    }
+
+    type PaymentRow = {
+      paymentMethod: string;
+      status: string;
+      amountBDT: number;
+      count: number;
+    };
+
+    let rows: PaymentRow[] = [];
+    let supabaseSuccess = false;
+
+    try {
+      const supabase = await supabaseAdmin();
+      const { data: orders, error } = await supabase
+        .from("orders")
+        .select("payment_method, status, amount_poisha");
+
+      if (!error && Array.isArray(orders)) {
+        supabaseSuccess = true;
+        const grouped: Record<string, PaymentRow> = {};
+        for (const o of orders) {
+          const key = `${o.payment_method}|${o.status}`;
+          if (!grouped[key]) {
+            grouped[key] = {
+              paymentMethod: o.payment_method || "UNKNOWN",
+              status: o.status || "UNKNOWN",
+              amountBDT: 0,
+              count: 0,
+            };
+          }
+          grouped[key].amountBDT += Math.round((o.amount_poisha ?? 0) / 100);
+          grouped[key].count += 1;
+        }
+        rows = Object.values(grouped);
+      }
+    } catch (err) {
+      console.warn("[getAdminPaymentSummaryFn] Supabase error, falling back:", err);
+    }
+
+    if (!supabaseSuccess) {
+      const grouped: Record<string, PaymentRow> = {};
+      for (const o of db.orders) {
+        const key = `${o.paymentMethod}|${o.status}`;
+        if (!grouped[key]) {
+          grouped[key] = {
+            paymentMethod: o.paymentMethod || "UNKNOWN",
+            status: o.status || "UNKNOWN",
+            amountBDT: 0,
+            count: 0,
+          };
+        }
+        grouped[key].amountBDT += Math.round(o.amountPoisha / 100);
+        grouped[key].count += 1;
+      }
+      rows = Object.values(grouped);
+    }
+
+    // Build summary
+    const byMethod: Record<string, { totalBDT: number; count: number }> = {};
+    let grandTotalBDT = 0;
+    let grandTotalCount = 0;
+    for (const r of rows) {
+      if (!byMethod[r.paymentMethod]) byMethod[r.paymentMethod] = { totalBDT: 0, count: 0 };
+      byMethod[r.paymentMethod]!.totalBDT += r.amountBDT;
+      byMethod[r.paymentMethod]!.count += r.count;
+      grandTotalBDT += r.amountBDT;
+      grandTotalCount += r.count;
+    }
+
+    return {
+      success: true,
+      data: {
+        rows,
+        byMethod,
+        grandTotalBDT,
+        grandTotalCount,
+      },
+      dataSource: supabaseSuccess ? "SUPABASE_POSTGRESQL" : "IN_MEMORY_COMPATIBILITY",
+    };
+  });
+
+// ── Admin Console: Platform Analytics ─────────────────────────────────────────
+export const getAdminAnalyticsFn = createServerFn({ method: "POST" })
+  .validator((data: { token: string }) => data)
+  .handler(async ({ data }) => {
+    const session = getSessionUser(data.token);
+    if (!session || (!session.isAdmin && session.role !== "ADMIN")) {
+      return { success: false, error: "Unauthorized: Admin privileges required.", data: null };
+    }
+
+    const ordersByMonth: Record<string, { count: number; gmvBDT: number }> = {};
+    const listingsByMonth: Record<string, number> = {};
+    const moderationActionsByMonth: Record<string, number> = {};
+    const categoryVolume: Record<string, { orders: number; gmvBDT: number }> = {};
+
+    let supabaseSuccess = false;
+    try {
+      const supabase = await supabaseAdmin();
+
+      const [ordersRes, listingsRes, auditRes, productsRes] = await Promise.all([
+        supabase.from("orders").select("created_at, status, amount_poisha, listing_id"),
+        supabase.from("listings").select("id, listed_at, product_id"),
+        supabase.from("listing_audit_history").select("created_at"),
+        supabase.from("products").select("id, category"),
+      ]);
+
+      if (!ordersRes.error && !listingsRes.error) {
+        supabaseSuccess = true;
+        const productCategoryMap = Object.fromEntries(
+          (productsRes.data ?? []).map((p) => [p.id, p.category]),
+        );
+        const listingProductMap = Object.fromEntries(
+          (listingsRes.data ?? []).map((l) => [l.id ?? "", l.product_id]),
+        );
+
+        for (const o of ordersRes.data ?? []) {
+          const month = (o.created_at || "").slice(0, 7);
+          if (!month) continue;
+          if (!ordersByMonth[month]) ordersByMonth[month] = { count: 0, gmvBDT: 0 };
+          ordersByMonth[month].count += 1;
+          const st = (o.status || "").toUpperCase();
+          if (st === "DELIVERED" || st === "COMPLETED") {
+            ordersByMonth[month].gmvBDT += Math.round((o.amount_poisha ?? 0) / 100);
+          }
+
+          // Category volume
+          const listingId = o.listing_id || "";
+          const productId = listingProductMap[listingId] || "";
+          const category = productCategoryMap[productId] || "Other";
+          if (!categoryVolume[category]) categoryVolume[category] = { orders: 0, gmvBDT: 0 };
+          categoryVolume[category].orders += 1;
+          if (st === "DELIVERED" || st === "COMPLETED") {
+            categoryVolume[category].gmvBDT += Math.round((o.amount_poisha ?? 0) / 100);
+          }
+        }
+
+        for (const l of listingsRes.data ?? []) {
+          const month = (l.listed_at || "").slice(0, 7);
+          if (!month) continue;
+          listingsByMonth[month] = (listingsByMonth[month] || 0) + 1;
+        }
+
+        for (const a of auditRes.data ?? []) {
+          const month = (a.created_at || "").slice(0, 7);
+          if (!month) continue;
+          moderationActionsByMonth[month] = (moderationActionsByMonth[month] || 0) + 1;
+        }
+      }
+    } catch (err) {
+      console.warn("[getAdminAnalyticsFn] Supabase error, falling back:", err);
+    }
+
+    if (!supabaseSuccess) {
+      for (const o of db.orders) {
+        const month = o.createdAt.slice(0, 7);
+        if (!ordersByMonth[month]) ordersByMonth[month] = { count: 0, gmvBDT: 0 };
+        ordersByMonth[month].count += 1;
+        const st = (o.status || "").toUpperCase();
+        if (st === "DELIVERED" || st === "COMPLETED") {
+          ordersByMonth[month].gmvBDT += Math.round(o.amountPoisha / 100);
+        }
+      }
+      for (const l of db.listings) {
+        const month = l.listedAt.slice(0, 7);
+        listingsByMonth[month] = (listingsByMonth[month] || 0) + 1;
+      }
+      for (const a of db.listingAuditHistory) {
+        const month = a.createdAt.slice(0, 7);
+        moderationActionsByMonth[month] = (moderationActionsByMonth[month] || 0) + 1;
+      }
+    }
+
+    // Sort months chronologically
+    const allMonths = [
+      ...new Set([
+        ...Object.keys(ordersByMonth),
+        ...Object.keys(listingsByMonth),
+        ...Object.keys(moderationActionsByMonth),
+      ]),
+    ].sort();
+
+    const timeline = allMonths.map((month) => ({
+      month,
+      orders: ordersByMonth[month]?.count || 0,
+      gmvBDT: ordersByMonth[month]?.gmvBDT || 0,
+      listings: listingsByMonth[month] || 0,
+      moderationActions: moderationActionsByMonth[month] || 0,
+    }));
+
+    return {
+      success: true,
+      data: {
+        timeline,
+        categoryVolume: Object.entries(categoryVolume)
+          .map(([category, v]) => ({ category, ...v }))
+          .sort((a, b) => b.orders - a.orders),
+      },
+      dataSource: supabaseSuccess ? "SUPABASE_POSTGRESQL" : "IN_MEMORY_COMPATIBILITY",
+    };
+  });
+
+// ── Admin Console: Geographic Performance Analytics ─────────────────────────
+export type GeoTimeRange = "today" | "7d" | "30d" | "90d" | "this_year" | "all";
+
+export interface DistrictPerformanceItem {
+  district: string;
+  orders: number;
+  settledSalesBDT: number;
+  ordersSharePct: number;
+  salesSharePct: number;
+  isUnknown: boolean;
+}
+
+export interface GeographicAnalyticsResult {
+  timeRange: GeoTimeRange;
+  totalOrders: number;
+  totalSettledSalesBDT: number;
+  districts: DistrictPerformanceItem[];
+  userAnalytics: {
+    available: boolean;
+    reason: string;
+    totalUsers: number;
+    newUsersInPeriod: number;
+  };
+  dataSource: string;
+}
+
+export const getAdminGeographicAnalyticsFn = createServerFn({ method: "POST" })
+  .validator((data: { token: string; timeRange?: GeoTimeRange }) => data)
+  .handler(
+    async ({
+      data,
+    }): Promise<{ success: boolean; error?: string; data?: GeographicAnalyticsResult }> => {
+      const session = getSessionUser(data.token);
+      if (!session || (!session.isAdmin && session.role !== "ADMIN")) {
+        return { success: false, error: "Unauthorized: Admin privileges required." };
+      }
+
+      const timeRange: GeoTimeRange = data.timeRange || "all";
+      const now = new Date();
+      let filterDate: Date | null = null;
+
+      if (timeRange === "today") {
+        filterDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      } else if (timeRange === "7d") {
+        filterDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      } else if (timeRange === "30d") {
+        filterDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      } else if (timeRange === "90d") {
+        filterDate = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+      } else if (timeRange === "this_year") {
+        filterDate = new Date(now.getFullYear(), 0, 1);
+      }
+
+      let supabaseSuccess = false;
+      let rawOrders: Array<{
+        id: string;
+        status: string;
+        amount_poisha: number | null;
+        shipping_address_json: unknown;
+        created_at: string;
+      }> = [];
+      let totalUsersCount = 0;
+      let newUsersCount = 0;
+
+      try {
+        const supabase = await supabaseAdmin();
+
+        // Orders query
+        let query = supabase
+          .from("orders")
+          .select("id, status, amount_poisha, shipping_address_json, created_at");
+
+        if (filterDate) {
+          query = query.gte("created_at", filterDate.toISOString());
+        }
+
+        const { data: orderRows, error: ordersErr } = await query;
+
+        // Users count query
+        const { count: totalUCount } = await supabase
+          .from("users")
+          .select("id", { count: "exact", head: true });
+        totalUsersCount = totalUCount ?? 0;
+
+        if (filterDate) {
+          const { count: periodUCount } = await supabase
+            .from("users")
+            .select("id", { count: "exact", head: true })
+            .gte("created_at", filterDate.toISOString());
+          newUsersCount = periodUCount ?? 0;
+        } else {
+          newUsersCount = totalUsersCount;
+        }
+
+        if (!ordersErr && Array.isArray(orderRows)) {
+          supabaseSuccess = true;
+          rawOrders = orderRows;
+        }
+      } catch (err) {
+        console.warn("[getAdminGeographicAnalyticsFn] Supabase error:", err);
+      }
+
+      if (!supabaseSuccess) {
+        totalUsersCount = db.users.length;
+        if (filterDate) {
+          const fTime = filterDate.getTime();
+          newUsersCount = db.users.filter((u) => new Date(u.createdAt).getTime() >= fTime).length;
+        } else {
+          newUsersCount = totalUsersCount;
+        }
+
+        rawOrders = db.orders
+          .filter((o) => {
+            if (!filterDate) return true;
+            return new Date(o.createdAt).getTime() >= filterDate.getTime();
+          })
+          .map((o) => ({
+            id: o.id,
+            status: o.status,
+            amount_poisha: o.amountPoisha,
+            shipping_address_json: o.shippingAddressJson,
+            created_at: o.createdAt,
+          }));
+      }
+
+      // Aggregate by district
+      const districtStats: Record<
+        string,
+        { orders: number; settledSalesBDT: number; isUnknown: boolean }
+      > = {};
+      let totalOrders = 0;
+      let totalSettledSalesBDT = 0;
+
+      for (const ord of rawOrders) {
+        totalOrders++;
+        const st = (ord.status || "").toUpperCase();
+        const isSettled = st === "DELIVERED" || st === "COMPLETED";
+        const poisha = typeof ord.amount_poisha === "number" ? ord.amount_poisha : 0;
+        const amountBDT = Math.round(poisha / 100);
+
+        if (isSettled) {
+          totalSettledSalesBDT += amountBDT;
+        }
+
+        let parsedDistrict = "";
+        if (typeof ord.shipping_address_json === "string") {
+          try {
+            const parsed = JSON.parse(ord.shipping_address_json);
+            if (parsed && typeof parsed.district === "string") {
+              parsedDistrict = parsed.district.trim();
+            }
+          } catch {
+            // ignore
+          }
+        } else if (
+          typeof ord.shipping_address_json === "object" &&
+          ord.shipping_address_json !== null
+        ) {
+          const obj = ord.shipping_address_json as Record<string, unknown>;
+          if (typeof obj["district"] === "string") {
+            parsedDistrict = obj["district"].trim();
+          }
+        }
+
+        const isUnknown = !parsedDistrict;
+        const districtKey = isUnknown ? "Unknown / Not Recorded" : parsedDistrict;
+
+        if (!districtStats[districtKey]) {
+          districtStats[districtKey] = { orders: 0, settledSalesBDT: 0, isUnknown };
+        }
+
+        districtStats[districtKey]!.orders += 1;
+        if (isSettled) {
+          districtStats[districtKey]!.settledSalesBDT += amountBDT;
+        }
+      }
+
+      const districts: DistrictPerformanceItem[] = Object.entries(districtStats).map(
+        ([district, stats]) => {
+          const ordersSharePct =
+            totalOrders > 0 ? Math.round((stats.orders / totalOrders) * 1000) / 10 : 0;
+          const salesSharePct =
+            totalSettledSalesBDT > 0
+              ? Math.round((stats.settledSalesBDT / totalSettledSalesBDT) * 1000) / 10
+              : 0;
+
+          return {
+            district,
+            orders: stats.orders,
+            settledSalesBDT: stats.settledSalesBDT,
+            ordersSharePct,
+            salesSharePct,
+            isUnknown: stats.isUnknown,
+          };
+        },
+      );
+
+      return {
+        success: true,
+        data: {
+          timeRange,
+          totalOrders,
+          totalSettledSalesBDT,
+          districts,
+          userAnalytics: {
+            available: false,
+            reason:
+              "The users table does not currently record a normalized district field. District data is captured strictly through customer order shipping destinations.",
+            totalUsers: totalUsersCount,
+            newUsersInPeriod: newUsersCount,
+          },
+          dataSource: supabaseSuccess ? "SUPABASE_POSTGRESQL" : "IN_MEMORY_COMPATIBILITY",
+        },
+      };
     },
   );

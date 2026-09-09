@@ -59,4 +59,3 @@ I previously proposed a separate Lovable project. The audit changes that recomme
 - Admin console lives in this project as its own section with its own sign-in and layout — a separate project could not reach the existing accounts and moderation rules without rebuilding them.
 - `/admin/identity` is removed for now and returns when real ID-document storage exists.
 - Dashboard shows only counts derived from real data; no sales/revenue figure until settled-payment data exists.
-

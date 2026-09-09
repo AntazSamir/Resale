@@ -42,28 +42,37 @@
 
 ---
 
-### 🔐 3. Server-Authoritative Auth & Protected Routes
+### 🔐 3. Server-Authoritative Auth, Google OAuth & Resilient Sessions
 
+- **Google OAuth 2.0 Integration**:
+  - One-click Google sign-in and sign-up integrated into `/login` and `/register` via `<GoogleAuthButton />`.
+  - Seamless Supabase OAuth session synchronization bridge (`syncGoogleSessionFn`) that automatically provisions user records and returns an authoritative session token.
+- **HMAC-Signed Resilient Session Tokens**:
+  - Cryptographically secure 30-day session tokens (`rst_...`) signed with backend HMAC secrets and embedded expiration (`issueSessionToken`).
+  - **Server-Restart Resilience**: `getOrRestoreSession` gracefully re-parses and validates valid token payloads if in-memory session caches reset during server restarts.
+- **Robust Client Hydration & No-Flicker Persistence**:
+  - `AuthProvider` validates active sessions server-side on mount (`initializeAuth`) with automatic fallback to Supabase Google sessions if stored tokens require renewal.
+  - Optimistic cached user state prevents jarring logout flashes during navigation or reloads.
+  - `ProtectedRoute` waits for complete client hydration (`isHydrated === true`) before evaluating authorization, eliminating unexpected page-refresh logouts.
+  - Logged-in users navigating to `/login` are automatically redirected to the destination in their `?redirect` query parameter or back home.
 - **Protected Flow Guards (`/sell`, `/account/disputes`)**:
   - Direct route authentication checks redirect unauthenticated visitors to `/login` with clean `redirect` query preservation.
   - Transparent return navigation restores previous wizard state or dispute claims upon successful sign-in.
 - **ID & Password Authentication (`/login`)**:
   - Sign in using verified **Mobile Number** (e.g. `01XXXXXXXXX`) or **Email Address** along with a secure password.
   - Show/hide password visibility toggle with high-contrast icons.
-  - Direct redirect preservation (`?redirect=/checkout`) returning users immediately to their previous session upon login.
 - **OTP-Verified Password Reset & Change**:
   - In-place multi-step modal flow: Enter ID &rarr; Verify 6-digit SMS/Email OTP &rarr; Set & Confirm New Password.
   - Server-side rate limiting and 5-minute OTP TTL (`sendOtpFn`, `changePasswordFn`).
 - **NID-Gated Registration (`/register`)**:
   - Enforces mandatory Bangladesh National ID (10, 13, or 17 digits) collection, Full Name, Contact ID, Password creation, and OTP verification.
-- **Server Session Tokens**:
-  - Cryptographically secure 30-day session tokens (`rst_...`) stored and validated exclusively on the backend (`validateSessionFn`), preventing client-side role spoofing.
 
 ---
 
 ### 📱 4. Responsive Homepage & Promo Discovery
 
 - **Optimized Mobile Hero**:
+  - Lightweight, high-fidelity WebP hero visual asset (`hero-banner.webp`) optimized for fast Largest Contentful Paint (LCP) and zero cumulative layout shifts.
   - Theme-aware gradient contrast ensuring crystal-clear text readability over background media.
   - Side-by-side touch-friendly CTA buttons (_Shop Devices_ & _Sell Device_).
   - Dedicated **Mobile Trust Strip** (100% Inspected, 4.8★ Rating, 48h Protection, COD Available) positioned neatly below the hero section on mobile viewports.
@@ -91,23 +100,35 @@ The listing details page (`/listing/$listingId`) presents a structured, high-tru
 
 ---
 
-### 📦 6. Order & Transaction Infrastructure (Phase 3.1 & 4.1A)
+### 📦 6. Order & Transaction Infrastructure & Seller Confirmation
 
 - **Decoupled Order Lifecycle Engine**:
   - `OrderStatus`: `PENDING` &rarr; `CONFIRMED` &rarr; `PROCESSING` &rarr; `READY_TO_SHIP` &rarr; `SHIPPED` &rarr; `DELIVERED` &rarr; `COMPLETED` (plus `CANCELLED`, `REFUND_REQUESTED`, `REFUNDED`, `DISPUTED`).
   - `PaymentStatus`: `PENDING` (Payment due on delivery), `AUTHORIZED`, `PAID`, `FAILED`, `REFUND_PENDING`, `REFUNDED`.
-- **Payment Method Abstraction**: Architecture supports `COD`, `BKASH`, `NAGAD`, `SSLCOMMERZ`, `CARD`, with **Cash on Delivery (COD) as the active method**.
-- **Backend Persistence & Local-First Remote Sync**:
-  - Bidirectional remote synchronization for Cart Items, Orders, Disputes, Listings, and Stores backed by server functions in `src/lib/db-server.ts`.
-  - Silent error degradation ensuring optimistic local-first browser responsiveness even if database tables are in transit.
-- **Listing Snapshot Preservation**: Each order item permanently preserves the product name, grade, condition score, seller identity, images, and included accessories at the exact moment of checkout.
-- **Audited Event Timeline (`/account/orders/$orderId`)**: Chronological event logs recorded by Buyer, Seller, Courier, and Admin.
-- **Seller Order Fulfillment Hub (`/seller/orders`)**: Dedicated dashboard for sellers to progress orders through confirmation, packaging, and courier handover.
+- **Authentic Buyer Identity & Order Binding**:
+  - Checkout automatically binds real authenticated buyer profile records (User ID, full name, email, and phone) to order records and persistent storage.
+- **Atomic Listing Reservation (`RESERVED`)**:
+  - Atomic reservation locks all purchased second-hand listings upon order placement to prevent double-purchase race conditions.
+  - Automatically sends instant `ORDER_PLACED` in-app notifications to affected sellers.
+- **Real Seller Confirmation Workflow**:
+  - Server function `confirmOrderAsSellerFn` authorizes sellers to verify and confirm incoming orders directly from `/seller/orders` and `/seller/dashboard`.
+  - Emits an audited confirmation event, marks the order as `CONFIRMED`, and triggers an instant `ORDER_CONFIRMED` notification to the buyer.
+- **Buyer Order Tracking Lifecycle Banners (`/account/orders`, `/account/orders/$orderId`)**:
+  - Prominent real-time status banners:
+    - **Pending Confirmation**: Informs buyer that the seller is inspecting and validating stock.
+    - **Seller Confirmed**: Reassures buyer with seller verification timestamp as order moves to packaging and courier dispatch.
+- **Pure Production Telemetry (Zero Demo Fallbacks)**:
+  - Completely purged all mock/sample order data, placeholder badges, and demo fallback IDs across `/seller/orders`, `/seller/dashboard`, and `/account/orders`.
+- **Listing Snapshot Preservation**: Each order item permanently preserves product name, condition grade, score, seller identity, images, and included accessories at the exact moment of checkout.
+- **Audited Event Timeline (`/account/orders/$orderId`)**: Chronological audit trail recorded by Buyer, Seller, Courier, and Admin.
+- **Payment Method Abstraction**: Architecture supports `COD`, `BKASH`, `NAGAD`, `SSLCOMMERZ`, `CARD`, with **Cash on Delivery (COD) as the primary method**.
 
 ---
 
-### 🏪 7. Pro Storefronts & Creator Suite (Phase 3.4 & 4.1B)
+### 🏪 7. Pro Storefronts, Public Seller Profiles & Creator Suite
 
+- **Public Dynamic Seller Profiles (`/seller/$sellerId`)**:
+  - Dedicated public profile for individual and merchant sellers displaying verified badges, member since timeline, operating district/division, dynamic trust score math link, and real-time active inventory catalog.
 - **Public Branded Storefronts (`/store/:slug`)**: Verified merchant profiles with cover banners, operational badges, warranty policies, and live catalog filtering backed by Supabase `public.stores`.
 - **Verified Creator Video Hub (`/creator/:slug`)**: Direct creator channels featuring short-form and long-form hands-on device unboxings with exact-unit inspection tag links.
 - **Hands-on Video Review Strip**: Listing pages embed creator review cards with modal video players and timestamps.
@@ -203,6 +224,21 @@ Resale.com replaces subjective, easily-manipulated 5-star ratings with a mathema
 
 ---
 
+### 💫 14. Brand Design System & Custom Animated Loader Component
+
+- **Custom-Engineered Dual-Bar Animated Loader**:
+  - Reusable `<Loader label="..." className="..." />` component (`src/components/ui/loader.tsx`) utilizing dedicated keyframe choreography (`@keyframes l29-1` and `l29-2` in `src/styles.css`).
+  - Replaces generic spinner icons with a fluid, brand-themed loading animation that maintains consistent typography and zero layout shifting.
+  - Unified across asynchronous loading states:
+    - Seller Analytics Intelligence (`/seller/analytics`)
+    - Seller Inventory Management (`/seller/listings`)
+    - Admin Moderation Queue (`/admin/moderation`)
+    - Buyer Order Tracking & Real-Time Timelines (`/account/orders/$orderId`)
+- **Lightweight Visual Assets**:
+  - Modern WebP hero banner asset (`hero-banner.webp`) engineered for instant Largest Contentful Paint (LCP) and zero cumulative layout shifts across mobile and desktop devices.
+
+---
+
 ## 🛠️ Technology Stack
 
 | Layer            | Technology                                                                                          |
@@ -222,12 +258,13 @@ Resale.com replaces subjective, easily-manipulated 5-star ratings with a mathema
 ├── src/
 │   ├── assets/                         # Brand assets & images (official logo, promo banners, product images)
 │   ├── components/
-│   │   ├── ui/                         # Accessible Radix & Tailwind UI components (Button, Input, Sheet, etc.)
+│   │   ├── ui/                         # Accessible Radix & Tailwind UI components (Button, Input, Loader, Sheet, etc.)
 │   │   ├── storefront/                 # Storefront components (StoreBadge, store verification chips)
 │   │   ├── seller/                     # Seller components (ListingStatusBadge, SellerTrustBadge, SellerTrustBreakdownDialog)
 │   │   ├── moderation/                 # Admin moderation components (RejectionDialog, AuditHistorySheet)
 │   │   ├── site-header.tsx             # Dual header bar, tree dropdowns, notification bell & mobile drawer
 │   │   ├── site-footer.tsx             # Footer, newsletter subscription & platform directory
+│   │   ├── google-auth-button.tsx      # Google OAuth authentication button
 │   │   ├── listing-card.tsx            # Listing-first product offer card
 │   │   ├── product-card.tsx            # Catalog model showcase card
 │   │   ├── grade-badge.tsx             # Visual condition grade badge (A+ to D)
@@ -238,7 +275,7 @@ Resale.com replaces subjective, easily-manipulated 5-star ratings with a mathema
 │   │   ├── notification-panel.tsx      # In-app notification bell with dropdown
 │   │   ├── repair-history.tsx          # Component servicing disclosure table
 │   │   ├── whats-included.tsx          # Accessory tags and inclusions
-│   │   └── protected-route.tsx         # Auth guard with redirect support
+│   │   └── protected-route.tsx         # Auth guard with redirect & hydration support
 │   ├── data/
 │   │   ├── catalog.ts                  # Products catalog, active listings, brands & pricing utilities
 │   │   ├── grading.ts                  # 100-point condition grading calculation matrix
@@ -249,7 +286,7 @@ Resale.com replaces subjective, easily-manipulated 5-star ratings with a mathema
 │   │   ├── schema.ts                   # Drizzle ORM database schema definitions
 │   │   └── seed.ts                     # Database seed data
 │   ├── lib/
-│   │   ├── auth-store.tsx              # User authentication session store
+│   │   ├── auth-store.tsx              # User authentication & session store with Google sync
 │   │   ├── cart-store.tsx              # Shopping cart store & remote sync persistence
 │   │   ├── order-store.ts              # Orders, lifecycle state machine, & Supabase sync
 │   │   ├── dispute-store.ts            # Dispute lifecycle, SLA engine, & Supabase persistence
@@ -268,13 +305,17 @@ Resale.com replaces subjective, easily-manipulated 5-star ratings with a mathema
 │   ├── routes/
 │   │   ├── __root.tsx                  # Root HTML layout & global error boundary
 │   │   ├── index.tsx                   # Homepage (Hero, mobile trust strip, dual banners, catalog rails)
+│   │   ├── about.tsx                   # About Resale.com story, values, and inspection criteria
 │   │   ├── grading.tsx                 # Dedicated Standardized Grading (A+ to D) & Simulator
 │   │   ├── products.tsx                # Unified Marketplace with full multi-facet filter engine
 │   │   ├── categories.tsx              # Category & Subcategory Catalog Hub
+│   │   ├── category.$categorySlug.tsx  # Dynamic category & subcategory catalog browser
 │   │   ├── product.$productId.tsx      # Multi-seller aggregated product view
 │   │   ├── listing.$listingId.tsx      # Progressive Listing Details & 32-Point Report
 │   │   ├── store.$storeSlug.tsx        # Public Branded Merchant Storefront
+│   │   ├── seller.$sellerId.tsx        # Public Dynamic Seller Profile & Inventory Catalog
 │   │   ├── creator.$creatorSlug.tsx    # Verified Creator Profile & Video Hub
+│   │   ├── cart.tsx                    # Cart manager with listing snapshot verification
 │   │   ├── checkout.tsx                # Gated 3-step checkout & COD order placement
 │   │   ├── account.orders.tsx          # Buyer Order History & status filters
 │   │   ├── account.orders.$orderId.tsx # Buyer Detailed Timeline Tracking & 48h Inspection Timer
@@ -294,11 +335,11 @@ Resale.com replaces subjective, easily-manipulated 5-star ratings with a mathema
 │   │   ├── admin.disputes.tsx          # Admin Mediation Workbench & Side-by-Side Inspector
 │   │   ├── admin.moderation.tsx        # Admin Listing Review Queue
 │   │   ├── admin.identity.tsx          # Admin NID Verification Queue
-│   │   ├── login.tsx                   # ID & Password login with OTP password reset modal
+│   │   ├── login.tsx                   # ID & Password login with Google OAuth & OTP password reset
 │   │   ├── register.tsx                # NID-Verified Registration with Password setup
 │   │   ├── partner.tsx                 # B2B Corporate Excess Inventory Application
 │   │   └── contact.tsx                 # Support Desk & Knowledge Base FAQ
-│   └── styles.css                      # Global styles, typography & hairline grid tokens
+│   └── styles.css                      # Global styles, typography, loader animations & tokens
 ```
 
 ---
