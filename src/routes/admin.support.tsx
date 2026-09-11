@@ -15,7 +15,7 @@ function DeferredAdminModule() {
   return (
     <ProtectedRoute requireAdmin>
       <AdminShell active="support">
-        <div className="space-y-6 max-w-4xl">
+        <div className="space-y-6">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold font-display tracking-tight text-foreground flex items-center gap-2">
               <Ticket className="size-8 text-primary" />

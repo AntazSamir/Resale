@@ -301,7 +301,7 @@ export function AdminShell({ active, children }: AdminShellProps) {
   return (
     <div className="min-h-screen bg-muted/15 flex flex-col font-sans text-foreground selection:bg-primary/20">
       {/* Top Navbar */}
-      <header className="h-14 border-b border-border/70 bg-background/95 backdrop-blur-md sticky top-0 z-40 px-4 sm:px-6 flex items-center justify-between">
+      <header className="h-14 border-b border-border/70 bg-background/95 backdrop-blur-md sticky top-0 z-40 px-4 sm:px-6 lg:px-8 flex items-center justify-between">
         <div className="flex items-center gap-3">
           {/* Mobile hamburger button */}
           <Button
@@ -367,7 +367,7 @@ export function AdminShell({ active, children }: AdminShellProps) {
       </header>
 
       {/* Main Administrative Container */}
-      <div className="flex-1 flex w-full max-w-7xl mx-auto px-4 sm:px-6 py-6 gap-6 lg:gap-8">
+      <div className="flex-1 flex w-full px-4 sm:px-6 lg:px-8 py-6 gap-6 lg:gap-8">
         {/* Desktop Sidebar Navigation */}
         <aside className="hidden md:block w-56 lg:w-60 shrink-0">
           <div className="sticky top-20 max-h-[calc(100vh-6rem)] overflow-y-auto pr-1 pb-8 space-y-6">
