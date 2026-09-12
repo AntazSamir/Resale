@@ -20,6 +20,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as PartnerRouteImport } from './routes/partner'
 import { Route as ProductsRouteImport } from './routes/products'
 import { Route as RegisterRouteImport } from './routes/register'
+import { Route as SellersRouteImport } from './routes/sellers'
 import { Route as AccountDisputesRouteImport } from './routes/account.disputes'
 import { Route as AccountOrdersRouteImport } from './routes/account.orders'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
@@ -116,6 +117,11 @@ const ProductsRoute = ProductsRouteImport.update({
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
   path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SellersRoute = SellersRouteImport.update({
+  id: '/sellers',
+  path: '/sellers',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AccountDisputesRoute = AccountDisputesRouteImport.update({
@@ -341,6 +347,7 @@ export interface FileRoutesByFullPath {
   '/partner': typeof PartnerRoute
   '/products': typeof ProductsRoute
   '/register': typeof RegisterRoute
+  '/sellers': typeof SellersRoute
   '/account/disputes': typeof AccountDisputesRoute
   '/account/orders': typeof AccountOrdersRouteWithChildren
   '/admin/analytics': typeof AdminAnalyticsRoute
@@ -396,6 +403,7 @@ export interface FileRoutesByTo {
   '/partner': typeof PartnerRoute
   '/products': typeof ProductsRoute
   '/register': typeof RegisterRoute
+  '/sellers': typeof SellersRoute
   '/account/disputes': typeof AccountDisputesRoute
   '/account/orders': typeof AccountOrdersRouteWithChildren
   '/admin/analytics': typeof AdminAnalyticsRoute
@@ -452,6 +460,7 @@ export interface FileRoutesById {
   '/partner': typeof PartnerRoute
   '/products': typeof ProductsRoute
   '/register': typeof RegisterRoute
+  '/sellers': typeof SellersRoute
   '/account/disputes': typeof AccountDisputesRoute
   '/account/orders': typeof AccountOrdersRouteWithChildren
   '/admin/analytics': typeof AdminAnalyticsRoute
@@ -509,6 +518,7 @@ export interface FileRouteTypes {
     | '/partner'
     | '/products'
     | '/register'
+    | '/sellers'
     | '/account/disputes'
     | '/account/orders'
     | '/admin/analytics'
@@ -564,6 +574,7 @@ export interface FileRouteTypes {
     | '/partner'
     | '/products'
     | '/register'
+    | '/sellers'
     | '/account/disputes'
     | '/account/orders'
     | '/admin/analytics'
@@ -619,6 +630,7 @@ export interface FileRouteTypes {
     | '/partner'
     | '/products'
     | '/register'
+    | '/sellers'
     | '/account/disputes'
     | '/account/orders'
     | '/admin/analytics'
@@ -675,6 +687,7 @@ export interface RootRouteChildren {
   PartnerRoute: typeof PartnerRoute
   ProductsRoute: typeof ProductsRoute
   RegisterRoute: typeof RegisterRoute
+  SellersRoute: typeof SellersRoute
   AccountDisputesRoute: typeof AccountDisputesRoute
   AccountOrdersRoute: typeof AccountOrdersRouteWithChildren
   AdminAnalyticsRoute: typeof AdminAnalyticsRoute
@@ -795,6 +808,13 @@ declare module '@tanstack/react-router' {
       path: '/register'
       fullPath: '/register'
       preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sellers': {
+      id: '/sellers'
+      path: '/sellers'
+      fullPath: '/sellers'
+      preLoaderRoute: typeof SellersRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/account/disputes': {
@@ -1118,6 +1138,7 @@ const rootRouteChildren: RootRouteChildren = {
   PartnerRoute: PartnerRoute,
   ProductsRoute: ProductsRoute,
   RegisterRoute: RegisterRoute,
+  SellersRoute: SellersRoute,
   AccountDisputesRoute: AccountDisputesRoute,
   AccountOrdersRoute: AccountOrdersRouteWithChildren,
   AdminAnalyticsRoute: AdminAnalyticsRoute,

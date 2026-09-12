@@ -684,13 +684,22 @@ function Index() {
       ════════════════════════════════════════════════════════════ */}
       <section className="px-4 md:px-6 lg:px-8 py-12 border-b border-border/80">
         <div className="mx-auto max-w-7xl space-y-6">
-          <div>
-            <h2 className="text-2xl sm:text-3xl font-display font-bold text-foreground">
-              Verified Pro Sellers &amp; Tech Creators
-            </h2>
-            <p className="mt-1 text-xs sm:text-sm text-muted-foreground">
-              Explore curated devices from established shops and tech reviewer profiles.
-            </p>
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+            <div>
+              <h2 className="text-2xl sm:text-3xl font-display font-bold text-foreground">
+                Verified Pro Sellers &amp; Tech Creators
+              </h2>
+              <p className="mt-1 text-xs sm:text-sm text-muted-foreground">
+                Explore curated devices from established shops and tech reviewer profiles.
+              </p>
+            </div>
+            <Link
+              to="/sellers"
+              className="inline-flex items-center gap-1 text-xs sm:text-sm font-semibold text-primary hover:underline whitespace-nowrap self-start sm:self-auto"
+            >
+              <span>View all</span>
+              <ArrowRight className="size-3.5" />
+            </Link>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
