@@ -26,6 +26,7 @@ import { WhatsIncludedCard } from "@/components/whats-included";
 import { SellerTrustLine } from "@/components/seller-trust-card";
 import { getApprovedVideoForListing } from "@/lib/creator-store";
 import { CreatorVideoModal } from "@/components/creator/creator-video-modal";
+import { getDeviceGradesFn, type DeviceGradeRecord } from "@/lib/grading.functions";
 import {
   cheapest,
   galleryShots,
@@ -115,6 +116,19 @@ function ListingPage() {
   const inCart = isInCart(listing.id);
 
   const exactVideo = getApprovedVideoForListing(listing.id);
+  const [buyerGrades, setBuyerGrades] = useState<DeviceGradeRecord[]>([]);
+
+  useEffect(() => {
+    if (listing?.id) {
+      getDeviceGradesFn({ data: { listingId: listing.id } })
+        .then((res) => {
+          if (res.success && Array.isArray(res.grades)) {
+            setBuyerGrades(res.grades.filter((g) => g.graderRole === "BUYER"));
+          }
+        })
+        .catch(() => {});
+    }
+  }, [listing?.id]);
 
   // Check public discovery eligibility
   const isPublic = isListingPubliclyEligible(listing);
@@ -357,6 +371,23 @@ function ListingPage() {
 
             {/* 4. Condition Score — full gauge matching brand design */}
             <ConditionScore score={listing.conditionScore} grade={listing.grade} />
+
+            {/* Verified Buyer Grade Display */}
+            {buyerGrades.length > 0 && (
+              <div className="p-3 bg-secondary/50 border border-border/80 flex items-center justify-between gap-3 text-xs">
+                <div className="flex items-center gap-2">
+                  <ShieldCheck className="size-4 text-emerald-500 shrink-0" />
+                  <div>
+                    <span className="font-semibold text-foreground">Verified Buyer Inspection</span>
+                    <span className="text-muted-foreground block text-[11px]">
+                      Buyer Verified: Grade {buyerGrades[0]?.grade} (
+                      {buyerGrades[0]?.conditionScore}/100 pts)
+                    </span>
+                  </div>
+                </div>
+                <GradeBadge grade={buyerGrades[0]?.grade ?? "C"} />
+              </div>
+            )}
 
             {/* 5. Quick trust pills — warranty, battery, invoice */}
             <div className="flex flex-wrap items-center gap-2 text-xs">

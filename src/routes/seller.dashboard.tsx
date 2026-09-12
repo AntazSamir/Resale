@@ -227,16 +227,31 @@ function SellerDashboardPage() {
     ? analytics.ordersBreakdown.placedOrPending
     : pendingOrdersCount;
 
-  const handleQuickConfirm = (orderId: string) => {
-    const res = transitionOrderStatus(orderId, "CONFIRMED", "SELLER");
-    if (res.success) {
-      confirmOrderAsSellerFn({
+  const handleQuickConfirm = async (orderId: string) => {
+    try {
+      const confirmRes = await confirmOrderAsSellerFn({
         data: {
           orderId,
           ...(user?.id ? { sellerId: user.id } : {}),
+          token: token || undefined,
           note: "Seller confirmed order from dashboard.",
         },
-      }).catch(() => {});
+      });
+      if (confirmRes && !confirmRes.success && (confirmRes as { error?: string }).error) {
+        alert((confirmRes as { error: string }).error);
+        return;
+      }
+    } catch (err: unknown) {
+      console.error("Seller dashboard confirmation failed:", err);
+      alert(
+        (err as { message?: string })?.message ||
+          "Failed to confirm order on server. Please try again.",
+      );
+      return;
+    }
+
+    const res = transitionOrderStatus(orderId, "CONFIRMED", "SELLER");
+    if (res.success) {
       setOrders(getOrders().filter((o) => !o.isSampleData));
     }
   };

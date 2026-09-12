@@ -139,13 +139,13 @@ function getOrderStatusBadge(status: OrderStatus) {
 }
 
 function OrdersPage() {
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const [orders, setOrders] = useState<OrderRecord[]>([]);
   const [filter, setFilter] = useState<"ALL" | "ACTIVE" | "COMPLETED" | "CANCELLED">("ALL");
 
   useEffect(() => {
     setOrders(getOrders().filter((o) => !o.isSampleData));
-    fetchOrdersAsync()
+    fetchOrdersAsync(token || undefined)
       .then((res) => {
         if (Array.isArray(res) && res.length > 0) {
           setOrders(res.filter((o) => !o.isSampleData));
@@ -156,7 +156,7 @@ function OrdersPage() {
       setOrders(updated.filter((o) => !o.isSampleData));
     });
     return () => unsubscribe();
-  }, []);
+  }, [token]);
 
   const filteredOrders = orders.filter((order) => {
     // Strictly exclude any sample/demo orders

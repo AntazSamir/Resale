@@ -12,7 +12,15 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { CheckCircle2, ShieldCheck, Truck, Clock, AlertCircle, UserCheck } from "lucide-react";
+import {
+  CheckCircle2,
+  ShieldCheck,
+  Truck,
+  Clock,
+  AlertCircle,
+  UserCheck,
+  AlertTriangle,
+} from "lucide-react";
 import { taka, listingFor, productFor } from "@/data/catalog";
 import { useCart } from "@/lib/cart-store";
 import { useAuth } from "@/lib/auth-store";
@@ -51,6 +59,7 @@ function CheckoutPage() {
   const [step, setStep] = useState<"address" | "identity" | "payment" | "success">("address");
   const [orderId, setOrderId] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [reservationError, setReservationError] = useState<string | null>(null);
   const navigate = useNavigate();
   const { items, clearCart } = useCart();
   const { user } = useAuth();
@@ -182,12 +191,12 @@ function CheckoutPage() {
       updatedAt: now,
     };
 
-    saveOrder(newOrder);
+    setReservationError(null);
 
-    // Notify server function and reserve all items atomically
+    // Atomically reserve all items on the server first
     try {
       const allListingIds = cartItems.map((c) => c.listing.id);
-      await placeOrderFn({
+      const res = await placeOrderFn({
         data: {
           orderId: id,
           listingId: cartItems[0]?.listing.id,
@@ -200,11 +209,29 @@ function CheckoutPage() {
           nidNumber: nid,
         },
       });
-    } catch (err) {
-      console.error("Server order sync notice:", err);
+
+      if (!res.success) {
+        setReservationError(
+          res.error ||
+            "One or more items in your cart were just reserved by another customer. Please remove them to proceed.",
+        );
+        setSubmitting(false);
+        return;
+      }
+    } catch (err: unknown) {
+      console.error("Server order reservation error:", err);
+      setReservationError(
+        (err as { message?: string })?.message ||
+          "Failed to confirm item reservation. Please check your connection and try again.",
+      );
+      setSubmitting(false);
+      return;
     }
 
+    // Reservation verified on server; persist locally and complete checkout
+    saveOrder(newOrder);
     clearCart();
+    setSubmitting(false);
     setStep("success");
   };
 
@@ -325,6 +352,29 @@ function CheckoutPage() {
               </div>
             )}
           </div>
+
+          {reservationError && (
+            <div className="mb-6 p-4 border border-destructive/50 bg-destructive/10 text-destructive text-xs sm:text-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              <div className="flex items-start gap-2.5">
+                <AlertTriangle className="size-5 shrink-0 text-destructive mt-0.5" />
+                <div>
+                  <h4 className="font-bold text-destructive">Inventory Reservation Conflict</h4>
+                  <p className="text-xs text-destructive/90 mt-0.5">{reservationError}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => navigate({ to: "/cart" })}
+                  className="text-xs border-destructive/40 text-destructive hover:bg-destructive/15"
+                >
+                  Return to Cart
+                </Button>
+              </div>
+            </div>
+          )}
 
           <div className="space-y-6">
             {/* Step 1: Address */}

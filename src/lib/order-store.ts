@@ -595,19 +595,60 @@ export function orderRecordToSupabase(order: OrderRecord): Record<string, unknow
   };
 }
 
-/**
- * Fetches all orders directly from Supabase PostgreSQL, updates local cache, and notifies listeners
- */
-export async function fetchOrdersAsync(): Promise<OrderRecord[]> {
+function getActiveUserId(): string | null {
+  if (typeof window === "undefined") return null;
   try {
-    const { json, error } = await listOrdersFn();
+    const raw =
+      window.localStorage.getItem("resale.cached_user") ||
+      window.sessionStorage.getItem("resale.cached_user");
+    if (raw) {
+      const u = JSON.parse(raw) as { id?: string; phone?: string };
+      return u.id || u.phone || null;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+function getStoredToken(): string | undefined {
+  if (typeof window === "undefined") return undefined;
+  try {
+    return (
+      window.localStorage.getItem("resale.session_token") ||
+      window.sessionStorage.getItem("resale.session_token") ||
+      undefined
+    );
+  } catch {
+    return undefined;
+  }
+}
+
+function getScopedStorageKey(userId?: string | null): string {
+  const uid = userId || getActiveUserId();
+  return uid ? `${STORAGE_KEY}.${uid}` : `${STORAGE_KEY}.anon`;
+}
+
+/**
+ * Fetches scoped orders from Supabase PostgreSQL via authenticated listOrdersFn,
+ * updates per-user local cache, and notifies listeners.
+ */
+export async function fetchOrdersAsync(token?: string): Promise<OrderRecord[]> {
+  try {
+    const activeToken = token || getStoredToken();
+    if (!activeToken) {
+      // Unauthenticated users do not fetch remote orders to preserve privacy
+      return readLocalOrders();
+    }
+
+    const { json, error } = await listOrdersFn({ data: { token: activeToken } });
     const rows = JSON.parse(json || "[]") as Array<Record<string, unknown>>;
 
-    if (error || !Array.isArray(rows) || rows.length === 0) {
+    if (error || !Array.isArray(rows)) {
       if (error) {
         console.warn("listOrdersFn error, using local cache:", error);
       }
-      return getOrders();
+      return readLocalOrders();
     }
 
     const remoteOrders = rows.map((r) => rowToOrderRecord(r as Record<string, unknown>));
@@ -633,14 +674,15 @@ export async function fetchOrdersAsync(): Promise<OrderRecord[]> {
     return remoteOrders;
   } catch (err) {
     console.warn("fetchOrdersAsync exception, using local cache:", err);
-    return getOrders();
+    return readLocalOrders();
   }
 }
 
 function readLocalOrders(): OrderRecord[] {
   if (typeof window === "undefined") return INITIAL_SAMPLE_ORDERS;
   try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
+    const scopedKey = getScopedStorageKey();
+    const raw = window.localStorage.getItem(scopedKey) || window.localStorage.getItem(STORAGE_KEY);
     if (!raw) {
       const legacyRaw = window.localStorage.getItem(LEGACY_STORAGE_KEY);
       if (legacyRaw) {
@@ -665,8 +707,8 @@ function readLocalOrders(): OrderRecord[] {
 function writeLocalOrders(orders: OrderRecord[]): void {
   if (typeof window === "undefined") return;
   try {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(orders));
-    window.localStorage.setItem(LEGACY_STORAGE_KEY, JSON.stringify(orders));
+    const scopedKey = getScopedStorageKey();
+    window.localStorage.setItem(scopedKey, JSON.stringify(orders));
   } catch {
     // ignore
   }

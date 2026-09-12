@@ -32,6 +32,8 @@ import resaleLogo from "@/assets/resale-logo.svg";
 
 import { ProtectedRoute } from "@/components/protected-route";
 import { Loader } from "@/components/ui/loader";
+import { useAuth } from "@/lib/auth-store";
+import { BuyerGradingCard } from "@/components/grading/buyer-grading-card";
 
 export const Route = createFileRoute("/account/orders/$orderId")({
   head: ({ params }) => ({
@@ -148,6 +150,7 @@ function getOrderStatusBadge(status: OrderStatus) {
 
 function OrderDetailsPage() {
   const { orderId } = Route.useParams();
+  const { token } = useAuth();
   const [order, setOrder] = useState<OrderRecord | null | undefined>(undefined);
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [cancelReason, setCancelReason] = useState("Change of mind");
@@ -156,7 +159,7 @@ function OrderDetailsPage() {
 
   useEffect(() => {
     setOrder(getOrderById(orderId) || null);
-    fetchOrdersAsync()
+    fetchOrdersAsync(token || undefined)
       .then((orders) => {
         const found = orders.find((o) => o.id.toUpperCase() === orderId.toUpperCase());
         if (found) setOrder(found);
@@ -167,7 +170,7 @@ function OrderDetailsPage() {
       if (found) setOrder(found);
     });
     return () => unsubscribe();
-  }, [orderId]);
+  }, [orderId, token]);
 
   const handleCancelSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -350,6 +353,18 @@ function OrderDetailsPage() {
                         {taka(item.price)}
                       </span>
                     </div>
+
+                    {/* Buyer verification & grading component when order is delivered or completed */}
+                    {(order.orderStatus === "DELIVERED" || order.orderStatus === "COMPLETED") && (
+                      <BuyerGradingCard
+                        orderId={order.id}
+                        listingId={item.listingId}
+                        itemTitle={item.name}
+                        sellerGrade={item.grade as string as import("@/data/catalog").Grade}
+                        sellerConditionScore={item.conditionScore}
+                        isOrderDeliveredOrCompleted={true}
+                      />
+                    )}
                   </div>
                 ))}
 

@@ -1371,13 +1371,53 @@ export const placeOrderFn = createServerFn({ method: "POST" })
     const orderId = data.orderId || `ORD-${Math.floor(10000 + Math.random() * 90000)}`;
     const createdAt = new Date().toISOString();
 
-    // Check availability for all items
+    // 1. Authoritative availability and reservation check against database
+    let supabaseInstance: Awaited<ReturnType<typeof supabaseAdmin>> | null = null;
+    try {
+      supabaseInstance = await supabaseAdmin();
+    } catch {
+      // ignore
+    }
+
+    if (supabaseInstance && allListingIds.length > 0) {
+      try {
+        const { data: dbRows, error: dbErr } = await supabaseInstance
+          .from("listings")
+          .select("id, status")
+          .in("id", allListingIds);
+
+        if (!dbErr && Array.isArray(dbRows)) {
+          for (const row of dbRows) {
+            const st = String(row.status || "").toUpperCase();
+            if (st === "RESERVED" || st === "SOLD" || (st !== "ACTIVE" && st !== "PUBLISHED")) {
+              const memListing = db.listings.find((l) => l.id === row.id);
+              const prod = memListing
+                ? db.products.find((p) => p.id === memListing.productId)
+                : null;
+              const name = prod?.name || `Listing #${row.id}`;
+              return {
+                success: false,
+                error: `Item "${name}" was just reserved by another customer. Please remove it from your cart to proceed.`,
+                conflictListingId: row.id,
+              };
+            }
+          }
+        }
+      } catch (err) {
+        console.warn("[placeOrderFn] Supabase pre-check warning:", err);
+      }
+    }
+
+    // 2. Fallback check against in-memory repository
     for (const lid of allListingIds) {
       const listing = db.listings.find((l) => l.id === lid);
       if (listing && listing.status !== "ACTIVE" && listing.status !== "PUBLISHED") {
+        const prod = db.products.find((p) => p.id === listing.productId);
+        const name = prod?.name || `Item ${lid}`;
         return {
           success: false,
-          error: `Item ${lid} is no longer available or is currently reserved by another order.`,
+          error: `Item "${name}" was just reserved by another customer. Please remove it from your cart to proceed.`,
+          conflictListingId: lid,
         };
       }
     }
@@ -1421,25 +1461,26 @@ export const placeOrderFn = createServerFn({ method: "POST" })
       }
     }
 
-    try {
-      const supabase = await supabaseAdmin();
-      await supabase.from("orders").upsert({
-        id: orderId,
-        listing_id: primaryListingId,
-        buyer_id: buyerId,
-        amount_poisha: Math.round(data.amount * 100),
-        payment_method: data.paymentMethod.toUpperCase(),
-        status: "PENDING",
-        shipping_address_json: data.shippingAddress,
-        nid_number: data.nidNumber,
-        created_at: createdAt,
-      });
+    if (supabaseInstance) {
+      try {
+        await supabaseInstance.from("orders").upsert({
+          id: orderId,
+          listing_id: primaryListingId,
+          buyer_id: buyerId,
+          amount_poisha: Math.round(data.amount * 100),
+          payment_method: data.paymentMethod.toUpperCase(),
+          status: "PENDING",
+          shipping_address_json: data.shippingAddress,
+          nid_number: data.nidNumber,
+          created_at: createdAt,
+        });
 
-      for (const lid of allListingIds) {
-        await supabase.from("listings").update({ status: "RESERVED" }).eq("id", lid);
+        for (const lid of allListingIds) {
+          await supabaseInstance.from("listings").update({ status: "RESERVED" }).eq("id", lid);
+        }
+      } catch (err) {
+        console.warn("Supabase placeOrder server sync error:", err);
       }
-    } catch (err) {
-      console.warn("Supabase placeOrder server sync error:", err);
     }
 
     // Notify buyer
@@ -1476,11 +1517,18 @@ export const placeOrderFn = createServerFn({ method: "POST" })
 // Server-side seller confirmation of order
 export const confirmOrderAsSellerFn = createServerFn({ method: "POST" })
   .validator(
-    (data: { orderId: string; note?: string | undefined; sellerId?: string | undefined }) => data,
+    (data: {
+      orderId: string;
+      note?: string | undefined;
+      sellerId?: string | undefined;
+      token?: string | undefined;
+    }) => data,
   )
   .handler(async ({ data }) => {
-    const order = db.orders.find((o) => o.id === data.orderId);
+    const session = data.token ? getOrRestoreSession(data.token) : null;
     const now = new Date().toISOString();
+
+    const order = db.orders.find((o) => o.id === data.orderId);
     if (order) {
       order.status = "CONFIRMED";
       order.confirmedAt = now;
@@ -1488,10 +1536,70 @@ export const confirmOrderAsSellerFn = createServerFn({ method: "POST" })
 
     try {
       const supabase = await supabaseAdmin();
-      await supabase
+      // Fetch existing order to check authorization and status
+      const { data: existingOrder } = await supabase
         .from("orders")
-        .update({ status: "CONFIRMED", confirmed_at: now })
-        .eq("id", data.orderId);
+        .select("*")
+        .eq("id", data.orderId)
+        .maybeSingle();
+
+      if (existingOrder) {
+        const addr = (existingOrder.shipping_address_json || {}) as Record<string, unknown>;
+        const snapshot = (addr["_orderSnapshot"] || {}) as Record<string, unknown>;
+        const timeline = Array.isArray(snapshot["timeline"])
+          ? [...(snapshot["timeline"] as unknown[])]
+          : [];
+
+        // Check if caller has permission
+        if (session && !session.isAdmin) {
+          const isItemSeller = Array.isArray(snapshot["items"])
+            ? (snapshot["items"] as { sellerId?: string }[]).some(
+                (it) => it.sellerId === session.userId,
+              )
+            : false;
+          if (!isItemSeller && data.sellerId !== session.userId) {
+            return {
+              success: false,
+              error: "Unauthorized: only the seller or an admin can confirm this order.",
+            };
+          }
+        }
+
+        const newTimelineEvent = {
+          id: `evt-${Date.now().toString(36)}`,
+          type: "ORDER_CONFIRMED",
+          title: "Order Confirmed by Seller",
+          description: data.note || "Seller verified device condition and accepted reservation.",
+          timestamp: now,
+          actor: "SELLER",
+        };
+
+        const updatedSnapshot = {
+          ...snapshot,
+          orderStatus: "CONFIRMED",
+          timeline: [...timeline, newTimelineEvent],
+          updatedAt: now,
+        };
+
+        const updatedShippingAddressJson = {
+          ...addr,
+          _orderSnapshot: updatedSnapshot,
+        };
+
+        await supabase
+          .from("orders")
+          .update({
+            status: "CONFIRMED",
+            confirmed_at: now,
+            shipping_address_json: updatedShippingAddressJson,
+          })
+          .eq("id", data.orderId);
+      } else {
+        await supabase
+          .from("orders")
+          .update({ status: "CONFIRMED", confirmed_at: now })
+          .eq("id", data.orderId);
+      }
     } catch (err) {
       console.warn("Supabase confirmOrderAsSellerFn error:", err);
     }

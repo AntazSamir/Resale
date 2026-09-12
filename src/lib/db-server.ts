@@ -140,22 +140,84 @@ export const upsertOrderFn = createServerFn({ method: "POST" })
   });
 
 /**
- * Orders contain PII (NID, address) so reads must go through the server too.
- * Rows are returned as a JSON string (serializer-safe); caller parses them.
+ * Orders contain sensitive PII (NID, address, phone). Reads must be authenticated
+ * and strictly scoped by user role (BUYER sees only own purchases, SELLER sees
+ * only orders for their listings, ADMIN can audit platform orders).
  */
-export const listOrdersFn = createServerFn({ method: "GET" }).handler(async () => {
-  try {
-    const supabase = await admin();
-    const { data, error } = await supabase
-      .from("orders")
-      .select("*")
-      .order("created_at", { ascending: false });
-    if (error) return { json: "[]", error: error.message };
-    return { json: JSON.stringify(data ?? []), error: null };
-  } catch (err) {
-    return { json: "[]", error: String(err) };
-  }
-});
+export const listOrdersFn = createServerFn({ method: "POST" })
+  .validator((data: { token?: string | undefined }) => data)
+  .handler(async ({ data }) => {
+    try {
+      const { getOrRestoreSession } = await import("./server-functions");
+      const session = data?.token ? getOrRestoreSession(data.token) : null;
+      if (!session) {
+        return { json: "[]", error: "Authentication required to read orders." };
+      }
+
+      const supabase = await admin();
+      const { data: allRows, error } = await supabase
+        .from("orders")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) return { json: "[]", error: error.message };
+      const rows = (allRows ?? []) as Array<Record<string, unknown>>;
+
+      if (session.isAdmin) {
+        return { json: JSON.stringify(rows), error: null };
+      }
+
+      if (session.role === "SELLER") {
+        // Resolve seller's own listings to filter relevant orders
+        const { data: sellerListings } = await supabase
+          .from("listings")
+          .select("id")
+          .eq("seller_id", session.userId);
+        const sellerListingIds = new Set(
+          (sellerListings || []).map((l: { id: string }) => l.id.toLowerCase()),
+        );
+
+        const sellerOrders = rows.filter((r) => {
+          // If seller also bought this item
+          if (r["buyer_id"] === session.userId) return true;
+          const listingId = String(r["listing_id"] || "").toLowerCase();
+          if (listingId && sellerListingIds.has(listingId)) return true;
+
+          const addr = r["shipping_address_json"] as Record<string, unknown> | null;
+          const meta = addr?.["_orderSnapshot"] as Record<string, unknown> | null;
+          if (meta && Array.isArray(meta["items"])) {
+            return (meta["items"] as { sellerId?: string }[]).some(
+              (item) =>
+                item.sellerId && item.sellerId.toLowerCase() === session.userId.toLowerCase(),
+            );
+          }
+          return false;
+        });
+
+        return { json: JSON.stringify(sellerOrders), error: null };
+      }
+
+      // BUYER: strictly scoped to the authenticated buyer's identity
+      const buyerOrders = rows.filter((r) => {
+        if (r["buyer_id"] === session.userId) return true;
+        const addr = r["shipping_address_json"] as Record<string, unknown> | null;
+        const meta = addr?.["_orderSnapshot"] as Record<string, unknown> | null;
+        if (meta) {
+          if (meta["buyerId"] === session.userId) return true;
+          const contact = meta["buyerContact"] as { phone?: string; buyerId?: string } | null;
+          if (contact?.buyerId === session.userId) return true;
+          if (contact?.phone === session.phone || addr?.["phone"] === session.phone) {
+            return true;
+          }
+        }
+        return false;
+      });
+
+      return { json: JSON.stringify(buyerOrders), error: null };
+    } catch (err) {
+      return { json: "[]", error: String(err) };
+    }
+  });
 
 // ─── Cart Items ──────────────────────────────────────────────────────────────
 // These handlers silently swallow errors (incl. table-not-found) so the app

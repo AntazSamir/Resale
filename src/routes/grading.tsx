@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   ShieldCheck,
   CheckCircle2,
@@ -16,12 +16,21 @@ import {
   AlertTriangle,
   RotateCcw,
   Sliders,
+  Copy,
+  Bookmark,
+  BookmarkCheck,
 } from "lucide-react";
 import { SiteFooter, SiteHeader } from "@/components/site-header";
 import { type Grade } from "@/data/catalog";
 import { gradingCriteria, evaluateGrading, type GradingAnswers } from "@/data/grading";
 import { GradeBadge } from "@/components/grade-badge";
 import { ConditionScore } from "@/components/condition-score";
+import { useAuth } from "@/lib/auth-store";
+import {
+  saveDeviceGradeFn,
+  getDeviceGradesFn,
+  type DeviceGradeRecord,
+} from "@/lib/grading.functions";
 
 export const Route = createFileRoute("/grading")({
   head: () => ({
@@ -198,6 +207,74 @@ function GradingPage() {
 
   const handleSelectOption = (criterionId: string, value: string) => {
     setTestAnswers((prev) => ({ ...prev, [criterionId]: value }));
+  };
+
+  const { user, token } = useAuth();
+  const [deviceLabel, setDeviceLabel] = useState("");
+  const [saveNotes, setSaveNotes] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [savedFeedback, setSavedFeedback] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+  const [myGrades, setMyGrades] = useState<DeviceGradeRecord[]>([]);
+
+  useEffect(() => {
+    if (token) {
+      getDeviceGradesFn({ data: { token, mine: true } })
+        .then((res) => {
+          if (res.success && Array.isArray(res.grades)) {
+            setMyGrades(res.grades);
+          }
+        })
+        .catch(() => {});
+    }
+  }, [token]);
+
+  const handleSaveGrade = async () => {
+    if (!token) {
+      alert("Please sign in to save an evaluation to your account.");
+      return;
+    }
+    setSaving(true);
+    try {
+      const res = await saveDeviceGradeFn({
+        data: {
+          token,
+          answers: testAnswers,
+          productLabel: deviceLabel.trim() || "Evaluated Device",
+          notes: saveNotes.trim() || undefined,
+          role: user?.isAdmin ? "ADMIN" : user?.role === "SELLER" ? "SELLER" : "BUYER",
+        },
+      });
+      if (res.success) {
+        setSavedFeedback("Evaluation successfully saved to your profile!");
+        setMyGrades((prev) => [res.record, ...prev]);
+        setDeviceLabel("");
+        setSaveNotes("");
+        setTimeout(() => setSavedFeedback(null), 4000);
+      } else {
+        alert(res.error || "Failed to save evaluation.");
+      }
+    } catch (err: unknown) {
+      alert((err as { message?: string })?.message || "Failed to save evaluation.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleCopyReport = () => {
+    const text = `Resale.com Condition Inspection Report
+Device: ${deviceLabel || "Electronic Device"}
+Grade: Grade ${result.grade} (${result.conditionScore}/100 points)
+Breakdown:
+- Body & Frame: ${testAnswers["physical"]}
+- Display: ${testAnswers["screen"]}
+- Functionality: ${testAnswers["functionality"]}
+- Battery Health: ${testAnswers["battery"]}
+- Repairs: ${testAnswers["repairs"]}
+Verified via Resale 100-point algorithm.`;
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 3000);
   };
 
   const handleReset = () => {
@@ -535,7 +612,51 @@ function GradingPage() {
                   </div>
                 )}
 
-                <div className="border-t border-border pt-4">
+                {savedFeedback && (
+                  <div className="border-t border-border pt-3">
+                    <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1">
+                      <Check className="size-3.5" /> {savedFeedback}
+                    </p>
+                  </div>
+                )}
+
+                {/* Standalone Inspection Actions */}
+                <div className="border-t border-border pt-4 space-y-2">
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-semibold text-foreground block">
+                      Save to My Account (Standalone Tool):
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. My iPhone 13 Pro Max"
+                      value={deviceLabel}
+                      onChange={(e) => setDeviceLabel(e.target.value)}
+                      className="w-full border border-input bg-transparent px-2.5 py-1.5 text-xs placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                    />
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={handleSaveGrade}
+                      disabled={saving}
+                      className="flex-1 inline-flex items-center justify-center gap-1.5 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/30 py-2 text-xs font-semibold transition-colors"
+                    >
+                      <Bookmark className="size-3.5" />
+                      <span>{saving ? "Saving…" : "Save Grade"}</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleCopyReport}
+                      className="inline-flex items-center justify-center gap-1.5 bg-muted hover:bg-muted/80 text-foreground border border-border px-3 py-2 text-xs font-semibold transition-colors"
+                      title="Copy report to clipboard"
+                    >
+                      <Copy className="size-3.5" />
+                      <span>{copied ? "Copied!" : "Copy"}</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div className="border-t border-border pt-3">
                   <Link
                     to="/sell"
                     className="w-full inline-flex items-center justify-center gap-2 bg-primary py-2.5 text-xs font-semibold text-primary-foreground hover:bg-primary/90"
@@ -547,6 +668,42 @@ function GradingPage() {
               </div>
             </div>
           </div>
+
+          {/* User's Saved Device Grades */}
+          {myGrades.length > 0 && (
+            <div className="mt-10 pt-8 border-t border-border">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <BookmarkCheck className="size-4 text-primary" />
+                  <h3 className="text-base font-bold font-display text-foreground">
+                    My Saved Device Evaluations ({myGrades.length})
+                  </h3>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {myGrades.map((g) => (
+                  <div key={g.id} className="p-3.5 border border-border bg-card space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="font-semibold text-foreground text-xs truncate max-w-45">
+                        {g.productLabel || "Evaluated Device"}
+                      </span>
+                      <GradeBadge grade={g.grade} />
+                    </div>
+                    <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+                      <span>Condition: {g.conditionScore}/100 pts</span>
+                      <span>{new Date(g.createdAt).toLocaleDateString("en-GB")}</span>
+                    </div>
+                    {g.notes && (
+                      <p className="text-[10.5px] text-muted-foreground italic truncate">
+                        &ldquo;{g.notes}&rdquo;
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </section>
 

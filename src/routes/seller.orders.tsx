@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { SiteHeader, SiteFooter } from "@/components/site-header";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { SellerSidebar } from "./seller.dashboard";
@@ -108,23 +108,23 @@ function getStatusBadge(status: OrderStatus) {
 }
 
 function SellerOrdersPage() {
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const [orders, setOrders] = useState<OrderRecord[]>([]);
   const [filter, setFilter] = useState<
     "ALL" | "PENDING" | "IN_PROGRESS" | "SHIPPED" | "COMPLETED" | "CANCELLED"
   >("ALL");
   const [actionFeedback, setActionFeedback] = useState<string | null>(null);
 
-  const refresh = () => {
+  const refresh = useCallback(() => {
     setOrders(getOrders().filter((o) => !o.isSampleData));
-    fetchOrdersAsync()
+    fetchOrdersAsync(token || undefined)
       .then((res) => {
         if (Array.isArray(res) && res.length > 0) {
           setOrders(res.filter((o) => !o.isSampleData));
         }
       })
       .catch(() => {});
-  };
+  }, [token]);
 
   useEffect(() => {
     refresh();
@@ -132,20 +132,35 @@ function SellerOrdersPage() {
       setOrders(updated.filter((o) => !o.isSampleData));
     });
     return () => unsubscribe();
-  }, []);
+  }, [token, refresh]);
 
-  const handleTransition = (orderId: string, nextStatus: OrderStatus, label: string) => {
-    const res = transitionOrderStatus(orderId, nextStatus, "SELLER");
-    if (res.success) {
-      if (nextStatus === "CONFIRMED") {
-        confirmOrderAsSellerFn({
+  const handleTransition = async (orderId: string, nextStatus: OrderStatus, label: string) => {
+    if (nextStatus === "CONFIRMED") {
+      try {
+        const confirmRes = await confirmOrderAsSellerFn({
           data: {
             orderId,
             ...(user?.id ? { sellerId: user.id } : {}),
-            note: "Seller verified device condition and reservation.",
+            token: token || undefined,
+            note: "Seller verified device condition and accepted reservation.",
           },
-        }).catch(() => {});
+        });
+        if (confirmRes && !confirmRes.success && (confirmRes as { error?: string }).error) {
+          alert((confirmRes as { error: string }).error);
+          return;
+        }
+      } catch (err: unknown) {
+        console.error("Seller confirmation failed:", err);
+        alert(
+          (err as { message?: string })?.message ||
+            "Failed to confirm order on server. Please try again.",
+        );
+        return;
       }
+    }
+
+    const res = transitionOrderStatus(orderId, nextStatus, "SELLER");
+    if (res.success) {
       setActionFeedback(`Order #${orderId} updated to: ${label}`);
       setTimeout(() => setActionFeedback(null), 3000);
       refresh();
