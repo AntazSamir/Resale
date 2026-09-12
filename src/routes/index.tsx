@@ -693,76 +693,257 @@ function Index() {
             </p>
           </div>
 
-          <div className="flex gap-4 overflow-x-auto scrollbar-none pb-2 sm:grid sm:grid-cols-3 lg:grid-cols-6 sm:overflow-visible">
-            {creators.map((c) => (
-              <Link
-                key={c.id}
-                to="/creator/$creatorSlug"
-                params={{ creatorSlug: c.handle }}
-                className="group w-40 shrink-0 sm:w-auto rounded-xl border border-border/80 bg-card p-4 text-center transition-all duration-200 hover:shadow-md hover:border-primary/40 flex flex-col items-center justify-between"
-              >
-                <div className="relative size-14 mb-2.5 rounded-full overflow-hidden border border-border/80 bg-secondary">
-                  {c.avatarUrl ? (
-                    <img
-                      src={c.avatarUrl}
-                      alt={c.displayName}
-                      loading="lazy"
-                      className="size-full object-cover"
-                    />
-                  ) : (
-                    <span className="flex size-full items-center justify-center font-bold text-primary">
-                      {c.displayName.slice(0, 2).toUpperCase()}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            {/* Card 1: Sam Tech BD (Featured) */}
+            <div className="relative rounded-lg border border-border/80 bg-card p-4 flex flex-col justify-between hover:shadow-md transition-shadow">
+              <span className="absolute top-3 right-3 text-[10px] font-semibold tracking-wider text-emerald-700 bg-emerald-50 border border-emerald-200/80 px-2 py-0.5 rounded uppercase">
+                FEATURED
+              </span>
+              <div>
+                <div className="relative size-12 mb-3">
+                  <div className="size-12 rounded-full bg-black text-white flex items-center justify-center font-bold text-base tracking-tighter">
+                    <span>
+                      S<span className="text-red-500">T</span>
                     </span>
-                  )}
-                  {c.verified && (
-                    <span className="absolute bottom-0 right-0 size-4 bg-emerald-500 rounded-full border-2 border-card flex items-center justify-center text-white">
-                      <Check className="size-2.5" />
-                    </span>
-                  )}
+                  </div>
+                  <span className="absolute -bottom-1 -right-1 size-4 bg-emerald-600 rounded-full border-2 border-card flex items-center justify-center text-white">
+                    <Check className="size-2.5 stroke-3" />
+                  </span>
                 </div>
-                <h3 className="text-xs font-bold text-foreground truncate w-full">
-                  {c.displayName}
-                </h3>
-                <span className="text-[10px] text-muted-foreground mt-0.5">Tech Reviewer</span>
-                <span className="text-[11px] font-bold text-primary mt-1.5">
-                  {c.totalReviews} reviews
-                </span>
-              </Link>
-            ))}
+                <h3 className="text-sm font-bold text-foreground leading-tight">Sam Tech BD</h3>
+                <p className="text-[11px] text-muted-foreground mt-0.5">
+                  Tech Reviewer &amp; Seller
+                </p>
+                <div className="flex items-center gap-1 text-[11px] text-muted-foreground mt-2">
+                  <Star className="size-3 fill-amber-400 text-amber-400" />
+                  <span className="font-bold text-foreground">4.8</span>
+                  <span className="text-muted-foreground">1.2k reviews</span>
+                  <span className="mx-0.5 text-muted-foreground/50">|</span>
+                  <span className="flex items-center gap-0.5 text-emerald-700 font-medium">
+                    <ShieldCheck className="size-3 text-emerald-600" /> Verified
+                  </span>
+                </div>
+                <div className="flex items-center gap-1 text-[11px] text-muted-foreground mt-1">
+                  <MapPin className="size-3 shrink-0 text-muted-foreground" />
+                  <span>Dhaka, Bangladesh</span>
+                </div>
+              </div>
+              <div className="mt-4 flex justify-end">
+                <Link
+                  to="/creator/$creatorSlug"
+                  params={{ creatorSlug: "sam-tech-bd" }}
+                  className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium border border-emerald-600/40 text-emerald-700 hover:bg-emerald-50 rounded transition-colors"
+                >
+                  View profile <ArrowRight className="size-3" />
+                </Link>
+              </div>
+            </div>
 
-            {stores.map((s) => (
-              <Link
-                key={s.id}
-                to="/store/$storeSlug"
-                params={{ storeSlug: s.slug }}
-                className="group w-40 shrink-0 sm:w-auto rounded-xl border border-border/80 bg-card p-4 text-center transition-all duration-200 hover:shadow-md hover:border-primary/40 flex flex-col items-center justify-between"
-              >
-                <div className="relative size-14 mb-2.5 rounded-full overflow-hidden border border-border/80 bg-secondary">
-                  {s.logoUrl ? (
-                    <img
-                      src={s.logoUrl}
-                      alt={s.name}
-                      loading="lazy"
-                      className="size-full object-cover"
-                    />
-                  ) : (
-                    <span className="flex size-full items-center justify-center font-bold text-primary">
-                      {s.name.slice(0, 2).toUpperCase()}
-                    </span>
-                  )}
-                  {s.verified && (
-                    <span className="absolute bottom-0 right-0 size-4 bg-emerald-500 rounded-full border-2 border-card flex items-center justify-center text-white">
-                      <Check className="size-2.5" />
-                    </span>
-                  )}
+            {/* Card 2: Sam Tech Reviews */}
+            <div className="relative rounded-lg border border-border/80 bg-card p-4 flex flex-col justify-between hover:shadow-md transition-shadow">
+              <div>
+                <div className="relative size-12 mb-3">
+                  <img
+                    src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=160&auto=format&fit=crop&q=80"
+                    alt="Sam Tech Reviews"
+                    className="size-12 rounded-full object-cover border border-border/60"
+                  />
+                  <span className="absolute -bottom-1 -right-1 size-4 bg-emerald-600 rounded-full border-2 border-card flex items-center justify-center text-white">
+                    <Check className="size-2.5 stroke-3" />
+                  </span>
                 </div>
-                <h3 className="text-xs font-bold text-foreground truncate w-full">{s.name}</h3>
-                <span className="text-[10px] text-muted-foreground mt-0.5">Pro Store</span>
-                <span className="text-[11px] font-bold text-primary mt-1.5">
-                  {s.totalSales} sales
-                </span>
-              </Link>
-            ))}
+                <h3 className="text-sm font-bold text-foreground leading-tight">
+                  Sam Tech Reviews
+                </h3>
+                <p className="text-[11px] text-muted-foreground mt-0.5">Tech Reviewer</p>
+                <div className="flex items-center gap-1 text-[11px] text-muted-foreground mt-2">
+                  <Star className="size-3 fill-amber-400 text-amber-400" />
+                  <span className="font-bold text-foreground">4.7</span>
+                  <span className="text-muted-foreground">856 reviews</span>
+                  <span className="mx-0.5 text-muted-foreground/50">|</span>
+                  <span className="flex items-center gap-0.5 text-emerald-700 font-medium">
+                    <ShieldCheck className="size-3 text-emerald-600" /> Verified
+                  </span>
+                </div>
+                <div className="flex items-center gap-1 text-[11px] text-muted-foreground mt-1">
+                  <MapPin className="size-3 shrink-0 text-muted-foreground" />
+                  <span>Dhaka, Bangladesh</span>
+                </div>
+              </div>
+              <div className="mt-4 flex justify-end">
+                <Link
+                  to="/creator/$creatorSlug"
+                  params={{ creatorSlug: "sam-tech-bd" }}
+                  className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium border border-emerald-600/40 text-emerald-700 hover:bg-emerald-50 rounded transition-colors"
+                >
+                  View profile <ArrowRight className="size-3" />
+                </Link>
+              </div>
+            </div>
+
+            {/* Card 3: Gadget Talk Bangla */}
+            <div className="relative rounded-lg border border-border/80 bg-card p-4 flex flex-col justify-between hover:shadow-md transition-shadow">
+              <div>
+                <div className="relative size-12 mb-3">
+                  <div className="size-12 rounded-full bg-[#f97316] text-white flex items-center justify-center font-bold text-sm tracking-tight">
+                    GTB
+                  </div>
+                  <span className="absolute -bottom-1 -right-1 size-4 bg-emerald-600 rounded-full border-2 border-card flex items-center justify-center text-white">
+                    <Check className="size-2.5 stroke-3" />
+                  </span>
+                </div>
+                <h3 className="text-sm font-bold text-foreground leading-tight">
+                  Gadget Talk Bangla
+                </h3>
+                <p className="text-[11px] text-muted-foreground mt-0.5">Tech Reviewer</p>
+                <div className="flex items-center gap-1 text-[11px] text-muted-foreground mt-2">
+                  <Star className="size-3 fill-amber-400 text-amber-400" />
+                  <span className="font-bold text-foreground">4.6</span>
+                  <span className="text-muted-foreground">724 reviews</span>
+                  <span className="mx-0.5 text-muted-foreground/50">|</span>
+                  <span className="flex items-center gap-0.5 text-emerald-700 font-medium">
+                    <ShieldCheck className="size-3 text-emerald-600" /> Verified
+                  </span>
+                </div>
+                <div className="flex items-center gap-1 text-[11px] text-muted-foreground mt-1">
+                  <MapPin className="size-3 shrink-0 text-muted-foreground" />
+                  <span>Chattogram, Bangladesh</span>
+                </div>
+              </div>
+              <div className="mt-4 flex justify-end">
+                <Link
+                  to="/creator/$creatorSlug"
+                  params={{ creatorSlug: "gadget-talk-bangla" }}
+                  className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium border border-emerald-600/40 text-emerald-700 hover:bg-emerald-50 rounded transition-colors"
+                >
+                  View profile <ArrowRight className="size-3" />
+                </Link>
+              </div>
+            </div>
+
+            {/* Card 4: Apple Vault E2E */}
+            <div className="relative rounded-lg border border-border/80 bg-card p-4 flex flex-col justify-between hover:shadow-md transition-shadow">
+              <div>
+                <div className="relative size-12 mb-3">
+                  <img
+                    src="https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=160&auto=format&fit=crop&q=80"
+                    alt="Apple Vault E2E"
+                    className="size-12 rounded-full object-cover border border-border/60"
+                  />
+                  <span className="absolute -bottom-1 -right-1 size-4 bg-emerald-600 rounded-full border-2 border-card flex items-center justify-center text-white">
+                    <Check className="size-2.5 stroke-3" />
+                  </span>
+                </div>
+                <h3 className="text-sm font-bold text-foreground leading-tight">Apple Vault E2E</h3>
+                <p className="text-[11px] text-muted-foreground mt-0.5">Pro Store</p>
+                <div className="flex items-center gap-1 text-[11px] text-muted-foreground mt-2">
+                  <Star className="size-3 fill-amber-400 text-amber-400" />
+                  <span className="font-bold text-foreground">4.9</span>
+                  <span className="text-muted-foreground">1.4k reviews</span>
+                  <span className="mx-0.5 text-muted-foreground/50">|</span>
+                  <span className="flex items-center gap-0.5 text-emerald-700 font-medium">
+                    <ShieldCheck className="size-3 text-emerald-600" /> Verified
+                  </span>
+                </div>
+                <div className="flex items-center gap-1 text-[11px] text-muted-foreground mt-1">
+                  <MapPin className="size-3 shrink-0 text-muted-foreground" />
+                  <span>Dhaka, Bangladesh</span>
+                </div>
+              </div>
+              <div className="mt-4 flex justify-end">
+                <Link
+                  to="/store/$storeSlug"
+                  params={{ storeSlug: "apple-vault-e2e" }}
+                  className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium border border-emerald-600/40 text-emerald-700 hover:bg-emerald-50 rounded transition-colors"
+                >
+                  View profile <ArrowRight className="size-3" />
+                </Link>
+              </div>
+            </div>
+
+            {/* Card 5: Apple Vault Banani */}
+            <div className="relative rounded-lg border border-border/80 bg-card p-4 flex flex-col justify-between hover:shadow-md transition-shadow">
+              <div>
+                <div className="relative size-12 mb-3">
+                  <img
+                    src="https://images.unsplash.com/photo-1611186871348-b1ce696e52c9?w=160&auto=format&fit=crop&q=80"
+                    alt="Apple Vault Banani"
+                    className="size-12 rounded-full object-cover border border-border/60"
+                  />
+                  <span className="absolute -bottom-1 -right-1 size-4 bg-emerald-600 rounded-full border-2 border-card flex items-center justify-center text-white">
+                    <Check className="size-2.5 stroke-3" />
+                  </span>
+                </div>
+                <h3 className="text-sm font-bold text-foreground leading-tight">
+                  Apple Vault Banani
+                </h3>
+                <p className="text-[11px] text-muted-foreground mt-0.5">Pro Store</p>
+                <div className="flex items-center gap-1 text-[11px] text-muted-foreground mt-2">
+                  <Star className="size-3 fill-amber-400 text-amber-400" />
+                  <span className="font-bold text-foreground">4.9</span>
+                  <span className="text-muted-foreground">1.1k reviews</span>
+                  <span className="mx-0.5 text-muted-foreground/50">|</span>
+                  <span className="flex items-center gap-0.5 text-emerald-700 font-medium">
+                    <ShieldCheck className="size-3 text-emerald-600" /> Verified
+                  </span>
+                </div>
+                <div className="flex items-center gap-1 text-[11px] text-muted-foreground mt-1">
+                  <MapPin className="size-3 shrink-0 text-muted-foreground" />
+                  <span>Dhaka, Bangladesh</span>
+                </div>
+              </div>
+              <div className="mt-4 flex justify-end">
+                <Link
+                  to="/store/$storeSlug"
+                  params={{ storeSlug: "apple-vault" }}
+                  className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium border border-emerald-600/40 text-emerald-700 hover:bg-emerald-50 rounded transition-colors"
+                >
+                  View profile <ArrowRight className="size-3" />
+                </Link>
+              </div>
+            </div>
+
+            {/* Card 6: Pixel & Gadget Hub */}
+            <div className="relative rounded-lg border border-border/80 bg-card p-4 flex flex-col justify-between hover:shadow-md transition-shadow">
+              <div>
+                <div className="relative size-12 mb-3">
+                  <img
+                    src="https://images.unsplash.com/photo-1550009158-9ebf69173e03?w=160&auto=format&fit=crop&q=80"
+                    alt="Pixel & Gadget Hub"
+                    className="size-12 rounded-full object-cover border border-border/60"
+                  />
+                  <span className="absolute -bottom-1 -right-1 size-4 bg-emerald-600 rounded-full border-2 border-card flex items-center justify-center text-white">
+                    <Check className="size-2.5 stroke-3" />
+                  </span>
+                </div>
+                <h3 className="text-sm font-bold text-foreground leading-tight">
+                  Pixel &amp; Gadget Hub
+                </h3>
+                <p className="text-[11px] text-muted-foreground mt-0.5">Pro Store</p>
+                <div className="flex items-center gap-1 text-[11px] text-muted-foreground mt-2">
+                  <Star className="size-3 fill-amber-400 text-amber-400" />
+                  <span className="font-bold text-foreground">4.7</span>
+                  <span className="text-muted-foreground">632 reviews</span>
+                  <span className="mx-0.5 text-muted-foreground/50">|</span>
+                  <span className="flex items-center gap-0.5 text-emerald-700 font-medium">
+                    <ShieldCheck className="size-3 text-emerald-600" /> Verified
+                  </span>
+                </div>
+                <div className="flex items-center gap-1 text-[11px] text-muted-foreground mt-1">
+                  <MapPin className="size-3 shrink-0 text-muted-foreground" />
+                  <span>Dhaka, Bangladesh</span>
+                </div>
+              </div>
+              <div className="mt-4 flex justify-end">
+                <Link
+                  to="/store/$storeSlug"
+                  params={{ storeSlug: "pixel-gadget-hub" }}
+                  className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium border border-emerald-600/40 text-emerald-700 hover:bg-emerald-50 rounded transition-colors"
+                >
+                  View profile <ArrowRight className="size-3" />
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
       </section>

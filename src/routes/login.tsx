@@ -41,9 +41,7 @@ type FpStep = "id" | "otp" | "newpw" | "done";
 
 function ForgotPasswordModal({ onClose }: { onClose: () => void }) {
   const [step, setStep] = useState<FpStep>("id");
-  const [authMethod, setAuthMethod] = useState<"phone" | "email">("phone");
-  const [phone, setPhone] = useState("");
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [otp, setOtp] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -51,25 +49,35 @@ function ForgotPasswordModal({ onClose }: { onClose: () => void }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const target = authMethod === "phone" ? phone : email;
+  const cleanId = identifier.trim();
+  const isEmail = cleanId.includes("@");
 
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (authMethod === "phone" && phone.length < 11) {
-      setError("Please enter a valid 11-digit mobile number.");
+    if (!cleanId) {
+      setError("Please enter your phone number or email address.");
       return;
     }
-    if (authMethod === "email" && (!email || !email.includes("@"))) {
-      setError("Please enter a valid email address.");
-      return;
+    if (isEmail) {
+      if (!cleanId.includes(".") || cleanId.length < 5) {
+        setError("Please enter a valid email address.");
+        return;
+      }
+    } else {
+      const digitsOnly = cleanId.replace(/\D/g, "");
+      if (digitsOnly.length < 11) {
+        setError("Please enter a valid 11-digit mobile number.");
+        return;
+      }
     }
+
     setError(null);
     setLoading(true);
     try {
       await sendOtpFn({
         data: {
-          phone: authMethod === "phone" ? phone : undefined,
-          email: authMethod === "email" ? email : undefined,
+          phone: isEmail ? undefined : cleanId.replace(/\D/g, ""),
+          email: isEmail ? cleanId.toLowerCase() : undefined,
         },
       });
       setStep("otp");
@@ -102,8 +110,8 @@ function ForgotPasswordModal({ onClose }: { onClose: () => void }) {
     try {
       const res = await changePasswordFn({
         data: {
-          phone: authMethod === "phone" ? phone : undefined,
-          email: authMethod === "email" ? email : undefined,
+          phone: isEmail ? undefined : cleanId.replace(/\D/g, ""),
+          email: isEmail ? cleanId.toLowerCase() : undefined,
           otp,
           newPassword,
         },
@@ -178,46 +186,19 @@ function ForgotPasswordModal({ onClose }: { onClose: () => void }) {
           {/* Step 1 — Enter ID */}
           {step === "id" && (
             <form onSubmit={handleSendOtp} className="space-y-3">
-              <div className="flex rounded-md bg-secondary p-1 text-xs">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setAuthMethod("phone");
-                    setError(null);
-                  }}
-                  className={`flex-1 py-1.5 font-medium rounded transition-colors ${authMethod === "phone" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground"}`}
-                >
-                  Phone
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setAuthMethod("email");
-                    setError(null);
-                  }}
-                  className={`flex-1 py-1.5 font-medium rounded transition-colors ${authMethod === "email" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground"}`}
-                >
-                  Email
-                </button>
+              <div className="space-y-1.5">
+                <Label htmlFor="fp-id" className="text-xs">
+                  Phone Number or Email Address
+                </Label>
+                <Input
+                  id="fp-id"
+                  placeholder="01XXXXXXXXX or name@example.com"
+                  value={identifier}
+                  onChange={(e) => setIdentifier(e.target.value)}
+                  required
+                  autoComplete="username"
+                />
               </div>
-              {authMethod === "phone" ? (
-                <Input
-                  id="fp-phone"
-                  placeholder="01XXXXXXXXX"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  required
-                />
-              ) : (
-                <Input
-                  id="fp-email"
-                  type="email"
-                  placeholder="name@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
-              )}
               <Button type="submit" className="w-full" disabled={loading}>
                 {loading ? "Sending OTP…" : "Send Verification Code"}
               </Button>
@@ -229,7 +210,7 @@ function ForgotPasswordModal({ onClose }: { onClose: () => void }) {
             <form onSubmit={handleVerifyOtp} className="space-y-4">
               <p className="text-xs text-muted-foreground">
                 Enter the 6-digit code sent to{" "}
-                <span className="font-semibold text-foreground">{target}</span>.{" "}
+                <span className="font-semibold text-foreground">{cleanId}</span>.{" "}
                 <span className="text-subtle-foreground">(Use 123456 in dev)</span>
               </p>
               <div className="flex justify-center">
@@ -256,7 +237,7 @@ function ForgotPasswordModal({ onClose }: { onClose: () => void }) {
                 }}
                 className="w-full text-xs text-primary hover:underline"
               >
-                ← Change {authMethod === "phone" ? "phone number" : "email"}
+                ← Change phone number or email
               </button>
             </form>
           )}
@@ -328,9 +309,7 @@ function ForgotPasswordModal({ onClose }: { onClose: () => void }) {
 // ── Login Page ─────────────────────────────────────────────────────────────────
 function LoginPage() {
   const search = Route.useSearch();
-  const [authMethod, setAuthMethod] = useState<"phone" | "email">("phone");
-  const [phone, setPhone] = useState("");
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -348,14 +327,26 @@ function LoginPage() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (authMethod === "phone" && phone.length < 11) {
-      setError("Please enter a valid 11-digit mobile number.");
+    const cleanId = identifier.trim();
+    if (!cleanId) {
+      setError("Please enter your mobile number or email address.");
       return;
     }
-    if (authMethod === "email" && (!email || !email.includes("@"))) {
-      setError("Please enter a valid email address.");
-      return;
+
+    const isEmail = cleanId.includes("@");
+    if (isEmail) {
+      if (!cleanId.includes(".") || cleanId.length < 5) {
+        setError("Please enter a valid email address.");
+        return;
+      }
+    } else {
+      const digitsOnly = cleanId.replace(/\D/g, "");
+      if (digitsOnly.length < 11) {
+        setError("Please enter a valid 11-digit mobile number.");
+        return;
+      }
     }
+
     if (!password) {
       setError("Please enter your password.");
       return;
@@ -366,8 +357,8 @@ function LoginPage() {
     try {
       const res = await loginFn({
         data: {
-          phone: authMethod === "phone" ? phone : undefined,
-          email: authMethod === "email" ? email : undefined,
+          phone: isEmail ? undefined : cleanId.replace(/\D/g, ""),
+          email: isEmail ? cleanId.toLowerCase() : undefined,
           password,
         },
       });
@@ -430,55 +421,17 @@ function LoginPage() {
             )}
 
             <form onSubmit={handleLogin} className="space-y-4">
-              {/* Method tab */}
-              <div className="flex rounded-md bg-secondary p-1 text-xs">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setAuthMethod("phone");
-                    setError(null);
-                  }}
-                  className={`flex-1 py-1.5 font-medium rounded transition-colors ${authMethod === "phone" ? "bg-background text-foreground shadow-sm font-semibold" : "text-muted-foreground hover:text-foreground"}`}
-                >
-                  Mobile Number
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setAuthMethod("email");
-                    setError(null);
-                  }}
-                  className={`flex-1 py-1.5 font-medium rounded transition-colors ${authMethod === "email" ? "bg-background text-foreground shadow-sm font-semibold" : "text-muted-foreground hover:text-foreground"}`}
-                >
-                  Email Address
-                </button>
-              </div>
-
-              {/* ID field */}
+              {/* Single unified Phone or Email field */}
               <div className="space-y-2">
-                <Label htmlFor="login-id">
-                  {authMethod === "phone" ? "Phone Number" : "Email Address"}
-                </Label>
-                {authMethod === "phone" ? (
-                  <Input
-                    id="login-id"
-                    placeholder="01XXXXXXXXX"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    required
-                    pattern="01[3-9][0-9]{8}"
-                    title="Valid Bangladesh mobile number starting with 01"
-                  />
-                ) : (
-                  <Input
-                    id="login-id"
-                    type="email"
-                    placeholder="e.g. name@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
-                )}
+                <Label htmlFor="login-id">Phone Number or Email</Label>
+                <Input
+                  id="login-id"
+                  placeholder="01XXXXXXXXX or name@example.com"
+                  value={identifier}
+                  onChange={(e) => setIdentifier(e.target.value)}
+                  required
+                  autoComplete="username"
+                />
               </div>
 
               {/* Password field */}

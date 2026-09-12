@@ -39,10 +39,8 @@ export const Route = createFileRoute("/register")({
 function RegisterPage() {
   const search = Route.useSearch();
   const [step, setStep] = useState<"details" | "otp">("details");
-  const [authMethod, setAuthMethod] = useState<"phone" | "email">("phone");
   const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [nid, setNid] = useState("");
   const [password, setPassword] = useState("");
   const [otp, setOtp] = useState("");
@@ -51,15 +49,26 @@ function RegisterPage() {
   const navigate = useNavigate();
   const { signIn } = useAuth();
 
+  const cleanId = identifier.trim();
+  const isEmail = cleanId.includes("@");
+
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (authMethod === "phone" && phone.length < 11) {
-      setError("Please enter a valid 11-digit phone number.");
+    if (!cleanId) {
+      setError("Please enter your mobile number or email address.");
       return;
     }
-    if (authMethod === "email" && (!email || !email.includes("@") || !email.includes("."))) {
-      setError("Please enter a valid email address.");
-      return;
+    if (isEmail) {
+      if (!cleanId.includes(".") || cleanId.length < 5) {
+        setError("Please enter a valid email address.");
+        return;
+      }
+    } else {
+      const digitsOnly = cleanId.replace(/\D/g, "");
+      if (digitsOnly.length < 11) {
+        setError("Please enter a valid 11-digit phone number.");
+        return;
+      }
     }
     if ((nid.length !== 10 && nid.length !== 13 && nid.length !== 17) || name.length < 2) {
       setError("Please fill out all required fields with valid information.");
@@ -76,8 +85,8 @@ function RegisterPage() {
     try {
       await sendOtpFn({
         data: {
-          phone: authMethod === "phone" ? phone : undefined,
-          email: authMethod === "email" ? email : undefined,
+          phone: isEmail ? undefined : cleanId.replace(/\D/g, ""),
+          email: isEmail ? cleanId.toLowerCase() : undefined,
         },
       });
       setStep("otp");
@@ -98,8 +107,8 @@ function RegisterPage() {
     try {
       const res = await verifyOtpFn({
         data: {
-          phone: authMethod === "phone" ? phone : undefined,
-          email: authMethod === "email" ? email : undefined,
+          phone: isEmail ? undefined : cleanId.replace(/\D/g, ""),
+          email: isEmail ? cleanId.toLowerCase() : undefined,
           otp,
           name,
           nid,
@@ -125,7 +134,7 @@ function RegisterPage() {
     }
   };
 
-  const targetLabel = authMethod === "phone" ? phone : email;
+  const targetLabel = cleanId;
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -174,38 +183,6 @@ function RegisterPage() {
 
             {step === "details" ? (
               <form onSubmit={handleSendOtp} className="space-y-4">
-                {/* Method selector tab */}
-                <div className="flex rounded-md bg-secondary p-1 text-xs">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setAuthMethod("phone");
-                      setError(null);
-                    }}
-                    className={`flex-1 py-1.5 font-medium rounded transition-colors ${
-                      authMethod === "phone"
-                        ? "bg-background text-foreground shadow-sm font-semibold"
-                        : "text-muted-foreground hover:text-foreground"
-                    }`}
-                  >
-                    Mobile Number
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setAuthMethod("email");
-                      setError(null);
-                    }}
-                    className={`flex-1 py-1.5 font-medium rounded transition-colors ${
-                      authMethod === "email"
-                        ? "bg-background text-foreground shadow-sm font-semibold"
-                        : "text-muted-foreground hover:text-foreground"
-                    }`}
-                  >
-                    Email Address
-                  </button>
-                </div>
-
                 <div className="space-y-2">
                   <Label htmlFor="name">Full Name</Label>
                   <Input
@@ -217,32 +194,17 @@ function RegisterPage() {
                   />
                 </div>
 
-                {authMethod === "phone" ? (
-                  <div className="space-y-2">
-                    <Label htmlFor="phone">Phone Number</Label>
-                    <Input
-                      id="phone"
-                      placeholder="01XXXXXXXXX"
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      required
-                      pattern="01[3-9][0-9]{8}"
-                      title="Valid Bangladesh mobile number starting with 01"
-                    />
-                  </div>
-                ) : (
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email Address</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="e.g. name@example.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                    />
-                  </div>
-                )}
+                <div className="space-y-2">
+                  <Label htmlFor="reg-identifier">Phone Number or Email</Label>
+                  <Input
+                    id="reg-identifier"
+                    placeholder="01XXXXXXXXX or name@example.com"
+                    value={identifier}
+                    onChange={(e) => setIdentifier(e.target.value)}
+                    required
+                    autoComplete="username"
+                  />
+                </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="nid">NID Number</Label>

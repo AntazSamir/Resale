@@ -2,7 +2,7 @@
 
 > **Bangladesh's Trusted C2C & B2B Marketplace for Quality-Checked Pre-Owned, Open-Box & Like-New Electronics**
 
-This document tracks the completed engineering milestones across **Phase 1**, **Phase 2**, **Phase 3.1**, **Phase 3.4**, **Phase 3.6**, **Phase 4 (4.1A–E, 4.2, 4.4, 4.5, 4.6)**, and **Phase 5.1 (Marketplace Trust & Listing Governance)**, and outlines the strategic and technical roadmap for remaining milestones.
+This document tracks the completed engineering milestones across **Phase 1**, **Phase 2**, **Phase 3.1**, **Phase 3.4**, **Phase 3.6**, **Phase 4 (4.1A–E, 4.2, 4.4, 4.5, 4.6)**, **Phase 5.1 (Marketplace Trust & Listing Governance)**, **Phase 5.2 (Seller Reputation)**, and **Phase 5.3A (Admin Console & Grading Evaluation)**, and outlines the strategic and technical roadmap for remaining milestones.
 
 ---
 
@@ -572,4 +572,86 @@ Phase 5.1 transforms the listing flow from a direct-publish system into a proper
 
 ---
 
-_Last Updated: August 2026 (Phase 5.2 Complete) · Resale.com Engineering Team_
+## ✅ Phase 5.3A: Admin Console Overhaul, Grading Evaluation Flow & UI Polish
+
+**Status:** `COMPLETED` · **Commit Milestones:** `d1f8677`, `512dde5`, `7e426cd`, `8291734`, `52f34fb`, `9521537` · **Build Verified:** September 2026
+
+This sprint delivered a comprehensive Admin Console redesign, a new buyer-facing grading evaluation system tied to order fulfillment, and targeted UI improvements across auth, catalog, and homepage sections.
+
+---
+
+### 1. Polished Admin Console & Analytics Dashboard (`/admin`)
+
+- **`AdminShell` Layout Component (`src/components/admin/admin-shell.tsx`)**: Extracted and standardized the Admin Console sidebar/layout shell into a reusable component. Consistent max-width container and responsive layout applied across all admin routes.
+- **Admin Dashboard Overhaul (`src/routes/admin.index.tsx`)**: Complete visual redesign of the admin overview page with live platform-wide KPI cards, real-time metric panels, and structured section groupings for Operations, Platform Health, and Content.
+- **Geographic Performance Analytics — Bangladesh Heatmap (`src/components/bangladesh-map.tsx`)**: SVG-based interactive Bangladesh administrative map embedded in the Admin Analytics route (`/admin/analytics`). Division-level color intensity encoding based on real order and listing density with hover-revealed district detail tooltips.
+- **Admin Analytics Route (`/admin/analytics`)**: Dedicated analytics page with system-level insights, platform funnel metrics, and geographic performance heatmap.
+- **Expanded Admin Route Coverage**: Scaffolded and fully integrated 12 new admin sub-routes with the `AdminShell` layout: `admin.users`, `admin.listings`, `admin.payments`, `admin.inspections`, `admin.login`, `admin.categories`, `admin.content`, `admin.notifications`, `admin.partners`, `admin.payouts`, `admin.products`, `admin.promotions`, `admin.returns`, `admin.reviews`, `admin.roles`, `admin.settings`, `admin.support`.
+- **Admin Container Width Refactor (`52f34fb`)**: Unified container width constraints (`max-w-7xl`, `max-w-screen-2xl`) applied consistently across all admin routes eliminating over-wide content on large monitors.
+- **Admin Orders Redesign (`/admin/orders`)**: Fully refactored transaction oversight table with dual Order/Payment status filters, column-optimized layout, and improved responsive behavior.
+- **Admin Identity Hub (`/admin/identity`)**: Rebuilt NID verification queue with improved card layout and verification workflow clarity.
+
+---
+
+### 2. Order Grading Evaluation & Transaction Flow (`feat: implement order grading evaluation and transaction flow`)
+
+- **Grading Database Layer (`supabase/manual-sql/20260911_grading_and_orders.sql`)**: New `device_grade_records` Supabase table storing buyer-submitted post-delivery condition evaluations: physical, screen, functionality, battery, and accessory grades — with timestamps, order/listing/buyer references, and grading metadata.
+- **Grading Server Functions (`src/lib/grading.functions.ts`)**: Server-authoritative functions for submitting, fetching, and validating buyer grading evaluations: `submitBuyerGradeFn`, `getBuyerGradeFn`, `getListingGradeHistoryFn`. Session-validated, IDOR-safe, and structurally aligned with the existing `order-store.ts` lifecycle.
+- **`BuyerGradingCard` Component (`src/components/grading/buyer-grading-card.tsx`)**: Buyer-facing UI card embedded in the order detail timeline (`/account/orders/$orderId`). Surfaces after order delivery confirmation. Allows buyers to submit structured condition evaluations (Pristine → Unacceptable per axis) with additional free-text notes. Shows submitted evaluation read-only on revisit.
+- **Order Store Integration (`src/lib/order-store.ts`)**: Connected `submitBuyerGradeFn` into the order lifecycle post-delivery state. Evaluation submission updates the local order state and persists to Supabase asynchronously.
+- **Grading Route Refinement (`src/routes/grading.tsx`)**: Enhanced the public `/grading` condition standards page with improved grade capping logic visualization and updated the interactive grade simulator to reflect the 5-axis evaluation model used by the buyer grading card.
+- **Checkout Snapshot Enhancement (`src/routes/checkout.tsx`)**: Captures grading eligibility timestamps in the order snapshot for downstream grading card display logic.
+- **Seller Order Hub (`src/routes/seller.orders.tsx`)**: Updated seller fulfillment hub to surface buyer-submitted grading evaluations for delivered orders, helping sellers understand post-delivery condition feedback.
+- **Test Suite (`scripts/test-order-grading-flow.ts`)**: End-to-end test harness validating the order → delivery → grading evaluation lifecycle including session validation, submission, and fetch round-trip verification.
+
+---
+
+### 3. Auth Page UI — Consolidated Single-Field Identifier
+
+- **Login Page (`src/routes/login.tsx`)**: Removed the tab-based `Mobile Number / Email` toggle button. Replaced with a single `Phone Number or Email` input field. Auto-detects email vs phone by presence of `@` character and routes to the correct OTP/auth path automatically.
+- **Register Page (`src/routes/register.tsx`)**: Applied the same simplification — removed the `authMethod` tab state and duplicate conditional input blocks. Single `identifier` field handles both phone and email registration without UX friction.
+- **Smart Validation**: Both pages perform inline type detection (`isEmail = identifier.includes('@')`) and apply field-appropriate validation rules (11-digit phone check vs email format check) before OTP dispatch.
+
+---
+
+### 4. Browse Listings Page — 4-Column Grid Layout
+
+- **Products Grid (`src/routes/products.tsx`)**: Updated the main catalog grid to show **4 product cards per row on large screens** (`xl:grid-cols-4`) while maintaining 2-column mobile and 3-column tablet breakpoints. Adjusted gap sizing for tighter but visually balanced card presentation (`gap-4.5`).
+- **Container Width**: Products page container widened to `max-w-screen-2xl` on ultra-wide displays for better use of available screen real estate.
+
+---
+
+### 5. Homepage Storefront Section Design Refresh
+
+- **Verified Pro Sellers & Tech Creators Section (`src/routes/index.tsx`)**: Redesigned the storefront feature section on the homepage. Improved layout structure, card presentation, and visual hierarchy for the featured seller/creator showcases (`src/data/storefront.ts` data updates).
+
+---
+
+### 6. Summary — Phase 5.3A Deliverables
+
+| Feature | Files Touched | Status |
+|---|---|:---:|
+| Admin Shell Layout Component | `src/components/admin/admin-shell.tsx` | ✅ |
+| Admin Dashboard Overhaul | `src/routes/admin.index.tsx` | ✅ |
+| Bangladesh Geographic Heatmap | `src/components/bangladesh-map.tsx`, `src/routes/admin.analytics.tsx` | ✅ |
+| Admin Container Width Refactor | All `admin.*` routes | ✅ |
+| 15+ New Admin Sub-Routes | `admin.users`, `admin.payments`, `admin.inspections`, etc. | ✅ |
+| Grading DB Table & SQL | `supabase/manual-sql/20260911_grading_and_orders.sql` | ✅ |
+| Grading Server Functions | `src/lib/grading.functions.ts` | ✅ |
+| Buyer Grading Card Component | `src/components/grading/buyer-grading-card.tsx` | ✅ |
+| Order Store Grading Integration | `src/lib/order-store.ts`, `src/routes/account.orders.$orderId.tsx` | ✅ |
+| Grading E2E Test Script | `scripts/test-order-grading-flow.ts` | ✅ |
+| Login — Consolidated Identifier | `src/routes/login.tsx` | ✅ |
+| Register — Consolidated Identifier | `src/routes/register.tsx` | ✅ |
+| Products 4-Column Grid | `src/routes/products.tsx` | ✅ |
+| Homepage Storefront Section | `src/routes/index.tsx`, `src/data/storefront.ts` | ✅ |
+
+---
+
+| Milestone | Key Focus Area | Deliverables | Status |
+|---|---|---|:---:|
+| **Phase 5.3A** | Admin Console, Grading Flow & UI Polish | Admin Shell, Bangladesh Heatmap, 15+ Admin Routes, Buyer Grading Card, Grading DB, Login/Register Consolidated Input, 4-col Products Grid | ✅ Completed |
+
+---
+
+_Last Updated: September 2026 (Phase 5.3A Complete) · Resale.com Engineering Team_

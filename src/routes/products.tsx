@@ -544,7 +544,7 @@ function ProductsPage() {
     <div className="min-h-screen bg-background flex flex-col">
       <SiteHeader />
 
-      <main className="flex-1 w-full max-w-7xl mx-auto px-4 md:px-5 py-6 md:py-8">
+      <main className="flex-1 w-full max-w-7xl 2xl:max-w-screen-2xl mx-auto px-4 md:px-5 py-6 md:py-8">
         {/* Breadcrumb */}
         <nav className="text-xs text-muted-foreground mb-4 flex items-center gap-1.5">
           <Link to="/" className="hover:text-foreground transition-colors">
@@ -852,7 +852,7 @@ function ProductsPage() {
             {sortedListings.length > 0 ? (
               viewLayout === "grid" ? (
                 /* Grid view */
-                <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-3 gap-3 sm:gap-4 md:gap-5 items-stretch auto-rows-fr">
+                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-4.5 items-stretch auto-rows-fr">
                   {sortedListings.map((listing) => {
                     const product = productFor(listing.productId);
                     if (!product) return null;

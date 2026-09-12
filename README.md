@@ -7,7 +7,7 @@
 [![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3ECF8E?logo=supabase&logoColor=white)](https://supabase.com/)
 [![Cloudflare](https://img.shields.io/badge/Deploy-Cloudflare-F38020?logo=cloudflare&logoColor=white)](https://workers.cloudflare.com/)
 
-**Resale.com** is Bangladesh's premier C2C and B2B marketplace for quality-checked pre-owned, open-box, and refurbished electronics. Engineered with objective component-level condition grading (A+ to D), 32-point hardware inspection, NID-verified sellers, nationwide Cash on Delivery (COD), decoupled order lifecycle state machines, Pro Merchant storefronts, Verified Creator video reviews, server-authoritative authentication, a comprehensive 48-hour dispute mediation hub, a full marketplace listing governance system with admin moderation and immutable audit history, and a deterministic 0–100 seller reputation scoring engine with transparent calculation breakdown.
+**Resale.com** is Bangladesh's premier C2C and B2B marketplace for quality-checked pre-owned, open-box, and refurbished electronics. Engineered with objective component-level condition grading (A+ to D), 32-point hardware inspection, NID-verified sellers, nationwide Cash on Delivery (COD), decoupled order lifecycle state machines, Pro Merchant storefronts, Verified Creator video reviews, server-authoritative authentication, a comprehensive 48-hour dispute mediation hub, a full marketplace listing governance system with admin moderation and immutable audit history, a deterministic 0–100 seller reputation scoring engine with transparent calculation breakdown, a post-delivery buyer grading evaluation flow, and a polished Admin Console with Bangladesh geographic analytics.
 
 ---
 
@@ -236,6 +236,42 @@ Resale.com replaces subjective, easily-manipulated 5-star ratings with a mathema
     - Buyer Order Tracking & Real-Time Timelines (`/account/orders/$orderId`)
 - **Lightweight Visual Assets**:
   - Modern WebP hero banner asset (`hero-banner.webp`) engineered for instant Largest Contentful Paint (LCP) and zero cumulative layout shifts across mobile and desktop devices.
+
+---
+
+### 🖥️ 15. Admin Console Overhaul & Bangladesh Geographic Analytics (Phase 5.3A)
+
+A comprehensive redesign of the Admin Console delivering a unified layout system, geographic performance intelligence, and expanded platform management coverage.
+
+- **`AdminShell` Layout Component**: Reusable sidebar/navigation shell standardizing max-width containers and responsive layouts across all admin routes.
+- **Admin Dashboard Overhaul (`/admin`)**: Redesigned overview page with live KPI cards, platform health panels, and structured Operations/Content/Analytics sections.
+- **Bangladesh Geographic Heatmap (`/admin/analytics`)**: SVG-based interactive administrative map with division-level color-encoded order and listing density, hover tooltips revealing district-level stats.
+- **15+ Admin Sub-Routes**: Full coverage across Users, Listings, Payments, Inspections, Moderation, Orders, Disputes, Identity, Promotions, Reviews, Roles, Content, Partners, Payouts, and Settings — all using `AdminShell` for consistent UX.
+- **Admin Container Width Consistency**: Unified `max-w-7xl` / `max-w-screen-2xl` constraints across all admin pages.
+
+---
+
+### ⭐ 16. Post-Delivery Buyer Grading Evaluation Flow (Phase 5.3A)
+
+Buyers can now submit structured condition evaluations after receiving their orders, creating a transparent feedback loop between buyers and sellers.
+
+- **`BuyerGradingCard` Component**: Surfaces automatically on `/account/orders/$orderId` after delivery confirmation. Buyer rates the received device on 5 axes: Physical, Screen, Functionality, Battery, and Accessories (Pristine → Unacceptable scale). Includes free-text notes field. Read-only view on revisit.
+- **Grading Database Layer**: `device_grade_records` Supabase table capturing the full evaluation with order/listing/buyer references and submission timestamp.
+- **Session-Validated Server Functions** (`submitBuyerGradeFn`, `getBuyerGradeFn`, `getListingGradeHistoryFn`): Server-authoritative, IDOR-safe grading record management.
+- **Seller Visibility**: Seller Order Hub surfaces buyer-submitted evaluations for delivered orders.
+- **E2E Test Suite** (`scripts/test-order-grading-flow.ts`): Validates the full order → delivery → grading lifecycle.
+
+---
+
+### 🧹 17. Auth UX — Consolidated Single Identifier Field (Phase 5.3A)
+
+- **Login & Register Pages**: Replaced the `Mobile Number / Email` tab toggle with a single unified `Phone Number or Email` input field. Auto-detects input type via `@` character presence and routes to the correct validation and OTP path — reducing friction and visual clutter on mobile.
+
+---
+
+### 📦 18. Browse Listings — 4-Column Grid (Phase 5.3A)
+
+- **Products Catalog Grid** (`/products`): Updated to display **4 product cards per row on large screens** (`xl:grid-cols-4`). Maintains 2-column mobile and 3-column tablet layouts. Container widened to `max-w-screen-2xl` on ultra-wide viewports.
 
 ---
 

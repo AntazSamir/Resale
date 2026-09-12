@@ -32,6 +32,30 @@ export interface Storefront {
 
 export const INITIAL_DEMO_STORES: Storefront[] = [
   {
+    id: "store-apple-vault-e2e",
+    ownerId: "seller-e2e-1",
+    name: "Apple Vault E2E",
+    slug: "apple-vault-e2e",
+    tagline: "Dhaka's Verified Graded Apple Outlet",
+    description:
+      "Specializing in verified Grade A & A+ Apple MacBooks, iPhones, and iPads. All units pass 32-point diagnostics with warranty.",
+    logoUrl:
+      "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=160&auto=format&fit=crop&q=80",
+    bannerUrl:
+      "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=1200&auto=format&fit=crop&q=80",
+    district: "Dhaka",
+    area: "Dhanmondi",
+    address: "Road 27, Dhanmondi, Dhaka 1209",
+    phone: "+880 1711-889900",
+    email: "e2e@applevault.bd",
+    businessHours: "Saturday – Thursday: 10:00 AM – 8:00 PM",
+    verified: true,
+    rating: 4.9,
+    totalSales: 1400,
+    isDemo: true,
+    createdAt: "2026-01-10T10:00:00Z",
+  },
+  {
     id: "store-apple-vault",
     ownerId: "seller-rafiq-1",
     name: "Apple Vault Banani",
@@ -59,7 +83,7 @@ export const INITIAL_DEMO_STORES: Storefront[] = [
       whatsapp: "+8801711234567",
     },
     rating: 4.9,
-    totalSales: 84,
+    totalSales: 1100,
     isDemo: true,
     createdAt: "2026-01-15T10:00:00Z",
   },
