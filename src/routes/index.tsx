@@ -130,6 +130,7 @@ function Index() {
   const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
   const [activeInspectionTab, setActiveInspectionTab] = useState<number>(0);
   const [heroSearch, setHeroSearch] = useState("");
+  const brandCarouselRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setOrders(getOrders());
@@ -169,7 +170,22 @@ function Index() {
     .sort((a, b) => b.pct - a.pct)
     .slice(0, 8);
 
-  const availableBrands = useMemo(() => [...new Set(products.map((p) => p.brand))].sort(), []);
+  const availableBrands = useMemo(() => {
+    const brandMap = new Map<string, { count: number; categories: Set<string> }>();
+    for (const p of products) {
+      const entry = brandMap.get(p.brand) ?? { count: 0, categories: new Set() };
+      entry.count += 1;
+      entry.categories.add(p.category);
+      brandMap.set(p.brand, entry);
+    }
+    return Array.from(brandMap.entries())
+      .map(([name, data]) => ({
+        name,
+        count: data.count,
+        categories: Array.from(data.categories).slice(0, 2).join(" · "),
+      }))
+      .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
+  }, []);
 
   const [creators, setCreators] = useState<ReturnType<typeof getCreators>>([]);
   const [stores, setStores] = useState<ReturnType<typeof getStores>>([]);
@@ -376,38 +392,79 @@ function Index() {
       </section>
 
       {/* ════════════════════════════════════════════════════════════
-          AVAILABLE BRANDS
+          AVAILABLE BRANDS (Interactive Carousel)
       ════════════════════════════════════════════════════════════ */}
       <section className="px-4 md:px-6 lg:px-8 py-8 border-b border-border/80 bg-card/20">
-        <div className="mx-auto max-w-7xl">
-          <div className="flex items-end justify-between gap-4 mb-4">
+        <div className="mx-auto max-w-7xl space-y-4">
+          <div className="flex items-end justify-between gap-4">
             <div>
               <h2 className="text-xl sm:text-2xl font-display font-bold text-foreground">
                 Available Brands
               </h2>
               <p className="mt-1 text-xs sm:text-sm text-muted-foreground">
-                Shop verified pre-owned devices from top global electronics brands.
+                Shop verified pre-owned devices from top global electronics manufacturers.
               </p>
             </div>
-            <Link
-              to="/products"
-              search={{ q: undefined, category: undefined, brand: undefined }}
-              className="inline-flex items-center gap-1 text-xs sm:text-sm font-semibold text-primary hover:underline whitespace-nowrap"
-            >
-              Browse Catalog
-              <ArrowRight className="size-3.5" />
-            </Link>
+
+            <div className="flex items-center gap-2">
+              <Link
+                to="/products"
+                search={{ q: undefined, category: undefined, brand: undefined }}
+                className="hidden sm:inline-flex items-center gap-1 text-xs sm:text-sm font-semibold text-primary hover:underline whitespace-nowrap mr-2"
+              >
+                Browse Catalog
+                <ArrowRight className="size-3.5" />
+              </Link>
+              <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    brandCarouselRef.current?.scrollBy({ left: -320, behavior: "smooth" });
+                  }}
+                  aria-label="Scroll brands left"
+                  className="flex size-8 items-center justify-center rounded-lg border border-border/80 bg-card text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors cursor-pointer"
+                >
+                  <ChevronLeft className="size-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    brandCarouselRef.current?.scrollBy({ left: 320, behavior: "smooth" });
+                  }}
+                  aria-label="Scroll brands right"
+                  className="flex size-8 items-center justify-center rounded-lg border border-border/80 bg-card text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors cursor-pointer"
+                >
+                  <ChevronRight className="size-4" />
+                </button>
+              </div>
+            </div>
           </div>
 
-          <div className="flex flex-wrap gap-2 sm:gap-2.5">
+          <div
+            ref={brandCarouselRef}
+            className="flex gap-3 overflow-x-auto scrollbar-none snap-x snap-mandatory py-1 scroll-smooth"
+          >
             {availableBrands.map((brand) => (
               <Link
-                key={brand}
+                key={brand.name}
                 to="/products"
-                search={{ brand, q: undefined, category: undefined }}
-                className="rounded-lg border border-border/80 bg-card px-4 py-2 text-xs font-semibold text-foreground transition-all hover:border-primary/60 hover:text-primary hover:shadow-xs active:scale-[0.98]"
+                search={{ brand: brand.name, q: undefined, category: undefined }}
+                className="group shrink-0 snap-start w-44 sm:w-52 rounded-xl border border-border/80 bg-card p-3.5 sm:p-4 transition-all duration-200 hover:border-primary/50 hover:shadow-md hover:-translate-y-0.5"
               >
-                {brand}
+                <div className="flex items-center justify-between mb-2">
+                  <span className="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary font-display font-bold text-sm border border-primary/20 group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                    {brand.name.slice(0, 2).toUpperCase()}
+                  </span>
+                  <span className="text-[11px] font-semibold text-muted-foreground bg-secondary/80 px-2 py-0.5 rounded-md">
+                    {brand.count} {brand.count === 1 ? "device" : "devices"}
+                  </span>
+                </div>
+                <h3 className="text-sm font-bold text-foreground group-hover:text-primary transition-colors truncate">
+                  {brand.name}
+                </h3>
+                <p className="text-[11px] text-muted-foreground mt-0.5 truncate">
+                  {brand.categories || "Verified Devices"}
+                </p>
               </Link>
             ))}
           </div>
