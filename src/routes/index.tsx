@@ -700,15 +700,12 @@ function Index() {
                 FEATURED
               </span>
               <div>
-                <div className="relative size-12 mb-3">
-                  <div className="size-12 rounded-full bg-black text-white flex items-center justify-center font-bold text-base tracking-tighter">
+                <div className="relative size-14 mb-3">
+                  <div className="size-14 rounded-full bg-black text-white flex items-center justify-center font-bold text-lg tracking-tighter border border-border/60 shadow-xs">
                     <span>
                       S<span className="text-red-500">T</span>
                     </span>
                   </div>
-                  <span className="absolute -bottom-1 -right-1 size-4 bg-emerald-600 rounded-full border-2 border-card flex items-center justify-center text-white">
-                    <Check className="size-2.5 stroke-3" />
-                  </span>
                 </div>
                 <h3 className="text-sm font-bold text-foreground leading-tight">Sam Tech BD</h3>
                 <p className="text-[11px] text-muted-foreground mt-0.5">
@@ -742,15 +739,12 @@ function Index() {
             {/* Card 2: Sam Tech Reviews */}
             <div className="relative rounded-lg border border-border/80 bg-card p-4 flex flex-col justify-between hover:shadow-md transition-shadow">
               <div>
-                <div className="relative size-12 mb-3">
+                <div className="relative size-14 mb-3">
                   <img
                     src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=160&auto=format&fit=crop&q=80"
                     alt="Sam Tech Reviews"
-                    className="size-12 rounded-full object-cover border border-border/60"
+                    className="size-14 rounded-full object-cover border border-border/60 shadow-xs"
                   />
-                  <span className="absolute -bottom-1 -right-1 size-4 bg-emerald-600 rounded-full border-2 border-card flex items-center justify-center text-white">
-                    <Check className="size-2.5 stroke-3" />
-                  </span>
                 </div>
                 <h3 className="text-sm font-bold text-foreground leading-tight">
                   Sam Tech Reviews
@@ -784,13 +778,10 @@ function Index() {
             {/* Card 3: Gadget Talk Bangla */}
             <div className="relative rounded-lg border border-border/80 bg-card p-4 flex flex-col justify-between hover:shadow-md transition-shadow">
               <div>
-                <div className="relative size-12 mb-3">
-                  <div className="size-12 rounded-full bg-[#f97316] text-white flex items-center justify-center font-bold text-sm tracking-tight">
+                <div className="relative size-14 mb-3">
+                  <div className="size-14 rounded-full bg-[#f97316] text-white flex items-center justify-center font-bold text-base tracking-tight border border-border/60 shadow-xs">
                     GTB
                   </div>
-                  <span className="absolute -bottom-1 -right-1 size-4 bg-emerald-600 rounded-full border-2 border-card flex items-center justify-center text-white">
-                    <Check className="size-2.5 stroke-3" />
-                  </span>
                 </div>
                 <h3 className="text-sm font-bold text-foreground leading-tight">
                   Gadget Talk Bangla
@@ -824,15 +815,12 @@ function Index() {
             {/* Card 4: Apple Vault E2E */}
             <div className="relative rounded-lg border border-border/80 bg-card p-4 flex flex-col justify-between hover:shadow-md transition-shadow">
               <div>
-                <div className="relative size-12 mb-3">
+                <div className="relative size-14 mb-3">
                   <img
                     src="https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=160&auto=format&fit=crop&q=80"
                     alt="Apple Vault E2E"
-                    className="size-12 rounded-full object-cover border border-border/60"
+                    className="size-14 rounded-full object-cover border border-border/60 shadow-xs"
                   />
-                  <span className="absolute -bottom-1 -right-1 size-4 bg-emerald-600 rounded-full border-2 border-card flex items-center justify-center text-white">
-                    <Check className="size-2.5 stroke-3" />
-                  </span>
                 </div>
                 <h3 className="text-sm font-bold text-foreground leading-tight">Apple Vault E2E</h3>
                 <p className="text-[11px] text-muted-foreground mt-0.5">Pro Store</p>
@@ -864,15 +852,12 @@ function Index() {
             {/* Card 5: Apple Vault Banani */}
             <div className="relative rounded-lg border border-border/80 bg-card p-4 flex flex-col justify-between hover:shadow-md transition-shadow">
               <div>
-                <div className="relative size-12 mb-3">
+                <div className="relative size-14 mb-3">
                   <img
                     src="https://images.unsplash.com/photo-1611186871348-b1ce696e52c9?w=160&auto=format&fit=crop&q=80"
                     alt="Apple Vault Banani"
-                    className="size-12 rounded-full object-cover border border-border/60"
+                    className="size-14 rounded-full object-cover border border-border/60 shadow-xs"
                   />
-                  <span className="absolute -bottom-1 -right-1 size-4 bg-emerald-600 rounded-full border-2 border-card flex items-center justify-center text-white">
-                    <Check className="size-2.5 stroke-3" />
-                  </span>
                 </div>
                 <h3 className="text-sm font-bold text-foreground leading-tight">
                   Apple Vault Banani
@@ -906,15 +891,12 @@ function Index() {
             {/* Card 6: Pixel & Gadget Hub */}
             <div className="relative rounded-lg border border-border/80 bg-card p-4 flex flex-col justify-between hover:shadow-md transition-shadow">
               <div>
-                <div className="relative size-12 mb-3">
+                <div className="relative size-14 mb-3">
                   <img
                     src="https://images.unsplash.com/photo-1550009158-9ebf69173e03?w=160&auto=format&fit=crop&q=80"
                     alt="Pixel & Gadget Hub"
-                    className="size-12 rounded-full object-cover border border-border/60"
+                    className="size-14 rounded-full object-cover border border-border/60 shadow-xs"
                   />
-                  <span className="absolute -bottom-1 -right-1 size-4 bg-emerald-600 rounded-full border-2 border-card flex items-center justify-center text-white">
-                    <Check className="size-2.5 stroke-3" />
-                  </span>
                 </div>
                 <h3 className="text-sm font-bold text-foreground leading-tight">
                   Pixel &amp; Gadget Hub
