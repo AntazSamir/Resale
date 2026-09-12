@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import {
   ArrowRight,
   BadgeCheck,
@@ -169,6 +169,8 @@ function Index() {
     .sort((a, b) => b.pct - a.pct)
     .slice(0, 8);
 
+  const availableBrands = useMemo(() => [...new Set(products.map((p) => p.brand))].sort(), []);
+
   const [creators, setCreators] = useState<ReturnType<typeof getCreators>>([]);
   const [stores, setStores] = useState<ReturnType<typeof getStores>>([]);
 
@@ -206,9 +208,14 @@ function Index() {
       {/* ════════════════════════════════════════════════════════════
           1. HERO SPOTLIGHT: Modern, high-impact asymmetric tech centerpiece
       ════════════════════════════════════════════════════════════ */}
-      <section className="relative w-full border-b border-border/80 overflow-hidden">
-        {/* Image drives the section height — scales proportionally with viewport width */}
-        <img src={heroBanner} alt="" aria-hidden="true" className="w-full h-auto block" />
+      <section className="relative w-full border-b border-border/80 overflow-hidden max-h-130 sm:max-h-140 lg:max-h-150 flex items-center">
+        {/* Image drives the section height — scales proportionally with viewport width, bounded by max-height */}
+        <img
+          src={heroBanner}
+          alt=""
+          aria-hidden="true"
+          className="w-full h-full min-h-115 sm:min-h-130 lg:min-h-145 max-h-130 sm:max-h-140 lg:max-h-150 object-cover object-center block"
+        />
 
         {/* Content overlaid on the image */}
         <div className="absolute inset-0 z-10 flex items-center px-4 sm:px-6 lg:px-8">
@@ -364,6 +371,45 @@ function Index() {
                 </Link>
               );
             })}
+          </div>
+        </div>
+      </section>
+
+      {/* ════════════════════════════════════════════════════════════
+          AVAILABLE BRANDS
+      ════════════════════════════════════════════════════════════ */}
+      <section className="px-4 md:px-6 lg:px-8 py-8 border-b border-border/80 bg-card/20">
+        <div className="mx-auto max-w-7xl">
+          <div className="flex items-end justify-between gap-4 mb-4">
+            <div>
+              <h2 className="text-xl sm:text-2xl font-display font-bold text-foreground">
+                Available Brands
+              </h2>
+              <p className="mt-1 text-xs sm:text-sm text-muted-foreground">
+                Shop verified pre-owned devices from top global electronics brands.
+              </p>
+            </div>
+            <Link
+              to="/products"
+              search={{ q: undefined, category: undefined, brand: undefined }}
+              className="inline-flex items-center gap-1 text-xs sm:text-sm font-semibold text-primary hover:underline whitespace-nowrap"
+            >
+              Browse Catalog
+              <ArrowRight className="size-3.5" />
+            </Link>
+          </div>
+
+          <div className="flex flex-wrap gap-2 sm:gap-2.5">
+            {availableBrands.map((brand) => (
+              <Link
+                key={brand}
+                to="/products"
+                search={{ brand, q: undefined, category: undefined }}
+                className="rounded-lg border border-border/80 bg-card px-4 py-2 text-xs font-semibold text-foreground transition-all hover:border-primary/60 hover:text-primary hover:shadow-xs active:scale-[0.98]"
+              >
+                {brand}
+              </Link>
+            ))}
           </div>
         </div>
       </section>
