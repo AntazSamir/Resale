@@ -2,7 +2,6 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState, useRef, useEffect, useMemo } from "react";
 import {
   ArrowRight,
-  BadgeCheck,
   Camera,
   Check,
   CheckCircle2,
@@ -14,7 +13,6 @@ import {
   Layers,
   Lock,
   MapPin,
-  Search,
   ShieldCheck,
   ShoppingBag,
   Smartphone,
@@ -129,7 +127,6 @@ function Index() {
   const [orders, setOrders] = useState<OrderRecord[]>([]);
   const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
   const [activeInspectionTab, setActiveInspectionTab] = useState<number>(0);
-  const [heroSearch, setHeroSearch] = useState("");
   const brandCarouselRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -209,14 +206,6 @@ function Index() {
     navigate({ to: "/cart" });
   };
 
-  const handleHeroSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    navigate({
-      to: "/products",
-      search: { q: heroSearch.trim() || undefined, category: undefined, brand: undefined },
-    });
-  };
-
   return (
     <div className="min-h-screen bg-background flex flex-col selection:bg-primary/20">
       <SiteHeader />
@@ -224,82 +213,12 @@ function Index() {
       {/* ════════════════════════════════════════════════════════════
           1. HERO SPOTLIGHT: Modern, high-impact asymmetric tech centerpiece
       ════════════════════════════════════════════════════════════ */}
-      <section className="relative w-full border-b border-border/80 overflow-hidden max-h-130 sm:max-h-140 lg:max-h-150 flex items-center">
-        {/* Image drives the section height — scales proportionally with viewport width, bounded by max-height */}
+      <section className="relative w-full border-b border-border/80 overflow-hidden bg-muted/20 flex items-center">
         <img
           src={heroBanner}
-          alt=""
-          aria-hidden="true"
-          className="w-full h-full min-h-115 sm:min-h-130 lg:min-h-145 max-h-130 sm:max-h-140 lg:max-h-150 object-cover object-center block"
+          alt="Premium Tech at Smarter Prices — Verified Pre-Owned Electronics"
+          className="w-full h-auto max-h-130 sm:max-h-140 lg:max-h-160 object-cover object-center block"
         />
-
-        {/* Content overlaid on the image */}
-        <div className="absolute inset-0 z-10 flex items-center px-4 sm:px-6 lg:px-8">
-          <div className="mx-auto max-w-7xl w-full">
-            <div className="lg:max-w-[58%] space-y-4 sm:space-y-6">
-              {/* Pillar Badge */}
-              <div className="inline-flex items-center gap-2 bg-primary/10 text-primary border border-primary/20 px-3 py-1 text-xs font-semibold rounded-full shadow-xs backdrop-blur-xs">
-                <BadgeCheck className="size-3.5 shrink-0" />
-                <span>Standardized 32-Point Diagnostics</span>
-                <span className="text-primary/60">·</span>
-                <span className="text-foreground/80 font-medium">A+ to D Graded</span>
-              </div>
-
-              {/* Main Headline */}
-              <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-[3.35rem] font-display font-bold leading-[1.12] tracking-tight text-foreground">
-                Buy Verified Used Tech. <br />
-                <span className="text-muted-foreground">Know Exactly</span>{" "}
-                <span className="text-primary">What You&apos;re Getting.</span>
-              </h1>
-
-              {/* Subtitle — hidden on very small screens to avoid overflow */}
-              <p className="hidden sm:block text-sm sm:text-base text-muted-foreground max-w-xl leading-relaxed">
-                Inspected pre-owned smartphones, laptops, and cameras from verified sellers in
-                Bangladesh. Standardized condition checklists with 48-hour return protection on
-                delivery.
-              </p>
-
-              {/* Quick Search Form */}
-              <form onSubmit={handleHeroSearchSubmit} className="max-w-xl">
-                <div className="relative flex items-center shadow-sm rounded-lg overflow-hidden border border-border bg-card focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all">
-                  <Search className="size-4.5 text-muted-foreground ml-3.5 shrink-0" />
-                  <input
-                    type="text"
-                    value={heroSearch}
-                    onChange={(e) => setHeroSearch(e.target.value)}
-                    placeholder="Search iPhone 15, MacBook M2, Sony XM5..."
-                    className="w-full bg-transparent px-3 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-hidden"
-                  />
-                  <button
-                    type="submit"
-                    className="bg-primary text-primary-foreground font-semibold text-xs sm:text-sm px-5 py-3 hover:opacity-90 transition-opacity shrink-0 flex items-center gap-1.5"
-                  >
-                    <span>Search</span>
-                    <ArrowRight className="size-3.5" />
-                  </button>
-                </div>
-              </form>
-
-              {/* CTAs — hidden on very small screens */}
-              <div className="hidden sm:flex flex-wrap items-center gap-3">
-                <Link
-                  to="/products"
-                  search={{ q: undefined, category: undefined, brand: undefined }}
-                  className="inline-flex items-center justify-center gap-2 bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground rounded-md transition-all hover:opacity-95 active:scale-[0.98] shadow-sm"
-                >
-                  <span>Explore All Devices</span>
-                  <ArrowRight className="size-4" />
-                </Link>
-                <Link
-                  to="/sell"
-                  className="inline-flex items-center justify-center gap-2 bg-card hover:bg-secondary text-foreground border border-border px-6 py-3 text-sm font-semibold rounded-md transition-all active:scale-[0.98]"
-                >
-                  <span>Sell a Device</span>
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
       </section>
 
       {/* Trust Guarantee Strip — below the hero image */}
