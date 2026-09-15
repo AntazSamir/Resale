@@ -365,23 +365,6 @@ export function SiteHeader() {
     }
   };
 
-  const location = useLocation();
-  const isHomePage = location.pathname === "/";
-  const [scrolledPastHero, setScrolledPastHero] = useState(!isHomePage);
-
-  useEffect(() => {
-    if (!isHomePage) {
-      setScrolledPastHero(true);
-      return;
-    }
-    const handleScroll = () => {
-      setScrolledPastHero(window.scrollY > 280);
-    };
-    handleScroll();
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [isHomePage]);
-
   const [showAnnouncement, setShowAnnouncement] = useState(true);
 
   useEffect(() => {
@@ -390,8 +373,6 @@ export function SiteHeader() {
     }, 3000);
     return () => clearTimeout(timer);
   }, []);
-
-  const isLogoCentered = isHomePage && !scrolledPastHero;
 
   return (
     <div className="sticky top-0 z-40 w-full bg-background">
@@ -412,7 +393,7 @@ export function SiteHeader() {
 
       {/* Main Header Bar */}
       <header className="relative z-20 border-b border-border bg-background/95 backdrop-blur">
-        <div className="relative mx-auto flex h-14 md:h-16 max-w-7xl items-center justify-between md:justify-start gap-4 md:gap-6 px-4 md:px-5">
+        <div className="relative mx-auto flex h-14 md:h-16 max-w-7xl items-center justify-between gap-4 md:gap-6 px-4 md:px-5">
           {/* Mobile Left: Hamburger Button */}
           <div className="flex md:hidden items-center">
             <button
@@ -424,12 +405,10 @@ export function SiteHeader() {
             </button>
           </div>
 
-          {/* Brand Logo - Centered at initial top state when search is hidden, slides to left on scroll */}
+          {/* Brand Logo - Centered on mobile, Left on desktop */}
           <Link
             to="/"
-            className={`inline-flex items-center shrink-0 hover:opacity-90 transition-all duration-300 ease-out absolute left-1/2 -translate-x-1/2 ${
-              isLogoCentered ? "md:left-1/2 md:-translate-x-1/2" : "md:left-5 md:translate-x-0"
-            }`}
+            className="inline-flex items-center shrink-0 absolute left-1/2 -translate-x-1/2 md:static md:translate-x-0"
             aria-label="Resale Home"
           >
             <img
@@ -439,14 +418,10 @@ export function SiteHeader() {
             />
           </Link>
 
-          {/* Desktop Center: Search Bar with Autocomplete (Smoothly collapses when Hero search is in view on Homepage) */}
+          {/* Desktop Center: Search Bar with Autocomplete */}
           <div
             ref={searchContainerRef}
-            className={`ml-auto md:ml-36 md:mr-auto hidden relative flex-1 md:flex md:max-w-md transition-all duration-300 ease-out ${
-              isLogoCentered
-                ? "opacity-0 pointer-events-none -translate-y-1 invisible"
-                : "opacity-100 pointer-events-auto translate-y-0 visible"
-            }`}
+            className="hidden md:flex md:absolute md:left-1/2 md:-translate-x-1/2 md:w-full md:max-w-md lg:max-w-lg z-10"
           >
             <form
               onSubmit={(e) => handleSearchSubmit(e)}
@@ -612,7 +587,7 @@ export function SiteHeader() {
           </div>
 
           {/* Desktop Right: Actions */}
-          <div className="ml-auto hidden md:flex items-center gap-5">
+          <div className="ml-auto hidden md:flex items-center gap-5 relative z-20">
             {isLoggedIn ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -829,7 +804,7 @@ export function SiteHeader() {
                 <Link
                   to="/"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="inline-flex items-center shrink-0 hover:opacity-90 transition-opacity pl-1"
+                  className="inline-flex items-center shrink-0 pl-1"
                   aria-label="Resale Home"
                 >
                   <img
