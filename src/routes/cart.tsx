@@ -762,8 +762,8 @@ function CartPage() {
           </div>
         ) : (
           /* Empty Cart State */
-          <div className="max-w-4xl mx-auto py-12 px-4">
-            <div className="text-center py-12 px-6 rounded-2xl border border-dashed border-border bg-card/50">
+          <div className="max-w-4xl mx-auto py-8 sm:py-12 px-0 sm:px-4">
+            <div className="text-center py-12 px-6 rounded-2xl border border-dashed border-border bg-card/50 mx-4 sm:mx-0">
               <div className="size-20 mx-auto rounded-full bg-primary/10 flex items-center justify-center text-primary mb-5 shadow-inner">
                 <ShoppingBag className="size-10 stroke-[1.5]" />
               </div>
@@ -788,9 +788,9 @@ function CartPage() {
             </div>
 
             {/* Curated Recommendations for Empty Cart */}
-            <div className="mt-12">
+            <div className="mt-10 sm:mt-12 -mx-4 sm:mx-0">
               {/* Section Header */}
-              <div className="flex items-center justify-between mb-4 px-0">
+              <div className="flex items-center justify-between mb-3.5 px-4 sm:px-0">
                 <div className="min-w-0">
                   <h3 className="text-base sm:text-xl font-semibold flex items-center gap-2">
                     <Sparkles className="size-4 sm:size-5 text-primary shrink-0" />
@@ -808,8 +808,8 @@ function CartPage() {
                 </Link>
               </div>
 
-              {/* Mobile: 2-column full-width grid */}
-              <div className="grid grid-cols-2 gap-3 sm:hidden">
+              {/* Mobile: 2-column full side width grid */}
+              <div className="grid grid-cols-2 gap-2 px-2 sm:hidden">
                 {recommendedProducts.map((prod) => {
                   const cheapestListing = cheapest(prod.id);
                   const minPrice = cheapestListing?.price ?? 0;
