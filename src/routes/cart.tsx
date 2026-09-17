@@ -808,52 +808,50 @@ function CartPage() {
                 </Link>
               </div>
 
-              {/* Mobile: horizontal scroll row — Desktop: grid */}
-              <div className="sm:hidden -mx-4 px-4">
-                <div className="flex gap-3 overflow-x-auto pb-3 snap-x snap-mandatory scrollbar-none">
-                  {recommendedProducts.map((prod) => {
-                    const cheapestListing = cheapest(prod.id);
-                    const minPrice = cheapestListing?.price ?? 0;
-                    return (
-                      <div
-                        key={prod.id}
-                        className="snap-start shrink-0 w-36 rounded-xl border border-border/80 bg-card overflow-hidden flex flex-col"
-                      >
-                        <div className="aspect-square bg-muted/60 overflow-hidden relative">
-                          <img
-                            src={prod.image}
-                            alt={prod.name}
-                            className="w-full h-full object-cover"
-                          />
-                          <Badge
-                            variant="secondary"
-                            className="absolute top-1.5 left-1.5 text-[9px] uppercase font-bold tracking-wider px-1.5 py-0.5"
-                          >
-                            {prod.brand}
-                          </Badge>
-                        </div>
-                        <div className="p-2.5 flex flex-col gap-1.5 flex-1">
-                          <h4 className="text-xs font-semibold line-clamp-2 leading-tight">
-                            {prod.name}
-                          </h4>
-                          <div>
-                            <span className="text-[9px] text-muted-foreground block">From</span>
-                            <span className="font-display font-bold text-xs text-foreground">
-                              {taka(minPrice)}
-                            </span>
-                          </div>
-                          <Link
-                            to="/products"
-                            search={{ q: prod.name }}
-                            className="mt-auto block w-full text-center text-[10px] font-semibold py-1.5 rounded-md bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
-                          >
-                            View
-                          </Link>
-                        </div>
+              {/* Mobile: 2-column full-width grid */}
+              <div className="grid grid-cols-2 gap-3 sm:hidden">
+                {recommendedProducts.map((prod) => {
+                  const cheapestListing = cheapest(prod.id);
+                  const minPrice = cheapestListing?.price ?? 0;
+                  return (
+                    <div
+                      key={prod.id}
+                      className="rounded-xl border border-border/80 bg-card overflow-hidden flex flex-col"
+                    >
+                      <div className="aspect-square bg-muted/60 overflow-hidden relative">
+                        <img
+                          src={prod.image}
+                          alt={prod.name}
+                          className="w-full h-full object-cover"
+                        />
+                        <Badge
+                          variant="secondary"
+                          className="absolute top-1.5 left-1.5 text-[9px] uppercase font-bold tracking-wider px-1.5 py-0.5"
+                        >
+                          {prod.brand}
+                        </Badge>
                       </div>
-                    );
-                  })}
-                </div>
+                      <div className="p-2.5 flex flex-col gap-1.5 flex-1">
+                        <h4 className="text-xs font-semibold line-clamp-2 leading-tight">
+                          {prod.name}
+                        </h4>
+                        <div>
+                          <span className="text-[9px] text-muted-foreground block">From</span>
+                          <span className="font-display font-bold text-xs text-foreground">
+                            {taka(minPrice)}
+                          </span>
+                        </div>
+                        <Link
+                          to="/products"
+                          search={{ q: prod.name }}
+                          className="mt-auto block w-full text-center text-[10px] font-semibold py-1.5 rounded-md bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+                        >
+                          View
+                        </Link>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
 
               {/* Desktop: grid */}
