@@ -2,7 +2,7 @@
 
 > **Bangladesh's Trusted C2C & B2B Marketplace for Quality-Checked Pre-Owned, Open-Box & Like-New Electronics**
 
-This document tracks the completed engineering milestones across **Phase 1**, **Phase 2**, **Phase 3.1**, **Phase 3.4**, **Phase 3.6**, **Phase 4 (4.1A–E, 4.2, 4.4, 4.5, 4.6)**, **Phase 5.1 (Marketplace Trust & Listing Governance)**, **Phase 5.2 (Seller Reputation)**, **Phase 5.3A (Admin Console & Grading Evaluation)**, and **Phase 5.3B (Cart Overhaul, Dynamic Page Transitions, Skeleton Loading Suite & Mobile UX Polish)**, and outlines the strategic and technical roadmap for remaining milestones.
+This document tracks the completed engineering milestones across **Phase 1**, **Phase 2**, **Phase 3.1**, **Phase 3.4**, **Phase 3.6**, **Phase 4 (4.1A–E, 4.2, 4.4, 4.5, 4.6)**, **Phase 5.1 (Marketplace Trust & Listing Governance)**, **Phase 5.2 (Seller Reputation)**, **Phase 5.3A (Admin Console & Grading Evaluation)**, **Phase 5.3B (Cart Overhaul, Dynamic Page Transitions, Skeleton Loading Suite & Mobile UX Polish)**, and **Phase 5.3C (Hero Banner Auto-Carousel, Full Side-Width Mobile Deals & Card Ergonomics)**, and outlines the strategic and technical roadmap for remaining milestones.
 
 ---
 
@@ -751,7 +751,58 @@ Phase 5.3B delivered an end-to-end commerce experience upgrade focusing on conve
 | -------------- | --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | :----------: |
 | **Phase 5.3A** | Admin Console, Grading Flow & UI Polish | Admin Shell, Bangladesh Heatmap, 15+ Admin Routes, Buyer Grading Card, Grading DB, Login/Register Consolidated Input, 4-col Products Grid | ✅ Completed |
 | **Phase 5.3B** | Cart, Transitions, Skeletons & Mobile   | Cart Stepper & Care+, NavigationProgressBar, Shimmer Skeletons, Brand Carousel, Sellers Directory, WCAG Touch Targets, Mobile Polish      | ✅ Completed |
+| **Phase 5.3C** | Hero Carousel, Full-Width Deals & Mobile UX | Auto-Advancing Hero Carousel, Touch Swipe Gestures, Full Side-Width Cart Deals, Compact Mobile Action Buttons, Banner Asset Cleanup   | ✅ Completed |
 
 ---
 
-_Last Updated: September 2026 (Phase 5.3B Complete) · Resale.com Engineering Team_
+## ✅ Phase 5.3C: Hero Banner Auto-Carousel, Full Side-Width Mobile Deals & Card Ergonomics
+
+**Status:** `COMPLETED` · **Commit Milestones:** `01521b2`, `947680f`, `4b9778d`
+
+Phase 5.3C delivered high-impact homepage visual presentation upgrades, advanced mobile card layouts, and button ergonomics polish.
+
+### 1. Auto-Advancing Hero Banner Carousel (`src/routes/index.tsx`)
+
+- **Dynamic Multi-Banner Rotation**: Upgraded the static hero spotlight into a responsive auto-advancing carousel cycling high-impact promotional banners (`banner-2.png` and `hero-banner.webp`).
+- **4.5-Second Interval & Smart Pause**: Automatic rotation timer with pause-on-hover interaction so buyers can comfortably view and click banners.
+- **Hardware-Accelerated Slide Animation**: Smooth CSS translation (`transition-transform duration-500 ease-out`) driven by container transform indexing.
+- **Frosted Glass Navigation Controls**: Floating chevron previous/next buttons with glassmorphism styling (`bg-background/70 backdrop-blur-md hover:scale-105`), styled with subtle hover transitions.
+- **Interactive Indicator Pills**: Bottom-centered indicator track with dynamic active pill expansion (`w-6 bg-primary` vs `w-2 bg-foreground/40`) supporting direct click-to-slide navigation.
+- **Mobile Touch Gesture Support**: Integrated touch listeners (`onTouchStart`, `onTouchMove`, `onTouchEnd`) allowing intuitive horizontal finger swiping across mobile devices.
+- **Asset Cleanup**: Pruned deprecated placeholder assets (`banner-1.png`) and consolidated production banner assets.
+
+---
+
+### 2. Full Side-Width Mobile Trending Deals in Cart (`src/routes/cart.tsx`)
+
+- **Full-Width Edge-to-Edge Grid**: Redesigned the "Trending Certified Deals" section on mobile viewports from a narrow constrained strip into an expansive 2-column full side-width grid (`grid grid-cols-2 gap-2 px-2`).
+- **Double Padding Elimination**: Removed nested container padding on mobile (`px-0 sm:px-4` on empty cart wrapper, `-mx-4 sm:mx-0` breakout), ensuring cards stretch edge-to-edge with clean 8px side margins.
+- **Compact Mobile Card Layout**:
+  - Full-bleed square product images (`aspect-square`) maximizing display area.
+  - 2-line clamped titles (`line-clamp-2 text-xs`) and clear "From" price indicators.
+  - Lightweight inline "View" pill buttons (`py-1.5 bg-primary/10 text-primary`) replacing bulky action buttons to save vertical height.
+- **Responsive Section Header**: Compact header layout hiding verbose subtitles on mobile to prevent wrapping, and shortening the CTA link to "View all".
+
+---
+
+### 3. Mobile Product Card Button Ergonomics & Hover Consistency
+
+- **Ergonomic Button Heights**: Streamlined product card action buttons on mobile (`h-7.5` / `h-8`) across `ListingCard` and `FeaturedDeviceCard` to prevent vertical bloat while maintaining easy tap accessibility.
+- **Hover Consistency**: Synchronized hover lift and shadow behaviors across catalog browse listings (`/products`) and homepage product shelves.
+
+---
+
+### 4. Summary — Phase 5.3C Deliverables
+
+| Feature                                   | Files Touched                                  | Status |
+| ----------------------------------------- | ---------------------------------------------- | :----: |
+| Hero Auto-Advancing Banner Carousel       | `src/routes/index.tsx`                         |   ✅   |
+| Touch Swipe & Pill Navigation Controls    | `src/routes/index.tsx`                         |   ✅   |
+| Full Side-Width Mobile Deals Grid in Cart | `src/routes/cart.tsx`                          |   ✅   |
+| Empty Cart Mobile Spacing Optimization    | `src/routes/cart.tsx`                          |   ✅   |
+| Mobile Card Button Ergonomics             | `src/components/listing-card.tsx`, `index.tsx` |   ✅   |
+| Banner Asset Cleanup                      | `public/`, `src/assets/`                       |   ✅   |
+
+---
+
+_Last Updated: September 2026 (Phase 5.3C Complete) · Resale.com Engineering Team_
