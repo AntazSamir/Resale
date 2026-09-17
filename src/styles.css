@@ -211,41 +211,81 @@
 @utility press-feedback {
   outline: none;
   -webkit-tap-highlight-color: transparent;
-  /* Press-down: scale to 97% over 80ms */
+  transition-property: transform;
+  transition-duration: 150ms;
+  transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
   &:active {
-    transform: scale(0.97);
-    transition: transform 80ms cubic-bezier(0.34, 1.56, 0.64, 1) ease-out;
+    transform: scale(0.96);
   }
-  /* Release: springy overshoot (handled by the transition above) */
 }
 
-/* Card hover lift with shadow + reduced-motion fallback */
+/* Card hover lift: translate up + deepen shadow, spring back on release */
 @utility card-hover-lift {
-  /* Hover: lift + shadow-md */
-  &:hover {
-    @media (prefers-reduced-motion: no-preference) {
-      transform: translateY(-0.5rem);
-      transition: transform 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  transition-property: transform, box-shadow;
+  transition-duration: 220ms;
+  transition-timing-function: cubic-bezier(0.34, 1.2, 0.64, 1);
+  will-change: transform, box-shadow;
+
+  @media (prefers-reduced-motion: no-preference) {
+    &:hover {
+      transform: translateY(-4px);
+      box-shadow:
+        0 12px 28px -6px oklch(0 0 0 / 0.12),
+        0 4px 10px -4px oklch(0 0 0 / 0.08);
     }
-    @media (prefers-reduced-motion: reduce) {
-      /* Fallback: opacity cross-fade for reduced motion */
-      transition: opacity 200ms ease-out;
-      /* The shadow remains, but we avoid the transform */
+    &:active {
+      transform: translateY(-1px) scale(0.98);
+      box-shadow:
+        0 4px 10px -2px oklch(0 0 0 / 0.08);
     }
   }
-  /* Active/tactile feedback */
-  &:active {
-    transform: scale(0.97);
-    transition: transform 80ms cubic-bezier(0.34, 1.56, 0.64, 1) ease-out;
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
   }
 }
 
 /* Interactive element active state */
 @utility interactive-active {
+  transition-property: transform;
+  transition-duration: 120ms;
+  transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
   &:active {
     transform: scale(0.97);
-    transition: transform 80ms cubic-bezier(0.34, 1.56, 0.64, 1) ease-out;
   }
+}
+
+/* Icon hover wiggle — attach to a group-hover child */
+@keyframes wiggle {
+  0%, 100% { transform: rotate(0deg); }
+  20%       { transform: rotate(-12deg); }
+  50%       { transform: rotate(10deg); }
+  75%       { transform: rotate(-6deg); }
+}
+@utility animate-wiggle {
+  animation: wiggle 450ms cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+  @media (prefers-reduced-motion: reduce) { animation: none; }
+}
+
+/* Cart success bounce-in */
+@keyframes bounce-in {
+  0%   { transform: scale(0) rotate(-30deg); opacity: 0; }
+  55%  { transform: scale(1.3) rotate(6deg);  opacity: 1; }
+  75%  { transform: scale(0.9) rotate(-3deg); }
+  100% { transform: scale(1)   rotate(0deg);  opacity: 1; }
+}
+@utility animate-bounce-in {
+  animation: bounce-in 400ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  @media (prefers-reduced-motion: reduce) { animation: none; }
+}
+
+/* Notification badge pulse */
+@keyframes badge-pulse {
+  0%, 100% { transform: scale(1);    opacity: 1; }
+  50%       { transform: scale(1.25); opacity: 0.85; }
+}
+@utility animate-badge-pulse {
+  animation: badge-pulse 1.6s ease-in-out infinite;
+  @media (prefers-reduced-motion: reduce) { animation: none; }
 }
 
 /* ─── Custom Loader ─────────────────────────────────────────────────────────── */
@@ -281,5 +321,46 @@
   50%,
   100% {
     transform: scaleX(-1);
+  }
+}
+
+/* ─── Page Transition Animation ────────────────────────────────────────────── */
+@keyframes page-enter {
+  0% {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@utility animate-page-enter {
+  animation: page-enter 220ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  will-change: opacity, transform;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ─── Skeleton Shimmer Animation ───────────────────────────────────────────── */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@utility animate-shimmer {
+  animation: shimmer 1.8s infinite;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
   }
 }

@@ -24,6 +24,7 @@ import { RepairHistoryCard } from "@/components/repair-history";
 import { DeviceVerificationCard } from "@/components/device-verification";
 import { WhatsIncludedCard } from "@/components/whats-included";
 import { SellerTrustLine } from "@/components/seller-trust-card";
+import { ListingDetailSkeleton } from "@/components/listing-detail-skeleton";
 import { getApprovedVideoForListing } from "@/lib/creator-store";
 import { CreatorVideoModal } from "@/components/creator/creator-video-modal";
 import { getDeviceGradesFn, type DeviceGradeRecord } from "@/lib/grading.functions";
@@ -101,6 +102,7 @@ export const Route = createFileRoute("/listing/$listingId")({
       ],
     };
   },
+  pendingComponent: ListingDetailSkeleton,
   component: ListingPage,
 });
 

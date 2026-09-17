@@ -36,7 +36,7 @@ export function ProductCard({ product, compact = false }: { product: Product; co
 
   if (compact) {
     return (
-      <div className="group relative flex flex-col justify-between h-full bg-card border border-border/70 p-3 transition-all duration-200 hover:shadow-md hover:border-primary/40 select-none overflow-hidden rounded-md">
+      <div className="group relative flex flex-col justify-between h-full bg-card border border-border/70 p-3 card-hover-lift select-none overflow-hidden rounded-md">
         <div>
           {/* Product Image Link → listing */}
           <Link
@@ -125,12 +125,12 @@ export function ProductCard({ product, compact = false }: { product: Product; co
             >
               {inCart || justAdded ? (
                 <>
-                  <Check className="size-3 text-emerald-600 shrink-0" />
+                  <Check className="size-3 text-emerald-600 shrink-0 animate-bounce-in" />
                   <span className="truncate">Added</span>
                 </>
               ) : (
                 <>
-                  <ShoppingBag className="size-3 shrink-0" />
+                  <ShoppingBag className="size-3 shrink-0 transition-transform duration-200 group-hover:scale-110" />
                   <span className="truncate">Add to cart</span>
                 </>
               )}
@@ -142,7 +142,7 @@ export function ProductCard({ product, compact = false }: { product: Product; co
   }
 
   return (
-    <div className="group flex flex-col bg-card p-4 transition-all duration-200 hover:shadow-lg hover:border-primary/40 relative overflow-hidden border border-border/80 rounded-lg h-full justify-between">
+    <div className="group flex flex-col bg-card p-4 card-hover-lift relative overflow-hidden border border-border/80 rounded-lg h-full justify-between">
       <div>
         {/* Product Image Link → listing */}
         <Link
@@ -232,12 +232,12 @@ export function ProductCard({ product, compact = false }: { product: Product; co
           >
             {inCart || justAdded ? (
               <>
-                <Check className="size-3.5 text-emerald-600 shrink-0" />
+                <Check className="size-3.5 text-emerald-600 shrink-0 animate-bounce-in" />
                 <span>Added</span>
               </>
             ) : (
               <>
-                <ShoppingBag className="size-3.5 shrink-0" />
+                <ShoppingBag className="size-3.5 shrink-0 transition-transform duration-200 group-hover:scale-110" />
                 <span>Add to cart</span>
               </>
             )}

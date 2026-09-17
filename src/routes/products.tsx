@@ -2,6 +2,7 @@ import { createFileRoute, Link, useSearch, useRouter } from "@tanstack/react-rou
 import { useState, useMemo, useEffect } from "react";
 import { SiteHeader, SiteFooter } from "@/components/site-header";
 import { ListingCard } from "@/components/listing-card";
+import { ListingCardSkeleton } from "@/components/listing-card-skeleton";
 import {
   products,
   listings,
@@ -83,6 +84,8 @@ function ProductsPage() {
 
   // Filter states
   const [searchQuery, setSearchQuery] = useState(urlSearch.q || "");
+  const [debouncedQuery, setDebouncedQuery] = useState(urlSearch.q || "");
+  const [isSearching, setIsSearching] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState<string[]>(
     urlSearch.category ? [urlSearch.category] : [],
   );
@@ -100,9 +103,27 @@ function ProductsPage() {
   const [viewLayout, setViewLayout] = useState<"grid" | "list">("grid");
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
 
+  // Debounce search query to provide instantaneous skeleton feedback while typing
+  useEffect(() => {
+    let timer: NodeJS.Timeout | undefined;
+    if (searchQuery !== debouncedQuery) {
+      setIsSearching(true);
+      timer = setTimeout(() => {
+        setDebouncedQuery(searchQuery);
+        setIsSearching(false);
+      }, 180);
+    }
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
+  }, [searchQuery, debouncedQuery]);
+
   // Sync with URL query when it changes
   useEffect(() => {
-    if (urlSearch.q !== undefined) setSearchQuery(urlSearch.q);
+    if (urlSearch.q !== undefined) {
+      setSearchQuery(urlSearch.q);
+      setDebouncedQuery(urlSearch.q);
+    }
     if (urlSearch.category !== undefined) setSelectedCategories([urlSearch.category]);
     if (urlSearch.brand !== undefined) setSelectedBrands([urlSearch.brand]);
     if (urlSearch.sub !== undefined) setSelectedSubs([urlSearch.sub]);
@@ -151,6 +172,8 @@ function ProductsPage() {
 
   const clearAllFilters = () => {
     setSearchQuery("");
+    setDebouncedQuery("");
+    setIsSearching(false);
     setSelectedCategories([]);
     setSelectedBrands([]);
     setSelectedSubs([]);
@@ -184,8 +207,8 @@ function ProductsPage() {
       if (!product) return false;
 
       // 1. Text search across product fields
-      if (searchQuery.trim()) {
-        const q = searchQuery.toLowerCase().trim();
+      if (debouncedQuery.trim()) {
+        const q = debouncedQuery.toLowerCase().trim();
         const matchesName = product.name.toLowerCase().includes(q);
         const matchesBrand = product.brand.toLowerCase().includes(q);
         const matchesCategory = product.category.toLowerCase().includes(q);
@@ -266,7 +289,7 @@ function ProductsPage() {
       return true;
     });
   }, [
-    searchQuery,
+    debouncedQuery,
     selectedCategories,
     selectedSubs,
     selectedBrands,
@@ -849,7 +872,23 @@ function ProductsPage() {
 
           {/* Listings Container */}
           <div className="space-y-6 overflow-hidden">
-            {sortedListings.length > 0 ? (
+            {isSearching ? (
+              viewLayout === "grid" ? (
+                /* Grid skeleton */
+                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-4.5 items-stretch auto-rows-fr animate-in fade-in duration-150">
+                  {Array.from({ length: 8 }).map((_, i) => (
+                    <ListingCardSkeleton key={i} layout="grid" />
+                  ))}
+                </div>
+              ) : (
+                /* List skeleton */
+                <div className="space-y-3 animate-in fade-in duration-150">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <ListingCardSkeleton key={i} layout="list" />
+                  ))}
+                </div>
+              )
+            ) : sortedListings.length > 0 ? (
               viewLayout === "grid" ? (
                 /* Grid view */
                 <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-4.5 items-stretch auto-rows-fr">

@@ -19,6 +19,7 @@ import { getApprovedVideosForProduct } from "@/lib/creator-store";
 import { CreatorReviewStrip } from "@/components/creator/creator-review-strip";
 import { StoreBadge } from "@/components/storefront/store-badge";
 import { getProductRecommendations } from "@/lib/recommendation-engine";
+import { ProductDetailSkeleton } from "@/components/product-detail-skeleton";
 
 export const Route = createFileRoute("/product/$productId")({
   loader: ({ params }) => {
@@ -40,6 +41,7 @@ export const Route = createFileRoute("/product/$productId")({
       ],
     };
   },
+  pendingComponent: ProductDetailSkeleton,
   component: ProductPage,
 });
 
