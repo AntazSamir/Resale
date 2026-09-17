@@ -788,26 +788,76 @@ function CartPage() {
             </div>
 
             {/* Curated Recommendations for Empty Cart */}
-            <div className="mt-16">
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <h3 className="text-xl font-semibold flex items-center gap-2">
-                    <Sparkles className="size-5 text-primary" />
+            <div className="mt-12">
+              {/* Section Header */}
+              <div className="flex items-center justify-between mb-4 px-0">
+                <div className="min-w-0">
+                  <h3 className="text-base sm:text-xl font-semibold flex items-center gap-2">
+                    <Sparkles className="size-4 sm:size-5 text-primary shrink-0" />
                     Trending Certified Deals
                   </h3>
-                  <p className="text-xs text-muted-foreground mt-0.5">
+                  <p className="text-xs text-muted-foreground mt-0.5 hidden sm:block">
                     Popular refurbished devices hand-picked with verified inspection
                   </p>
                 </div>
                 <Link
                   to="/products"
-                  className="text-xs font-semibold text-primary hover:underline flex items-center gap-1"
+                  className="text-xs font-semibold text-primary hover:underline flex items-center gap-1 shrink-0 ml-3"
                 >
-                  View all catalog <ChevronRight className="size-3.5" />
+                  View all <ChevronRight className="size-3.5" />
                 </Link>
               </div>
 
-              <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-4">
+              {/* Mobile: horizontal scroll row — Desktop: grid */}
+              <div className="sm:hidden -mx-4 px-4">
+                <div className="flex gap-3 overflow-x-auto pb-3 snap-x snap-mandatory scrollbar-none">
+                  {recommendedProducts.map((prod) => {
+                    const cheapestListing = cheapest(prod.id);
+                    const minPrice = cheapestListing?.price ?? 0;
+                    return (
+                      <div
+                        key={prod.id}
+                        className="snap-start shrink-0 w-36 rounded-xl border border-border/80 bg-card overflow-hidden flex flex-col"
+                      >
+                        <div className="aspect-square bg-muted/60 overflow-hidden relative">
+                          <img
+                            src={prod.image}
+                            alt={prod.name}
+                            className="w-full h-full object-cover"
+                          />
+                          <Badge
+                            variant="secondary"
+                            className="absolute top-1.5 left-1.5 text-[9px] uppercase font-bold tracking-wider px-1.5 py-0.5"
+                          >
+                            {prod.brand}
+                          </Badge>
+                        </div>
+                        <div className="p-2.5 flex flex-col gap-1.5 flex-1">
+                          <h4 className="text-xs font-semibold line-clamp-2 leading-tight">
+                            {prod.name}
+                          </h4>
+                          <div>
+                            <span className="text-[9px] text-muted-foreground block">From</span>
+                            <span className="font-display font-bold text-xs text-foreground">
+                              {taka(minPrice)}
+                            </span>
+                          </div>
+                          <Link
+                            to="/products"
+                            search={{ q: prod.name }}
+                            className="mt-auto block w-full text-center text-[10px] font-semibold py-1.5 rounded-md bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+                          >
+                            View
+                          </Link>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Desktop: grid */}
+              <div className="hidden sm:grid sm:grid-cols-2 md:grid-cols-4 gap-4">
                 {recommendedProducts.map((prod) => {
                   const cheapestListing = cheapest(prod.id);
                   const minPrice = cheapestListing?.price ?? 0;
