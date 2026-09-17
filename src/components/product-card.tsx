@@ -104,12 +104,12 @@ export function ProductCard({ product, compact = false }: { product: Product; co
             )}
           </div>
 
-          <div className="flex flex-col gap-1.5">
+          <div className="flex flex-col gap-1">
             <Button
               type="button"
               size="sm"
               onClick={handleBuyNow}
-              className="h-8 px-2 text-xs rounded-sm bg-primary text-primary-foreground font-semibold hover:opacity-90 flex items-center justify-center w-full shadow-xs"
+              className="h-7 px-2 text-[11px] rounded-sm bg-primary text-primary-foreground font-semibold hover:opacity-90 flex items-center justify-center w-full shadow-xs"
             >
               <span>Buy now</span>
             </Button>
@@ -118,7 +118,7 @@ export function ProductCard({ product, compact = false }: { product: Product; co
               variant="outline"
               size="sm"
               onClick={handleAddToCart}
-              className="h-8 px-2 text-xs rounded-sm border-border/80 font-medium flex items-center justify-center gap-1.5 hover:bg-muted w-full"
+              className="h-7 px-2 text-[11px] rounded-sm border-border/80 font-medium flex items-center justify-center gap-1.5 hover:bg-muted w-full"
             >
               {inCart || justAdded ? (
                 <>
@@ -209,12 +209,12 @@ export function ProductCard({ product, compact = false }: { product: Product; co
         </div>
 
         {/* Mobile action buttons (always visible on touch screens) */}
-        <div className="grid grid-cols-2 gap-2 sm:hidden">
+        <div className="grid grid-cols-2 gap-1.5 sm:hidden">
           <Button
             type="button"
             size="sm"
             onClick={handleBuyNow}
-            className="h-9 px-2 text-xs rounded-md bg-primary text-primary-foreground font-semibold hover:opacity-90 flex items-center justify-center shadow-xs"
+            className="h-7.5 px-1.5 text-[11px] rounded-sm bg-primary text-primary-foreground font-semibold hover:opacity-90 flex items-center justify-center shadow-xs"
           >
             <span>Buy now</span>
           </Button>
@@ -223,16 +223,16 @@ export function ProductCard({ product, compact = false }: { product: Product; co
             variant="outline"
             size="sm"
             onClick={handleAddToCart}
-            className="h-9 px-2 text-xs rounded-md border-border/80 font-medium flex items-center justify-center gap-1.5 hover:bg-muted"
+            className="h-7.5 px-1.5 text-[11px] rounded-sm border-border/80 font-medium flex items-center justify-center gap-1 hover:bg-muted"
           >
             {inCart || justAdded ? (
               <>
-                <Check className="size-3.5 text-emerald-600 shrink-0 animate-bounce-in" />
+                <Check className="size-3 text-emerald-600 shrink-0 animate-bounce-in" />
                 <span>Added</span>
               </>
             ) : (
               <>
-                <ShoppingBag className="size-3.5 shrink-0 transition-transform duration-200 group-hover:scale-110" />
+                <ShoppingBag className="size-3 shrink-0" />
                 <span>Add to cart</span>
               </>
             )}

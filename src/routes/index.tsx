@@ -1154,12 +1154,12 @@ function FeaturedDeviceCard({
           )}
         </div>
 
-        {/* Dual Actions with min 44px touch targets on mobile */}
-        <div className="grid grid-cols-2 gap-1.5 sm:gap-2 sm:hidden">
+        {/* Dual Actions on mobile */}
+        <div className="grid grid-cols-2 gap-1.5 sm:hidden">
           <button
             type="button"
             onClick={onBuyNow}
-            className="h-9 min-h-11 sm:min-h-9 bg-primary text-primary-foreground text-xs font-semibold rounded-md transition-all hover:opacity-90 flex items-center justify-center shadow-xs"
+            className="h-7.5 px-1.5 bg-primary text-primary-foreground text-[11px] font-semibold rounded-sm transition-all hover:opacity-90 flex items-center justify-center shadow-xs"
           >
             <span>Buy now</span>
           </button>
@@ -1167,7 +1167,7 @@ function FeaturedDeviceCard({
             type="button"
             onClick={handleAddToCart}
             aria-label="Add to cart"
-            className={`h-9 min-h-11 sm:min-h-9 border rounded-md text-xs font-medium transition-colors flex items-center justify-center gap-1 ${
+            className={`h-7.5 px-1.5 border rounded-sm text-[11px] font-medium transition-colors flex items-center justify-center gap-1 ${
               justAdded || inCart
                 ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
                 : "border-border bg-card text-foreground hover:bg-muted"
@@ -1175,13 +1175,13 @@ function FeaturedDeviceCard({
           >
             {justAdded || inCart ? (
               <>
-                <Check className="size-3.5 text-emerald-600" />
-                <span className="text-[11px]">Added</span>
+                <Check className="size-3 text-emerald-600" />
+                <span>Added</span>
               </>
             ) : (
               <>
-                <ShoppingBag className="size-3.5" />
-                <span className="text-[11px]">Cart</span>
+                <ShoppingBag className="size-3" />
+                <span>Cart</span>
               </>
             )}
           </button>
