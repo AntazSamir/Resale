@@ -45,8 +45,24 @@ import { useAuth } from "@/lib/auth-store";
 import { getOrders, onOrdersChange, fetchOrdersAsync, type OrderRecord } from "@/lib/order-store";
 import { getUserPersonalizedShelves } from "@/lib/recommendation-engine";
 import heroBanner from "@/assets/hero-banner.webp";
+import banner2 from "@/assets/banner-2.png";
 import bannerImage1 from "@/assets/image-1.webp";
 import bannerImage2 from "@/assets/image-2.webp";
+
+const HERO_BANNERS = [
+  {
+    id: "banner-2",
+    src: banner2,
+    alt: "Standardized 32-Point Inspection & Diagnostics on Every Unit",
+    link: "/products",
+  },
+  {
+    id: "hero-banner",
+    src: heroBanner,
+    alt: "Premium Tech at Smarter Prices — Tested, Inspected & Guaranteed",
+    link: "/products",
+  },
+];
 
 export const Route = createFileRoute("/")({
   head: () => {
@@ -128,6 +144,51 @@ function Index() {
   const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
   const [activeInspectionTab, setActiveInspectionTab] = useState<number>(0);
   const brandCarouselRef = useRef<HTMLDivElement>(null);
+  const [currentBannerIndex, setCurrentBannerIndex] = useState<number>(0);
+  const [isBannerPaused, setIsBannerPaused] = useState<boolean>(false);
+  const bannerTouchStartX = useRef<number | null>(null);
+  const bannerTouchEndX = useRef<number | null>(null);
+
+  // Auto-advance banner carousel every 4.5 seconds
+  useEffect(() => {
+    if (isBannerPaused) return;
+    const timer = setInterval(() => {
+      setCurrentBannerIndex((prev) => (prev + 1) % HERO_BANNERS.length);
+    }, 4500);
+    return () => clearInterval(timer);
+  }, [isBannerPaused]);
+
+  const handleNextBanner = () => {
+    setCurrentBannerIndex((prev) => (prev + 1) % HERO_BANNERS.length);
+  };
+
+  const handlePrevBanner = () => {
+    setCurrentBannerIndex((prev) => (prev - 1 + HERO_BANNERS.length) % HERO_BANNERS.length);
+  };
+
+  const handleBannerTouchStart = (e: React.TouchEvent) => {
+    if (e.targetTouches[0]) {
+      bannerTouchStartX.current = e.targetTouches[0].clientX;
+    }
+  };
+
+  const handleBannerTouchMove = (e: React.TouchEvent) => {
+    if (e.targetTouches[0]) {
+      bannerTouchEndX.current = e.targetTouches[0].clientX;
+    }
+  };
+
+  const handleBannerTouchEnd = () => {
+    if (bannerTouchStartX.current === null || bannerTouchEndX.current === null) return;
+    const diff = bannerTouchStartX.current - bannerTouchEndX.current;
+    if (diff > 45) {
+      handleNextBanner();
+    } else if (diff < -45) {
+      handlePrevBanner();
+    }
+    bannerTouchStartX.current = null;
+    bannerTouchEndX.current = null;
+  };
 
   useEffect(() => {
     setOrders(getOrders());
@@ -211,14 +272,70 @@ function Index() {
       <SiteHeader />
 
       {/* ════════════════════════════════════════════════════════════
-          1. HERO SPOTLIGHT: Modern, high-impact asymmetric tech centerpiece
+          1. HERO SPOTLIGHT: Auto-advancing banner carousel with touch swipe
       ════════════════════════════════════════════════════════════ */}
-      <section className="relative w-full border-b border-border/80 overflow-hidden bg-muted/20 flex items-center">
-        <img
-          src={heroBanner}
-          alt="Premium Tech at Smarter Prices — Verified Pre-Owned Electronics"
-          className="w-full h-auto max-h-130 sm:max-h-140 lg:max-h-160 object-cover object-center block"
-        />
+      <section
+        className="group relative w-full border-b border-border/80 overflow-hidden bg-muted/20 select-none"
+        onMouseEnter={() => setIsBannerPaused(true)}
+        onMouseLeave={() => setIsBannerPaused(false)}
+        onTouchStart={handleBannerTouchStart}
+        onTouchMove={handleBannerTouchMove}
+        onTouchEnd={handleBannerTouchEnd}
+        aria-label="Promotional Banners Carousel"
+      >
+        {/* Sliding Track */}
+        <div
+          className="flex w-full transition-transform duration-500 ease-out"
+          style={{ transform: `translateX(-${currentBannerIndex * 100}%)` }}
+        >
+          {HERO_BANNERS.map((banner, idx) => (
+            <div key={banner.id} className="w-full shrink-0">
+              <Link to={banner.link} className="block w-full">
+                <img
+                  src={banner.src}
+                  alt={banner.alt}
+                  loading={idx === 0 ? "eager" : "lazy"}
+                  className="w-full h-auto max-h-130 sm:max-h-140 lg:max-h-160 object-cover object-center block"
+                />
+              </Link>
+            </div>
+          ))}
+        </div>
+
+        {/* Carousel Arrow Controls */}
+        <button
+          type="button"
+          onClick={handlePrevBanner}
+          aria-label="Previous banner"
+          className="absolute left-3 sm:left-5 top-1/2 -translate-y-1/2 flex size-8 sm:size-10 items-center justify-center rounded-full bg-background/70 hover:bg-background backdrop-blur-md border border-border/70 text-foreground shadow-md transition-all opacity-80 sm:opacity-0 sm:group-hover:opacity-100 hover:scale-105 active:scale-95 cursor-pointer z-10"
+        >
+          <ChevronLeft className="size-4 sm:size-5" />
+        </button>
+        <button
+          type="button"
+          onClick={handleNextBanner}
+          aria-label="Next banner"
+          className="absolute right-3 sm:right-5 top-1/2 -translate-y-1/2 flex size-8 sm:size-10 items-center justify-center rounded-full bg-background/70 hover:bg-background backdrop-blur-md border border-border/70 text-foreground shadow-md transition-all opacity-80 sm:opacity-0 sm:group-hover:opacity-100 hover:scale-105 active:scale-95 cursor-pointer z-10"
+        >
+          <ChevronRight className="size-4 sm:size-5" />
+        </button>
+
+        {/* Indicator Dots */}
+        <div className="absolute bottom-3 sm:bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-1.5 sm:gap-2 z-10 bg-background/50 backdrop-blur-xs px-2.5 py-1 rounded-full border border-border/40">
+          {HERO_BANNERS.map((b, idx) => (
+            <button
+              key={b.id}
+              type="button"
+              onClick={() => setCurrentBannerIndex(idx)}
+              aria-label={`Go to slide ${idx + 1}`}
+              className={`h-1.5 sm:h-2 rounded-full transition-all duration-300 cursor-pointer ${
+                currentBannerIndex === idx
+                  ? "w-5 sm:w-6 bg-primary shadow-xs"
+                  : "w-1.5 sm:w-2 bg-foreground/40 hover:bg-foreground/70"
+              }`}
+            />
+          ))}
+        </div>
       </section>
 
       {/* Trust Guarantee Strip — below the hero image */}
