@@ -3,7 +3,7 @@ import { useState } from "react";
 import { GradeBadge } from "./grade-badge";
 import { taka, type Listing, type Product } from "@/data/catalog";
 import { useCart } from "@/lib/cart-store";
-import { ShoppingBag, Check, Star, ShieldCheck, MapPin } from "lucide-react";
+import { ShoppingBag, Check, ShieldCheck, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface ListingCardProps {
@@ -66,15 +66,12 @@ export function ListingCard({
             </div>
           </Link>
 
-          {/* Brand & Name */}
+          {/* Product Name */}
           <div className="pt-2.5 flex flex-col">
-            <span className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold truncate leading-none">
-              {product.brand}
-            </span>
             <Link
               to="/listing/$listingId"
               params={{ listingId: listing.id }}
-              className="mt-1 block text-xs font-semibold leading-snug hover:underline line-clamp-2 text-foreground"
+              className="block text-xs font-semibold leading-snug hover:underline line-clamp-2 text-foreground"
               title={product.name}
             >
               {product.name}
@@ -141,7 +138,7 @@ export function ListingCard({
   /* ── List Layout Variant ── */
   if (layout === "list") {
     return (
-      <div className="group flex flex-col sm:flex-row bg-card p-4 sm:p-5 card-hover-lift relative overflow-hidden border border-border/80 rounded-xl gap-4 items-center">
+      <div className="flex flex-col sm:flex-row bg-card p-4 sm:p-5 relative overflow-hidden border border-border/80 rounded-xl gap-4 items-center">
         {/* Image */}
         <Link
           to="/listing/$listingId"
@@ -154,7 +151,7 @@ export function ListingCard({
             width={300}
             height={300}
             loading="lazy"
-            className="size-full object-cover transition-transform duration-300 group-hover:scale-105"
+            className="size-full object-cover"
           />
         </Link>
 
@@ -162,9 +159,6 @@ export function ListingCard({
         <div className="flex-1 min-w-0 space-y-1.5 w-full">
           <div className="flex items-center gap-2">
             <GradeBadge grade={listing.grade} />
-            <span className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">
-              {product.brand} · {product.category}
-            </span>
           </div>
 
           <Link
@@ -181,10 +175,6 @@ export function ListingCard({
           </p>
 
           <div className="flex flex-wrap items-center gap-2.5 pt-1 text-xs text-muted-foreground">
-            <span className="flex items-center gap-1 text-amber-500 font-medium">
-              <Star className="size-3 fill-current" />
-              {listing.seller.rating.toFixed(1)}
-            </span>
             {listing.battery && (
               <span className="bg-emerald-500/10 text-emerald-600 px-2 py-0.5 rounded-full border border-emerald-500/20 font-medium text-[11px]">
                 🔋 {listing.battery}% Battery
@@ -243,7 +233,7 @@ export function ListingCard({
 
   /* ── Full Grid Variant (desktop default) ── */
   return (
-    <div className="group flex flex-col bg-card p-4 card-hover-lift relative overflow-hidden border border-border/80 rounded-xl h-full justify-between">
+    <div className="group flex flex-col bg-card p-3 sm:p-4 transition-all duration-200 hover:shadow-lg hover:border-primary/40 relative overflow-hidden border border-border/80 rounded-xl h-full justify-between">
       <div>
         {/* Image */}
         <Link
@@ -266,15 +256,12 @@ export function ListingCard({
           </div>
         </Link>
 
-        {/* Brand & Name */}
+        {/* Product Name */}
         <div className="pt-3.5">
-          <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">
-            {product.brand} · {product.category}
-          </p>
           <Link
             to="/listing/$listingId"
             params={{ listingId: listing.id }}
-            className="mt-1 block text-sm font-semibold leading-snug hover:underline line-clamp-1 text-foreground"
+            className="block text-sm font-semibold leading-snug hover:underline line-clamp-1 text-foreground"
           >
             {product.name}
           </Link>
@@ -305,20 +292,49 @@ export function ListingCard({
             <MapPin className="size-3 shrink-0 text-muted-foreground" />
             {listing.seller.district}
           </span>
-          {listing.seller.verified ? (
+          {listing.seller.verified && (
             <span className="text-emerald-600 font-semibold shrink-0 flex items-center gap-1 text-xs">
               <ShieldCheck className="size-3.5" />
               Verified Seller
             </span>
-          ) : (
-            <span className="flex items-center gap-1 text-muted-foreground">
-              <Star className="size-3 fill-amber-400 text-amber-400" />
-              {listing.seller.rating.toFixed(1)}
-            </span>
           )}
         </div>
 
-        <div className="grid grid-cols-2 gap-2">
+        {/* Mobile action buttons (always visible on touch screens) */}
+        <div className="grid grid-cols-2 gap-2 sm:hidden">
+          <Button
+            type="button"
+            size="sm"
+            onClick={handleBuyNow}
+            className="h-9 px-2 text-xs rounded-md bg-primary text-primary-foreground font-semibold hover:opacity-90 flex items-center justify-center shadow-xs"
+          >
+            <span>Buy now</span>
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={handleAddToCart}
+            className="h-9 px-2 text-xs rounded-md border-border/80 font-medium flex items-center justify-center gap-1.5 hover:bg-muted"
+          >
+            {inCart || justAdded ? (
+              <>
+                <Check className="size-3.5 text-emerald-600 shrink-0 animate-bounce-in" />
+                <span>Added</span>
+              </>
+            ) : (
+              <>
+                <ShoppingBag className="size-3.5 shrink-0 transition-transform duration-200 group-hover:scale-110" />
+                <span>Add to cart</span>
+              </>
+            )}
+          </Button>
+        </div>
+      </div>
+
+      {/* Desktop hover slide-up action bar overlay */}
+      <div className="hidden sm:flex absolute inset-x-0 bottom-0 p-3 sm:p-4 bg-card/95 backdrop-blur-xs border-t border-border/70 z-10 translate-y-full opacity-0 pointer-events-none group-hover:translate-y-0 group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-300 ease-out">
+        <div className="grid grid-cols-2 gap-2 w-full">
           <Button
             type="button"
             size="sm"

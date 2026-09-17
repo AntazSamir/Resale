@@ -250,10 +250,10 @@ function CartPage() {
 
         {/* Undo Toast Notification */}
         {recentlyRemoved && (
-          <div className="mb-6 p-4 bg-muted/90 backdrop-blur-md border border-border rounded-lg flex items-center justify-between shadow-md animate-in fade-in slide-in-from-top-2">
-            <div className="flex items-center gap-3 text-sm">
-              <span className="size-2 rounded-full bg-destructive" />
-              <span>
+          <div className="mb-6 p-4 bg-muted/90 backdrop-blur-md border border-border rounded-lg flex items-center justify-between gap-3 shadow-md animate-in fade-in slide-in-from-top-2">
+            <div className="flex items-center gap-3 text-sm min-w-0">
+              <span className="size-2 rounded-full bg-destructive shrink-0" />
+              <span className="truncate">
                 Removed <strong>{recentlyRemoved.name}</strong> from your cart.
               </span>
             </div>
@@ -549,7 +549,7 @@ function CartPage() {
                   <Button
                     type="button"
                     onClick={() => handleApplyPromo()}
-                    className="h-10 px-5 font-medium shrink-0"
+                    className="h-10 px-3 sm:px-5 font-medium shrink-0"
                   >
                     Apply
                   </Button>

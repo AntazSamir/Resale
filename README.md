@@ -7,7 +7,7 @@
 [![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3ECF8E?logo=supabase&logoColor=white)](https://supabase.com/)
 [![Cloudflare](https://img.shields.io/badge/Deploy-Cloudflare-F38020?logo=cloudflare&logoColor=white)](https://workers.cloudflare.com/)
 
-**Resale.com** is Bangladesh's premier C2C and B2B marketplace for quality-checked pre-owned, open-box, and refurbished electronics. Engineered with objective component-level condition grading (A+ to D), 32-point hardware inspection, NID-verified sellers, nationwide Cash on Delivery (COD), decoupled order lifecycle state machines, Pro Merchant storefronts, Verified Creator video reviews, server-authoritative authentication, a comprehensive 48-hour dispute mediation hub, a full marketplace listing governance system with admin moderation and immutable audit history, a deterministic 0–100 seller reputation scoring engine with transparent calculation breakdown, a post-delivery buyer grading evaluation flow, and a polished Admin Console with Bangladesh geographic analytics.
+**Resale.com** is Bangladesh's premier C2C and B2B marketplace for quality-checked pre-owned, open-box, and refurbished electronics. Engineered with objective component-level condition grading (A+ to D), 32-point hardware inspection, NID-verified sellers, nationwide Cash on Delivery (COD), decoupled order lifecycle state machines, Pro Merchant storefronts, Verified Creator video reviews, server-authoritative authentication, a comprehensive 48-hour dispute mediation hub, a full marketplace listing governance system with admin moderation and immutable audit history, a deterministic 0–100 seller reputation scoring engine with transparent calculation breakdown, a post-delivery buyer grading evaluation flow, a polished Admin Console with Bangladesh geographic analytics, a complete cart overhaul with multi-step checkout stepper and Care+ protection, GPU-accelerated shimmer skeleton loaders, smooth route navigation transitions, an interactive brand carousel, a verified sellers directory, and WCAG-compliant mobile touch responsiveness.
 
 ---
 
@@ -275,6 +275,57 @@ Buyers can now submit structured condition evaluations after receiving their ord
 
 ---
 
+### 🛒 19. Comprehensive Cart Experience & Checkout Stepper (Phase 5.3B)
+
+A complete overhaul of `/cart` focusing on frictionless checkout progression, trust building, and purchase protection.
+
+- **Multi-Step Checkout Indicator**: Visual stepper (`1. Cart Review` → `2. Shipping & Address` → `3. Inspection & COD`) providing clear transaction progression.
+- **Dynamic Free Shipping Progress Bar**: Real-time spending threshold tracker (৳100,000 threshold) with celebratory progress animation and reward badge.
+- **Resale Care+ Protection Add-ons**: Per-item toggle offering optional 30-day screen & battery protection with immediate subtotal updates.
+- **Interactive Voucher Codes**: Instant discount selector featuring pre-populated one-click promo codes (`RESALE500`, `EID2026`, `VERIFIED1000`).
+- **Saved For Later Drawer**: Allows buyers to park items outside active cart calculation without losing selected unit configurations.
+- **Undo Removal Toast Notification**: Floating dismissible toast with timer allowing instant restoration of accidentally removed cart items.
+- **Sticky Trust & Escrow Sidebar**: High-conversion checkout summary showcasing 48-Hour Return Protection, Verified Seller Escrow, and Cash on Delivery (COD) guarantees.
+- **Certified Deals Empty State**: Dynamic fallback presenting curated trending verified offers when the cart is empty.
+
+---
+
+### 🚀 20. Smooth Route Transitions & Top-Edge Progress Bar (Phase 5.3B)
+
+- **`NavigationProgressBar`**: Top-edge YouTube/GitHub-style animated loading progress bar bound directly to TanStack Router lifecycle events (`router.subscribe('onBeforeLoad' / 'onLoad')`).
+- **Key-Driven Page Transitions**: Integrated into root layout with `animate-page-enter` providing smooth fade-in and subtle upward slide on route changes.
+- **Accessibility Compliance**: Respects `prefers-reduced-motion: reduce` by suppressing animations for sensitive users.
+- **Automatic Scroll Restoration**: Integrated `<ScrollRestoration />` maintaining natural browser scroll behavior across navigation events.
+
+---
+
+### 💎 21. Shimmer Skeleton Loading Architecture (Phase 5.3B)
+
+- **GPU-Accelerated Shimmer Primitive**: Overhauled `Skeleton` with 200% linear gradient animation driven by `@keyframes shimmer`.
+- **`ListingCardSkeleton`**: Supports both grid and list catalog layouts with grade badge, photo, title, price, and trust line placeholders.
+- **`ListingDetailSkeleton`**: High-fidelity skeleton mirroring the 32-point inspection report, gallery, seller trust line, and CTAs.
+- **`ProductDetailSkeleton`**: Canonical product page skeleton with specs rail and offers comparison table placeholders.
+- **Instant Search/Filter Feedback**: Products catalog triggers immediate skeleton state during debounced search query processing.
+
+---
+
+### 🎡 22. Interactive Brand Carousel & Verified Directory (Phase 5.3B)
+
+- **Interactive Available Brands Carousel**: Modern touch-friendly horizontal brand carousel on the homepage with brand logos, device count pills, and scroll buttons.
+- **Verified Sellers & Creators Directory (`/sellers`)**: Dedicated directory page with category filtering (All / Stores / Creators), location chips, and trust metrics.
+- **Circular Merchant Framing**: High-contrast circular frames standardizing pro merchant logos across all storefront carousels.
+
+---
+
+### 📱 23. Mobile Responsiveness Polish & Touch Accessibility (Phase 5.3B)
+
+- **WCAG 2.5.5 Touch Compliance**: Added `.touch-target` utility ensuring 44×44px minimum tap targets across all interactive buttons and triggers.
+- **2-Column Mobile Grid Optimization**: Tightened gaps (`gap-2 sm:gap-3 md:gap-4 xl:gap-4.5`) and refined listing card padding (`p-3 sm:p-4`) on `/products` to maximize screen utilization.
+- **Listing Detail Typography Hierarchy**: Responsive title scale (`text-xl sm:text-2xl lg:text-3xl`), price scale, truncated breadcrumb IDs (`max-w-20 sm:max-w-none`), and safe word-wrapping (`wrap-break-word`).
+- **Cart Mobile Optimization**: Responsive promo button padding (`px-3 sm:px-5`) and title truncation on the undo toast.
+
+---
+
 ## 🛠️ Technology Stack
 
 | Layer            | Technology                                                                                          |
@@ -300,11 +351,16 @@ Buyers can now submit structured condition evaluations after receiving their ord
 │   │   ├── moderation/                 # Admin moderation components (RejectionDialog, AuditHistorySheet)
 │   │   ├── site-header.tsx             # Dual header bar, tree dropdowns, notification bell & mobile drawer
 │   │   ├── site-footer.tsx             # Footer, newsletter subscription & platform directory
+│   │   ├── navigation-progress-bar.tsx # TanStack Router top-edge loading progress bar
 │   │   ├── google-auth-button.tsx      # Google OAuth authentication button
-│   │   ├── listing-card.tsx            # Listing-first product offer card
+│   │   ├── listing-card.tsx            # Listing-first product offer card with hover lift
+│   │   ├── listing-card-skeleton.tsx   # Dual-mode grid/list shimmer skeleton
+│   │   ├── listing-detail-skeleton.tsx # Progressive listing detail shimmer skeleton
+│   │   ├── product-detail-skeleton.tsx # Canonical product offers shimmer skeleton
 │   │   ├── product-card.tsx            # Catalog model showcase card
 │   │   ├── grade-badge.tsx             # Visual condition grade badge (A+ to D)
 │   │   ├── condition-score.tsx         # 4-zone condition score gauge
+│   │   ├── bangladesh-map.tsx          # SVG interactive geographic performance heatmap
 │   │   ├── seller-trust-card.tsx       # SellerTrustLine and SellerTrustCard
 │   │   ├── device-verification.tsx     # Security and cloud activation matrix
 │   │   ├── inspection-report.tsx       # 32-point inspection breakdown
@@ -339,19 +395,20 @@ Buyers can now submit structured condition evaluations after receiving their ord
 │   │   ├── recommendation-engine.ts    # Deterministic rule-based recommendation & personalization engine
 │   │   └── server-functions.ts         # Nitro server functions (auth, listing lifecycle, moderation, orders)
 │   ├── routes/
-│   │   ├── __root.tsx                  # Root HTML layout & global error boundary
-│   │   ├── index.tsx                   # Homepage (Hero, mobile trust strip, dual banners, catalog rails)
+│   │   ├── __root.tsx                  # Root HTML layout, progress bar, key-driven transitions & error boundary
+│   │   ├── index.tsx                   # Homepage (Hero, brands carousel, mobile trust strip, catalog rails)
 │   │   ├── about.tsx                   # About Resale.com story, values, and inspection criteria
 │   │   ├── grading.tsx                 # Dedicated Standardized Grading (A+ to D) & Simulator
-│   │   ├── products.tsx                # Unified Marketplace with full multi-facet filter engine
+│   │   ├── products.tsx                # Unified Marketplace with full multi-facet filter engine & shimmer loading
 │   │   ├── categories.tsx              # Category & Subcategory Catalog Hub
 │   │   ├── category.$categorySlug.tsx  # Dynamic category & subcategory catalog browser
-│   │   ├── product.$productId.tsx      # Multi-seller aggregated product view
+│   │   ├── product.$productId.tsx      # Multi-seller aggregated product view with offers table
 │   │   ├── listing.$listingId.tsx      # Progressive Listing Details & 32-Point Report
+│   │   ├── sellers.tsx                 # Verified Merchant Stores & Tech Creators Directory
 │   │   ├── store.$storeSlug.tsx        # Public Branded Merchant Storefront
 │   │   ├── seller.$sellerId.tsx        # Public Dynamic Seller Profile & Inventory Catalog
 │   │   ├── creator.$creatorSlug.tsx    # Verified Creator Profile & Video Hub
-│   │   ├── cart.tsx                    # Cart manager with listing snapshot verification
+│   │   ├── cart.tsx                    # Cart manager with multi-step stepper, Care+, vouchers & undo
 │   │   ├── checkout.tsx                # Gated 3-step checkout & COD order placement
 │   │   ├── account.orders.tsx          # Buyer Order History & status filters
 │   │   ├── account.orders.$orderId.tsx # Buyer Detailed Timeline Tracking & 48h Inspection Timer
@@ -375,7 +432,7 @@ Buyers can now submit structured condition evaluations after receiving their ord
 │   │   ├── register.tsx                # NID-Verified Registration with Password setup
 │   │   ├── partner.tsx                 # B2B Corporate Excess Inventory Application
 │   │   └── contact.tsx                 # Support Desk & Knowledge Base FAQ
-│   └── styles.css                      # Global styles, typography, loader animations & tokens
+│   └── styles.css                      # Global styles, typography, loader animations, touch-target & tokens
 ```
 
 ---

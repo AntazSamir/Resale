@@ -64,15 +64,12 @@ export function ProductCard({ product, compact = false }: { product: Product; co
             </div>
           </Link>
 
-          {/* Brand & Name */}
+          {/* Product Name */}
           <div className="pt-2.5 flex flex-col">
-            <span className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold truncate leading-none">
-              {product.brand}
-            </span>
             <Link
               to="/listing/$listingId"
               params={{ listingId: best.id }}
-              className="mt-1 block text-xs font-semibold leading-snug hover:underline line-clamp-2 text-foreground"
+              className="block text-xs font-semibold leading-snug hover:underline line-clamp-2 text-foreground"
               title={product.name}
             >
               {product.name}
@@ -170,15 +167,12 @@ export function ProductCard({ product, compact = false }: { product: Product; co
           </div>
         </Link>
 
-        {/* Brand & Name */}
+        {/* Product Name */}
         <div className="pt-3.5">
-          <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">
-            {product.brand} · {product.category}
-          </p>
           <Link
             to="/listing/$listingId"
             params={{ listingId: best.id }}
-            className="mt-1 block text-sm font-semibold leading-snug hover:underline line-clamp-1 text-foreground"
+            className="block text-sm font-semibold leading-snug hover:underline line-clamp-1 text-foreground"
           >
             {product.name}
           </Link>
@@ -214,7 +208,41 @@ export function ProductCard({ product, compact = false }: { product: Product; co
           )}
         </div>
 
-        <div className="grid grid-cols-2 gap-2">
+        {/* Mobile action buttons (always visible on touch screens) */}
+        <div className="grid grid-cols-2 gap-2 sm:hidden">
+          <Button
+            type="button"
+            size="sm"
+            onClick={handleBuyNow}
+            className="h-9 px-2 text-xs rounded-md bg-primary text-primary-foreground font-semibold hover:opacity-90 flex items-center justify-center shadow-xs"
+          >
+            <span>Buy now</span>
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={handleAddToCart}
+            className="h-9 px-2 text-xs rounded-md border-border/80 font-medium flex items-center justify-center gap-1.5 hover:bg-muted"
+          >
+            {inCart || justAdded ? (
+              <>
+                <Check className="size-3.5 text-emerald-600 shrink-0 animate-bounce-in" />
+                <span>Added</span>
+              </>
+            ) : (
+              <>
+                <ShoppingBag className="size-3.5 shrink-0 transition-transform duration-200 group-hover:scale-110" />
+                <span>Add to cart</span>
+              </>
+            )}
+          </Button>
+        </div>
+      </div>
+
+      {/* Desktop hover slide-up action bar overlay */}
+      <div className="hidden sm:flex absolute inset-x-0 bottom-0 p-4 bg-card/95 backdrop-blur-xs border-t border-border/70 z-10 translate-y-full opacity-0 pointer-events-none group-hover:translate-y-0 group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-300 ease-out">
+        <div className="grid grid-cols-2 gap-2 w-full">
           <Button
             type="button"
             size="sm"

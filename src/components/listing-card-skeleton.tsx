@@ -21,9 +21,8 @@ export function ListingCardSkeleton({
             </div>
           </div>
 
-          {/* Brand & Title */}
-          <div className="pt-2.5 space-y-1.5">
-            <Skeleton className="h-2.5 w-16" />
+          {/* Product Name */}
+          <div className="pt-2.5">
             <Skeleton className="h-4 w-4/5" />
           </div>
 
@@ -60,7 +59,6 @@ export function ListingCardSkeleton({
         <div className="flex-1 min-w-0 space-y-2.5 w-full">
           <div className="flex items-center gap-2">
             <Skeleton className="h-5 w-16 rounded-xs" />
-            <Skeleton className="h-3 w-28" />
           </div>
 
           <Skeleton className="h-5 w-3/4" />
@@ -97,9 +95,8 @@ export function ListingCardSkeleton({
           </div>
         </div>
 
-        {/* Brand & Name */}
-        <div className="pt-3.5 space-y-1.5">
-          <Skeleton className="h-3 w-20" />
+        {/* Product Name */}
+        <div className="pt-3.5">
           <Skeleton className="h-4.5 w-4/5" />
         </div>
 
@@ -122,7 +119,7 @@ export function ListingCardSkeleton({
           <Skeleton className="h-3.5 w-24" />
         </div>
 
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-2 gap-2 sm:hidden">
           <Skeleton className="h-9 w-full rounded-md" />
           <Skeleton className="h-9 w-full rounded-md" />
         </div>

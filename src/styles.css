@@ -254,6 +254,12 @@
   }
 }
 
+/* Minimum 44×44px tap target for accessibility (WCAG 2.5.5) */
+@utility touch-target {
+  min-height: 44px;
+  min-width: 44px;
+}
+
 /* Icon hover wiggle — attach to a group-hover child */
 @keyframes wiggle {
   0%, 100% { transform: rotate(0deg); }

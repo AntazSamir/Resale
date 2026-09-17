@@ -583,7 +583,7 @@ function ProductsPage() {
             <h1 className="text-2xl md:text-3xl font-display font-bold tracking-tight text-foreground">
               Browse Listings
             </h1>
-            <p className="text-xs md:text-sm text-subtle-foreground mt-1">
+            <p className="hidden sm:block text-xs md:text-sm text-subtle-foreground mt-1">
               Individual verified units from NID verified sellers across Bangladesh — each card is
               an authentic offer with 32-point inspection data.
             </p>
@@ -598,9 +598,9 @@ function ProductsPage() {
         </div>
 
         {/* Search & Controls Bar */}
-        <div className="mt-6 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-card border border-border p-3">
+        <div className="mt-6 flex flex-wrap items-stretch justify-between gap-3 bg-card border border-border p-3">
           {/* Search Input */}
-          <div className="relative flex-1">
+          <div className="relative flex-1 min-w-35">
             <Search className="size-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
             <Input
               value={searchQuery}
@@ -619,7 +619,7 @@ function ProductsPage() {
             )}
           </div>
 
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2">
             {/* Mobile Filters Sheet */}
             <Sheet open={mobileDrawerOpen} onOpenChange={setMobileDrawerOpen}>
               <SheetTrigger asChild>
@@ -698,7 +698,7 @@ function ProductsPage() {
                 Sort:
               </span>
               <Select value={sortBy} onValueChange={(val) => setSortBy(val as SortOption)}>
-                <SelectTrigger className="w-40 md:w-44 h-9 text-xs rounded-none border-border bg-background">
+                <SelectTrigger className="w-32 sm:w-40 md:w-44 h-9 text-xs rounded-none border-border bg-background">
                   <SelectValue placeholder="Sort by" />
                 </SelectTrigger>
                 <SelectContent className="rounded-none border-border bg-card">
@@ -717,7 +717,9 @@ function ProductsPage() {
         {/* Active Filter Chips */}
         {activeFilterCount > 0 && (
           <div className="mt-4 flex flex-wrap items-center gap-2 pt-1">
-            <span className="text-xs text-muted-foreground font-medium mr-1">Active filters:</span>
+            <span className="hidden sm:inline text-xs text-muted-foreground font-medium mr-1">
+              Active filters:
+            </span>
 
             {searchQuery && (
               <Badge variant="secondary" className="text-xs font-normal gap-1 rounded-none py-1">
@@ -875,7 +877,7 @@ function ProductsPage() {
             {isSearching ? (
               viewLayout === "grid" ? (
                 /* Grid skeleton */
-                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-4.5 items-stretch auto-rows-fr animate-in fade-in duration-150">
+                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-3 md:gap-4 xl:gap-4.5 items-stretch auto-rows-fr animate-in fade-in duration-150">
                   {Array.from({ length: 8 }).map((_, i) => (
                     <ListingCardSkeleton key={i} layout="grid" />
                   ))}
@@ -891,7 +893,7 @@ function ProductsPage() {
             ) : sortedListings.length > 0 ? (
               viewLayout === "grid" ? (
                 /* Grid view */
-                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-4.5 items-stretch auto-rows-fr">
+                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-3 md:gap-4 xl:gap-4.5 items-stretch auto-rows-fr">
                   {sortedListings.map((listing) => {
                     const product = productFor(listing.productId);
                     if (!product) return null;

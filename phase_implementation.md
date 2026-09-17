@@ -2,7 +2,7 @@
 
 > **Bangladesh's Trusted C2C & B2B Marketplace for Quality-Checked Pre-Owned, Open-Box & Like-New Electronics**
 
-This document tracks the completed engineering milestones across **Phase 1**, **Phase 2**, **Phase 3.1**, **Phase 3.4**, **Phase 3.6**, **Phase 4 (4.1A–E, 4.2, 4.4, 4.5, 4.6)**, **Phase 5.1 (Marketplace Trust & Listing Governance)**, **Phase 5.2 (Seller Reputation)**, and **Phase 5.3A (Admin Console & Grading Evaluation)**, and outlines the strategic and technical roadmap for remaining milestones.
+This document tracks the completed engineering milestones across **Phase 1**, **Phase 2**, **Phase 3.1**, **Phase 3.4**, **Phase 3.6**, **Phase 4 (4.1A–E, 4.2, 4.4, 4.5, 4.6)**, **Phase 5.1 (Marketplace Trust & Listing Governance)**, **Phase 5.2 (Seller Reputation)**, **Phase 5.3A (Admin Console & Grading Evaluation)**, and **Phase 5.3B (Cart Overhaul, Dynamic Page Transitions, Skeleton Loading Suite & Mobile UX Polish)**, and outlines the strategic and technical roadmap for remaining milestones.
 
 ---
 
@@ -543,32 +543,34 @@ Phase 5.1 transforms the listing flow from a direct-publish system into a proper
 
 ## 📊 Summary Milestone Table
 
-| Milestone      | Key Focus Area               | Deliverables                                                                                                                                                                                   |    Status    |
-| -------------- | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------: |
-| **Phase 1**    | Marketplace Core & Catalog   | Alternating Homepage, Catalog Filters, Cart, COD Checkout, NID Auth, Seller Wizard                                                                                                             | ✅ Completed |
-| **Phase 2**    | Trust & Inspection UX        | 32-Point Inspection, Condition Gauge, Seller Trust Line, Device Verification, Product Multi-Seller Page                                                                                        | ✅ Completed |
-| **Phase 3.1**  | Order & Transaction Backbone | Decoupled Lifecycle State Machine, Payment Abstraction (COD Active), Mandatory Auth & Redirect, Buyer Timeline & Cancellation, Seller Fulfillment Hub, Admin Oversight                         | ✅ Completed |
-| **Phase 3.4**  | Creator & Pro Storefronts    | Public Branded Storefronts (`/store/:slug`), Verified Creator Profiles (`/creator/:slug`), Hands-on Product Video Reviews, Exact-Unit Review Badging, Bulk CSV Inventory Importer              | ✅ Completed |
-| **Phase 3.6**  | Dispute Mediation Hub        | 48h Inspection Window, 24h Seller SLA, Evidence Dropzone, Side-by-Side Admin Workbench, Deterministic Risk Analyzer, Simulated Payout Holds & Reverse Logistics                                | ✅ Completed |
-| **Phase 3.2**  | Courier Logistics            | Steadfast/Pathao API integration, live tracking webhooks, automated COD reconciliation                                                                                                         |  📋 Planned  |
-| **Phase 3.3**  | Automated Diagnostics        | Live IMEI verification API, device hardware test runner, certified badges                                                                                                                      |  📋 Planned  |
-| **Phase 3.5**  | AI Valuation Engine          | Real-time price recommender, price history graphs, "Fair Deal" badges                                                                                                                          |  📋 Planned  |
-| **Phase 4.1A** | Supabase Orders Persistence  | Remote PostgreSQL orders sync, user foreign-key resolution, snapshot immutability, cross-browser shared state                                                                                  | ✅ Completed |
-| **Phase 4.1B** | Remote Stores & Creators     | Supabase persistence for Pro Storefronts (`stores`) and Creator Hub (`creator_profiles`, `product_videos`)                                                                                     | ✅ Completed |
-| **Phase 4.1E** | Backend Admin Auth & Email   | Server-issued session tokens, backend role enforcement, spoofing prevention, email registration/login with OTP                                                                                 | ✅ Completed |
-| **Phase 4.1C** | Remote Dispute Persistence   | Supabase persistence for Disputes (`disputes`) and evidence metadata                                                                                                                           | ✅ Completed |
-| **Phase 4.1D** | Cloud Cart Sync              | Guest-to-user cart cloud persistence & automatic login merging                                                                                                                                 | ✅ Completed |
-| **Phase 4.2**  | Event & Analytics Model      | 12-type behavioral event model, privacy-safe session tracking, analytics foundation                                                                                                            | ✅ Completed |
-| **Phase 4.3**  | Favorites & Saved Searches   | Listing/product favorites, saved search persistence, new-listing alerts                                                                                                                        |  📋 Planned  |
-| **Phase 4.4**  | Seller Intelligence          | Real listing view/conversion metrics, seller analytics page, dashboard overhaul                                                                                                                | ✅ Completed |
-| **Phase 4.5**  | Notifications Infrastructure | Database-backed notifications table, RLS policies, notification preferences, order/dispute/price-drop triggers, in-app notification panel with bell icon, server-side authorization            | ✅ Completed |
-| **Phase 4.6**  | Rule-Based Personalization   | Deterministic recommendation engine, recent-order homepage shelf, consolidated product page "You May Also Like", strict data-truth fallback                                                    | ✅ Completed |
-| **Phase 4.7**  | Device Lifecycle Passport    | Honest per-device Resale history page, inspection/sale/dispute timeline                                                                                                                        |  📋 Planned  |
-| **Phase 5.1**  | Listing Governance & Trust   | Dual-status lifecycle (DRAFT→PENDING_REVIEW→ACTIVE/REJECTED), admin moderation workbench, immutable audit history, RESERVED race-condition lock, public discovery gating, seller resubmit flow | ✅ Completed |
-| **Phase 5.2**  | Seller Trust Score & Badges  | Deterministic 0–100 trust formula (Orders, Disputes, SLA, NID tier), transparent score breakdown dialog, verified merchant badges                                                              | ✅ Completed |
-| **Phase 5.3**  | Fair-Market Price Guidance   | Historical sold price benchmarks, sell wizard price competitiveness indicator, 6–24 mo model depreciation curves                                                                               |  📋 Planned  |
-| **Phase 5.4**  | Device Lifecycle Passport    | Digital ledger per physical unit (`/passport/$id`), immutable chain of custody, QR verification label                                                                                          |  📋 Planned  |
-| **Phase 5.5**  | Certified Physical QA Hubs   | Hub drop-off logistics routing, technician inspection workbench (`/admin/qa-hub`), tamper-evident physical certification seals                                                                 |  📋 Planned  |
+| Milestone      | Key Focus Area               | Deliverables                                                                                                                                                                                                    |    Status    |
+| -------------- | ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------: |
+| **Phase 1**    | Marketplace Core & Catalog   | Alternating Homepage, Catalog Filters, Cart, COD Checkout, NID Auth, Seller Wizard                                                                                                                              | ✅ Completed |
+| **Phase 2**    | Trust & Inspection UX        | 32-Point Inspection, Condition Gauge, Seller Trust Line, Device Verification, Product Multi-Seller Page                                                                                                         | ✅ Completed |
+| **Phase 3.1**  | Order & Transaction Backbone | Decoupled Lifecycle State Machine, Payment Abstraction (COD Active), Mandatory Auth & Redirect, Buyer Timeline & Cancellation, Seller Fulfillment Hub, Admin Oversight                                          | ✅ Completed |
+| **Phase 3.4**  | Creator & Pro Storefronts    | Public Branded Storefronts (`/store/:slug`), Verified Creator Profiles (`/creator/:slug`), Hands-on Product Video Reviews, Exact-Unit Review Badging, Bulk CSV Inventory Importer                               | ✅ Completed |
+| **Phase 3.6**  | Dispute Mediation Hub        | 48h Inspection Window, 24h Seller SLA, Evidence Dropzone, Side-by-Side Admin Workbench, Deterministic Risk Analyzer, Simulated Payout Holds & Reverse Logistics                                                 | ✅ Completed |
+| **Phase 3.2**  | Courier Logistics            | Steadfast/Pathao API integration, live tracking webhooks, automated COD reconciliation                                                                                                                          |  📋 Planned  |
+| **Phase 3.3**  | Automated Diagnostics        | Live IMEI verification API, device hardware test runner, certified badges                                                                                                                                       |  📋 Planned  |
+| **Phase 3.5**  | AI Valuation Engine          | Real-time price recommender, price history graphs, "Fair Deal" badges                                                                                                                                           |  📋 Planned  |
+| **Phase 4.1A** | Supabase Orders Persistence  | Remote PostgreSQL orders sync, user foreign-key resolution, snapshot immutability, cross-browser shared state                                                                                                   | ✅ Completed |
+| **Phase 4.1B** | Remote Stores & Creators     | Supabase persistence for Pro Storefronts (`stores`) and Creator Hub (`creator_profiles`, `product_videos`)                                                                                                      | ✅ Completed |
+| **Phase 4.1E** | Backend Admin Auth & Email   | Server-issued session tokens, backend role enforcement, spoofing prevention, email registration/login with OTP                                                                                                  | ✅ Completed |
+| **Phase 4.1C** | Remote Dispute Persistence   | Supabase persistence for Disputes (`disputes`) and evidence metadata                                                                                                                                            | ✅ Completed |
+| **Phase 4.1D** | Cloud Cart Sync              | Guest-to-user cart cloud persistence & automatic login merging                                                                                                                                                  | ✅ Completed |
+| **Phase 4.2**  | Event & Analytics Model      | 12-type behavioral event model, privacy-safe session tracking, analytics foundation                                                                                                                             | ✅ Completed |
+| **Phase 4.3**  | Favorites & Saved Searches   | Listing/product favorites, saved search persistence, new-listing alerts                                                                                                                                         |  📋 Planned  |
+| **Phase 4.4**  | Seller Intelligence          | Real listing view/conversion metrics, seller analytics page, dashboard overhaul                                                                                                                                 | ✅ Completed |
+| **Phase 4.5**  | Notifications Infrastructure | Database-backed notifications table, RLS policies, notification preferences, order/dispute/price-drop triggers, in-app notification panel with bell icon, server-side authorization                             | ✅ Completed |
+| **Phase 4.6**  | Rule-Based Personalization   | Deterministic recommendation engine, recent-order homepage shelf, consolidated product page "You May Also Like", strict data-truth fallback                                                                     | ✅ Completed |
+| **Phase 4.7**  | Device Lifecycle Passport    | Honest per-device Resale history page, inspection/sale/dispute timeline                                                                                                                                         |  📋 Planned  |
+| **Phase 5.1**  | Listing Governance & Trust   | Dual-status lifecycle (DRAFT→PENDING_REVIEW→ACTIVE/REJECTED), admin moderation workbench, immutable audit history, RESERVED race-condition lock, public discovery gating, seller resubmit flow                  | ✅ Completed |
+| **Phase 5.2**  | Seller Trust Score & Badges  | Deterministic 0–100 trust formula (Orders, Disputes, SLA, NID tier), transparent score breakdown dialog, verified merchant badges                                                                               | ✅ Completed |
+| **Phase 5.3A** | Admin Console & Grading Flow | Admin Shell layout, Bangladesh heatmap analytics, 15+ sub-routes, buyer grading card, consolidated auth identifier, 4-col products grid                                                                         | ✅ Completed |
+| **Phase 5.3B** | Cart, Transitions & Mobile   | Cart checkout stepper, shipping progress bar, Care+ add-ons, undo toast, navigation progress bar, page enter transitions, shimmer skeleton suite, brand carousel, sellers directory, mobile touch-target polish | ✅ Completed |
+| **Phase 5.3**  | Fair-Market Price Guidance   | Historical sold price benchmarks, sell wizard price competitiveness indicator, 6–24 mo model depreciation curves                                                                                                |  📋 Planned  |
+| **Phase 5.4**  | Device Lifecycle Passport    | Digital ledger per physical unit (`/passport/$id`), immutable chain of custody, QR verification label                                                                                                           |  📋 Planned  |
+| **Phase 5.5**  | Certified Physical QA Hubs   | Hub drop-off logistics routing, technician inspection workbench (`/admin/qa-hub`), tamper-evident physical certification seals                                                                                  |  📋 Planned  |
 
 ---
 
@@ -629,29 +631,127 @@ This sprint delivered a comprehensive Admin Console redesign, a new buyer-facing
 
 ### 6. Summary — Phase 5.3A Deliverables
 
-| Feature | Files Touched | Status |
-|---|---|:---:|
-| Admin Shell Layout Component | `src/components/admin/admin-shell.tsx` | ✅ |
-| Admin Dashboard Overhaul | `src/routes/admin.index.tsx` | ✅ |
-| Bangladesh Geographic Heatmap | `src/components/bangladesh-map.tsx`, `src/routes/admin.analytics.tsx` | ✅ |
-| Admin Container Width Refactor | All `admin.*` routes | ✅ |
-| 15+ New Admin Sub-Routes | `admin.users`, `admin.payments`, `admin.inspections`, etc. | ✅ |
-| Grading DB Table & SQL | `supabase/manual-sql/20260911_grading_and_orders.sql` | ✅ |
-| Grading Server Functions | `src/lib/grading.functions.ts` | ✅ |
-| Buyer Grading Card Component | `src/components/grading/buyer-grading-card.tsx` | ✅ |
-| Order Store Grading Integration | `src/lib/order-store.ts`, `src/routes/account.orders.$orderId.tsx` | ✅ |
-| Grading E2E Test Script | `scripts/test-order-grading-flow.ts` | ✅ |
-| Login — Consolidated Identifier | `src/routes/login.tsx` | ✅ |
-| Register — Consolidated Identifier | `src/routes/register.tsx` | ✅ |
-| Products 4-Column Grid | `src/routes/products.tsx` | ✅ |
-| Homepage Storefront Section | `src/routes/index.tsx`, `src/data/storefront.ts` | ✅ |
+| Feature                            | Files Touched                                                         | Status |
+| ---------------------------------- | --------------------------------------------------------------------- | :----: |
+| Admin Shell Layout Component       | `src/components/admin/admin-shell.tsx`                                |   ✅   |
+| Admin Dashboard Overhaul           | `src/routes/admin.index.tsx`                                          |   ✅   |
+| Bangladesh Geographic Heatmap      | `src/components/bangladesh-map.tsx`, `src/routes/admin.analytics.tsx` |   ✅   |
+| Admin Container Width Refactor     | All `admin.*` routes                                                  |   ✅   |
+| 15+ New Admin Sub-Routes           | `admin.users`, `admin.payments`, `admin.inspections`, etc.            |   ✅   |
+| Grading DB Table & SQL             | `supabase/manual-sql/20260911_grading_and_orders.sql`                 |   ✅   |
+| Grading Server Functions           | `src/lib/grading.functions.ts`                                        |   ✅   |
+| Buyer Grading Card Component       | `src/components/grading/buyer-grading-card.tsx`                       |   ✅   |
+| Order Store Grading Integration    | `src/lib/order-store.ts`, `src/routes/account.orders.$orderId.tsx`    |   ✅   |
+| Grading E2E Test Script            | `scripts/test-order-grading-flow.ts`                                  |   ✅   |
+| Login — Consolidated Identifier    | `src/routes/login.tsx`                                                |   ✅   |
+| Register — Consolidated Identifier | `src/routes/register.tsx`                                             |   ✅   |
+| Products 4-Column Grid             | `src/routes/products.tsx`                                             |   ✅   |
+| Homepage Storefront Section        | `src/routes/index.tsx`, `src/data/storefront.ts`                      |   ✅   |
 
 ---
 
-| Milestone | Key Focus Area | Deliverables | Status |
-|---|---|---|:---:|
+## ✅ Phase 5.3B: Cart Overhaul, Navigation Transitions, Shimmer Skeletons, Brand Carousel & Mobile Polish
+
+**Status:** `COMPLETED` · **Commit Milestones:** `75c899d`, `0901d64`, `f4bebbe`, `d7f2e99`, `2fba1a6`, `014078b`, `6745dd2` · **Build Verified:** September 2026
+
+Phase 5.3B delivered an end-to-end commerce experience upgrade focusing on conversion rate optimization, micro-interactions, perceived performance through GPU-accelerated shimmer skeleton loaders, smooth route navigation transitions, an interactive brand discovery carousel, a dedicated verified sellers/creators directory, and rigorous mobile responsiveness polish across all core views.
+
+---
+
+### 1. Comprehensive Cart Experience Overhaul (`/cart`)
+
+- **Multi-Step Checkout Indicator**: Visual stepper (`1. Cart Review` → `2. Shipping & Address` → `3. Inspection & COD`) showing buyers their exact progression in the transaction journey.
+- **Dynamic Free Shipping Progress Bar**: Real-time progress tracker computing proximity to the ৳100,000 threshold with animated progress bar and celebratory unlock badge.
+- **Resale Care+ Protection Add-ons**: Per-item optional protection plan toggle offering 30-day screen & battery hardware coverage with immediate subtotal updates.
+- **Interactive Promo Code System**: Pre-populated one-click voucher selector (`RESALE500`, `EID2026`, `VERIFIED1000`) with instant validation and discount computation.
+- **Saved For Later Shelf**: Drawer/shelf allowing buyers to temporarily move items out of active checkout without losing them, with instant "Move back to cart" action.
+- **Undo Removal Toast Notification**: Floating dismissible toast enabling buyers to restore accidentally removed items within a 5-second window, complete with title truncation on mobile.
+- **Sticky Trust & Escrow Order Summary**: Redesigned checkout summary sidebar highlighting 48-Hour Return Protection, Verified Seller Escrow, and Cash on Delivery (COD) guarantees.
+- **Certified Deals Empty State**: Engaging empty state layout featuring curated trending certified offers with one-click quick add actions.
+
+---
+
+### 2. Page Navigation Transitions & Router Progress Bar
+
+- **`NavigationProgressBar` (`src/components/navigation-progress-bar.tsx`)**: High-performance top-edge loading progress bar directly bound to TanStack Router lifecycle events (`router.subscribe('onBeforeLoad' / 'onLoad')`). Features smooth progress staging (20% → 60% → 85% → 100%), gradient emerald sheen, and subtle glow shadows.
+- **Fluid Route Transitions (`src/routes/__root.tsx`)**: Outlets wrapped with key-driven transitions leveraging `router.state.location.pathname` to trigger smooth page-enter animations.
+- **Accessibility-Safe Keyframe Animations (`src/styles.css`)**: `@keyframes pageEnter` with 0.995 scale-up and 4px upward translation over 180ms ease-out. Fully respects `prefers-reduced-motion: reduce`.
+- **Automatic Scroll Restoration**: Integrated `<ScrollRestoration />` in the root layout ensuring immediate top-of-page scroll on navigation while maintaining history position on back/forward clicks.
+
+---
+
+### 3. Shimmer Skeleton Loading Architecture
+
+- **GPU-Accelerated Shimmer Primitive (`src/components/ui/skeleton.tsx`)**: Overhauled skeleton base component with a 200% width linear gradient (`bg-linear-to-r`) driven by `@keyframes shimmer` (1.8s infinite translation) replacing basic opacity pulsing.
+- **`ListingCardSkeleton` (`src/components/listing-card-skeleton.tsx`)**: Dual-mode skeleton matching both grid (2/3/4 column) and list view layouts, including aspect-square image ratio, grade pill, title, price, and trust badge placeholders.
+- **`ListingDetailSkeleton` (`src/components/listing-detail-skeleton.tsx`)**: Complete replica of the progressive listing page, featuring media gallery, seller trust line, condition score gauge, trust badges, what's included chips, 32-point inspection report, and CTA blocks.
+- **`ProductDetailSkeleton` (`src/components/product-detail-skeleton.tsx`)**: Canonical product page skeleton featuring hero specs, price benchmark cards, and multi-seller offers comparison table rows.
+- **Instant Search & Filter Feedback (`src/routes/products.tsx`)**: Debounced search query triggers immediate `isSearching` skeleton state for 150ms to prevent visual flashing and provide instant feedback while results compute.
+
+---
+
+### 4. Micro-Animations & Interactive Spring Feedback
+
+- **Spring Hover Lift (`.card-hover-lift`)**: Pure CSS micro-interaction applying `translateY(-3px)` combined with dual-layer shadow expansion (`box-shadow: 0 12px 24px -6px ...`) via custom cubic-bezier spring curve `cubic-bezier(0.16, 1, 0.3, 1)`.
+- **Cart Check Bounce (`.animate-bounce-in`)**: Custom spring bounce-in scale animation for the cart success checkmark icon.
+- **Shopping Bag Icon Scale**: Subtle `group-hover:scale-110` micro-interaction on CTA button icons.
+- **Interactive Badges (`.animate-wiggle`, `.animate-badge-pulse`)**: Attention-directing micro-animations for high-priority status chips.
+- **Button Press Feedback**: Global `<Button>` transition upgraded to include `transform` for instant tactile response on click (`active:scale-[0.98]`).
+
+---
+
+### 5. Homepage Enhancements & Interactive Brand Carousel
+
+- **Clean Visual Hero (`src/assets/hero-banner.webp`, `src/routes/index.tsx`)**: Optimized high-resolution WebP hero asset with adjusted height, removing overlaid text clashing to let the clean banner design speak for itself.
+- **Interactive Available Brands Carousel (`src/routes/index.tsx`)**: Modern horizontal scrolling carousel showcasing popular brands (Apple, Samsung, Google, Sony, Dell, HP, Lenovo, Canon) with circular brand emblems, active device counts, and touch-friendly scroll navigation controls.
+- **Verified Sellers & Creators Directory (`/sellers`, `src/routes/sellers.tsx`)**: Dedicated hub page indexing all verified pro merchant stores and tech reviewer creators with real-time search, category filters (All / Stores / Creators), outlet location chips, and trust metrics. Linked directly from the homepage trust showcase.
+- **Circular Merchant Framing**: Replaced square card logos with polished circular badge frames across all storefront showcases.
+
+---
+
+### 6. Mobile Responsiveness Polish & Touch Target Accessibility
+
+- **WCAG 2.5.5 Touch Target Compliance (`.touch-target` in `src/styles.css`)**: Added 44×44px minimum tap target utility ensuring effortless one-thumb interactions on mobile viewports.
+- **Catalog Grid Optimization (`src/routes/products.tsx`)**:
+  - Tightened gap spacing on mobile (`gap-2 sm:gap-3 md:gap-4 xl:gap-4.5`) to maximize viewable product area on 2-column mobile screens.
+  - Search input with flexible `min-w-35` sizing and responsive sort dropdown (`w-32 sm:w-40 md:w-44`).
+  - Hides non-essential subtitle and label text on mobile viewports to prevent viewport clutter.
+- **Listing Card Mobile Scale (`src/components/listing-card.tsx`)**: Dynamic internal padding (`p-3 sm:p-4`) preventing text wrapping and badge overflow in compact 2-column mobile grids.
+- **Listing Detail Polish (`src/routes/listing.$listingId.tsx`)**:
+  - Responsive typography scale (`text-xl sm:text-2xl lg:text-3xl` for title; `text-2xl sm:text-3xl` for price).
+  - Truncated breadcrumb listing IDs (`max-w-20 sm:max-w-none`) preventing header wrapping.
+  - Safe word-wrapping on seller notes (`wrap-break-word`).
+  - Adjusted gallery thumbnail sizing (`min-h-13`) and responsive card padding (`p-4 sm:p-6`).
+- **Cart Mobile Polish (`src/routes/cart.tsx`)**:
+  - Promo apply button padding scaled for mobile screens (`px-3 sm:px-5`).
+  - Undo toast with `min-w-0 truncate` ensuring long product titles don't overflow on small phone displays.
+
+---
+
+### 7. Summary — Phase 5.3B Deliverables
+
+| Feature                        | Files Touched                                       | Status |
+| ------------------------------ | --------------------------------------------------- | :----: |
+| Cart Redesign & Stepper        | `src/routes/cart.tsx`                               |   ✅   |
+| Resale Care+ Add-on & Vouchers | `src/routes/cart.tsx`                               |   ✅   |
+| Top Navigation Progress Bar    | `src/components/navigation-progress-bar.tsx`        |   ✅   |
+| Animated Page Transitions      | `src/routes/__root.tsx`, `src/styles.css`           |   ✅   |
+| Shimmer Skeleton Suite         | `src/components/ui/skeleton.tsx`, `*skeleton.tsx`   |   ✅   |
+| Card Hover Lift & Spring CSS   | `src/styles.css`, `src/components/listing-card.tsx` |   ✅   |
+| Interactive Brands Carousel    | `src/routes/index.tsx`                              |   ✅   |
+| Verified Sellers Directory     | `src/routes/sellers.tsx`, `src/routes/index.tsx`    |   ✅   |
+| Mobile Touch Targets (WCAG)    | `src/styles.css`                                    |   ✅   |
+| Products Grid Mobile Polish    | `src/routes/products.tsx`, `listing-card.tsx`       |   ✅   |
+| Listing Detail Mobile Polish   | `src/routes/listing.$listingId.tsx`                 |   ✅   |
+| Cart Toast & Button Polish     | `src/routes/cart.tsx`                               |   ✅   |
+
+---
+
+| Milestone      | Key Focus Area                          | Deliverables                                                                                                                              |    Status    |
+| -------------- | --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | :----------: |
 | **Phase 5.3A** | Admin Console, Grading Flow & UI Polish | Admin Shell, Bangladesh Heatmap, 15+ Admin Routes, Buyer Grading Card, Grading DB, Login/Register Consolidated Input, 4-col Products Grid | ✅ Completed |
+| **Phase 5.3B** | Cart, Transitions, Skeletons & Mobile   | Cart Stepper & Care+, NavigationProgressBar, Shimmer Skeletons, Brand Carousel, Sellers Directory, WCAG Touch Targets, Mobile Polish      | ✅ Completed |
 
 ---
 
-_Last Updated: September 2026 (Phase 5.3A Complete) · Resale.com Engineering Team_
+_Last Updated: September 2026 (Phase 5.3B Complete) · Resale.com Engineering Team_

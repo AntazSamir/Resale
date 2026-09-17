@@ -263,7 +263,9 @@ function ListingPage() {
             {product.name}
           </Link>
           <span>/</span>
-          <span className="text-foreground font-medium truncate">Listing {listing.id}</span>
+          <span className="text-foreground font-medium truncate max-w-20 sm:max-w-none">
+            Listing {listing.id}
+          </span>
         </nav>
 
         {/* ── Above the Fold: Main Product Layout ── */}
@@ -288,7 +290,7 @@ function ListingPage() {
             </div>
 
             {/* Thumbnail Buttons */}
-            <div className="grid grid-cols-4 gap-2.5">
+            <div className="grid grid-cols-4 gap-2">
               {galleryShots.map((g, i) => (
                 <button
                   key={g.label}
@@ -296,7 +298,7 @@ function ListingPage() {
                   onClick={() => setShot(i)}
                   aria-label={`Show ${g.label} photo`}
                   aria-pressed={i === shot}
-                  className={`border p-1 bg-card transition-all text-left ${
+                  className={`border p-1 bg-card transition-all text-left min-h-13 ${
                     i === shot
                       ? "border-primary ring-1 ring-primary shadow-xs"
                       : "border-border/70 hover:border-primary/40 opacity-80 hover:opacity-100"
@@ -366,7 +368,7 @@ function ListingPage() {
               <span className="text-[11px] uppercase tracking-[0.2em] font-semibold text-muted-foreground block">
                 {product.brand}
               </span>
-              <h1 className="font-display text-2xl sm:text-3xl lg:text-3.5xl font-bold text-foreground tracking-tight leading-snug">
+              <h1 className="font-display text-xl sm:text-2xl lg:text-3xl font-bold text-foreground tracking-tight leading-snug">
                 {product.name}
               </h1>
             </div>
@@ -434,7 +436,7 @@ function ListingPage() {
               <blockquote className="border-l-2 border-primary bg-secondary/30 px-3.5 py-2.5 text-xs text-foreground italic leading-relaxed">
                 &ldquo;{listing.sellerNote}&rdquo;
               </blockquote>
-              <p className="text-[11px] text-muted-foreground">
+              <p className="text-[11px] text-muted-foreground wrap-break-word">
                 — Listed by {listing.seller.name} on {listedDate} · Reference: {listing.id}
               </p>
             </div>
@@ -471,7 +473,7 @@ function ListingPage() {
             {/* 11. Price & 12. Purchase CTAs */}
             <div className="pt-3 border-t border-border/60 space-y-4">
               <div>
-                <p className="font-display text-3xl sm:text-4xl font-bold text-primary">
+                <p className="font-display text-2xl sm:text-3xl md:text-4xl font-bold text-primary">
                   {taka(listing.price)}
                 </p>
                 <p className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
@@ -530,7 +532,10 @@ function ListingPage() {
           </section>
 
           {/* Section 20: Grade Criteria & Standards */}
-          <section id="grade-criteria" className="border border-border/80 bg-card p-6 space-y-5">
+          <section
+            id="grade-criteria"
+            className="border border-border/80 bg-card p-4 sm:p-6 space-y-5"
+          >
             <div className="flex items-center gap-2 border-b border-border/60 pb-4">
               <Layers className="size-5 text-primary" />
               <div>
@@ -584,7 +589,7 @@ function ListingPage() {
           {/* Section 21: Full Technical Specifications */}
           <section
             id="technical-specifications"
-            className="border border-border/80 bg-card p-6 space-y-6"
+            className="border border-border/80 bg-card p-4 sm:p-6 space-y-6"
           >
             <div className="border-b border-border/60 pb-4">
               <h2 className="font-display text-xl font-bold text-foreground">

@@ -1119,9 +1119,6 @@ function FeaturedDeviceCard({
 
         {/* Info Block */}
         <div className="pt-3 space-y-1">
-          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold truncate">
-            {product.brand} · {product.category}
-          </p>
           <Link
             to="/listing/$listingId"
             params={{ listingId }}
@@ -1149,18 +1146,16 @@ function FeaturedDeviceCard({
             <MapPin className="size-3 shrink-0" />
             {seller.district}
           </span>
-          {seller.verified ? (
+          {seller.verified && (
             <span className="text-emerald-600 font-semibold shrink-0 flex items-center gap-0.5 text-[10px]">
               <ShieldCheck className="size-3" />
               Verified Seller
             </span>
-          ) : (
-            <span className="text-[10px] text-muted-foreground">★ {seller.rating.toFixed(1)}</span>
           )}
         </div>
 
         {/* Dual Actions with min 44px touch targets on mobile */}
-        <div className="grid grid-cols-2 gap-1.5 sm:gap-2">
+        <div className="grid grid-cols-2 gap-1.5 sm:gap-2 sm:hidden">
           <button
             type="button"
             onClick={onBuyNow}
@@ -1187,6 +1182,41 @@ function FeaturedDeviceCard({
               <>
                 <ShoppingBag className="size-3.5" />
                 <span className="text-[11px]">Cart</span>
+              </>
+            )}
+          </button>
+        </div>
+      </div>
+
+      {/* Desktop hover slide-up action bar overlay */}
+      <div className="hidden sm:flex absolute inset-x-0 bottom-0 p-3 sm:p-4 bg-card/95 backdrop-blur-xs border-t border-border/70 z-10 translate-y-full opacity-0 pointer-events-none group-hover:translate-y-0 group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-300 ease-out">
+        <div className="grid grid-cols-2 gap-2 w-full">
+          <button
+            type="button"
+            onClick={onBuyNow}
+            className="h-9 bg-primary text-primary-foreground text-xs font-semibold rounded-md transition-all hover:opacity-90 flex items-center justify-center shadow-xs"
+          >
+            <span>Buy now</span>
+          </button>
+          <button
+            type="button"
+            onClick={handleAddToCart}
+            aria-label="Add to cart"
+            className={`h-9 border rounded-md text-xs font-medium transition-colors flex items-center justify-center gap-1.5 hover:bg-muted ${
+              justAdded || inCart
+                ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                : "border-border bg-card text-foreground"
+            }`}
+          >
+            {justAdded || inCart ? (
+              <>
+                <Check className="size-3.5 text-emerald-600 animate-bounce-in" />
+                <span className="text-xs">Added</span>
+              </>
+            ) : (
+              <>
+                <ShoppingBag className="size-3.5 transition-transform duration-200 group-hover:scale-110" />
+                <span className="text-xs">Add to cart</span>
               </>
             )}
           </button>
