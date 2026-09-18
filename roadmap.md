@@ -1,6 +1,13 @@
 # Resale.com Roadmap & Admin Console Architecture
 
-## Current Milestone: Admin Console Implementation (Completed)
+## Current Milestone: Customer Product Clarity
+
+- [ ] Show delivery, return, payment, and listing-specific warranty details near products.
+- [ ] Surface category, price, grade, location, and brand as quick filters above listings.
+- [ ] Explain A+–D grades before customers first encounter listing cards.
+- [ ] Verify the updated product browsing experience on desktop and mobile.
+
+## Previous Milestone: Admin Console Implementation (Completed)
 
 The Admin Console is implemented as a dedicated UI layer under `/admin/*` sharing the existing repository, server functions, custom HMAC session authentication, and Supabase database.
 

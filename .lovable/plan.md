@@ -1,61 +1,44 @@
-# Admin Console — Audit Findings and Revised Plan
+# Clearer Product Trust and Browsing Controls
 
-## Audit of the current repository
+## Goal
 
-What I verified by reading the code, not assuming:
+Make product discovery easier and purchasing terms clearer by surfacing the information customers need before opening or buying a listing.
 
-- **Authentication is custom, not Supabase Auth.** `loginFn`, `sendOtpFn`, `verifyOtpFn`, `validateSessionFn`, `signOutFn` in `src/lib/server-functions.ts` issue and validate opaque session tokens against `public.users`. Admin identity is `users.role === 'ADMIN'`, surfaced as `session.isAdmin`. There is no `user_roles` table and no Supabase Auth session.
-- **Phase 5.1 listing governance is real and server-authoritative.** `getModerationQueueFn` and `moderateListingFn` both reject non-admin sessions server-side, write to `listing_audit_history`, and fire seller notifications. `/admin/moderation` is fully wired to these.
-- **`/admin/orders` and `/admin/disputes` are client-side.** They read `order-store.ts` and `dispute-store.ts` (localStorage plus a Supabase mirror through the browser client). There is no admin-scoped server function and no server-side authorization for those two surfaces.
-- **`/admin/identity` is entirely mock.** `pendingDocs` is a hardcoded array in the route file. The schema has only `users.nid_number`; there is no NID document table, no verification-status column, no storage bucket.
-- **`/admin` dashboard numbers are hardcoded strings** (৳4.2M GMV, 24 pending, 8 NID).
-- **Service-role access already exists** — `src/lib/supabase-admin.ts` plus `SUPABASE_SERVICE_ROLE_KEY` in the environment, used by `src/lib/db-server.ts`.
-- **`roadmap.md` does not exist yet.**
+## What will change
 
-## Answering your earlier question, corrected
+### 1. Product assurance details
 
-I previously proposed a separate Lovable project. The audit changes that recommendation. All authoritative logic — session validation, admin role check, moderation state machine, audit history — lives in this repo's server functions, which are same-origin RPC endpoints. A separate project could not call them without either duplicating that logic or building a new public HTTP API surface. Both violate your constraint.
+- Add a compact assurance row to listing cards showing:
+  - delivery availability;
+  - Cash on Delivery;
+  - the existing 48-hour inspection/return window;
+  - the listing’s actual warranty duration, or “No warranty” when none exists.
+- Add a clearer purchase assurance panel beside the price and purchase actions on the individual listing page.
+- Use only existing marketplace policies and each listing’s stored warranty value; no new guarantee or delivery estimate will be invented.
 
-**Recommendation: keep the admin console in this repo as a genuinely separate UI layer.** It gets its own shell (no marketplace header/footer/cart), its own sign-in entry at `/admin/login`, and its own route subtree. It reuses the existing session and admin-role logic unchanged. This gives you a distinct admin experience and a single authoritative backend.
+### 2. Stronger filters above listings
 
-## Scope
+- Add a prominent quick-filter bar above the results for Category, Price, Grade, Location, and Brand.
+- Keep the detailed desktop sidebar and mobile filter drawer for battery, storage, RAM, and other advanced filters.
+- Connect the quick controls to the existing filter state so counts, active-filter chips, clearing, sorting, and results remain synchronized.
+- Ensure the controls wrap cleanly on narrow screens and remain keyboard accessible.
 
-### In scope
+### 3. Grade explanation at first encounter
 
-1. `roadmap.md` created at project root with the tasks below.
-2. **Admin shell**: a dedicated layout replacing `SiteHeader`/`SiteFooter` on all `/admin/*` routes, with sidebar, admin identity chip, and sign-out. `AdminSidebar` moves out of `admin.index.tsx` into `src/components/admin/admin-shell.tsx`.
-3. **Admin sign-in at `/admin/login`**: a distinct page that calls the existing `loginFn`, then rejects the session client-side if `isAdmin` is false and shows "This account is not an administrator." No new auth logic, no new tables, no new tokens.
-4. **`/admin/moderation`**: unchanged behaviour, restyled into the new shell.
-5. **`/admin/orders` and `/admin/disputes`**: move their reads behind new admin-authorized server functions that wrap the existing store conversion helpers, reusing the same `validateSession` + `isAdmin` guard already used by `getModerationQueueFn`. No new order or dispute business rules; resolution still runs through the existing `resolveDisputeByAdmin` transition logic.
-6. **`/admin` dashboard**: replace hardcoded numbers with counts derived from data that actually exists — pending-review listing count from the moderation queue, open dispute count, order count by status. Anything without a real source is removed, not faked.
+- Add a concise A+–D grade guide directly above the listing results, before customers encounter grade badges on product cards.
+- Show each grade’s short label, with a compact explanation available without leaving the page.
+- Reuse the existing authoritative grade labels and criteria so wording stays consistent across browse, product, and listing pages.
 
-### Explicitly out of scope
+## Verification
 
-- **NID / identity verification.** No document table, no storage bucket, no verification workflow exists. `/admin/identity` will be **removed** rather than left showing fabricated pending documents. It returns when the underlying schema and secure document storage land.
-- **GMV / revenue metrics.** No settled-payment or commission data exists; order amounts alone are not GMV. No revenue tile.
-- **New service-role code paths.** Admin server functions use the existing `db-server.ts` privileged helpers only where those helpers already exist; no new `getSupabaseAdmin()` call sites beyond that pattern.
-- **A `user_roles` table or Supabase Auth migration.** The existing role model stays authoritative.
-- **Any change to the listing governance state machine, order state machine, or dispute resolution rules.**
+- Check desktop and mobile layouts for overflow, wrapping, and touch target size.
+- Confirm each quick filter changes the visible results and can be cleared.
+- Confirm product cards and the listing purchase area show the correct warranty state and existing delivery, payment, and return terms.
+- Confirm the grade guide is visible before the first listing and uses the same A+–D definitions as product details.
 
-## Technical notes
+## Technical details
 
-- New admin server functions live in `src/lib/server-functions.ts` alongside the existing ones and copy the exact guard shape already in use:
-  `if (!session || (!session.isAdmin && session.role !== "ADMIN")) return { error: "Unauthorized" }`.
-- `ProtectedRoute requireAdmin` stays as the UI gate; server-side checks remain the security boundary.
-- Admin routes stay under the `/admin/*` path so existing links and the moderation workbench keep working.
-- One separate fix, unrelated to admin: the home page currently throws a hydration mismatch because `getCreators()` is read during render and returns localStorage data on the client but demo data on the server. It will be moved into a mount effect.
-
-## Phases
-
-1. Create `roadmap.md`; fix the home-page hydration mismatch.
-2. Extract the admin shell and sidebar; apply to all `/admin/*` routes.
-3. Add `/admin/login` and admin-aware sign-out.
-4. Add admin-authorized server functions for orders and disputes; rewire those two pages.
-5. Replace dashboard placeholder metrics with real counts; remove `/admin/identity` and its sidebar entry.
-6. Verify: sign in as non-admin and confirm 403, sign in as admin and confirm each page loads real data; typecheck and build.
-
-## Decisions taken
-
-- Admin console lives in this project as its own section with its own sign-in and layout — a separate project could not reach the existing accounts and moderation rules without rebuilding them.
-- `/admin/identity` is removed for now and returns when real ID-document storage exists.
-- Dashboard shows only counts derived from real data; no sales/revenue figure until settled-payment data exists.
+- Reuse `Listing`, `gradeLabel`, and `gradeCriteria` from the current catalog model.
+- Extend the existing `/products` filter UI rather than create a second filtering engine.
+- Build small shared presentation components for assurance details and the grade guide to prevent copy drift across pages.
+- No backend, checkout rules, pricing logic, or marketplace policy changes are included.
