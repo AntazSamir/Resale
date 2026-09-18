@@ -317,32 +317,41 @@ function Index() {
       </section>
 
       {/* Trust Guarantee Strip — below the hero image */}
-      <div className="border-b border-border/80 bg-card/60 px-4 sm:px-6 lg:px-8 py-5">
-        <div className="mx-auto max-w-7xl grid grid-cols-2 md:grid-cols-4 gap-4">
-          {[
-            {
-              icon: ShieldCheck,
-              title: "32-Point Diagnostics",
-              sub: "Standardized inspection on every unit",
-            },
-            {
-              icon: FileCheck2,
-              title: "Transparent A+–D Grading",
-              sub: "Clear condition standards",
-            },
-            { icon: Lock, title: "48-Hour Return Window", sub: "Inspect device on arrival" },
-            { icon: Wallet, title: "Cash on Delivery", sub: "Pay after courier verification" },
-          ].map((pillar) => (
-            <div key={pillar.title} className="flex items-start gap-3">
-              <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                <pillar.icon className="size-4.5" />
+      <div className="border-b border-border/80 bg-card/60 px-4 sm:px-6 lg:px-8 py-3.5 sm:py-5">
+        <div className="mx-auto max-w-7xl">
+          <div className="flex items-center gap-3 overflow-x-auto scrollbar-none snap-x snap-mandatory -mx-4 px-4 py-0.5 sm:mx-0 sm:px-0 md:grid md:grid-cols-4 md:gap-4 md:overflow-visible">
+            {[
+              {
+                icon: ShieldCheck,
+                title: "32-Point Diagnostics",
+                sub: "Standardized inspection on every unit",
+              },
+              {
+                icon: FileCheck2,
+                title: "Transparent A+–D Grading",
+                sub: "Clear condition standards",
+              },
+              { icon: Lock, title: "48-Hour Return Window", sub: "Inspect device on arrival" },
+              { icon: Wallet, title: "Cash on Delivery", sub: "Pay after courier verification" },
+            ].map((pillar) => (
+              <div
+                key={pillar.title}
+                className="flex shrink-0 snap-start items-center gap-3 rounded-xl border border-border/70 bg-background/80 dark:bg-card/70 px-3.5 py-2.5 shadow-2xs min-w-60 sm:min-w-64 md:min-w-0 md:border-0 md:bg-transparent md:p-0 md:rounded-none md:shadow-none md:items-start"
+              >
+                <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                  <pillar.icon className="size-4.5" />
+                </div>
+                <div className="min-w-0">
+                  <h4 className="text-xs font-bold text-foreground leading-snug whitespace-nowrap sm:whitespace-normal">
+                    {pillar.title}
+                  </h4>
+                  <p className="text-[11px] text-muted-foreground mt-0.5 leading-normal">
+                    {pillar.sub}
+                  </p>
+                </div>
               </div>
-              <div>
-                <h4 className="text-xs font-bold text-foreground leading-snug">{pillar.title}</h4>
-                <p className="text-[11px] text-muted-foreground mt-0.5">{pillar.sub}</p>
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
 
