@@ -114,6 +114,48 @@ const customerExperiences = [
   },
 ];
 
+interface TrustPillar {
+  icon: typeof ShieldCheck;
+  title: string;
+  sub: string;
+  isClone?: boolean;
+}
+
+const ALL_TRUST_PILLARS: TrustPillar[] = [
+  {
+    icon: ShieldCheck,
+    title: "32-Point Diagnostics",
+    sub: "Standardized inspection on every unit",
+  },
+  {
+    icon: FileCheck2,
+    title: "Transparent A+–D Grading",
+    sub: "Clear condition standards",
+  },
+  {
+    icon: Lock,
+    title: "48-Hour Return Window",
+    sub: "Inspect device on arrival",
+  },
+  {
+    icon: Wallet,
+    title: "Cash on Delivery",
+    sub: "Pay after courier verification",
+  },
+  {
+    icon: ShieldCheck,
+    title: "32-Point Diagnostics",
+    sub: "Standardized inspection on every unit",
+    isClone: true,
+  },
+  {
+    icon: FileCheck2,
+    title: "Transparent A+–D Grading",
+    sub: "Clear condition standards",
+    isClone: true,
+  },
+];
+
 function Index() {
   const navigate = useNavigate();
   const { addToCart, isInCart } = useCart();
@@ -139,35 +181,52 @@ function Index() {
     return () => clearInterval(timer);
   }, [isBannerPaused]);
 
-  // Auto-loop trust guarantee cards on mobile (2 cards at a time) every 3.5 seconds
+  // Infinite forward-looping trust guarantee cards on mobile (never rewinds backwards)
   useEffect(() => {
     const el = trustStripRef.current;
     if (!el) return;
 
+    let resetTimer: NodeJS.Timeout | null = null;
+
     const timer = setInterval(() => {
       if (isTrustStripInteracting.current || !trustStripRef.current) return;
       const { scrollLeft, scrollWidth, clientWidth } = trustStripRef.current;
-      // If container is not horizontally scrollable (e.g., desktop 4-column grid), skip
-      if (scrollWidth <= clientWidth + 5) return;
+      if (scrollWidth <= clientWidth + 10) return;
 
-      const maxScroll = scrollWidth - clientWidth;
-      if (scrollLeft >= maxScroll - 15) {
-        trustStripRef.current.scrollTo({ left: 0, behavior: "smooth" });
-        setTrustStripIndex(0);
-      } else {
-        trustStripRef.current.scrollTo({ left: maxScroll, behavior: "smooth" });
+      const singlePageWidth = (scrollWidth - clientWidth) / 2;
+
+      if (scrollLeft < singlePageWidth * 0.5) {
+        // Smoothly advance from Page 0 to Page 1
+        trustStripRef.current.scrollTo({ left: singlePageWidth, behavior: "smooth" });
         setTrustStripIndex(1);
+      } else {
+        // Smoothly advance forward into Clone Page 2 (always moves in forward direction)
+        trustStripRef.current.scrollTo({ left: singlePageWidth * 2, behavior: "smooth" });
+        setTrustStripIndex(0);
+
+        // Once the forward slide completes, seamlessly reset scroll position back to Page 0
+        if (resetTimer) clearTimeout(resetTimer);
+        resetTimer = setTimeout(() => {
+          if (trustStripRef.current && !isTrustStripInteracting.current) {
+            trustStripRef.current.scrollTo({ left: 0, behavior: "instant" });
+          }
+        }, 550);
       }
     }, 3500);
 
-    return () => clearInterval(timer);
+    return () => {
+      clearInterval(timer);
+      if (resetTimer) clearTimeout(resetTimer);
+    };
   }, []);
 
   const handleTrustStripScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const { scrollLeft, scrollWidth, clientWidth } = e.currentTarget;
     const maxScroll = scrollWidth - clientWidth;
     if (maxScroll > 15) {
-      setTrustStripIndex(scrollLeft > maxScroll / 2 ? 1 : 0);
+      const singlePageWidth = maxScroll / 2;
+      const page = Math.round(scrollLeft / singlePageWidth);
+      setTrustStripIndex(page % 2);
     }
   };
 
@@ -373,37 +432,29 @@ function Index() {
             }}
             className="flex items-center gap-2.5 overflow-x-auto scrollbar-none snap-x snap-mandatory -mx-4 px-4 py-0.5 sm:mx-0 sm:px-0 md:grid md:grid-cols-4 md:gap-4 md:overflow-visible"
           >
-            {[
-              {
-                icon: ShieldCheck,
-                title: "32-Point Diagnostics",
-                sub: "Standardized inspection on every unit",
-              },
-              {
-                icon: FileCheck2,
-                title: "Transparent A+–D Grading",
-                sub: "Clear condition standards",
-              },
-              { icon: Lock, title: "48-Hour Return Window", sub: "Inspect device on arrival" },
-              { icon: Wallet, title: "Cash on Delivery", sub: "Pay after courier verification" },
-            ].map((pillar) => (
-              <div
-                key={pillar.title}
-                className="flex shrink-0 snap-start items-center gap-2 rounded-xl border border-border/70 bg-background/80 dark:bg-card/70 p-2.5 shadow-2xs w-[calc(50%-5px)] min-w-[calc(50%-5px)] sm:w-auto sm:min-w-0 sm:p-3 sm:gap-3 md:border-0 md:bg-transparent md:p-0 md:rounded-none md:shadow-none md:items-start"
-              >
-                <div className="flex size-8 sm:size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                  <pillar.icon className="size-4 sm:size-4.5" />
+            {ALL_TRUST_PILLARS.map((pillar, idx) => {
+              const Icon = pillar.icon;
+              return (
+                <div
+                  key={pillar.isClone ? `${pillar.title}-clone-${idx}` : pillar.title}
+                  className={`flex shrink-0 snap-start items-center gap-2 rounded-xl border border-border/70 bg-background/80 dark:bg-card/70 p-2.5 shadow-2xs w-[calc(50%-5px)] min-w-[calc(50%-5px)] sm:w-auto sm:min-w-0 sm:p-3 sm:gap-3 md:border-0 md:bg-transparent md:p-0 md:rounded-none md:shadow-none md:items-start ${
+                    pillar.isClone ? "md:hidden" : ""
+                  }`}
+                >
+                  <div className="flex size-8 sm:size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                    <Icon className="size-4 sm:size-4.5" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <h4 className="text-[11px] sm:text-xs font-bold text-foreground leading-snug truncate sm:whitespace-normal">
+                      {pillar.title}
+                    </h4>
+                    <p className="text-[10px] sm:text-[11px] text-muted-foreground mt-0.5 leading-tight truncate sm:whitespace-normal">
+                      {pillar.sub}
+                    </p>
+                  </div>
                 </div>
-                <div className="min-w-0 flex-1">
-                  <h4 className="text-[11px] sm:text-xs font-bold text-foreground leading-snug truncate sm:whitespace-normal">
-                    {pillar.title}
-                  </h4>
-                  <p className="text-[10px] sm:text-[11px] text-muted-foreground mt-0.5 leading-tight truncate sm:whitespace-normal">
-                    {pillar.sub}
-                  </p>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           {/* Mobile page indicator dots (2 cards per page) */}
@@ -426,9 +477,9 @@ function Index() {
               onClick={() => {
                 setTrustStripIndex(1);
                 if (trustStripRef.current) {
-                  const maxScroll =
-                    trustStripRef.current.scrollWidth - trustStripRef.current.clientWidth;
-                  trustStripRef.current.scrollTo({ left: maxScroll, behavior: "smooth" });
+                  const singlePageWidth =
+                    (trustStripRef.current.scrollWidth - trustStripRef.current.clientWidth) / 2;
+                  trustStripRef.current.scrollTo({ left: singlePageWidth, behavior: "smooth" });
                 }
               }}
               aria-label="Show next 2 guarantees"
