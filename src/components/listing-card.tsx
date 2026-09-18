@@ -1,6 +1,7 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useState, useCallback, memo } from "react";
 import { GradeBadge } from "./grade-badge";
+import { AssuranceDetails } from "./assurance-details";
 import { type Listing, type Product } from "@/data/types";
 import { taka } from "@/lib/utils";
 import { useCart } from "@/lib/cart-store";
@@ -107,8 +108,9 @@ export const ListingCard = memo(function ListingCard({
               </span>
             )}
           </div>
+          <AssuranceDetails listing={listing} variant="compact" />
 
-          <div className="flex flex-col gap-1">
+          <div className="flex flex-col gap-1 mt-2">
             <Button
               type="button"
               size="sm"
@@ -195,6 +197,9 @@ export const ListingCard = memo(function ListingCard({
             ) : (
               <span className="text-muted-foreground text-[11px]">{listing.seller.district}</span>
             )}
+          </div>
+          <div className="mt-1">
+            <AssuranceDetails listing={listing} variant="compact" />
           </div>
         </div>
 
@@ -306,6 +311,8 @@ export const ListingCard = memo(function ListingCard({
             </span>
           )}
         </div>
+
+        <AssuranceDetails listing={listing} variant="compact" />
 
         {/* Mobile action buttons (always visible on touch screens) */}
         <div className="grid grid-cols-2 gap-1.5 sm:hidden">

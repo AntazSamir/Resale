@@ -18,6 +18,7 @@ import { useCart } from "@/lib/cart-store";
 import { trackActiveEvent } from "@/lib/event-tracker";
 import { GradeBadge } from "@/components/grade-badge";
 import { ProductCard } from "@/components/product-card";
+import { AssuranceDetails } from "@/components/assurance-details";
 import { ConditionScore } from "@/components/condition-score";
 import { InspectionReport } from "@/components/inspection-report";
 import { RepairHistoryCard } from "@/components/repair-history";
@@ -410,10 +411,9 @@ function ListingPage() {
                 <p className="font-display text-2xl sm:text-3xl md:text-4xl font-bold text-primary">
                   {taka(listing.price)}
                 </p>
-                <p className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
-                  <Truck className="size-3.5 text-muted-foreground shrink-0" />
-                  <span>Cash on delivery available · ships from {listing.seller.district}</span>
-                </p>
+                <div className="mt-4">
+                  <AssuranceDetails listing={listing} variant="full" />
+                </div>
               </div>
 
               {/* Purchase Buttons */}

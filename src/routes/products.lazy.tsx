@@ -3,6 +3,7 @@ import { useState, useMemo, useEffect } from "react";
 import { SiteHeader, SiteFooter } from "@/components/site-header";
 import { ListingCard } from "@/components/listing-card";
 import { ListingCardSkeleton } from "@/components/listing-card-skeleton";
+import { GradeGuide } from "@/components/grade-guide";
 import { products, listings, productFor } from "@/data/catalog";
 import { type Grade } from "@/data/types";
 import { taka } from "@/lib/utils";
@@ -598,6 +599,57 @@ function ProductsPage() {
             )}
           </div>
 
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0 scrollbar-hide shrink-0 min-w-full lg:min-w-0 order-3 lg:order-0 mt-2 lg:mt-0">
+            {/* Quick Filters */}
+            <Select value={selectedCategories[0] || ""} onValueChange={(v) => toggleCategory(v)}>
+              <SelectTrigger className="w-27.5 h-9 text-xs rounded-none border-border bg-background shrink-0">
+                <SelectValue placeholder="Category" />
+              </SelectTrigger>
+              <SelectContent className="rounded-none border-border bg-card">
+                <SelectItem value="smartphone">Smartphone</SelectItem>
+                <SelectItem value="laptop">Laptop</SelectItem>
+                <SelectItem value="smartwatch">Smartwatch</SelectItem>
+                <SelectItem value="tablet">Tablet</SelectItem>
+                <SelectItem value="accessory">Accessory</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select
+              value={priceMax === MAX_CATALOG_PRICE ? "" : priceMax.toString()}
+              onValueChange={(v) => setPriceMax(Number(v))}
+            >
+              <SelectTrigger className="w-25 h-9 text-xs rounded-none border-border bg-background shrink-0">
+                <SelectValue placeholder="Price" />
+              </SelectTrigger>
+              <SelectContent className="rounded-none border-border bg-card">
+                <SelectItem value="25000">Under 25,000</SelectItem>
+                <SelectItem value="50000">Under 50,000</SelectItem>
+                <SelectItem value="100000">Under 100,000</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={selectedGrades[0] || ""} onValueChange={(v) => toggleGrade(v as Grade)}>
+              <SelectTrigger className="w-25 h-9 text-xs rounded-none border-border bg-background shrink-0">
+                <SelectValue placeholder="Grade" />
+              </SelectTrigger>
+              <SelectContent className="rounded-none border-border bg-card">
+                <SelectItem value="A+">Grade A+</SelectItem>
+                <SelectItem value="A">Grade A</SelectItem>
+                <SelectItem value="B">Grade B</SelectItem>
+                <SelectItem value="C">Grade C</SelectItem>
+                <SelectItem value="D">Grade D</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={selectedDistricts[0] || ""} onValueChange={(v) => toggleDistrict(v)}>
+              <SelectTrigger className="w-27.5 h-9 text-xs rounded-none border-border bg-background shrink-0">
+                <SelectValue placeholder="Location" />
+              </SelectTrigger>
+              <SelectContent className="rounded-none border-border bg-card">
+                <SelectItem value="Dhaka">Dhaka</SelectItem>
+                <SelectItem value="Chittagong">Chittagong</SelectItem>
+                <SelectItem value="Sylhet">Sylhet</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
           <div className="flex items-center gap-2">
             {/* Mobile Filters Sheet */}
             <Sheet open={mobileDrawerOpen} onOpenChange={setMobileDrawerOpen}>
@@ -853,6 +905,8 @@ function ProductsPage() {
 
           {/* Listings Container */}
           <div className="space-y-6 overflow-hidden">
+            <GradeGuide />
+
             {isSearching ? (
               viewLayout === "grid" ? (
                 /* Grid skeleton */

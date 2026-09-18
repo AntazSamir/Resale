@@ -7,7 +7,7 @@
 [![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3ECF8E?logo=supabase&logoColor=white)](https://supabase.com/)
 [![Cloudflare](https://img.shields.io/badge/Deploy-Cloudflare-F38020?logo=cloudflare&logoColor=white)](https://workers.cloudflare.com/)
 
-**Resale.com** is Bangladesh's premier C2C and B2B marketplace for quality-checked pre-owned, open-box, and refurbished electronics. Engineered with objective component-level condition grading (A+ to D), 32-point hardware inspection, NID-verified sellers, nationwide Cash on Delivery (COD), decoupled order lifecycle state machines, Pro Merchant storefronts, Verified Creator video reviews, server-authoritative authentication, a comprehensive 48-hour dispute mediation hub, a full marketplace listing governance system with admin moderation and immutable audit history, a deterministic 0–100 seller reputation scoring engine with transparent calculation breakdown, a post-delivery buyer grading evaluation flow, a polished Admin Console with Bangladesh geographic analytics, a complete cart overhaul with multi-step checkout stepper and Care+ protection, GPU-accelerated shimmer skeleton loaders, smooth route navigation transitions, an interactive brand carousel, a verified sellers directory, and WCAG-compliant mobile touch responsiveness.
+**Resale.com** is Bangladesh's premier C2C and B2B marketplace for quality-checked pre-owned, open-box, and refurbished electronics. Engineered with objective component-level condition grading (A+ to D), 32-point hardware inspection, NID-verified sellers, nationwide Cash on Delivery (COD), decoupled order lifecycle state machines, Pro Merchant storefronts, Verified Creator video reviews, server-authoritative authentication, a comprehensive 48-hour dispute mediation hub, a full marketplace listing governance system with admin moderation and immutable audit history, a deterministic 0–100 seller reputation scoring engine with transparent calculation breakdown, a post-delivery buyer grading evaluation flow, a polished Admin Console with Bangladesh geographic analytics, a complete cart overhaul with multi-step checkout stepper and Care+ protection, GPU-accelerated shimmer skeleton loaders, smooth route navigation transitions, an interactive brand carousel, a verified sellers directory, WCAG-compliant mobile touch responsiveness, full 56-route lazy loading code splitting for high performance, and clearer product trust controls.
 
 ---
 
@@ -323,6 +323,23 @@ A complete overhaul of `/cart` focusing on frictionless checkout progression, tr
 - **2-Column Mobile Grid Optimization**: Tightened gaps (`gap-2 sm:gap-3 md:gap-4 xl:gap-4.5`) and refined listing card padding (`p-3 sm:p-4`) on `/products` to maximize screen utilization.
 - **Listing Detail Typography Hierarchy**: Responsive title scale (`text-xl sm:text-2xl lg:text-3xl`), price scale, truncated breadcrumb IDs (`max-w-20 sm:max-w-none`), and safe word-wrapping (`wrap-break-word`).
 - **Cart Mobile Optimization**: Responsive promo button padding (`px-3 sm:px-5`) and title truncation on the undo toast.
+
+---
+
+### 🚀 24. Route Code Splitting & Performance (Phase 5.3D)
+
+- **56-Route Lazy Splitting**: All 56 routes migrated from eagerly-loaded to lazy `.lazy.tsx` chunks using TanStack Router's `createLazyFileRoute` pattern, significantly reducing initial JavaScript payload.
+- **Shared Type Extraction**: Extracted all TypeScript types into `src/data/types.ts` to prevent components from pulling in the full catalog blob when only types are needed.
+- **Lazy Catalog Loading**: Implemented a `useState`/`useCallback` lazy import pattern in the site header, fetching the catalog only when the search input is focused (reducing initial client chunk by 27%).
+- **Component Memoization**: Applied `useMemo` and `React.memo` across key components (`ProductCard`, `ListingCard`) to prevent unnecessary re-renders during filter and sort operations.
+
+---
+
+### 🛡️ 25. Clearer Product Trust & Browsing Controls (Phase 5.4)
+
+- **Assurance Details Component**: New dual-mode component (`AssuranceDetails`) highlighting Delivery/COD availability, 48-hour return window, and warranty status inline on listing cards and detailed on listing pages.
+- **Grade Guide Component**: Added a visual grade guide (`GradeGuide`) above listing results on the Browse Listings page to explain the A+–D grading scale clearly to buyers.
+- **Quick-Filter Bar**: Introduced a prominent quick-filter bar below the search input for immediate access to Category, Price, Grade, and Location filters.
 
 ---
 

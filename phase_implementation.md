@@ -2,7 +2,7 @@
 
 > **Bangladesh's Trusted C2C & B2B Marketplace for Quality-Checked Pre-Owned, Open-Box & Like-New Electronics**
 
-This document tracks the completed engineering milestones across **Phase 1**, **Phase 2**, **Phase 3.1**, **Phase 3.4**, **Phase 3.6**, **Phase 4 (4.1A–E, 4.2, 4.4, 4.5, 4.6)**, **Phase 5.1 (Marketplace Trust & Listing Governance)**, **Phase 5.2 (Seller Reputation)**, **Phase 5.3A (Admin Console & Grading Evaluation)**, **Phase 5.3B (Cart Overhaul, Dynamic Page Transitions, Skeleton Loading Suite & Mobile UX Polish)**, and **Phase 5.3C (Hero Banner Auto-Carousel, Full Side-Width Mobile Deals & Card Ergonomics)**, and outlines the strategic and technical roadmap for remaining milestones.
+This document tracks the completed engineering milestones across **Phase 1**, **Phase 2**, **Phase 3.1**, **Phase 3.4**, **Phase 3.6**, **Phase 4 (4.1A–E, 4.2, 4.4, 4.5, 4.6)**, **Phase 5.1 (Marketplace Trust & Listing Governance)**, **Phase 5.2 (Seller Reputation)**, **Phase 5.3A (Admin Console & Grading Evaluation)**, **Phase 5.3B (Cart Overhaul, Dynamic Page Transitions, Skeleton Loading Suite & Mobile UX Polish)**, **Phase 5.3C (Hero Banner Auto-Carousel, Full Side-Width Mobile Deals & Card Ergonomics)**, **Phase 5.3D (Route Code Splitting & Performance Optimization)**, and **Phase 5.4 (Clearer Product Trust & Browsing Controls)**, and outlines the strategic and technical roadmap for remaining milestones.
 
 ---
 
@@ -752,6 +752,8 @@ Phase 5.3B delivered an end-to-end commerce experience upgrade focusing on conve
 | **Phase 5.3A** | Admin Console, Grading Flow & UI Polish | Admin Shell, Bangladesh Heatmap, 15+ Admin Routes, Buyer Grading Card, Grading DB, Login/Register Consolidated Input, 4-col Products Grid | ✅ Completed |
 | **Phase 5.3B** | Cart, Transitions, Skeletons & Mobile   | Cart Stepper & Care+, NavigationProgressBar, Shimmer Skeletons, Brand Carousel, Sellers Directory, WCAG Touch Targets, Mobile Polish      | ✅ Completed |
 | **Phase 5.3C** | Hero Carousel, Full-Width Deals & Mobile UX | Auto-Advancing Hero Carousel, Touch Swipe Gestures, Full Side-Width Cart Deals, Compact Mobile Action Buttons, Banner Asset Cleanup   | ✅ Completed |
+| **Phase 5.3D** | Route Code Splitting & Performance      | 56-route lazy splitting, shared types/utils extraction, lazy catalog in site-header, component memoization                                | ✅ Completed |
+| **Phase 5.4**  | Product Trust & Browsing Controls       | Assurance Details on listing cards & detail page, Grade Guide on products page, Quick-Filter bar (Category, Price, Grade, Location)       | ✅ Completed |
 
 ---
 
@@ -805,4 +807,76 @@ Phase 5.3C delivered high-impact homepage visual presentation upgrades, advanced
 
 ---
 
-_Last Updated: September 2026 (Phase 5.3C Complete) · Resale.com Engineering Team_
+## ✅ Phase 5.3D: Route Code Splitting & Performance Optimization
+
+**Status:** `COMPLETED` · **Commit Milestones:** `2cac056` · **Build Verified:** September 2026
+
+Phase 5.3D systematically reduced the initial JavaScript payload and improved perceived performance across all routes through code splitting, catalog lazy-loading, and component memoization.
+
+### 1. Full Route Lazy-Splitting (56 Routes)
+
+- **All 56 routes** migrated from eagerly-loaded `.tsx` files to lazy `.lazy.tsx` chunks using TanStack Router's `createLazyFileRoute` pattern.
+- Each route is now its own independently loaded async chunk — only downloaded when the user first navigates to it.
+- The `routeTree.gen.ts` file is auto-generated and must never be manually edited.
+
+### 2. Shared Type & Utility Extraction
+
+- **`src/data/types.ts`** (new): Extracted all TypeScript types (`Grade`, `Product`, `Listing`, `InspectionItem`, etc.) from the 320 KB `catalog.ts` blob. Components importing only types no longer pull in the full catalog.
+- **`src/lib/utils.ts`** extended: Currency formatter `taka()` moved here so non-catalog routes don't drag in catalog data.
+- **~80 import sites** updated via automated rewriting scripts.
+
+### 3. Lazy Catalog Loading in Site Header
+
+- **Problem**: `site-header.tsx` had a top-level `import { products, cheapest }` forcing the entire 320 KB catalog into every page's initial load.
+- **Fix**: Replaced with a `useState`/`useCallback` lazy import pattern — catalog is fetched only when the user focuses the search input.
+- **Result**: Initial client `db.js` chunk reduced from **320 KB → 235 KB** (−85 KB, −27%).
+
+### 4. Component Memoization
+
+- `ProductCard`: Added `useMemo` for `cheapest` / `listingsFor` lookups; fixed hook order violation.
+- `ListingCard`: Wrapped with `React.memo` to prevent unnecessary re-renders during filter/sort operations.
+
+| Feature                         | Files Touched                                                  | Status |
+| ------------------------------- | -------------------------------------------------------------- | :----: |
+| 56-Route Lazy Splitting         | All `src/routes/*.tsx` → `*.lazy.tsx`                         |   ✅   |
+| Shared Type Extraction          | `src/data/types.ts` (new), ~80 import sites updated           |   ✅   |
+| Lazy Catalog in Site Header     | `src/components/site-header.tsx`                              |   ✅   |
+| Component Memoization           | `src/components/product-card.tsx`, `listing-card.tsx`         |   ✅   |
+
+---
+
+## ✅ Phase 5.4: Clearer Product Trust & Browsing Controls
+
+**Status:** `COMPLETED` · **Build Verified:** September 2026 (`tsc --noEmit` exit 0)
+
+Phase 5.4 surfaced key purchasing trust signals earlier in the buyer journey and made product discovery faster with inline filter controls.
+
+### 1. Product Assurance Details
+
+- **`AssuranceDetails` Component (`src/components/assurance-details.tsx`)**: Shared reusable component with two render modes:
+  - **Compact variant**: Rendered inside every `ListingCard` (grid, list, and compact layouts). Shows Delivery/COD, 48h Return, and Warranty status inline on the card.
+  - **Full variant**: Rendered in the purchase area of individual listing pages (`listing.$listingId.lazy.tsx`). Expands to a detailed panel with icons, explanations, and seller-specific warranty info.
+- Uses only each listing's stored `warrantyMonths` value — no invented guarantees.
+
+### 2. Grade Guide at First Encounter
+
+- **`GradeGuide` Component (`src/components/grade-guide.tsx`)**: Explains the A+–D grading scale with color-coded badges and plain-language descriptions.
+- Inserted directly above the listing results on the Browse Listings page (`products.lazy.tsx`) so buyers understand grade badges before they see them on cards.
+
+### 3. Quick-Filter Bar Above Listings
+
+- A compact **quick-filter bar** added below the search input on `/products` with dropdowns for **Category**, **Price**, **Grade**, and **Location**.
+- Fully connected to existing filter state (`toggleCategory`, `toggleGrade`, `toggleDistrict`, `setPriceMax`) — selections appear as active filter chips and are clearable like any other filter.
+- Horizontally scrollable on narrow screens; does not replace the detailed sidebar/mobile drawer (which retains Battery, Storage, RAM, and advanced options).
+
+| Feature                         | Files Touched                                                       | Status |
+| ------------------------------- | ------------------------------------------------------------------- | :----: |
+| AssuranceDetails Component      | `src/components/assurance-details.tsx` (new)                        |   ✅   |
+| Listing Card Assurance Row      | `src/components/listing-card.tsx`                                   |   ✅   |
+| Listing Page Assurance Panel    | `src/routes/listing.$listingId.lazy.tsx`                            |   ✅   |
+| GradeGuide Component            | `src/components/grade-guide.tsx` (new)                              |   ✅   |
+| Quick-Filter Bar                | `src/routes/products.lazy.tsx`                                      |   ✅   |
+
+---
+
+_Last Updated: September 2026 (Phase 5.4 Complete) · Resale.com Engineering Team_
