@@ -126,8 +126,11 @@ function Index() {
   const [isBannerPaused, setIsBannerPaused] = useState<boolean>(false);
   const bannerTouchStartX = useRef<number | null>(null);
   const bannerTouchEndX = useRef<number | null>(null);
+  const trustStripRef = useRef<HTMLDivElement>(null);
+  const isTrustStripInteracting = useRef<boolean>(false);
+  const [trustStripIndex, setTrustStripIndex] = useState<number>(0);
 
-  // Auto-advance banner carousel every 4.5 seconds
+  // Auto-advance hero banner carousel every 4.5 seconds
   useEffect(() => {
     if (isBannerPaused) return;
     const timer = setInterval(() => {
@@ -135,6 +138,38 @@ function Index() {
     }, 4500);
     return () => clearInterval(timer);
   }, [isBannerPaused]);
+
+  // Auto-loop trust guarantee cards on mobile (2 cards at a time) every 3.5 seconds
+  useEffect(() => {
+    const el = trustStripRef.current;
+    if (!el) return;
+
+    const timer = setInterval(() => {
+      if (isTrustStripInteracting.current || !trustStripRef.current) return;
+      const { scrollLeft, scrollWidth, clientWidth } = trustStripRef.current;
+      // If container is not horizontally scrollable (e.g., desktop 4-column grid), skip
+      if (scrollWidth <= clientWidth + 5) return;
+
+      const maxScroll = scrollWidth - clientWidth;
+      if (scrollLeft >= maxScroll - 15) {
+        trustStripRef.current.scrollTo({ left: 0, behavior: "smooth" });
+        setTrustStripIndex(0);
+      } else {
+        trustStripRef.current.scrollTo({ left: maxScroll, behavior: "smooth" });
+        setTrustStripIndex(1);
+      }
+    }, 3500);
+
+    return () => clearInterval(timer);
+  }, []);
+
+  const handleTrustStripScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const { scrollLeft, scrollWidth, clientWidth } = e.currentTarget;
+    const maxScroll = scrollWidth - clientWidth;
+    if (maxScroll > 15) {
+      setTrustStripIndex(scrollLeft > maxScroll / 2 ? 1 : 0);
+    }
+  };
 
   const handleNextBanner = () => {
     setCurrentBannerIndex((prev) => (prev + 1) % HERO_BANNERS.length);
@@ -319,7 +354,25 @@ function Index() {
       {/* Trust Guarantee Strip — below the hero image */}
       <div className="border-b border-border/80 bg-card/60 px-4 sm:px-6 lg:px-8 py-3.5 sm:py-5">
         <div className="mx-auto max-w-7xl">
-          <div className="flex items-center gap-3 overflow-x-auto scrollbar-none snap-x snap-mandatory -mx-4 px-4 py-0.5 sm:mx-0 sm:px-0 md:grid md:grid-cols-4 md:gap-4 md:overflow-visible">
+          <div
+            ref={trustStripRef}
+            onScroll={handleTrustStripScroll}
+            onTouchStart={() => {
+              isTrustStripInteracting.current = true;
+            }}
+            onTouchEnd={() => {
+              setTimeout(() => {
+                isTrustStripInteracting.current = false;
+              }, 2500);
+            }}
+            onMouseEnter={() => {
+              isTrustStripInteracting.current = true;
+            }}
+            onMouseLeave={() => {
+              isTrustStripInteracting.current = false;
+            }}
+            className="flex items-center gap-2.5 overflow-x-auto scrollbar-none snap-x snap-mandatory -mx-4 px-4 py-0.5 sm:mx-0 sm:px-0 md:grid md:grid-cols-4 md:gap-4 md:overflow-visible"
+          >
             {[
               {
                 icon: ShieldCheck,
@@ -336,21 +389,55 @@ function Index() {
             ].map((pillar) => (
               <div
                 key={pillar.title}
-                className="flex shrink-0 snap-start items-center gap-3 rounded-xl border border-border/70 bg-background/80 dark:bg-card/70 px-3.5 py-2.5 shadow-2xs min-w-60 sm:min-w-64 md:min-w-0 md:border-0 md:bg-transparent md:p-0 md:rounded-none md:shadow-none md:items-start"
+                className="flex shrink-0 snap-start items-center gap-2 rounded-xl border border-border/70 bg-background/80 dark:bg-card/70 p-2.5 shadow-2xs w-[calc(50%-5px)] min-w-[calc(50%-5px)] sm:w-auto sm:min-w-0 sm:p-3 sm:gap-3 md:border-0 md:bg-transparent md:p-0 md:rounded-none md:shadow-none md:items-start"
               >
-                <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                  <pillar.icon className="size-4.5" />
+                <div className="flex size-8 sm:size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                  <pillar.icon className="size-4 sm:size-4.5" />
                 </div>
-                <div className="min-w-0">
-                  <h4 className="text-xs font-bold text-foreground leading-snug whitespace-nowrap sm:whitespace-normal">
+                <div className="min-w-0 flex-1">
+                  <h4 className="text-[11px] sm:text-xs font-bold text-foreground leading-snug truncate sm:whitespace-normal">
                     {pillar.title}
                   </h4>
-                  <p className="text-[11px] text-muted-foreground mt-0.5 leading-normal">
+                  <p className="text-[10px] sm:text-[11px] text-muted-foreground mt-0.5 leading-tight truncate sm:whitespace-normal">
                     {pillar.sub}
                   </p>
                 </div>
               </div>
             ))}
+          </div>
+
+          {/* Mobile page indicator dots (2 cards per page) */}
+          <div className="flex justify-center items-center gap-1.5 mt-2.5 md:hidden">
+            <button
+              type="button"
+              onClick={() => {
+                setTrustStripIndex(0);
+                trustStripRef.current?.scrollTo({ left: 0, behavior: "smooth" });
+              }}
+              aria-label="Show first 2 guarantees"
+              className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer ${
+                trustStripIndex === 0
+                  ? "w-4 bg-primary"
+                  : "w-1.5 bg-muted-foreground/30 hover:bg-muted-foreground/60"
+              }`}
+            />
+            <button
+              type="button"
+              onClick={() => {
+                setTrustStripIndex(1);
+                if (trustStripRef.current) {
+                  const maxScroll =
+                    trustStripRef.current.scrollWidth - trustStripRef.current.clientWidth;
+                  trustStripRef.current.scrollTo({ left: maxScroll, behavior: "smooth" });
+                }
+              }}
+              aria-label="Show next 2 guarantees"
+              className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer ${
+                trustStripIndex === 1
+                  ? "w-4 bg-primary"
+                  : "w-1.5 bg-muted-foreground/30 hover:bg-muted-foreground/60"
+              }`}
+            />
           </div>
         </div>
       </div>
