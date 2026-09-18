@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
-import { inspectionFramework, TOTAL_INSPECTION_CHECKS, type InspectionItem } from "@/data/catalog";
+import { type InspectionItem } from "@/data/types";
+import { inspectionFramework, TOTAL_INSPECTION_CHECKS } from "@/data/types";
 import { Check, ChevronDown, ShieldCheck, Info } from "lucide-react";
 
 interface InspectionReportProps {

@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
-import { Listing, productFor } from "@/data/catalog";
+import { productFor } from "@/data/catalog";
+import { type Listing } from "@/data/types";
 import { ListingCard } from "@/components/listing-card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";

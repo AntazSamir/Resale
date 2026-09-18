@@ -1,5 +1,5 @@
 import { Wrench, CheckCircle2, AlertTriangle, FileText } from "lucide-react";
-import { type RepairHistory } from "@/data/catalog";
+import { type RepairHistory } from "@/data/types";
 
 interface RepairHistoryProps {
   repairs: string;

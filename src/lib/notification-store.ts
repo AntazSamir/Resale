@@ -1,5 +1,11 @@
 import { create } from "zustand";
 import type { Notification } from "./types";
+import {
+  fetchNotificationsFn,
+  fetchUnreadCountFn,
+  markNotificationReadFn,
+  markAllNotificationsReadFn,
+} from "./notification-service";
 
 interface NotificationStore {
   notifications: Notification[];
@@ -23,7 +29,6 @@ export const useNotificationStore = create<NotificationStore>((set, get) => ({
   fetchNotifications: async (token, limit = 20, offset = 0) => {
     set({ loading: true, error: null });
     try {
-      const { fetchNotificationsFn } = await import("./notification-service");
       const result = await fetchNotificationsFn({ data: { token, limit, offset } });
       if (result.success && result.data) {
         set({ notifications: result.data as Notification[], loading: false });
@@ -37,7 +42,6 @@ export const useNotificationStore = create<NotificationStore>((set, get) => ({
 
   fetchUnreadCount: async (token) => {
     try {
-      const { fetchUnreadCountFn } = await import("./notification-service");
       const result = await fetchUnreadCountFn({ data: { token } });
       if (result.success && result.data !== null) {
         set({ unreadCount: result.data as number });
@@ -49,7 +53,6 @@ export const useNotificationStore = create<NotificationStore>((set, get) => ({
 
   markRead: async (token, notificationId) => {
     try {
-      const { markNotificationReadFn } = await import("./notification-service");
       await markNotificationReadFn({ data: { token, notificationId } });
       set((state) => ({
         notifications: state.notifications.map((n) =>
@@ -64,7 +67,6 @@ export const useNotificationStore = create<NotificationStore>((set, get) => ({
 
   markAllRead: async (token) => {
     try {
-      const { markAllNotificationsReadFn } = await import("./notification-service");
       await markAllNotificationsReadFn({ data: { token } });
       set((state) => ({
         notifications: state.notifications.map((n) => ({ ...n, is_read: true })),

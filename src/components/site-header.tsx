@@ -49,7 +49,8 @@ import {
 } from "lucide-react";
 import { BangladeshMapSVG } from "./bangladesh-map";
 import resaleLogo from "@/assets/resale-logo.svg";
-import { products, taka, cheapest } from "@/data/catalog";
+import type { Product } from "@/data/types";
+import { taka } from "@/lib/utils";
 
 type NavItem = {
   label: string;
@@ -200,6 +201,16 @@ export function SiteHeader() {
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [mobileExpandedCategory, setMobileExpandedCategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  // Lazy-loaded catalog data — only fetched when user interacts with search
+  const [catalogData, setCatalogData] = useState<{
+    products: Product[];
+    cheapest: (id: string) => import("@/data/types").Listing | undefined;
+  } | null>(null);
+  const loadCatalog = useCallback(async () => {
+    if (catalogData) return;
+    const mod = await import("@/data/catalog");
+    setCatalogData({ products: mod.products, cheapest: mod.cheapest });
+  }, [catalogData]);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const closeDropdownTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const dropdownRefs = useRef<Record<string, HTMLButtonElement | null>>({});
@@ -334,7 +345,7 @@ export function SiteHeader() {
   ];
 
   const matchingProducts = searchQuery.trim()
-    ? products
+    ? (catalogData?.products ?? [])
         .filter(
           (p) =>
             p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -430,10 +441,14 @@ export function SiteHeader() {
               <Search className="size-4 text-muted-foreground shrink-0" />
               <input
                 value={searchQuery}
-                onFocus={() => setSearchFocused(true)}
+                onFocus={() => {
+                  setSearchFocused(true);
+                  void loadCatalog();
+                }}
                 onChange={(e) => {
                   setSearchQuery(e.target.value);
                   setSearchFocused(true);
+                  void loadCatalog();
                 }}
                 onKeyDown={(e) => {
                   if (e.key === "Escape") setSearchFocused(false);
@@ -467,7 +482,7 @@ export function SiteHeader() {
                     {matchingProducts.length > 0 ? (
                       <div className="space-y-1.5">
                         {matchingProducts.map((p) => {
-                          const deal = cheapest(p.id);
+                          const deal = catalogData?.cheapest(p.id);
                           return deal ? (
                             <Link
                               key={p.id}
@@ -688,7 +703,11 @@ export function SiteHeader() {
               <input
                 autoFocus
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onFocus={() => void loadCatalog()}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  void loadCatalog();
+                }}
                 placeholder="Search iPhone, MacBook, Sony..."
                 className="w-full bg-transparent outline-none text-xs text-foreground"
               />
@@ -707,7 +726,7 @@ export function SiteHeader() {
             {searchQuery.trim() ? (
               <div className="space-y-1 pt-1">
                 {matchingProducts.map((p) => {
-                  const deal = cheapest(p.id);
+                  const deal = catalogData?.cheapest(p.id);
                   return deal ? (
                     <Link
                       key={p.id}

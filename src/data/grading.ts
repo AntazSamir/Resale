@@ -1,4 +1,4 @@
-import type { Grade } from "./catalog";
+import type { Grade } from "./types";
 
 export type GradingOption = {
   value: string;

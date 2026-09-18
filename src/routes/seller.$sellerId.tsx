@@ -3,7 +3,8 @@ import { SiteHeader, SiteFooter } from "@/components/site-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ShieldCheck, Star, MapPin, CalendarDays, PackageX } from "lucide-react";
-import { listings, productFor, taka } from "@/data/catalog";
+import { listings, productFor } from "@/data/catalog";
+import { taka } from "@/lib/utils";
 import { GradeBadge } from "@/components/grade-badge";
 import { useAuth } from "@/lib/auth-store";
 import { getStoreByOwnerId } from "@/lib/store-store";
@@ -12,7 +13,6 @@ export const Route = createFileRoute("/seller/$sellerId")({
   head: () => ({
     meta: [{ title: "Seller Profile | Resale.com" }],
   }),
-  component: SellerProfilePage,
 });
 
 function SellerProfilePage() {

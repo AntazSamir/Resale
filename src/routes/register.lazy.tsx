@@ -1,0 +1,299 @@
+import { createLazyFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
+import { SiteHeader, SiteFooter } from "@/components/site-header";
+import { useAuth } from "@/lib/auth-store";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
+import { sendOtpFn, verifyOtpFn } from "@/lib/server-functions";
+import { AlertCircle, Lock } from "lucide-react";
+import resaleLogo from "@/assets/resale-logo.svg";
+import { GoogleAuthButton, AuthDivider } from "@/components/google-auth-button";
+
+interface RegisterSearch {
+  redirect?: string | undefined;
+}
+
+export const Route = createLazyFileRoute("/register")({
+  component: RegisterPage,
+});
+
+function RegisterPage() {
+  const search = Route.useSearch();
+  const [step, setStep] = useState<"details" | "otp">("details");
+  const [name, setName] = useState("");
+  const [identifier, setIdentifier] = useState("");
+  const [nid, setNid] = useState("");
+  const [password, setPassword] = useState("");
+  const [otp, setOtp] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
+  const { signIn } = useAuth();
+
+  const cleanId = identifier.trim();
+  const isEmail = cleanId.includes("@");
+
+  const handleSendOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!cleanId) {
+      setError("Please enter your mobile number or email address.");
+      return;
+    }
+    if (isEmail) {
+      if (!cleanId.includes(".") || cleanId.length < 5) {
+        setError("Please enter a valid email address.");
+        return;
+      }
+    } else {
+      const digitsOnly = cleanId.replace(/\D/g, "");
+      if (digitsOnly.length < 11) {
+        setError("Please enter a valid 11-digit phone number.");
+        return;
+      }
+    }
+    if ((nid.length !== 10 && nid.length !== 13 && nid.length !== 17) || name.length < 2) {
+      setError("Please fill out all required fields with valid information.");
+      return;
+    }
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters.");
+      return;
+    }
+
+    setError(null);
+    setLoading(true);
+
+    try {
+      await sendOtpFn({
+        data: {
+          phone: isEmail ? undefined : cleanId.replace(/\D/g, ""),
+          email: isEmail ? cleanId.toLowerCase() : undefined,
+        },
+      });
+      setStep("otp");
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Failed to send OTP. Please try again.";
+      setError(message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerify = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (otp.length !== 6) return;
+    setError(null);
+    setLoading(true);
+
+    try {
+      const res = await verifyOtpFn({
+        data: {
+          phone: isEmail ? undefined : cleanId.replace(/\D/g, ""),
+          email: isEmail ? cleanId.toLowerCase() : undefined,
+          otp,
+          name,
+          nid,
+          password,
+        },
+      });
+
+      if (res && res.success && res.user && res.token) {
+        signIn({ token: res.token, user: res.user });
+        if (search.redirect) {
+          navigate({ to: search.redirect });
+        } else {
+          navigate({ to: "/" });
+        }
+      } else {
+        setError(res?.error || "Invalid or expired verification code.");
+      }
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Registration verification failed.";
+      setError(message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const targetLabel = cleanId;
+
+  return (
+    <div className="min-h-screen bg-background flex flex-col">
+      <SiteHeader />
+      <main className="flex-1 flex items-center justify-center p-5">
+        <Card className="w-full max-w-md shadow-md border-border/80">
+          <CardHeader className="text-center">
+            <div className="flex justify-center mb-3">
+              <Link
+                to="/"
+                className="inline-flex items-center hover:opacity-90 transition-opacity"
+                aria-label="Resale Home"
+              >
+                <img
+                  src={resaleLogo}
+                  alt="Resale logo"
+                  className="h-9 w-auto object-contain shrink-0"
+                />
+              </Link>
+            </div>
+            <CardTitle className="text-2xl font-display font-bold">Create an account</CardTitle>
+            <CardDescription className="text-xs sm:text-sm">
+              {search.redirect?.includes("checkout")
+                ? "Register a verified account to place your order."
+                : step === "details"
+                  ? "Join Resale.com to buy or sell quality-checked electronics."
+                  : `We sent a 6-digit code to ${targetLabel}. (Enter 123456 in dev/testing)`}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {search.redirect && (
+              <div className="mb-4 p-2.5 bg-primary/10 border border-primary/20 text-xs text-primary flex items-center gap-2">
+                <Lock className="size-3.5 shrink-0" />
+                <span>
+                  NID-verified registration protects buyer purchase &amp; warranty claims.
+                </span>
+              </div>
+            )}
+
+            {error && (
+              <div className="mb-4 p-3 bg-destructive/10 border border-destructive/20 text-destructive text-xs flex items-center gap-2">
+                <AlertCircle className="size-4 shrink-0" />
+                <span>{error}</span>
+              </div>
+            )}
+
+            {step === "details" ? (
+              <form onSubmit={handleSendOtp} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="name">Full Name</Label>
+                  <Input
+                    id="name"
+                    placeholder="e.g. Rafiq Islam"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    required
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="reg-identifier">Phone Number or Email</Label>
+                  <Input
+                    id="reg-identifier"
+                    placeholder="01XXXXXXXXX or name@example.com"
+                    value={identifier}
+                    onChange={(e) => setIdentifier(e.target.value)}
+                    required
+                    autoComplete="username"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="nid">NID Number</Label>
+                  <Input
+                    id="nid"
+                    placeholder="10, 13, or 17 digit NID number"
+                    value={nid}
+                    onChange={(e) => setNid(e.target.value.replace(/\D/g, ""))}
+                    required
+                    pattern="^\d{10}$|^\d{13}$|^\d{17}$"
+                    title="Please enter a valid 10, 13, or 17 digit NID number"
+                  />
+                  <p className="text-[10.5px] text-muted-foreground">
+                    Required for all users to ensure marketplace trust per PRD guidelines.
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="password">Set Password</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder="Min. 6 characters"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    minLength={6}
+                  />
+                </div>
+
+                <Button type="submit" className="w-full font-semibold" disabled={loading}>
+                  {loading ? "Sending OTP…" : "Send Verification Code"}
+                </Button>
+              </form>
+            ) : (
+              <form onSubmit={handleVerify} className="space-y-6">
+                <div className="space-y-2 flex flex-col items-center">
+                  <Label htmlFor="otp">One-Time Password</Label>
+                  <InputOTP maxLength={6} value={otp} onChange={(value) => setOtp(value)}>
+                    <InputOTPGroup>
+                      <InputOTPSlot index={0} />
+                      <InputOTPSlot index={1} />
+                      <InputOTPSlot index={2} />
+                      <InputOTPSlot index={3} />
+                      <InputOTPSlot index={4} />
+                      <InputOTPSlot index={5} />
+                    </InputOTPGroup>
+                  </InputOTP>
+                </div>
+                <Button
+                  type="submit"
+                  className="w-full font-semibold"
+                  disabled={otp.length !== 6 || loading}
+                >
+                  {loading ? "Verifying…" : "Complete Registration"}
+                </Button>
+                <div className="text-center">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setStep("details");
+                      setError(null);
+                    }}
+                    className="text-xs text-primary hover:underline cursor-pointer"
+                  >
+                    Change registration details
+                  </button>
+                </div>
+              </form>
+            )}
+          </CardContent>
+          {step === "details" && (
+            <div className="px-6 pb-6">
+              <AuthDivider />
+              <GoogleAuthButton redirect={search.redirect} onError={setError} />
+            </div>
+          )}
+          <CardFooter className="justify-center border-t border-border/60 p-5">
+            <p className="text-xs text-muted-foreground">
+              Already have an account?{" "}
+              {search.redirect ? (
+                <Link
+                  to="/login"
+                  search={{ redirect: search.redirect }}
+                  className="text-primary hover:underline font-semibold"
+                >
+                  Sign in here
+                </Link>
+              ) : (
+                <Link to="/login" className="text-primary hover:underline font-semibold">
+                  Sign in here
+                </Link>
+              )}
+            </p>
+          </CardFooter>
+        </Card>
+      </main>
+      <SiteFooter />
+    </div>
+  );
+}

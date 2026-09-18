@@ -34,7 +34,6 @@ export const Route = createFileRoute("/creator/$creatorSlug")({
       ],
     };
   },
-  component: CreatorPage,
 });
 
 function CreatorPage() {

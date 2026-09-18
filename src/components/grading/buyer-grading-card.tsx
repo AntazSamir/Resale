@@ -4,7 +4,7 @@ import { GradeSelector } from "@/components/grade-selector";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ShieldCheck, CheckCircle2, AlertTriangle, FileCheck2, Sparkles } from "lucide-react";
-import { type Grade } from "@/data/catalog";
+import { type Grade } from "@/data/types";
 import { type GradingAnswers, evaluateGrading } from "@/data/grading";
 import {
   saveDeviceGradeFn,

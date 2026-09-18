@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Star, ShieldCheck, MapPin, CheckCircle2, UserCheck } from "lucide-react";
-import { type Listing } from "@/data/catalog";
+import { type Listing } from "@/data/types";
 import { createServerFn } from "@tanstack/react-start";
 
 import { StoreBadge } from "@/components/storefront/store-badge";

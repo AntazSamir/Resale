@@ -1,5 +1,6 @@
 import { Storefront, INITIAL_DEMO_STORES } from "@/data/storefront";
-import { listings, Listing } from "@/data/catalog";
+import { listings } from "@/data/catalog";
+import { type Listing } from "@/data/types";
 import { readGradedDrafts } from "@/lib/grade-store";
 import { supabase } from "./supabase";
 import { upsertUserRecordFn, upsertStoreFn } from "./db-server";

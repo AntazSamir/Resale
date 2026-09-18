@@ -17,7 +17,7 @@ import {
   FileText,
   AlertTriangle,
 } from "lucide-react";
-import { taka } from "@/data/catalog";
+import { taka } from "@/lib/utils";
 import {
   getOrderById,
   canCancelOrder,
@@ -39,7 +39,6 @@ export const Route = createFileRoute("/account/orders/$orderId")({
   head: ({ params }) => ({
     meta: [{ title: `Order #${params.orderId} Details | Resale.com` }],
   }),
-  component: OrderDetailsPageWrapper,
 });
 
 function OrderDetailsPageWrapper() {
@@ -360,7 +359,7 @@ function OrderDetailsPage() {
                         orderId={order.id}
                         listingId={item.listingId}
                         itemTitle={item.name}
-                        sellerGrade={item.grade as string as import("@/data/catalog").Grade}
+                        sellerGrade={item.grade as string as import("@/data/types").Grade}
                         sellerConditionScore={item.conditionScore}
                         isOrderDeliveredOrCompleted={true}
                       />

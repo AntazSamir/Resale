@@ -3,7 +3,7 @@ import { useState } from "react";
 import { SiteHeader, SiteFooter } from "@/components/site-header";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { SellerSidebar } from "./seller.dashboard";
+import { SellerSidebar } from "@/components/seller-sidebar";
 import { ProtectedRoute } from "@/components/protected-route";
 import { useAuth } from "@/lib/auth-store";
 import { getStoreByOwnerId } from "@/lib/store-store";
@@ -29,7 +29,6 @@ export const Route = createFileRoute("/seller/inventory/import")({
   head: () => ({
     meta: [{ title: "Bulk Inventory Import | Seller Hub · Resale.com" }],
   }),
-  component: SellerBulkImportPage,
 });
 
 function SellerBulkImportPage() {

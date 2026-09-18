@@ -1,11 +1,5 @@
-import {
-  products,
-  listings,
-  productFor,
-  listingsFor,
-  type Product,
-  type Listing,
-} from "@/data/catalog";
+import { products, listings, productFor, listingsFor } from "@/data/catalog";
+import { type Product, type Listing } from "@/data/types";
 import { isListingPubliclyEligible } from "./listing-eligibility";
 import type { OrderRecord } from "./order-store";
 import type { AuthUser } from "./auth-store";

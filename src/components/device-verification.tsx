@@ -1,5 +1,5 @@
 import { ShieldCheck, Info, Lock, AlertTriangle } from "lucide-react";
-import { type DeviceVerification, type InspectionItem } from "@/data/catalog";
+import { type DeviceVerification, type InspectionItem } from "@/data/types";
 
 interface DeviceVerificationCardProps {
   deviceVerification?: DeviceVerification | undefined;

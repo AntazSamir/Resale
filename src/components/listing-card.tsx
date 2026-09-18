@@ -1,7 +1,8 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useCallback, memo } from "react";
 import { GradeBadge } from "./grade-badge";
-import { taka, type Listing, type Product } from "@/data/catalog";
+import { type Listing, type Product } from "@/data/types";
+import { taka } from "@/lib/utils";
 import { useCart } from "@/lib/cart-store";
 import { ShoppingBag, Check, ShieldCheck, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -13,7 +14,7 @@ interface ListingCardProps {
   layout?: "grid" | "list";
 }
 
-export function ListingCard({
+export const ListingCard = memo(function ListingCard({
   listing,
   product,
   compact = false,
@@ -25,20 +26,26 @@ export function ListingCard({
 
   const inCart = isInCart(listing.id);
 
-  const handleAddToCart = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    addToCart(listing.id);
-    setJustAdded(true);
-    setTimeout(() => setJustAdded(false), 1500);
-  };
+  const handleAddToCart = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      addToCart(listing.id);
+      setJustAdded(true);
+      setTimeout(() => setJustAdded(false), 1500);
+    },
+    [addToCart, listing.id],
+  );
 
-  const handleBuyNow = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    addToCart(listing.id);
-    navigate({ to: "/cart" });
-  };
+  const handleBuyNow = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      addToCart(listing.id);
+      navigate({ to: "/cart" });
+    },
+    [addToCart, listing.id, navigate],
+  );
 
   /* ── Compact variant (used in mobile swipe) ── */
   if (compact) {
@@ -57,7 +64,7 @@ export function ListingCard({
               width={400}
               height={400}
               loading="lazy"
-              className="size-full object-cover transition-transform duration-300 group-hover:scale-105"
+              className="size-full object-cover transition-transform duration-300 group-hover:transform-[scale3d(1.05,1.05,1)]"
             />
             <div className="absolute bottom-1.5 right-1.5">
               <span className="bg-card/95 backdrop-blur-xs text-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-xs border border-border/60 shadow-xs">
@@ -332,8 +339,8 @@ export function ListingCard({
         </div>
       </div>
 
-      {/* Desktop hover slide-up action bar overlay */}
-      <div className="hidden sm:flex absolute inset-x-0 bottom-0 p-3 sm:p-4 bg-card/95 backdrop-blur-xs border-t border-border/70 z-10 translate-y-full opacity-0 pointer-events-none group-hover:translate-y-0 group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-300 ease-out">
+      {/* Desktop hover slide-up action bar overlay — GPU-composited via translate3d */}
+      <div className="hidden sm:flex absolute inset-x-0 bottom-0 p-3 sm:p-4 bg-card/95 backdrop-blur-xs border-t border-border/70 z-10 transform-[translate3d(0,100%,0)] opacity-0 pointer-events-none group-hover:transform-[translate3d(0,0,0)] group-hover:opacity-100 group-hover:pointer-events-auto transition-[transform,opacity] duration-300 ease-out will-change-transform">
         <div className="grid grid-cols-2 gap-2 w-full">
           <Button
             type="button"
@@ -366,4 +373,4 @@ export function ListingCard({
       </div>
     </div>
   );
-}
+});

@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, useCallback, useMemo, type ReactNode } from "react";
 import { listingFor } from "@/data/catalog";
 import { trackActiveEvent } from "@/lib/event-tracker";
 import { useAuth } from "@/lib/auth-store";
@@ -153,10 +153,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
     [items],
   );
 
-  const subtotal = items.reduce((acc, item) => {
-    const listing = listingFor(item.listingId);
-    return acc + (listing?.price ?? 0);
-  }, 0);
+  const subtotal = useMemo(
+    () =>
+      items.reduce((acc, item) => {
+        const listing = listingFor(item.listingId);
+        return acc + (listing?.price ?? 0);
+      }, 0),
+    [items],
+  );
 
   return (
     <CartContext.Provider

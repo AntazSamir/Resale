@@ -1,4 +1,4 @@
-import { type Grade } from "@/data/catalog";
+import { type Grade } from "@/data/types";
 import { GradeBadge } from "./grade-badge";
 
 interface ConditionScoreProps {

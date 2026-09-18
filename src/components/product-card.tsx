@@ -1,38 +1,54 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useMemo, useState, useCallback, memo } from "react";
 import { GradeBadge } from "./grade-badge";
-import { cheapest, listingsFor, taka, type Product } from "@/data/catalog";
+import { cheapest, listingsFor } from "@/data/catalog";
+import { type Product } from "@/data/types";
+import { taka } from "@/lib/utils";
 import { useCart } from "@/lib/cart-store";
 import { ShoppingBag, Check, ShieldCheck, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-export function ProductCard({ product, compact = false }: { product: Product; compact?: boolean }) {
-  const best = cheapest(product.id);
-  const count = listingsFor(product.id).length;
+export const ProductCard = memo(function ProductCard({
+  product,
+  compact = false,
+}: {
+  product: Product;
+  compact?: boolean;
+}) {
+  const best = useMemo(() => cheapest(product.id), [product.id]);
+  const count = useMemo(() => listingsFor(product.id).length, [product.id]);
   const { addToCart, isInCart } = useCart();
   const navigate = useNavigate();
   const [justAdded, setJustAdded] = useState(false);
 
-  if (!best) return null;
-
-  const inCart = isInCart(best.id);
+  const inCart = best ? isInCart(best.id) : false;
   const savingsPct =
-    product.retail > best.price ? Math.round((1 - best.price / product.retail) * 100) : 0;
+    best && product.retail > best.price ? Math.round((1 - best.price / product.retail) * 100) : 0;
 
-  const handleAddToCart = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    addToCart(best.id);
-    setJustAdded(true);
-    setTimeout(() => setJustAdded(false), 1500);
-  };
+  const handleAddToCart = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (!best) return;
+      addToCart(best.id);
+      setJustAdded(true);
+      setTimeout(() => setJustAdded(false), 1500);
+    },
+    [addToCart, best?.id],
+  );
 
-  const handleBuyNow = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    addToCart(best.id);
-    navigate({ to: "/cart" });
-  };
+  const handleBuyNow = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (!best) return;
+      addToCart(best.id);
+      navigate({ to: "/cart" });
+    },
+    [addToCart, best?.id, navigate],
+  );
+
+  if (!best) return null;
 
   if (compact) {
     return (
@@ -50,7 +66,7 @@ export function ProductCard({ product, compact = false }: { product: Product; co
               width={400}
               height={400}
               loading="lazy"
-              className="size-full object-cover transition-transform duration-300 group-hover:scale-105"
+              className="size-full object-cover transition-transform duration-300 group-hover:transform-[scale3d(1.05,1.05,1)]"
             />
             {savingsPct > 0 && (
               <span className="absolute top-1.5 left-1.5 bg-primary text-primary-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-xs shadow-xs">
@@ -240,8 +256,8 @@ export function ProductCard({ product, compact = false }: { product: Product; co
         </div>
       </div>
 
-      {/* Desktop hover slide-up action bar overlay */}
-      <div className="hidden sm:flex absolute inset-x-0 bottom-0 p-4 bg-card/95 backdrop-blur-xs border-t border-border/70 z-10 translate-y-full opacity-0 pointer-events-none group-hover:translate-y-0 group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-300 ease-out">
+      {/* Desktop hover slide-up action bar overlay — GPU-composited via translate3d */}
+      <div className="hidden sm:flex absolute inset-x-0 bottom-0 p-4 bg-card/95 backdrop-blur-xs border-t border-border/70 z-10 transform-[translate3d(0,100%,0)] opacity-0 pointer-events-none group-hover:transform-[translate3d(0,0,0)] group-hover:opacity-100 group-hover:pointer-events-auto transition-[transform,opacity] duration-300 ease-out will-change-transform">
         <div className="grid grid-cols-2 gap-2 w-full">
           <Button
             type="button"
@@ -274,4 +290,4 @@ export function ProductCard({ product, compact = false }: { product: Product; co
       </div>
     </div>
   );
-}
+});

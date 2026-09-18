@@ -1,4 +1,4 @@
-import type { Grade } from "@/data/catalog";
+import type { Grade } from "@/data/types";
 import type { GradingAnswers } from "@/data/grading";
 
 export type GradedDraft = {

@@ -1,4 +1,5 @@
-import { gradeCriteria, gradeLabel, type Grade } from "@/data/catalog";
+import { type Grade } from "@/data/types";
+import { gradeCriteria, gradeLabel } from "@/data/types";
 
 interface GradeBadgeProps {
   grade: Grade;

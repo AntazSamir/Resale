@@ -214,32 +214,38 @@
   transition-property: transform;
   transition-duration: 150ms;
   transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
+  will-change: transform;
+  backface-visibility: hidden;
+  transform: translateZ(0); /* GPU layer promotion */
   &:active {
-    transform: scale(0.96);
+    transform: scale3d(0.96, 0.96, 1);
   }
 }
 
 /* Card hover lift: translate up + deepen shadow, spring back on release */
 @utility card-hover-lift {
   transition-property: transform, box-shadow;
-  transition-duration: 220ms;
+  transition-duration: 200ms;
   transition-timing-function: cubic-bezier(0.34, 1.2, 0.64, 1);
   will-change: transform, box-shadow;
+  backface-visibility: hidden;
+  transform: translateZ(0); /* Promote to GPU compositor layer */
 
   @media (prefers-reduced-motion: no-preference) {
     &:hover {
-      transform: translateY(-4px);
+      transform: translate3d(0, -4px, 0);
       box-shadow:
         0 12px 28px -6px oklch(0 0 0 / 0.12),
         0 4px 10px -4px oklch(0 0 0 / 0.08);
     }
     &:active {
-      transform: translateY(-1px) scale(0.98);
+      transform: translate3d(0, -1px, 0) scale3d(0.98, 0.98, 1);
       box-shadow: 0 4px 10px -2px oklch(0 0 0 / 0.08);
     }
   }
   @media (prefers-reduced-motion: reduce) {
     transition: none;
+    transform: none;
   }
 }
 
@@ -248,8 +254,11 @@
   transition-property: transform;
   transition-duration: 120ms;
   transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
+  will-change: transform;
+  backface-visibility: hidden;
+  transform: translateZ(0);
   &:active {
-    transform: scale(0.97);
+    transform: scale3d(0.97, 0.97, 1);
   }
 }
 
@@ -259,68 +268,77 @@
   min-width: 44px;
 }
 
-/* Icon hover wiggle — attach to a group-hover child */
+/* Icon hover wiggle — GPU-composited via rotate3d */
 @keyframes wiggle {
   0%,
   100% {
-    transform: rotate(0deg);
+    transform: rotate3d(0, 0, 1, 0deg);
   }
   20% {
-    transform: rotate(-12deg);
+    transform: rotate3d(0, 0, 1, -12deg);
   }
   50% {
-    transform: rotate(10deg);
+    transform: rotate3d(0, 0, 1, 10deg);
   }
   75% {
-    transform: rotate(-6deg);
+    transform: rotate3d(0, 0, 1, -6deg);
   }
 }
 @utility animate-wiggle {
   animation: wiggle 450ms cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+  will-change: transform;
+  backface-visibility: hidden;
+  transform: translateZ(0);
   @media (prefers-reduced-motion: reduce) {
     animation: none;
   }
 }
 
-/* Cart success bounce-in */
+/* Cart success bounce-in — GPU-composited via scale3d + rotate3d */
 @keyframes bounce-in {
   0% {
-    transform: scale(0) rotate(-30deg);
+    transform: scale3d(0, 0, 1) rotate3d(0, 0, 1, -30deg);
     opacity: 0;
   }
   55% {
-    transform: scale(1.3) rotate(6deg);
+    transform: scale3d(1.3, 1.3, 1) rotate3d(0, 0, 1, 6deg);
     opacity: 1;
   }
   75% {
-    transform: scale(0.9) rotate(-3deg);
+    transform: scale3d(0.9, 0.9, 1) rotate3d(0, 0, 1, -3deg);
   }
   100% {
-    transform: scale(1) rotate(0deg);
+    transform: scale3d(1, 1, 1) rotate3d(0, 0, 1, 0deg);
     opacity: 1;
   }
 }
 @utility animate-bounce-in {
   animation: bounce-in 400ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  transform: translateZ(0);
   @media (prefers-reduced-motion: reduce) {
     animation: none;
   }
 }
 
-/* Notification badge pulse */
+/* Notification badge pulse — GPU-composited via scale3d */
 @keyframes badge-pulse {
   0%,
   100% {
-    transform: scale(1);
+    transform: scale3d(1, 1, 1);
     opacity: 1;
   }
   50% {
-    transform: scale(1.25);
+    transform: scale3d(1.25, 1.25, 1);
     opacity: 0.85;
   }
 }
 @utility animate-badge-pulse {
   animation: badge-pulse 1.6s ease-in-out infinite;
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  transform: translateZ(0);
   @media (prefers-reduced-motion: reduce) {
     animation: none;
   }
@@ -337,6 +355,8 @@
     var(--c) right 20px bottom 0,
     var(--c) bottom 20px left 0;
   background-size: calc(100% / 3) calc(100% / 3);
+  will-change: transform;
+  backface-visibility: hidden;
   animation:
     l29-1 0.75s infinite alternate linear,
     l29-2 1.5s infinite;
@@ -351,14 +371,15 @@
   }
 }
 
+/* scale3d(-1,1,1) = scaleX(-1) but GPU-composited */
 @keyframes l29-2 {
   0%,
   49.99% {
-    transform: scaleX(1);
+    transform: scale3d(1, 1, 1);
   }
   50%,
   100% {
-    transform: scaleX(-1);
+    transform: scale3d(-1, 1, 1);
   }
 }
 
@@ -366,17 +387,18 @@
 @keyframes page-enter {
   0% {
     opacity: 0;
-    transform: translateY(6px);
+    transform: translate3d(0, 6px, 0);
   }
   100% {
     opacity: 1;
-    transform: translateY(0);
+    transform: translate3d(0, 0, 0);
   }
 }
 
 @utility animate-page-enter {
   animation: page-enter 220ms cubic-bezier(0.16, 1, 0.3, 1) both;
   will-change: opacity, transform;
+  backface-visibility: hidden;
 
   @media (prefers-reduced-motion: reduce) {
     animation: none;
@@ -388,15 +410,17 @@
 /* ─── Skeleton Shimmer Animation ───────────────────────────────────────────── */
 @keyframes shimmer {
   0% {
-    transform: translateX(-100%);
+    transform: translate3d(-100%, 0, 0);
   }
   100% {
-    transform: translateX(100%);
+    transform: translate3d(100%, 0, 0);
   }
 }
 
 @utility animate-shimmer {
   animation: shimmer 1.8s infinite;
+  will-change: transform;
+  backface-visibility: hidden;
 
   @media (prefers-reduced-motion: reduce) {
     animation: none;

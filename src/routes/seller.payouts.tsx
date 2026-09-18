@@ -1,16 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { SiteHeader, SiteFooter } from "@/components/site-header";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { SellerSidebar } from "./seller.dashboard";
+import { SellerSidebar } from "@/components/seller-sidebar";
 import { Button } from "@/components/ui/button";
-import { taka } from "@/data/catalog";
+import { taka } from "@/lib/utils";
 import { ProtectedRoute } from "@/components/protected-route";
 
 export const Route = createFileRoute("/seller/payouts")({
   head: () => ({
     meta: [{ title: "Payouts & Credits | Resale.com" }],
   }),
-  component: SellerPayoutsPage,
 });
 
 function SellerPayoutsPage() {

@@ -1,4 +1,5 @@
-import { products, Product, Grade } from "@/data/catalog";
+import { products } from "@/data/catalog";
+import { type Product, type Grade } from "@/data/types";
 import { saveGradedDraft } from "@/lib/grade-store";
 
 export interface ParsedCsvRow {

@@ -5,7 +5,8 @@ import {
   createOrderTimelineEvent,
   type OrderRecord,
 } from "./order-store";
-import { products, productFor, taka } from "@/data/catalog";
+import { products, productFor } from "@/data/catalog";
+import { taka } from "@/lib/utils";
 import { upsertDisputeFn } from "./db-server";
 
 export type DisputeStatus =

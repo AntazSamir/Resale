@@ -6,8 +6,8 @@ import {
   type GradingCriterion,
   type GradingOption,
 } from "@/data/grading";
-import type { Grade } from "@/data/catalog";
-import { getOrRestoreSession } from "./server-functions";
+import type { Grade } from "@/data/types";
+
 
 export type DeviceGradeRecord = {
   id: string;
@@ -106,6 +106,7 @@ export const saveDeviceGradeFn = createServerFn({ method: "POST" })
     }) => data,
   )
   .handler(async ({ data }) => {
+    const { getOrRestoreSession } = await import("./server-functions");
     const session = getOrRestoreSession(data.token);
     if (!session) {
       return { success: false as const, error: "Please sign in to save a grade." };
@@ -177,6 +178,7 @@ export const getDeviceGradesFn = createServerFn({ method: "POST" })
         .order("created_at", { ascending: false });
 
       if (data.mine) {
+        const { getOrRestoreSession } = await import("./server-functions");
         const session = data.token ? getOrRestoreSession(data.token) : null;
         if (!session) return { success: true as const, grades: [] as DeviceGradeRecord[] };
         query = query.eq("grader_id", session.userId);

@@ -1,5 +1,5 @@
 import { GradeBadge } from "./grade-badge";
-import { gradeCriteria } from "@/data/catalog";
+import { gradeCriteria } from "@/data/types";
 import {
   evaluateGrading,
   gradingCriteria,

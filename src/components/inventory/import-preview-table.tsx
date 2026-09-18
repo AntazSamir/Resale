@@ -2,7 +2,7 @@ import { ImportValidationReport, ValidatedImportRow } from "@/lib/bulk-importer"
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { GradeBadge } from "@/components/grade-badge";
-import { taka } from "@/data/catalog";
+import { taka } from "@/lib/utils";
 import {
   CheckCircle2,
   XCircle,

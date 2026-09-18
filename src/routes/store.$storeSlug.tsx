@@ -30,7 +30,6 @@ export const Route = createFileRoute("/store/$storeSlug")({
       ],
     };
   },
-  component: StorefrontPage,
 });
 
 function StorefrontPage() {
