@@ -21,6 +21,7 @@ import { Route as PartnerRouteImport } from './routes/partner'
 import { Route as ProductsRouteImport } from './routes/products'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as SellersRouteImport } from './routes/sellers'
+import { Route as AccountIndexRouteImport } from './routes/account.index'
 import { Route as AccountDisputesRouteImport } from './routes/account.disputes'
 import { Route as AccountOrdersRouteImport } from './routes/account.orders'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
@@ -124,6 +125,11 @@ const SellersRoute = SellersRouteImport.update({
   path: '/sellers',
   getParentRoute: () => rootRouteImport,
 } as any).lazy(() => import('./routes/sellers.lazy').then((d) => d.Route))
+const AccountIndexRoute = AccountIndexRouteImport.update({
+  id: '/account/',
+  path: '/account/',
+  getParentRoute: () => rootRouteImport,
+} as any).lazy(() => import('./routes/account.index.lazy').then((d) => d.Route))
 const AccountDisputesRoute = AccountDisputesRouteImport.update({
   id: '/account/disputes',
   path: '/account/disputes',
@@ -432,6 +438,7 @@ export interface FileRoutesByFullPath {
   '/seller/payouts': typeof SellerPayoutsRoute
   '/seller/storefront': typeof SellerStorefrontRoute
   '/store/$storeSlug': typeof StoreStoreSlugRoute
+  '/account/': typeof AccountIndexRoute
   '/admin/': typeof AdminIndexRoute
   '/sell/': typeof SellIndexRoute
   '/account/orders/$orderId': typeof AccountOrdersOrderIdRoute
@@ -488,6 +495,7 @@ export interface FileRoutesByTo {
   '/seller/payouts': typeof SellerPayoutsRoute
   '/seller/storefront': typeof SellerStorefrontRoute
   '/store/$storeSlug': typeof StoreStoreSlugRoute
+  '/account': typeof AccountIndexRoute
   '/admin': typeof AdminIndexRoute
   '/sell': typeof SellIndexRoute
   '/account/orders/$orderId': typeof AccountOrdersOrderIdRoute
@@ -545,6 +553,7 @@ export interface FileRoutesById {
   '/seller/payouts': typeof SellerPayoutsRoute
   '/seller/storefront': typeof SellerStorefrontRoute
   '/store/$storeSlug': typeof StoreStoreSlugRoute
+  '/account/': typeof AccountIndexRoute
   '/admin/': typeof AdminIndexRoute
   '/sell/': typeof SellIndexRoute
   '/account/orders/$orderId': typeof AccountOrdersOrderIdRoute
@@ -603,6 +612,7 @@ export interface FileRouteTypes {
     | '/seller/payouts'
     | '/seller/storefront'
     | '/store/$storeSlug'
+    | '/account/'
     | '/admin/'
     | '/sell/'
     | '/account/orders/$orderId'
@@ -659,6 +669,7 @@ export interface FileRouteTypes {
     | '/seller/payouts'
     | '/seller/storefront'
     | '/store/$storeSlug'
+    | '/account'
     | '/admin'
     | '/sell'
     | '/account/orders/$orderId'
@@ -715,6 +726,7 @@ export interface FileRouteTypes {
     | '/seller/payouts'
     | '/seller/storefront'
     | '/store/$storeSlug'
+    | '/account/'
     | '/admin/'
     | '/sell/'
     | '/account/orders/$orderId'
@@ -772,6 +784,7 @@ export interface RootRouteChildren {
   SellerPayoutsRoute: typeof SellerPayoutsRoute
   SellerStorefrontRoute: typeof SellerStorefrontRoute
   StoreStoreSlugRoute: typeof StoreStoreSlugRoute
+  AccountIndexRoute: typeof AccountIndexRoute
   AdminIndexRoute: typeof AdminIndexRoute
   SellIndexRoute: typeof SellIndexRoute
   SellerInventoryImportRoute: typeof SellerInventoryImportRoute
@@ -861,6 +874,13 @@ declare module '@tanstack/react-router' {
       path: '/sellers'
       fullPath: '/sellers'
       preLoaderRoute: typeof SellersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/account/': {
+      id: '/account/'
+      path: '/account'
+      fullPath: '/account/'
+      preLoaderRoute: typeof AccountIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/account/disputes': {
@@ -1223,6 +1243,7 @@ const rootRouteChildren: RootRouteChildren = {
   SellerPayoutsRoute: SellerPayoutsRoute,
   SellerStorefrontRoute: SellerStorefrontRoute,
   StoreStoreSlugRoute: StoreStoreSlugRoute,
+  AccountIndexRoute: AccountIndexRoute,
   AdminIndexRoute: AdminIndexRoute,
   SellIndexRoute: SellIndexRoute,
   SellerInventoryImportRoute: SellerInventoryImportRoute,
