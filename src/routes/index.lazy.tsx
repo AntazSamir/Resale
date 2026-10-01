@@ -1378,6 +1378,7 @@ function FeaturedDeviceCard({
               <span className="text-[11px] text-muted-foreground line-through">{taka(retail)}</span>
             )}
           </div>
+          <InspectionTeaser listingId={listingId} />
         </div>
       </div>
 

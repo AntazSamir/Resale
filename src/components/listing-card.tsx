@@ -91,6 +91,7 @@ export const ListingCard = memo(function ListingCard({
             <span className="font-display text-sm font-bold text-primary leading-tight">
               {taka(listing.price)}
             </span>
+            <span className="mt-1"><InspectionTeaser listingId={listing.id} /></span>
           </div>
         </div>
 
@@ -281,6 +282,7 @@ export const ListingCard = memo(function ListingCard({
         <div className="mt-2 flex items-baseline gap-2">
           <p className="font-display text-lg font-bold text-primary">{taka(listing.price)}</p>
         </div>
+        <div className="mt-1"><InspectionTeaser listingId={listing.id} /></div>
 
         {/* Badges */}
         <div className="mt-2.5 flex flex-wrap items-center gap-1.5 text-xs">
