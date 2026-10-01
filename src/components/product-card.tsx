@@ -1,4 +1,6 @@
 import { Link, useNavigate } from "@tanstack/react-router";
+import { GradePill } from "@/components/grade-pill";
+import { InspectionTeaser } from "@/components/inspection-teaser";
 import { useMemo, useState, useCallback, memo } from "react";
 import { GradeBadge } from "./grade-badge";
 import { cheapest, listingsFor } from "@/data/catalog";
@@ -74,9 +76,7 @@ export const ProductCard = memo(function ProductCard({
               </span>
             )}
             <div className="absolute bottom-1.5 right-1.5">
-              <span className="bg-card/95 backdrop-blur-xs text-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-xs border border-border/60 shadow-xs">
-                Grade {best.grade}
-              </span>
+              <GradePill grade={best.grade} size="xs" />
             </div>
           </Link>
 
@@ -177,9 +177,7 @@ export const ProductCard = memo(function ProductCard({
             </span>
           )}
           <div className="absolute bottom-2.5 right-2.5">
-            <span className="bg-card/95 backdrop-blur-xs text-foreground text-xs font-bold px-2 py-0.5 rounded-xs border border-border/60 shadow-xs">
-              Grade {best.grade}
-            </span>
+            <GradePill grade={best.grade} size="sm" />
           </div>
         </Link>
 
@@ -203,6 +201,7 @@ export const ProductCard = memo(function ProductCard({
             </span>
           )}
         </div>
+        <div className="mt-1"><InspectionTeaser listingId={best.id} /></div>
       </div>
 
       {/* Bottom meta & actions */}

@@ -1,4 +1,6 @@
 import { Link, useNavigate } from "@tanstack/react-router";
+import { GradePill } from "@/components/grade-pill";
+import { InspectionTeaser } from "@/components/inspection-teaser";
 import { useState, useCallback, memo } from "react";
 import { GradeBadge } from "./grade-badge";
 import { AssuranceDetails } from "./assurance-details";
@@ -68,9 +70,7 @@ export const ListingCard = memo(function ListingCard({
               className="size-full object-cover transition-transform duration-300 group-hover:transform-[scale3d(1.05,1.05,1)]"
             />
             <div className="absolute bottom-1.5 right-1.5">
-              <span className="bg-card/95 backdrop-blur-xs text-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-xs border border-border/60 shadow-xs">
-                Grade {listing.grade}
-              </span>
+              <GradePill grade={listing.grade} size="xs" />
             </div>
           </Link>
 
@@ -91,6 +91,7 @@ export const ListingCard = memo(function ListingCard({
             <span className="font-display text-sm font-bold text-primary leading-tight">
               {taka(listing.price)}
             </span>
+            <span className="mt-1"><InspectionTeaser listingId={listing.id} /></span>
           </div>
         </div>
 
@@ -262,9 +263,7 @@ export const ListingCard = memo(function ListingCard({
             className="size-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
           <div className="absolute bottom-2.5 right-2.5">
-            <span className="bg-card/95 backdrop-blur-xs text-foreground text-xs font-bold px-2 py-0.5 rounded-xs border border-border/60 shadow-xs">
-              Grade {listing.grade}
-            </span>
+            <GradePill grade={listing.grade} size="sm" />
           </div>
         </Link>
 
@@ -283,6 +282,7 @@ export const ListingCard = memo(function ListingCard({
         <div className="mt-2 flex items-baseline gap-2">
           <p className="font-display text-lg font-bold text-primary">{taka(listing.price)}</p>
         </div>
+        <div className="mt-1"><InspectionTeaser listingId={listing.id} /></div>
 
         {/* Badges */}
         <div className="mt-2.5 flex flex-wrap items-center gap-1.5 text-xs">
