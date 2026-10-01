@@ -557,80 +557,34 @@ function Index() {
       {/* ════════════════════════════════════════════════════════════
           AVAILABLE BRANDS (Interactive Carousel)
       ════════════════════════════════════════════════════════════ */}
-      <section className="px-4 md:px-6 lg:px-8 py-8 border-b border-border/80 bg-card/20">
-        <div className="mx-auto max-w-7xl space-y-4">
-          <div className="flex items-end justify-between gap-4">
-            <div>
-              <h2 className="text-xl sm:text-2xl font-display font-bold text-foreground">
-                Available Brands
-              </h2>
-              <p className="mt-1 text-xs sm:text-sm text-muted-foreground">
-                Shop verified pre-owned devices from top global electronics manufacturers.
-              </p>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <Link
-                to="/products"
-                search={{ q: undefined, category: undefined, brand: undefined }}
-                className="hidden sm:inline-flex items-center gap-1 text-xs sm:text-sm font-semibold text-primary hover:underline whitespace-nowrap mr-2"
-              >
-                Browse Catalog
-                <ArrowRight className="size-3.5" />
-              </Link>
-              <div className="flex items-center gap-1">
-                <button
-                  type="button"
-                  onClick={() => {
-                    brandCarouselRef.current?.scrollBy({ left: -320, behavior: "smooth" });
-                  }}
-                  aria-label="Scroll brands left"
-                  className="flex size-8 items-center justify-center rounded-lg border border-border/80 bg-card text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors cursor-pointer"
-                >
-                  <ChevronLeft className="size-4" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    brandCarouselRef.current?.scrollBy({ left: 320, behavior: "smooth" });
-                  }}
-                  aria-label="Scroll brands right"
-                  className="flex size-8 items-center justify-center rounded-lg border border-border/80 bg-card text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors cursor-pointer"
-                >
-                  <ChevronRight className="size-4" />
-                </button>
-              </div>
-            </div>
-          </div>
-
+      <section className="px-4 md:px-6 lg:px-8 py-5 border-b border-border/80">
+        <div className="mx-auto max-w-7xl flex items-center gap-4">
+          <h2 className="shrink-0 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+            Brands
+          </h2>
           <div
             ref={brandCarouselRef}
-            className="flex gap-3 overflow-x-auto scrollbar-none snap-x snap-mandatory py-1 scroll-smooth"
+            className="flex-1 flex gap-2 overflow-x-auto scrollbar-none snap-x py-1"
           >
             {availableBrands.map((brand) => (
               <Link
                 key={brand.name}
                 to="/products"
                 search={{ brand: brand.name, q: undefined, category: undefined }}
-                className="group shrink-0 snap-start w-44 sm:w-52 rounded-xl border border-border/80 bg-card p-3.5 sm:p-4 transition-all duration-200 hover:border-primary/50 hover:shadow-md hover:-translate-y-0.5"
+                className="shrink-0 snap-start inline-flex items-center gap-2 border border-border bg-card px-3 py-1.5 text-xs font-semibold text-foreground transition-colors hover:border-foreground"
               >
-                <div className="flex items-center justify-between mb-2">
-                  <span className="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary font-display font-bold text-sm border border-primary/20 group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-                    {brand.name.slice(0, 2).toUpperCase()}
-                  </span>
-                  <span className="text-[11px] font-semibold text-muted-foreground bg-secondary/80 px-2 py-0.5 rounded-md">
-                    {brand.count} {brand.count === 1 ? "device" : "devices"}
-                  </span>
-                </div>
-                <h3 className="text-sm font-bold text-foreground group-hover:text-primary transition-colors truncate">
-                  {brand.name}
-                </h3>
-                <p className="text-[11px] text-muted-foreground mt-0.5 truncate">
-                  {brand.categories || "Verified Devices"}
-                </p>
+                {brand.name}
+                <span className="text-[10px] font-medium text-muted-foreground">{brand.count}</span>
               </Link>
             ))}
           </div>
+          <Link
+            to="/products"
+            search={{ q: undefined, category: undefined, brand: undefined }}
+            className="hidden sm:inline-flex shrink-0 items-center gap-1 text-xs font-semibold text-primary hover:underline"
+          >
+            All <ArrowRight className="size-3.5" />
+          </Link>
         </div>
       </section>
 
@@ -778,14 +732,15 @@ function Index() {
       ════════════════════════════════════════════════════════════ */}
 
       {valueDeals.length > 0 && (
-        <section className="px-4 md:px-6 lg:px-8 py-12 border-b border-border/80 bg-secondary/30">
-          <div className="mx-auto max-w-7xl space-y-6">
+        <section className="px-4 md:px-6 lg:px-8 py-16 sm:py-20 bg-foreground text-background">
+          <div className="mx-auto max-w-7xl space-y-8">
             <div className="flex items-end justify-between gap-4">
               <div>
-                <h2 className="text-2xl sm:text-3xl font-display font-bold text-foreground">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-background/60 mb-2">Editor's savings pick</p>
+                <h2 className="text-3xl sm:text-4xl font-display font-bold text-background">
                   Top Value Deals vs. New Retail
                 </h2>
-                <p className="mt-1 text-xs sm:text-sm text-muted-foreground">
+                <p className="mt-2 text-xs sm:text-sm text-background/70">
                   Substantial savings compared to brand-new box price, backed by full 32-point
                   inspection.
                 </p>
@@ -793,15 +748,20 @@ function Index() {
               <Link
                 to="/products"
                 search={{ q: undefined, category: undefined, brand: undefined }}
-                className="inline-flex items-center gap-1 text-xs sm:text-sm font-semibold text-primary hover:underline whitespace-nowrap"
+                className="inline-flex items-center gap-1 text-xs sm:text-sm font-semibold text-background hover:underline whitespace-nowrap"
               >
                 View All Deals
                 <ArrowRight className="size-3.5" />
               </Link>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5 sm:gap-5">
-              {valueDeals.map(({ listing: l, product: p, pct }) => (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+              {valueDeals.slice(0, 2).map(({ listing: l, product: p }) => (
+                <SpotlightDeal key={l.id} listingId={l.id} product={p} grade={l.grade} price={l.price} />
+              ))}
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3.5 sm:gap-4">
+              {valueDeals.slice(2, 8).map(({ listing: l, product: p, pct }) => (
                 <FeaturedDeviceCard
                   key={l.id}
                   listingId={l.id}
@@ -1000,7 +960,8 @@ function Index() {
                   <span>Dhaka, Bangladesh</span>
                 </div>
               </div>
-              <div className="mt-4 flex justify-end">
+              <StoreStats index={0} />
+              <div className="mt-3 flex justify-end">
                 <Link
                   to="/creator/$creatorSlug"
                   params={{ creatorSlug: "sam-tech-bd" }}
@@ -1039,7 +1000,8 @@ function Index() {
                   <span>Dhaka, Bangladesh</span>
                 </div>
               </div>
-              <div className="mt-4 flex justify-end">
+              <StoreStats index={1} />
+              <div className="mt-3 flex justify-end">
                 <Link
                   to="/creator/$creatorSlug"
                   params={{ creatorSlug: "sam-tech-bd" }}
@@ -1076,7 +1038,8 @@ function Index() {
                   <span>Chattogram, Bangladesh</span>
                 </div>
               </div>
-              <div className="mt-4 flex justify-end">
+              <StoreStats index={2} />
+              <div className="mt-3 flex justify-end">
                 <Link
                   to="/creator/$creatorSlug"
                   params={{ creatorSlug: "gadget-talk-bangla" }}
@@ -1113,7 +1076,8 @@ function Index() {
                   <span>Dhaka, Bangladesh</span>
                 </div>
               </div>
-              <div className="mt-4 flex justify-end">
+              <StoreStats index={3} />
+              <div className="mt-3 flex justify-end">
                 <Link
                   to="/store/$storeSlug"
                   params={{ storeSlug: "apple-vault-e2e" }}
@@ -1152,7 +1116,8 @@ function Index() {
                   <span>Dhaka, Bangladesh</span>
                 </div>
               </div>
-              <div className="mt-4 flex justify-end">
+              <StoreStats index={4} />
+              <div className="mt-3 flex justify-end">
                 <Link
                   to="/store/$storeSlug"
                   params={{ storeSlug: "apple-vault" }}
@@ -1191,7 +1156,8 @@ function Index() {
                   <span>Dhaka, Bangladesh</span>
                 </div>
               </div>
-              <div className="mt-4 flex justify-end">
+              <StoreStats index={5} />
+              <div className="mt-3 flex justify-end">
                 <Link
                   to="/store/$storeSlug"
                   params={{ storeSlug: "pixel-gadget-hub" }}
@@ -1581,6 +1547,98 @@ function TestimonialCarousel() {
             }`}
           />
         ))}
+      </div>
+    </div>
+  );
+}
+
+const storeStatsData = [
+  { followers: "48.2k", sales: 1240, pass: 99 },
+  { followers: "21.5k", sales: 610, pass: 98 },
+  { followers: "35.9k", sales: 890, pass: 98 },
+  { followers: "12.1k", sales: 430, pass: 97 },
+  { followers: "9.4k", sales: 315, pass: 99 },
+  { followers: "6.8k", sales: 268, pass: 96 },
+];
+
+function StoreStats({ index }: { index: number }) {
+  const d = storeStatsData[index % storeStatsData.length]!;
+  return (
+    <dl className="mt-3 grid grid-cols-3 border border-border/70 text-center">
+      {[
+        ["Followers", d.followers],
+        ["Verified sales", d.sales.toLocaleString()],
+        ["Inspection pass", `${d.pass}%`],
+      ].map(([label, value]) => (
+        <div key={label} className="py-1.5 px-1 border-r border-border/70 last:border-r-0">
+          <dd className="text-xs font-bold text-foreground font-display">{value}</dd>
+          <dt className="text-[9px] text-muted-foreground leading-tight">{label}</dt>
+        </div>
+      ))}
+    </dl>
+  );
+}
+
+function SpotlightDeal({
+  listingId,
+  product,
+  grade,
+  price,
+}: {
+  listingId: string;
+  product: Product;
+  grade: Grade;
+  price: number;
+}) {
+  const saved = product.retail - price;
+  return (
+    <div className="group grid grid-cols-5 bg-card text-card-foreground border border-border overflow-hidden">
+      <Link to="/listing/$listingId" params={{ listingId }} className="col-span-2 relative bg-muted/30">
+        <img
+          src={product.image}
+          alt={product.name}
+          loading="lazy"
+          className="size-full object-cover aspect-square transition-transform duration-500 group-hover:scale-105"
+        />
+        <span className="absolute top-2 left-2">
+          <GradePill grade={grade} size="xs" />
+        </span>
+      </Link>
+      <div className="col-span-3 p-4 sm:p-6 flex flex-col justify-between gap-4">
+        <div className="space-y-2">
+          <Link
+            to="/listing/$listingId"
+            params={{ listingId }}
+            className="block font-display text-lg sm:text-xl font-bold leading-tight hover:underline"
+          >
+            {product.name}
+          </Link>
+          <InspectionTeaser listingId={listingId} />
+        </div>
+        <div className="grid grid-cols-2 border border-border">
+          <div className="p-2.5 sm:p-3 border-r border-border">
+            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">New retail</p>
+            <p className="font-display text-sm sm:text-base font-semibold text-muted-foreground line-through">
+              {taka(product.retail)}
+            </p>
+          </div>
+          <div className="p-2.5 sm:p-3">
+            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Resale price</p>
+            <p className="font-display text-base sm:text-lg font-bold text-primary">{taka(price)}</p>
+          </div>
+        </div>
+        <div className="flex items-center justify-between gap-2">
+          <span className="grade-tone px-2.5 py-1 text-xs font-bold" data-grade="A+">
+            Save {taka(saved)}
+          </span>
+          <Link
+            to="/listing/$listingId"
+            params={{ listingId }}
+            className="inline-flex items-center gap-1 text-xs font-semibold text-foreground hover:underline"
+          >
+            View deal <ArrowRight className="size-3.5" />
+          </Link>
+        </div>
       </div>
     </div>
   );
