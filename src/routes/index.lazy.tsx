@@ -1,4 +1,6 @@
 import { createLazyFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { GradePill } from "@/components/grade-pill";
+import { InspectionTeaser } from "@/components/inspection-teaser";
 import { useState, useRef, useEffect, useMemo } from "react";
 import {
   ArrowRight,
@@ -1353,9 +1355,7 @@ function FeaturedDeviceCard({
 
           {/* Bottom Right Grade Badge */}
           <div className="absolute bottom-2 right-2">
-            <span className="bg-card/95 backdrop-blur-xs text-foreground text-[10px] font-bold px-2 py-0.5 rounded-md border border-border/60 shadow-xs">
-              Grade {grade}
-            </span>
+            <GradePill grade={grade} size="xs" />
           </div>
         </div>
 
