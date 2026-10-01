@@ -181,10 +181,15 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid var(--color-foreground);
   font-family: var(--font-display);
   font-weight: 600;
   letter-spacing: 0.02em;
+  background-color: var(--grade-c);
+  color: var(--grade-on);
+  &[data-grade="A+"] { background-color: var(--grade-aplus); }
+  &[data-grade="A"] { background-color: var(--grade-a); }
+  &[data-grade="B"] { background-color: var(--grade-b); color: oklch(0.2 0.03 70); }
+  &[data-grade="D"] { background-color: var(--grade-d); }
 }
 
 @utility hairline-grid {
@@ -433,4 +438,24 @@
   &::-webkit-scrollbar {
     display: none;
   }
+}
+
+/* ── Condition grade colour system ── */
+:root {
+  --grade-aplus: oklch(0.5 0.12 160);
+  --grade-a: oklch(0.6 0.09 190);
+  --grade-b: oklch(0.7 0.14 70);
+  --grade-c: oklch(0.55 0.03 250);
+  --grade-d: oklch(0.55 0.17 30);
+  --grade-on: oklch(0.99 0 0);
+}
+
+@utility grade-tone {
+  background-color: var(--grade-c);
+  color: var(--grade-on);
+  &[data-grade="A+"] { background-color: var(--grade-aplus); }
+  &[data-grade="A"] { background-color: var(--grade-a); }
+  &[data-grade="B"] { background-color: var(--grade-b); color: oklch(0.2 0.03 70); }
+  &[data-grade="C"] { background-color: var(--grade-c); }
+  &[data-grade="D"] { background-color: var(--grade-d); }
 }
