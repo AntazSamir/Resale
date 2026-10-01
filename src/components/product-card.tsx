@@ -201,6 +201,7 @@ export const ProductCard = memo(function ProductCard({
             </span>
           )}
         </div>
+        <div className="mt-1"><InspectionTeaser listingId={best.id} /></div>
       </div>
 
       {/* Bottom meta & actions */}
