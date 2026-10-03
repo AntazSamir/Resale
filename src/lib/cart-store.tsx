@@ -1,4 +1,12 @@
-import { createContext, useContext, useState, useEffect, useCallback, useMemo, type ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+  type ReactNode,
+} from "react";
 import { listingFor } from "@/data/catalog";
 import { trackActiveEvent } from "@/lib/event-tracker";
 import { useAuth } from "@/lib/auth-store";

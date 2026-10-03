@@ -1,12 +1,4 @@
-import { gradeLabel, type Grade } from "@/data/types";
-
-export const gradeHint: Record<Grade, string> = {
-  "A+": "Zero scratches",
-  A: "Hairline marks only",
-  B: "Cosmetic wear, 100% functional",
-  C: "Visible wear, functional",
-  D: "Heavy wear, defects disclosed",
-};
+import { gradeLabel, gradeHint, type Grade } from "@/data/types";
 
 export function GradePill({
   grade,
@@ -27,7 +19,9 @@ export function GradePill({
       }`}
     >
       {g}
-      {showLabel && gradeLabel[g] && <span className="font-medium opacity-90">· {gradeLabel[g]}</span>}
+      {showLabel && gradeLabel[g] && (
+        <span className="font-medium opacity-90">· {gradeLabel[g]}</span>
+      )}
     </span>
   );
 }

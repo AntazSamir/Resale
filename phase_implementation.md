@@ -747,13 +747,13 @@ Phase 5.3B delivered an end-to-end commerce experience upgrade focusing on conve
 
 ---
 
-| Milestone      | Key Focus Area                          | Deliverables                                                                                                                              |    Status    |
-| -------------- | --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | :----------: |
-| **Phase 5.3A** | Admin Console, Grading Flow & UI Polish | Admin Shell, Bangladesh Heatmap, 15+ Admin Routes, Buyer Grading Card, Grading DB, Login/Register Consolidated Input, 4-col Products Grid | ✅ Completed |
-| **Phase 5.3B** | Cart, Transitions, Skeletons & Mobile   | Cart Stepper & Care+, NavigationProgressBar, Shimmer Skeletons, Brand Carousel, Sellers Directory, WCAG Touch Targets, Mobile Polish      | ✅ Completed |
-| **Phase 5.3C** | Hero Carousel, Full-Width Deals & Mobile UX | Auto-Advancing Hero Carousel, Touch Swipe Gestures, Full Side-Width Cart Deals, Compact Mobile Action Buttons, Banner Asset Cleanup   | ✅ Completed |
-| **Phase 5.3D** | Route Code Splitting & Performance      | 56-route lazy splitting, shared types/utils extraction, lazy catalog in site-header, component memoization                                | ✅ Completed |
-| **Phase 5.4**  | Product Trust & Browsing Controls       | Assurance Details on listing cards & detail page, Grade Guide on products page, Quick-Filter bar (Category, Price, Grade, Location)       | ✅ Completed |
+| Milestone      | Key Focus Area                              | Deliverables                                                                                                                              |    Status    |
+| -------------- | ------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | :----------: |
+| **Phase 5.3A** | Admin Console, Grading Flow & UI Polish     | Admin Shell, Bangladesh Heatmap, 15+ Admin Routes, Buyer Grading Card, Grading DB, Login/Register Consolidated Input, 4-col Products Grid | ✅ Completed |
+| **Phase 5.3B** | Cart, Transitions, Skeletons & Mobile       | Cart Stepper & Care+, NavigationProgressBar, Shimmer Skeletons, Brand Carousel, Sellers Directory, WCAG Touch Targets, Mobile Polish      | ✅ Completed |
+| **Phase 5.3C** | Hero Carousel, Full-Width Deals & Mobile UX | Auto-Advancing Hero Carousel, Touch Swipe Gestures, Full Side-Width Cart Deals, Compact Mobile Action Buttons, Banner Asset Cleanup       | ✅ Completed |
+| **Phase 5.3D** | Route Code Splitting & Performance          | 56-route lazy splitting, shared types/utils extraction, lazy catalog in site-header, component memoization                                | ✅ Completed |
+| **Phase 5.4**  | Product Trust & Browsing Controls           | Assurance Details on listing cards & detail page, Grade Guide on products page, Quick-Filter bar (Category, Price, Grade, Location)       | ✅ Completed |
 
 ---
 
@@ -836,12 +836,12 @@ Phase 5.3D systematically reduced the initial JavaScript payload and improved pe
 - `ProductCard`: Added `useMemo` for `cheapest` / `listingsFor` lookups; fixed hook order violation.
 - `ListingCard`: Wrapped with `React.memo` to prevent unnecessary re-renders during filter/sort operations.
 
-| Feature                         | Files Touched                                                  | Status |
-| ------------------------------- | -------------------------------------------------------------- | :----: |
-| 56-Route Lazy Splitting         | All `src/routes/*.tsx` → `*.lazy.tsx`                         |   ✅   |
-| Shared Type Extraction          | `src/data/types.ts` (new), ~80 import sites updated           |   ✅   |
-| Lazy Catalog in Site Header     | `src/components/site-header.tsx`                              |   ✅   |
-| Component Memoization           | `src/components/product-card.tsx`, `listing-card.tsx`         |   ✅   |
+| Feature                     | Files Touched                                         | Status |
+| --------------------------- | ----------------------------------------------------- | :----: |
+| 56-Route Lazy Splitting     | All `src/routes/*.tsx` → `*.lazy.tsx`                 |   ✅   |
+| Shared Type Extraction      | `src/data/types.ts` (new), ~80 import sites updated   |   ✅   |
+| Lazy Catalog in Site Header | `src/components/site-header.tsx`                      |   ✅   |
+| Component Memoization       | `src/components/product-card.tsx`, `listing-card.tsx` |   ✅   |
 
 ---
 
@@ -869,13 +869,13 @@ Phase 5.4 surfaced key purchasing trust signals earlier in the buyer journey and
 - Fully connected to existing filter state (`toggleCategory`, `toggleGrade`, `toggleDistrict`, `setPriceMax`) — selections appear as active filter chips and are clearable like any other filter.
 - Horizontally scrollable on narrow screens; does not replace the detailed sidebar/mobile drawer (which retains Battery, Storage, RAM, and advanced options).
 
-| Feature                         | Files Touched                                                       | Status |
-| ------------------------------- | ------------------------------------------------------------------- | :----: |
-| AssuranceDetails Component      | `src/components/assurance-details.tsx` (new)                        |   ✅   |
-| Listing Card Assurance Row      | `src/components/listing-card.tsx`                                   |   ✅   |
-| Listing Page Assurance Panel    | `src/routes/listing.$listingId.lazy.tsx`                            |   ✅   |
-| GradeGuide Component            | `src/components/grade-guide.tsx` (new)                              |   ✅   |
-| Quick-Filter Bar                | `src/routes/products.lazy.tsx`                                      |   ✅   |
+| Feature                      | Files Touched                                | Status |
+| ---------------------------- | -------------------------------------------- | :----: |
+| AssuranceDetails Component   | `src/components/assurance-details.tsx` (new) |   ✅   |
+| Listing Card Assurance Row   | `src/components/listing-card.tsx`            |   ✅   |
+| Listing Page Assurance Panel | `src/routes/listing.$listingId.lazy.tsx`     |   ✅   |
+| GradeGuide Component         | `src/components/grade-guide.tsx` (new)       |   ✅   |
+| Quick-Filter Bar             | `src/routes/products.lazy.tsx`               |   ✅   |
 
 ---
 

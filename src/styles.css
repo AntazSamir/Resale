@@ -186,10 +186,19 @@
   letter-spacing: 0.02em;
   background-color: var(--grade-c);
   color: var(--grade-on);
-  &[data-grade="A+"] { background-color: var(--grade-aplus); }
-  &[data-grade="A"] { background-color: var(--grade-a); }
-  &[data-grade="B"] { background-color: var(--grade-b); color: oklch(0.2 0.03 70); }
-  &[data-grade="D"] { background-color: var(--grade-d); }
+  &[data-grade="A+"] {
+    background-color: var(--grade-aplus);
+  }
+  &[data-grade="A"] {
+    background-color: var(--grade-a);
+  }
+  &[data-grade="B"] {
+    background-color: var(--grade-b);
+    color: oklch(0.2 0.03 70);
+  }
+  &[data-grade="D"] {
+    background-color: var(--grade-d);
+  }
 }
 
 @utility hairline-grid {
@@ -453,9 +462,20 @@
 @utility grade-tone {
   background-color: var(--grade-c);
   color: var(--grade-on);
-  &[data-grade="A+"] { background-color: var(--grade-aplus); }
-  &[data-grade="A"] { background-color: var(--grade-a); }
-  &[data-grade="B"] { background-color: var(--grade-b); color: oklch(0.2 0.03 70); }
-  &[data-grade="C"] { background-color: var(--grade-c); }
-  &[data-grade="D"] { background-color: var(--grade-d); }
+  &[data-grade="A+"] {
+    background-color: var(--grade-aplus);
+  }
+  &[data-grade="A"] {
+    background-color: var(--grade-a);
+  }
+  &[data-grade="B"] {
+    background-color: var(--grade-b);
+    color: oklch(0.2 0.03 70);
+  }
+  &[data-grade="C"] {
+    background-color: var(--grade-c);
+  }
+  &[data-grade="D"] {
+    background-color: var(--grade-d);
+  }
 }

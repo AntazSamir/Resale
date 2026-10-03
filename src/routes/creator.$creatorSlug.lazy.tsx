@@ -13,7 +13,6 @@ export const Route = createLazyFileRoute("/creator/$creatorSlug")({
   component: CreatorPage,
 });
 
-
 function CreatorPage() {
   const { creator, videos } = Route.useLoaderData();
 

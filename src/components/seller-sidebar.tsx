@@ -10,7 +10,8 @@ import {
   Store,
   Sparkles,
   UploadCloud,
-  Plus
+  Plus,
+  UserCircle,
 } from "lucide-react";
 import resaleLogo from "@/assets/resale-logo.svg";
 
@@ -26,7 +27,8 @@ export function SellerSidebar({
     | "payouts"
     | "storefront"
     | "creator"
-    | "bulk-import";
+    | "bulk-import"
+    | "account";
 }) {
   return (
     <aside className="w-64 shrink-0 hidden md:block">
@@ -97,6 +99,12 @@ export function SellerSidebar({
             className={`flex items-center gap-3 px-4 py-2.5 text-xs font-medium rounded-md transition-colors ${active === "bulk-import" ? "bg-primary text-primary-foreground font-semibold" : "hover:bg-muted"}`}
           >
             <UploadCloud className="size-4" /> Bulk Inventory
+          </Link>
+          <Link
+            to="/seller/account"
+            className={`flex items-center gap-3 px-4 py-2.5 text-xs font-medium rounded-md transition-colors ${active === "account" ? "bg-primary text-primary-foreground font-semibold" : "hover:bg-muted"}`}
+          >
+            <UserCircle className="size-4" /> Account & Verification
           </Link>
         </div>
 

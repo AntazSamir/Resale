@@ -3721,7 +3721,6 @@ export const listings: Listing[] = [
   },
 ];
 
-
 export const listingsFor = (productId: string) =>
   listings
     .filter((l) => l.productId === productId && isListingPubliclyEligible(l))
@@ -3730,7 +3729,5 @@ export const listingsFor = (productId: string) =>
 export const productFor = (id: string) => products.find((p) => p.id === id);
 
 export const cheapest = (productId: string) => listingsFor(productId)[0] as Listing | undefined;
-
-
 
 export const listingFor = (id: string) => listings.find((l) => l.id === id);

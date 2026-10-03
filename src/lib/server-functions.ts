@@ -106,7 +106,7 @@ async function supabaseAdmin() {
   return getSupabaseAdmin();
 }
 
-function getSessionUser(token: string) {
+export function getSessionUser(token: string) {
   if (!token) return null;
   return getOrRestoreSession(token);
 }
@@ -1177,7 +1177,7 @@ export const updateListingDetailsFn = createServerFn({ method: "POST" })
     if (!listing) {
       return { success: false, error: "Listing not found." };
     }
-    if (listing.sellerId !== session.userId) {
+    if (listing.sellerId !== session.userId && !session.isAdmin) {
       return { success: false, error: "Forbidden: You do not own this listing." };
     }
 
@@ -1833,6 +1833,11 @@ export const verifyOtpFn = createServerFn({ method: "POST" })
         nidNumber: data.nid || null,
         role: "BUYER",
         verified: true,
+        verificationStatus: "UNVERIFIED",
+        nidDocUrl: null,
+        selfieUrl: null,
+        verificationNote: null,
+        verificationReviewedAt: null,
         createdAt: new Date().toISOString(),
       };
       db.users.push(user);
@@ -2095,6 +2100,11 @@ export const syncGoogleSessionFn = createServerFn({ method: "POST" })
         nidNumber: null,
         role: "BUYER",
         verified: false,
+        verificationStatus: "UNVERIFIED",
+        nidDocUrl: null,
+        selfieUrl: null,
+        verificationNote: null,
+        verificationReviewedAt: null,
         createdAt: new Date().toISOString(),
       };
       db.users.push(newUser);
@@ -3128,10 +3138,11 @@ export const getAdminSellerVerificationFn = createServerFn({ method: "POST" })
       return { success: false, error: "Unauthorized: Admin privileges required.", data: [] };
     }
 
-    let rows: Array<{
+    type SellerRow = {
       sellerId: string;
       sellerName: string | null;
       sellerPhone: string | null;
+      sellerEmail: string | null;
       trustScore: number | null;
       trustTier: string | null;
       nidVerified: boolean;
@@ -3139,44 +3150,107 @@ export const getAdminSellerVerificationFn = createServerFn({ method: "POST" })
       completedOrdersCount: number;
       upheldDisputesCount: number;
       calculatedAt: string;
-    }> = [];
+      verificationStatus: string;
+      nidDocUrl: string | null;
+      selfieUrl: string | null;
+      verificationNote: string | null;
+      verificationReviewedAt: string | null;
+      createdAt: string;
+      listingCount: number;
+    };
 
+    let rows: SellerRow[] = [];
     let supabaseSuccess = false;
+
     try {
       const supabase = await supabaseAdmin();
-      const { data: reputations, error } = await supabase
-        .from("seller_reputation")
+      // Fetch all sellers
+      const { data: sellers, error: sellersError } = await supabase
+        .from("users")
         .select(
-          "seller_id, trust_score, trust_tier, nid_verified, store_verified, completed_orders_count, upheld_disputes_count, calculated_at",
+          "id, name, phone, email, verified, verification_status, nid_doc_url, selfie_url, verification_note, verification_reviewed_at, created_at",
         )
-        .order("trust_score", { ascending: false });
+        .eq("role", "SELLER")
+        .order("created_at", { ascending: false });
 
-      if (!error && Array.isArray(reputations)) {
+      if (!sellersError && Array.isArray(sellers)) {
         supabaseSuccess = true;
-        const sellerIds = reputations.map((r) => r.seller_id);
-        const { data: users } = await supabase
-          .from("users")
-          .select("id, name, phone")
-          .in("id", sellerIds);
-        const userMap = Object.fromEntries(
-          (users ?? []).map((u) => [u.id, { name: u.name, phone: u.phone }]),
-        );
-        rows = reputations.map((r) => ({
-          sellerId: r.seller_id,
-          sellerName: userMap[r.seller_id]?.name || null,
-          sellerPhone: userMap[r.seller_id]?.phone || null,
-          trustScore: r.trust_score ?? null,
-          trustTier: r.trust_tier || null,
-          // Only expose boolean — NID number is never returned
-          nidVerified: Boolean(r.nid_verified),
-          storeVerified: Boolean(r.store_verified),
-          completedOrdersCount: r.completed_orders_count ?? 0,
-          upheldDisputesCount: r.upheld_disputes_count ?? 0,
-          calculatedAt: r.calculated_at || "",
-        }));
+
+        // Fetch reputation data for trust scores
+        const sellerIds = sellers.map((s) => s.id);
+        const { data: reputations } = await supabase
+          .from("seller_reputation")
+          .select(
+            "seller_id, trust_score, trust_tier, nid_verified, store_verified, completed_orders_count, upheld_disputes_count, calculated_at",
+          )
+          .in("seller_id", sellerIds);
+        const repMap = Object.fromEntries((reputations ?? []).map((r) => [r.seller_id, r]));
+
+        // Count listings per seller
+        const { data: listingCounts } = await supabase
+          .from("listings")
+          .select("seller_id")
+          .in("seller_id", sellerIds);
+        const listingCountMap: Record<string, number> = {};
+        for (const l of listingCounts ?? []) {
+          listingCountMap[l.seller_id] = (listingCountMap[l.seller_id] ?? 0) + 1;
+        }
+
+        rows = sellers.map((u) => {
+          const rep = repMap[u.id];
+          return {
+            sellerId: u.id,
+            sellerName: u.name ?? null,
+            sellerPhone: u.phone ?? null,
+            sellerEmail: u.email ?? null,
+            trustScore: rep?.trust_score ?? null,
+            trustTier: rep?.trust_tier ?? null,
+            nidVerified: Boolean(rep?.nid_verified ?? u.verified),
+            storeVerified: Boolean(rep?.store_verified),
+            completedOrdersCount: rep?.completed_orders_count ?? 0,
+            upheldDisputesCount: rep?.upheld_disputes_count ?? 0,
+            calculatedAt: rep?.calculated_at ?? "",
+            verificationStatus: u.verification_status ?? "UNVERIFIED",
+            nidDocUrl: u.nid_doc_url ?? null,
+            selfieUrl: u.selfie_url ?? null,
+            verificationNote: u.verification_note ?? null,
+            verificationReviewedAt: u.verification_reviewed_at ?? null,
+            createdAt: u.created_at ?? "",
+            listingCount: listingCountMap[u.id] ?? 0,
+          };
+        });
       }
     } catch (err) {
       console.warn("[getAdminSellerVerificationFn] Supabase error:", err);
+    }
+
+    if (!supabaseSuccess) {
+      // Fall back to in-memory sellers
+      const sellers = db.users.filter((u) => u.role === "SELLER");
+      const listingCountMap: Record<string, number> = {};
+      for (const l of db.listings) {
+        listingCountMap[l.sellerId] = (listingCountMap[l.sellerId] ?? 0) + 1;
+      }
+      rows = sellers.map((u) => ({
+        sellerId: u.id,
+        sellerName: u.name ?? null,
+        sellerPhone: u.phone ?? null,
+        sellerEmail: u.email ?? null,
+        trustScore: null,
+        trustTier: null,
+        nidVerified: u.verified,
+        storeVerified: false,
+        completedOrdersCount: 0,
+        upheldDisputesCount: 0,
+        calculatedAt: "",
+        verificationStatus: u.verificationStatus ?? "UNVERIFIED",
+        nidDocUrl: u.nidDocUrl ?? null,
+        selfieUrl: u.selfieUrl ?? null,
+        verificationNote: u.verificationNote ?? null,
+        verificationReviewedAt: u.verificationReviewedAt ?? null,
+        createdAt: u.createdAt,
+        listingCount: listingCountMap[u.id] ?? 0,
+      }));
     }
 
     return {
@@ -3611,3 +3685,134 @@ export const getAdminGeographicAnalyticsFn = createServerFn({ method: "POST" })
       };
     },
   );
+
+// ── Seller: Submit Verification Documents ─────────────────────────────────────
+export const submitSellerVerificationFn = createServerFn({ method: "POST" })
+  .validator((data: { token: string; nidDocUrl: string; selfieUrl?: string }) => data)
+  .handler(async ({ data }) => {
+    const session = getSessionUser(data.token);
+    if (!session) {
+      return { success: false, error: "Unauthorized: please sign in." };
+    }
+
+    const user = db.users.find((u) => u.id === session.userId);
+    if (!user) {
+      return { success: false, error: "User account not found." };
+    }
+    if (user.verificationStatus === "VERIFIED") {
+      return { success: false, error: "Your account is already verified." };
+    }
+    if (!data.nidDocUrl) {
+      return { success: false, error: "NID document is required." };
+    }
+
+    user.verificationStatus = "PENDING";
+    user.nidDocUrl = data.nidDocUrl;
+    user.selfieUrl = data.selfieUrl ?? null;
+    user.verificationNote = null;
+    user.verified = false;
+
+    try {
+      const supabase = await supabaseAdmin();
+      await supabase
+        .from("users")
+        .update({
+          verification_status: "PENDING",
+          nid_doc_url: data.nidDocUrl,
+          selfie_url: data.selfieUrl ?? null,
+          verification_note: null,
+        })
+        .eq("id", session.userId);
+    } catch {
+      // In-memory update already done; Supabase is best-effort
+    }
+
+    return {
+      success: true,
+      message: "Verification documents submitted. An admin will review shortly.",
+    };
+  });
+
+// ── Seller: Get My Verification Status ────────────────────────────────────────
+export const getMyVerificationStatusFn = createServerFn({ method: "POST" })
+  .validator((data: { token: string }) => data)
+  .handler(async ({ data }) => {
+    const session = getSessionUser(data.token);
+    if (!session) {
+      return { success: false, error: "Unauthorized.", data: null };
+    }
+
+    const user = db.users.find((u) => u.id === session.userId);
+    if (!user) {
+      return { success: false, error: "User not found.", data: null };
+    }
+
+    return {
+      success: true,
+      data: {
+        verificationStatus: (user.verificationStatus ?? "UNVERIFIED") as
+          "UNVERIFIED" | "PENDING" | "VERIFIED" | "REJECTED",
+        verificationNote: user.verificationNote ?? null,
+        nidDocUrl: user.nidDocUrl ?? null,
+        selfieUrl: user.selfieUrl ?? null,
+        verificationReviewedAt: user.verificationReviewedAt ?? null,
+        name: user.name ?? null,
+        phone: user.phone ?? null,
+        email: user.email ?? null,
+      },
+    };
+  });
+
+// ── Admin: Approve or Reject Seller Verification ──────────────────────────────
+export const adminActOnSellerVerificationFn = createServerFn({ method: "POST" })
+  .validator(
+    (data: { token: string; sellerId: string; action: "APPROVE" | "REJECT"; note?: string }) =>
+      data,
+  )
+  .handler(async ({ data }) => {
+    const session = getSessionUser(data.token);
+    if (!session || (!session.isAdmin && session.role !== "ADMIN")) {
+      return { success: false, error: "Unauthorized: Admin privileges required." };
+    }
+
+    const user = db.users.find((u) => u.id === data.sellerId);
+    if (!user) {
+      return { success: false, error: `Seller ${data.sellerId} not found.` };
+    }
+
+    const now = new Date().toISOString();
+    const isApprove = data.action === "APPROVE";
+
+    user.verificationStatus = isApprove ? "VERIFIED" : "REJECTED";
+    user.verified = isApprove;
+    user.verificationNote = data.note ?? null;
+    user.verificationReviewedAt = now;
+
+    try {
+      const supabase = await supabaseAdmin();
+      await Promise.all([
+        supabase
+          .from("users")
+          .update({
+            verification_status: user.verificationStatus,
+            verified: isApprove,
+            verification_note: user.verificationNote,
+            verification_reviewed_at: now,
+          })
+          .eq("id", data.sellerId),
+        supabase
+          .from("seller_reputation")
+          .update({ nid_verified: isApprove })
+          .eq("seller_id", data.sellerId),
+      ]);
+    } catch {
+      // In-memory update already done
+    }
+
+    return {
+      success: true,
+      message: isApprove
+        ? `Seller ${user.name ?? data.sellerId} has been verified.`
+        : `Seller ${user.name ?? data.sellerId} verification has been rejected.`,
+    };
+  });

@@ -24,34 +24,14 @@ import { Route as SellersRouteImport } from './routes/sellers'
 import { Route as AccountDisputesRouteImport } from './routes/account.disputes'
 import { Route as AccountOrdersRouteImport } from './routes/account.orders'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
-import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
-import { Route as AdminCategoriesRouteImport } from './routes/admin.categories'
-import { Route as AdminContentRouteImport } from './routes/admin.content'
-import { Route as AdminDisputesRouteImport } from './routes/admin.disputes'
-import { Route as AdminIdentityRouteImport } from './routes/admin.identity'
-import { Route as AdminInspectionsRouteImport } from './routes/admin.inspections'
-import { Route as AdminListingsRouteImport } from './routes/admin.listings'
-import { Route as AdminLoginRouteImport } from './routes/admin.login'
-import { Route as AdminModerationRouteImport } from './routes/admin.moderation'
-import { Route as AdminNotificationsRouteImport } from './routes/admin.notifications'
-import { Route as AdminOrdersRouteImport } from './routes/admin.orders'
-import { Route as AdminPartnersRouteImport } from './routes/admin.partners'
-import { Route as AdminPaymentsRouteImport } from './routes/admin.payments'
-import { Route as AdminPayoutsRouteImport } from './routes/admin.payouts'
-import { Route as AdminProductsRouteImport } from './routes/admin.products'
-import { Route as AdminPromotionsRouteImport } from './routes/admin.promotions'
-import { Route as AdminReturnsRouteImport } from './routes/admin.returns'
-import { Route as AdminReviewsRouteImport } from './routes/admin.reviews'
-import { Route as AdminRolesRouteImport } from './routes/admin.roles'
-import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
-import { Route as AdminSupportRouteImport } from './routes/admin.support'
-import { Route as AdminUsersRouteImport } from './routes/admin.users'
+import { Route as AdminSplatRouteImport } from './routes/admin.$'
 import { Route as CategoryCategorySlugRouteImport } from './routes/category.$categorySlug'
 import { Route as CreatorCreatorSlugRouteImport } from './routes/creator.$creatorSlug'
 import { Route as ListingListingIdRouteImport } from './routes/listing.$listingId'
 import { Route as ProductProductIdRouteImport } from './routes/product.$productId'
 import { Route as SellIndexRouteImport } from './routes/sell.index'
 import { Route as SellerSellerIdRouteImport } from './routes/seller.$sellerId'
+import { Route as SellerAccountRouteImport } from './routes/seller.account'
 import { Route as SellerAnalyticsRouteImport } from './routes/seller.analytics'
 import { Route as SellerCreatorProfileRouteImport } from './routes/seller.creator-profile'
 import { Route as SellerDashboardRouteImport } from './routes/seller.dashboard'
@@ -142,131 +122,12 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/admin/',
   path: '/admin/',
   getParentRoute: () => rootRouteImport,
-} as any).lazy(() => import('./routes/admin.index.lazy').then((d) => d.Route))
-const AdminAnalyticsRoute = AdminAnalyticsRouteImport.update({
-  id: '/admin/analytics',
-  path: '/admin/analytics',
-  getParentRoute: () => rootRouteImport,
-} as any).lazy(() =>
-  import('./routes/admin.analytics.lazy').then((d) => d.Route),
-)
-const AdminCategoriesRoute = AdminCategoriesRouteImport.update({
-  id: '/admin/categories',
-  path: '/admin/categories',
+} as any)
+const AdminSplatRoute = AdminSplatRouteImport.update({
+  id: '/admin/$',
+  path: '/admin/$',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminContentRoute = AdminContentRouteImport.update({
-  id: '/admin/content',
-  path: '/admin/content',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminDisputesRoute = AdminDisputesRouteImport.update({
-  id: '/admin/disputes',
-  path: '/admin/disputes',
-  getParentRoute: () => rootRouteImport,
-} as any).lazy(() =>
-  import('./routes/admin.disputes.lazy').then((d) => d.Route),
-)
-const AdminIdentityRoute = AdminIdentityRouteImport.update({
-  id: '/admin/identity',
-  path: '/admin/identity',
-  getParentRoute: () => rootRouteImport,
-} as any).lazy(() =>
-  import('./routes/admin.identity.lazy').then((d) => d.Route),
-)
-const AdminInspectionsRoute = AdminInspectionsRouteImport.update({
-  id: '/admin/inspections',
-  path: '/admin/inspections',
-  getParentRoute: () => rootRouteImport,
-} as any).lazy(() =>
-  import('./routes/admin.inspections.lazy').then((d) => d.Route),
-)
-const AdminListingsRoute = AdminListingsRouteImport.update({
-  id: '/admin/listings',
-  path: '/admin/listings',
-  getParentRoute: () => rootRouteImport,
-} as any).lazy(() =>
-  import('./routes/admin.listings.lazy').then((d) => d.Route),
-)
-const AdminLoginRoute = AdminLoginRouteImport.update({
-  id: '/admin/login',
-  path: '/admin/login',
-  getParentRoute: () => rootRouteImport,
-} as any).lazy(() => import('./routes/admin.login.lazy').then((d) => d.Route))
-const AdminModerationRoute = AdminModerationRouteImport.update({
-  id: '/admin/moderation',
-  path: '/admin/moderation',
-  getParentRoute: () => rootRouteImport,
-} as any).lazy(() =>
-  import('./routes/admin.moderation.lazy').then((d) => d.Route),
-)
-const AdminNotificationsRoute = AdminNotificationsRouteImport.update({
-  id: '/admin/notifications',
-  path: '/admin/notifications',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminOrdersRoute = AdminOrdersRouteImport.update({
-  id: '/admin/orders',
-  path: '/admin/orders',
-  getParentRoute: () => rootRouteImport,
-} as any).lazy(() => import('./routes/admin.orders.lazy').then((d) => d.Route))
-const AdminPartnersRoute = AdminPartnersRouteImport.update({
-  id: '/admin/partners',
-  path: '/admin/partners',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminPaymentsRoute = AdminPaymentsRouteImport.update({
-  id: '/admin/payments',
-  path: '/admin/payments',
-  getParentRoute: () => rootRouteImport,
-} as any).lazy(() =>
-  import('./routes/admin.payments.lazy').then((d) => d.Route),
-)
-const AdminPayoutsRoute = AdminPayoutsRouteImport.update({
-  id: '/admin/payouts',
-  path: '/admin/payouts',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminProductsRoute = AdminProductsRouteImport.update({
-  id: '/admin/products',
-  path: '/admin/products',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminPromotionsRoute = AdminPromotionsRouteImport.update({
-  id: '/admin/promotions',
-  path: '/admin/promotions',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminReturnsRoute = AdminReturnsRouteImport.update({
-  id: '/admin/returns',
-  path: '/admin/returns',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminReviewsRoute = AdminReviewsRouteImport.update({
-  id: '/admin/reviews',
-  path: '/admin/reviews',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminRolesRoute = AdminRolesRouteImport.update({
-  id: '/admin/roles',
-  path: '/admin/roles',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminSettingsRoute = AdminSettingsRouteImport.update({
-  id: '/admin/settings',
-  path: '/admin/settings',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminSupportRoute = AdminSupportRouteImport.update({
-  id: '/admin/support',
-  path: '/admin/support',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminUsersRoute = AdminUsersRouteImport.update({
-  id: '/admin/users',
-  path: '/admin/users',
-  getParentRoute: () => rootRouteImport,
-} as any).lazy(() => import('./routes/admin.users.lazy').then((d) => d.Route))
 const CategoryCategorySlugRoute = CategoryCategorySlugRouteImport.update({
   id: '/category/$categorySlug',
   path: '/category/$categorySlug',
@@ -304,6 +165,13 @@ const SellerSellerIdRoute = SellerSellerIdRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any).lazy(() =>
   import('./routes/seller.$sellerId.lazy').then((d) => d.Route),
+)
+const SellerAccountRoute = SellerAccountRouteImport.update({
+  id: '/seller/account',
+  path: '/seller/account',
+  getParentRoute: () => rootRouteImport,
+} as any).lazy(() =>
+  import('./routes/seller.account.lazy').then((d) => d.Route),
 )
 const SellerAnalyticsRoute = SellerAnalyticsRouteImport.update({
   id: '/seller/analytics',
@@ -396,33 +264,13 @@ export interface FileRoutesByFullPath {
   '/sellers': typeof SellersRoute
   '/account/disputes': typeof AccountDisputesRoute
   '/account/orders': typeof AccountOrdersRouteWithChildren
-  '/admin/analytics': typeof AdminAnalyticsRoute
-  '/admin/categories': typeof AdminCategoriesRoute
-  '/admin/content': typeof AdminContentRoute
-  '/admin/disputes': typeof AdminDisputesRoute
-  '/admin/identity': typeof AdminIdentityRoute
-  '/admin/inspections': typeof AdminInspectionsRoute
-  '/admin/listings': typeof AdminListingsRoute
-  '/admin/login': typeof AdminLoginRoute
-  '/admin/moderation': typeof AdminModerationRoute
-  '/admin/notifications': typeof AdminNotificationsRoute
-  '/admin/orders': typeof AdminOrdersRoute
-  '/admin/partners': typeof AdminPartnersRoute
-  '/admin/payments': typeof AdminPaymentsRoute
-  '/admin/payouts': typeof AdminPayoutsRoute
-  '/admin/products': typeof AdminProductsRoute
-  '/admin/promotions': typeof AdminPromotionsRoute
-  '/admin/returns': typeof AdminReturnsRoute
-  '/admin/reviews': typeof AdminReviewsRoute
-  '/admin/roles': typeof AdminRolesRoute
-  '/admin/settings': typeof AdminSettingsRoute
-  '/admin/support': typeof AdminSupportRoute
-  '/admin/users': typeof AdminUsersRoute
+  '/admin/$': typeof AdminSplatRoute
   '/category/$categorySlug': typeof CategoryCategorySlugRoute
   '/creator/$creatorSlug': typeof CreatorCreatorSlugRoute
   '/listing/$listingId': typeof ListingListingIdRoute
   '/product/$productId': typeof ProductProductIdRoute
   '/seller/$sellerId': typeof SellerSellerIdRoute
+  '/seller/account': typeof SellerAccountRoute
   '/seller/analytics': typeof SellerAnalyticsRoute
   '/seller/creator-profile': typeof SellerCreatorProfileRoute
   '/seller/dashboard': typeof SellerDashboardRoute
@@ -452,33 +300,13 @@ export interface FileRoutesByTo {
   '/sellers': typeof SellersRoute
   '/account/disputes': typeof AccountDisputesRoute
   '/account/orders': typeof AccountOrdersRouteWithChildren
-  '/admin/analytics': typeof AdminAnalyticsRoute
-  '/admin/categories': typeof AdminCategoriesRoute
-  '/admin/content': typeof AdminContentRoute
-  '/admin/disputes': typeof AdminDisputesRoute
-  '/admin/identity': typeof AdminIdentityRoute
-  '/admin/inspections': typeof AdminInspectionsRoute
-  '/admin/listings': typeof AdminListingsRoute
-  '/admin/login': typeof AdminLoginRoute
-  '/admin/moderation': typeof AdminModerationRoute
-  '/admin/notifications': typeof AdminNotificationsRoute
-  '/admin/orders': typeof AdminOrdersRoute
-  '/admin/partners': typeof AdminPartnersRoute
-  '/admin/payments': typeof AdminPaymentsRoute
-  '/admin/payouts': typeof AdminPayoutsRoute
-  '/admin/products': typeof AdminProductsRoute
-  '/admin/promotions': typeof AdminPromotionsRoute
-  '/admin/returns': typeof AdminReturnsRoute
-  '/admin/reviews': typeof AdminReviewsRoute
-  '/admin/roles': typeof AdminRolesRoute
-  '/admin/settings': typeof AdminSettingsRoute
-  '/admin/support': typeof AdminSupportRoute
-  '/admin/users': typeof AdminUsersRoute
+  '/admin/$': typeof AdminSplatRoute
   '/category/$categorySlug': typeof CategoryCategorySlugRoute
   '/creator/$creatorSlug': typeof CreatorCreatorSlugRoute
   '/listing/$listingId': typeof ListingListingIdRoute
   '/product/$productId': typeof ProductProductIdRoute
   '/seller/$sellerId': typeof SellerSellerIdRoute
+  '/seller/account': typeof SellerAccountRoute
   '/seller/analytics': typeof SellerAnalyticsRoute
   '/seller/creator-profile': typeof SellerCreatorProfileRoute
   '/seller/dashboard': typeof SellerDashboardRoute
@@ -509,33 +337,13 @@ export interface FileRoutesById {
   '/sellers': typeof SellersRoute
   '/account/disputes': typeof AccountDisputesRoute
   '/account/orders': typeof AccountOrdersRouteWithChildren
-  '/admin/analytics': typeof AdminAnalyticsRoute
-  '/admin/categories': typeof AdminCategoriesRoute
-  '/admin/content': typeof AdminContentRoute
-  '/admin/disputes': typeof AdminDisputesRoute
-  '/admin/identity': typeof AdminIdentityRoute
-  '/admin/inspections': typeof AdminInspectionsRoute
-  '/admin/listings': typeof AdminListingsRoute
-  '/admin/login': typeof AdminLoginRoute
-  '/admin/moderation': typeof AdminModerationRoute
-  '/admin/notifications': typeof AdminNotificationsRoute
-  '/admin/orders': typeof AdminOrdersRoute
-  '/admin/partners': typeof AdminPartnersRoute
-  '/admin/payments': typeof AdminPaymentsRoute
-  '/admin/payouts': typeof AdminPayoutsRoute
-  '/admin/products': typeof AdminProductsRoute
-  '/admin/promotions': typeof AdminPromotionsRoute
-  '/admin/returns': typeof AdminReturnsRoute
-  '/admin/reviews': typeof AdminReviewsRoute
-  '/admin/roles': typeof AdminRolesRoute
-  '/admin/settings': typeof AdminSettingsRoute
-  '/admin/support': typeof AdminSupportRoute
-  '/admin/users': typeof AdminUsersRoute
+  '/admin/$': typeof AdminSplatRoute
   '/category/$categorySlug': typeof CategoryCategorySlugRoute
   '/creator/$creatorSlug': typeof CreatorCreatorSlugRoute
   '/listing/$listingId': typeof ListingListingIdRoute
   '/product/$productId': typeof ProductProductIdRoute
   '/seller/$sellerId': typeof SellerSellerIdRoute
+  '/seller/account': typeof SellerAccountRoute
   '/seller/analytics': typeof SellerAnalyticsRoute
   '/seller/creator-profile': typeof SellerCreatorProfileRoute
   '/seller/dashboard': typeof SellerDashboardRoute
@@ -567,33 +375,13 @@ export interface FileRouteTypes {
     | '/sellers'
     | '/account/disputes'
     | '/account/orders'
-    | '/admin/analytics'
-    | '/admin/categories'
-    | '/admin/content'
-    | '/admin/disputes'
-    | '/admin/identity'
-    | '/admin/inspections'
-    | '/admin/listings'
-    | '/admin/login'
-    | '/admin/moderation'
-    | '/admin/notifications'
-    | '/admin/orders'
-    | '/admin/partners'
-    | '/admin/payments'
-    | '/admin/payouts'
-    | '/admin/products'
-    | '/admin/promotions'
-    | '/admin/returns'
-    | '/admin/reviews'
-    | '/admin/roles'
-    | '/admin/settings'
-    | '/admin/support'
-    | '/admin/users'
+    | '/admin/$'
     | '/category/$categorySlug'
     | '/creator/$creatorSlug'
     | '/listing/$listingId'
     | '/product/$productId'
     | '/seller/$sellerId'
+    | '/seller/account'
     | '/seller/analytics'
     | '/seller/creator-profile'
     | '/seller/dashboard'
@@ -623,33 +411,13 @@ export interface FileRouteTypes {
     | '/sellers'
     | '/account/disputes'
     | '/account/orders'
-    | '/admin/analytics'
-    | '/admin/categories'
-    | '/admin/content'
-    | '/admin/disputes'
-    | '/admin/identity'
-    | '/admin/inspections'
-    | '/admin/listings'
-    | '/admin/login'
-    | '/admin/moderation'
-    | '/admin/notifications'
-    | '/admin/orders'
-    | '/admin/partners'
-    | '/admin/payments'
-    | '/admin/payouts'
-    | '/admin/products'
-    | '/admin/promotions'
-    | '/admin/returns'
-    | '/admin/reviews'
-    | '/admin/roles'
-    | '/admin/settings'
-    | '/admin/support'
-    | '/admin/users'
+    | '/admin/$'
     | '/category/$categorySlug'
     | '/creator/$creatorSlug'
     | '/listing/$listingId'
     | '/product/$productId'
     | '/seller/$sellerId'
+    | '/seller/account'
     | '/seller/analytics'
     | '/seller/creator-profile'
     | '/seller/dashboard'
@@ -679,33 +447,13 @@ export interface FileRouteTypes {
     | '/sellers'
     | '/account/disputes'
     | '/account/orders'
-    | '/admin/analytics'
-    | '/admin/categories'
-    | '/admin/content'
-    | '/admin/disputes'
-    | '/admin/identity'
-    | '/admin/inspections'
-    | '/admin/listings'
-    | '/admin/login'
-    | '/admin/moderation'
-    | '/admin/notifications'
-    | '/admin/orders'
-    | '/admin/partners'
-    | '/admin/payments'
-    | '/admin/payouts'
-    | '/admin/products'
-    | '/admin/promotions'
-    | '/admin/returns'
-    | '/admin/reviews'
-    | '/admin/roles'
-    | '/admin/settings'
-    | '/admin/support'
-    | '/admin/users'
+    | '/admin/$'
     | '/category/$categorySlug'
     | '/creator/$creatorSlug'
     | '/listing/$listingId'
     | '/product/$productId'
     | '/seller/$sellerId'
+    | '/seller/account'
     | '/seller/analytics'
     | '/seller/creator-profile'
     | '/seller/dashboard'
@@ -736,33 +484,13 @@ export interface RootRouteChildren {
   SellersRoute: typeof SellersRoute
   AccountDisputesRoute: typeof AccountDisputesRoute
   AccountOrdersRoute: typeof AccountOrdersRouteWithChildren
-  AdminAnalyticsRoute: typeof AdminAnalyticsRoute
-  AdminCategoriesRoute: typeof AdminCategoriesRoute
-  AdminContentRoute: typeof AdminContentRoute
-  AdminDisputesRoute: typeof AdminDisputesRoute
-  AdminIdentityRoute: typeof AdminIdentityRoute
-  AdminInspectionsRoute: typeof AdminInspectionsRoute
-  AdminListingsRoute: typeof AdminListingsRoute
-  AdminLoginRoute: typeof AdminLoginRoute
-  AdminModerationRoute: typeof AdminModerationRoute
-  AdminNotificationsRoute: typeof AdminNotificationsRoute
-  AdminOrdersRoute: typeof AdminOrdersRoute
-  AdminPartnersRoute: typeof AdminPartnersRoute
-  AdminPaymentsRoute: typeof AdminPaymentsRoute
-  AdminPayoutsRoute: typeof AdminPayoutsRoute
-  AdminProductsRoute: typeof AdminProductsRoute
-  AdminPromotionsRoute: typeof AdminPromotionsRoute
-  AdminReturnsRoute: typeof AdminReturnsRoute
-  AdminReviewsRoute: typeof AdminReviewsRoute
-  AdminRolesRoute: typeof AdminRolesRoute
-  AdminSettingsRoute: typeof AdminSettingsRoute
-  AdminSupportRoute: typeof AdminSupportRoute
-  AdminUsersRoute: typeof AdminUsersRoute
+  AdminSplatRoute: typeof AdminSplatRoute
   CategoryCategorySlugRoute: typeof CategoryCategorySlugRoute
   CreatorCreatorSlugRoute: typeof CreatorCreatorSlugRoute
   ListingListingIdRoute: typeof ListingListingIdRoute
   ProductProductIdRoute: typeof ProductProductIdRoute
   SellerSellerIdRoute: typeof SellerSellerIdRoute
+  SellerAccountRoute: typeof SellerAccountRoute
   SellerAnalyticsRoute: typeof SellerAnalyticsRoute
   SellerCreatorProfileRoute: typeof SellerCreatorProfileRoute
   SellerDashboardRoute: typeof SellerDashboardRoute
@@ -884,158 +612,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin/analytics': {
-      id: '/admin/analytics'
-      path: '/admin/analytics'
-      fullPath: '/admin/analytics'
-      preLoaderRoute: typeof AdminAnalyticsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/categories': {
-      id: '/admin/categories'
-      path: '/admin/categories'
-      fullPath: '/admin/categories'
-      preLoaderRoute: typeof AdminCategoriesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/content': {
-      id: '/admin/content'
-      path: '/admin/content'
-      fullPath: '/admin/content'
-      preLoaderRoute: typeof AdminContentRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/disputes': {
-      id: '/admin/disputes'
-      path: '/admin/disputes'
-      fullPath: '/admin/disputes'
-      preLoaderRoute: typeof AdminDisputesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/identity': {
-      id: '/admin/identity'
-      path: '/admin/identity'
-      fullPath: '/admin/identity'
-      preLoaderRoute: typeof AdminIdentityRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/inspections': {
-      id: '/admin/inspections'
-      path: '/admin/inspections'
-      fullPath: '/admin/inspections'
-      preLoaderRoute: typeof AdminInspectionsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/listings': {
-      id: '/admin/listings'
-      path: '/admin/listings'
-      fullPath: '/admin/listings'
-      preLoaderRoute: typeof AdminListingsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/login': {
-      id: '/admin/login'
-      path: '/admin/login'
-      fullPath: '/admin/login'
-      preLoaderRoute: typeof AdminLoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/moderation': {
-      id: '/admin/moderation'
-      path: '/admin/moderation'
-      fullPath: '/admin/moderation'
-      preLoaderRoute: typeof AdminModerationRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/notifications': {
-      id: '/admin/notifications'
-      path: '/admin/notifications'
-      fullPath: '/admin/notifications'
-      preLoaderRoute: typeof AdminNotificationsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/orders': {
-      id: '/admin/orders'
-      path: '/admin/orders'
-      fullPath: '/admin/orders'
-      preLoaderRoute: typeof AdminOrdersRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/partners': {
-      id: '/admin/partners'
-      path: '/admin/partners'
-      fullPath: '/admin/partners'
-      preLoaderRoute: typeof AdminPartnersRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/payments': {
-      id: '/admin/payments'
-      path: '/admin/payments'
-      fullPath: '/admin/payments'
-      preLoaderRoute: typeof AdminPaymentsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/payouts': {
-      id: '/admin/payouts'
-      path: '/admin/payouts'
-      fullPath: '/admin/payouts'
-      preLoaderRoute: typeof AdminPayoutsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/products': {
-      id: '/admin/products'
-      path: '/admin/products'
-      fullPath: '/admin/products'
-      preLoaderRoute: typeof AdminProductsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/promotions': {
-      id: '/admin/promotions'
-      path: '/admin/promotions'
-      fullPath: '/admin/promotions'
-      preLoaderRoute: typeof AdminPromotionsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/returns': {
-      id: '/admin/returns'
-      path: '/admin/returns'
-      fullPath: '/admin/returns'
-      preLoaderRoute: typeof AdminReturnsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/reviews': {
-      id: '/admin/reviews'
-      path: '/admin/reviews'
-      fullPath: '/admin/reviews'
-      preLoaderRoute: typeof AdminReviewsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/roles': {
-      id: '/admin/roles'
-      path: '/admin/roles'
-      fullPath: '/admin/roles'
-      preLoaderRoute: typeof AdminRolesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/settings': {
-      id: '/admin/settings'
-      path: '/admin/settings'
-      fullPath: '/admin/settings'
-      preLoaderRoute: typeof AdminSettingsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/support': {
-      id: '/admin/support'
-      path: '/admin/support'
-      fullPath: '/admin/support'
-      preLoaderRoute: typeof AdminSupportRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/users': {
-      id: '/admin/users'
-      path: '/admin/users'
-      fullPath: '/admin/users'
-      preLoaderRoute: typeof AdminUsersRouteImport
+    '/admin/$': {
+      id: '/admin/$'
+      path: '/admin/$'
+      fullPath: '/admin/$'
+      preLoaderRoute: typeof AdminSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/category/$categorySlug': {
@@ -1078,6 +659,13 @@ declare module '@tanstack/react-router' {
       path: '/seller/$sellerId'
       fullPath: '/seller/$sellerId'
       preLoaderRoute: typeof SellerSellerIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/seller/account': {
+      id: '/seller/account'
+      path: '/seller/account'
+      fullPath: '/seller/account'
+      preLoaderRoute: typeof SellerAccountRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/seller/analytics': {
@@ -1187,33 +775,13 @@ const rootRouteChildren: RootRouteChildren = {
   SellersRoute: SellersRoute,
   AccountDisputesRoute: AccountDisputesRoute,
   AccountOrdersRoute: AccountOrdersRouteWithChildren,
-  AdminAnalyticsRoute: AdminAnalyticsRoute,
-  AdminCategoriesRoute: AdminCategoriesRoute,
-  AdminContentRoute: AdminContentRoute,
-  AdminDisputesRoute: AdminDisputesRoute,
-  AdminIdentityRoute: AdminIdentityRoute,
-  AdminInspectionsRoute: AdminInspectionsRoute,
-  AdminListingsRoute: AdminListingsRoute,
-  AdminLoginRoute: AdminLoginRoute,
-  AdminModerationRoute: AdminModerationRoute,
-  AdminNotificationsRoute: AdminNotificationsRoute,
-  AdminOrdersRoute: AdminOrdersRoute,
-  AdminPartnersRoute: AdminPartnersRoute,
-  AdminPaymentsRoute: AdminPaymentsRoute,
-  AdminPayoutsRoute: AdminPayoutsRoute,
-  AdminProductsRoute: AdminProductsRoute,
-  AdminPromotionsRoute: AdminPromotionsRoute,
-  AdminReturnsRoute: AdminReturnsRoute,
-  AdminReviewsRoute: AdminReviewsRoute,
-  AdminRolesRoute: AdminRolesRoute,
-  AdminSettingsRoute: AdminSettingsRoute,
-  AdminSupportRoute: AdminSupportRoute,
-  AdminUsersRoute: AdminUsersRoute,
+  AdminSplatRoute: AdminSplatRoute,
   CategoryCategorySlugRoute: CategoryCategorySlugRoute,
   CreatorCreatorSlugRoute: CreatorCreatorSlugRoute,
   ListingListingIdRoute: ListingListingIdRoute,
   ProductProductIdRoute: ProductProductIdRoute,
   SellerSellerIdRoute: SellerSellerIdRoute,
+  SellerAccountRoute: SellerAccountRoute,
   SellerAnalyticsRoute: SellerAnalyticsRoute,
   SellerCreatorProfileRoute: SellerCreatorProfileRoute,
   SellerDashboardRoute: SellerDashboardRoute,

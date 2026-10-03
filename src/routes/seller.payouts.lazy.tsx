@@ -10,7 +10,6 @@ export const Route = createLazyFileRoute("/seller/payouts")({
   component: SellerPayoutsPage,
 });
 
-
 function SellerPayoutsPage() {
   return (
     <ProtectedRoute>

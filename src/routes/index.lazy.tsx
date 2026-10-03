@@ -432,14 +432,14 @@ function Index() {
             onMouseLeave={() => {
               isTrustStripInteracting.current = false;
             }}
-            className="flex items-center gap-2.5 overflow-x-auto scrollbar-none snap-x snap-mandatory -mx-4 px-4 py-0.5 sm:mx-0 sm:px-0 md:grid md:grid-cols-4 md:gap-4 md:overflow-visible"
+            className="flex items-center justify-center gap-3 overflow-x-auto scrollbar-none snap-x snap-mandatory -mx-4 px-4 py-0.5 sm:mx-0 sm:px-0 md:grid md:grid-cols-4 md:gap-4 md:overflow-visible md:justify-start"
           >
             {ALL_TRUST_PILLARS.map((pillar, idx) => {
               const Icon = pillar.icon;
               return (
                 <div
                   key={pillar.isClone ? `${pillar.title}-clone-${idx}` : pillar.title}
-                  className={`flex shrink-0 snap-start items-center gap-2 rounded-xl border border-border/70 bg-background/80 dark:bg-card/70 p-2.5 shadow-2xs w-[calc(50%-5px)] min-w-[calc(50%-5px)] sm:w-auto sm:min-w-0 sm:p-3 sm:gap-3 md:border-0 md:bg-transparent md:p-0 md:rounded-none md:shadow-none md:items-start ${
+                  className={`flex shrink-0 snap-start items-center gap-2 rounded-xl border border-border/70 bg-background/80 dark:bg-card/70 p-2.5 shadow-2xs w-[calc(50%-6px)] min-w-[calc(50%-6px)] sm:w-auto sm:min-w-0 sm:p-3 sm:gap-3 md:border-0 md:bg-transparent md:p-0 md:rounded-none md:shadow-none md:items-start ${
                     pillar.isClone ? "md:hidden" : ""
                   }`}
                 >
@@ -736,7 +736,9 @@ function Index() {
           <div className="mx-auto max-w-7xl space-y-8">
             <div className="flex items-end justify-between gap-4">
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-background/60 mb-2">Editor's savings pick</p>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-background/60 mb-2">
+                  Editor's savings pick
+                </p>
                 <h2 className="text-3xl sm:text-4xl font-display font-bold text-background">
                   Top Value Deals vs. New Retail
                 </h2>
@@ -757,7 +759,13 @@ function Index() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
               {valueDeals.slice(0, 2).map(({ listing: l, product: p }) => (
-                <SpotlightDeal key={l.id} listingId={l.id} product={p} grade={l.grade} price={l.price} />
+                <SpotlightDeal
+                  key={l.id}
+                  listingId={l.id}
+                  product={p}
+                  grade={l.grade}
+                  price={l.price}
+                />
               ))}
             </div>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3.5 sm:gap-4">
@@ -1593,7 +1601,11 @@ function SpotlightDeal({
   const saved = product.retail - price;
   return (
     <div className="group grid grid-cols-5 bg-card text-card-foreground border border-border overflow-hidden">
-      <Link to="/listing/$listingId" params={{ listingId }} className="col-span-2 relative bg-muted/30">
+      <Link
+        to="/listing/$listingId"
+        params={{ listingId }}
+        className="col-span-2 relative bg-muted/30"
+      >
         <img
           src={product.image}
           alt={product.name}
@@ -1623,8 +1635,12 @@ function SpotlightDeal({
             </p>
           </div>
           <div className="p-2.5 sm:p-3">
-            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Resale price</p>
-            <p className="font-display text-base sm:text-lg font-bold text-primary">{taka(price)}</p>
+            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+              Resale price
+            </p>
+            <p className="font-display text-base sm:text-lg font-bold text-primary">
+              {taka(price)}
+            </p>
           </div>
         </div>
         <div className="flex items-center justify-between gap-2">

@@ -9,7 +9,6 @@ export const Route = createLazyFileRoute("/store/$storeSlug")({
   component: StorefrontPage,
 });
 
-
 function StorefrontPage() {
   const { store, listings } = Route.useLoaderData();
 

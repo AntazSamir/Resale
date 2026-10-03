@@ -29,7 +29,6 @@ export const Route = createLazyFileRoute("/seller/inventory/import")({
   component: SellerBulkImportPage,
 });
 
-
 function SellerBulkImportPage() {
   const { user } = useAuth();
   const navigate = useNavigate();

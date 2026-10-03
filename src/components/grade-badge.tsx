@@ -26,7 +26,9 @@ export function GradeBadge({
   return (
     <div className={`inline-flex flex-col gap-1 ${className}`}>
       <span className="inline-flex items-center gap-2 text-xs">
-        <span data-grade={grade} className={`grade-chip ${sizeClasses} shrink-0`}>{grade}</span>
+        <span data-grade={grade} className={`grade-chip ${sizeClasses} shrink-0`}>
+          {grade}
+        </span>
         {showLabel && (
           <span className="text-subtle-foreground font-medium">{gradeLabel[grade]}</span>
         )}

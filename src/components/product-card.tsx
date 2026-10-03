@@ -36,7 +36,7 @@ export const ProductCard = memo(function ProductCard({
       setJustAdded(true);
       setTimeout(() => setJustAdded(false), 1500);
     },
-    [addToCart, best?.id],
+    [addToCart, best],
   );
 
   const handleBuyNow = useCallback(
@@ -47,7 +47,7 @@ export const ProductCard = memo(function ProductCard({
       addToCart(best.id);
       navigate({ to: "/cart" });
     },
-    [addToCart, best?.id, navigate],
+    [addToCart, best, navigate],
   );
 
   if (!best) return null;
@@ -201,7 +201,9 @@ export const ProductCard = memo(function ProductCard({
             </span>
           )}
         </div>
-        <div className="mt-1"><InspectionTeaser listingId={best.id} /></div>
+        <div className="mt-1">
+          <InspectionTeaser listingId={best.id} />
+        </div>
       </div>
 
       {/* Bottom meta & actions */}

@@ -10,6 +10,16 @@ export const users = sqliteTable("users", {
     .default("BUYER")
     .notNull(),
   verified: integer("verified", { mode: "boolean" }).default(false).notNull(),
+  // Seller document verification fields
+  verificationStatus: text("verification_status", {
+    enum: ["UNVERIFIED", "PENDING", "VERIFIED", "REJECTED"],
+  })
+    .default("UNVERIFIED")
+    .notNull(),
+  nidDocUrl: text("nid_doc_url"),
+  selfieUrl: text("selfie_url"),
+  verificationNote: text("verification_note"),
+  verificationReviewedAt: text("verification_reviewed_at"),
   createdAt: text("created_at").notNull(),
 });
 

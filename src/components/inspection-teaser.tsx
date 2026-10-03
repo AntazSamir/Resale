@@ -1,8 +1,8 @@
 import { Link } from "@tanstack/react-router";
 import { BadgeCheck, Battery, Camera, Smartphone, ArrowRight } from "lucide-react";
 import { listingFor, productFor } from "@/data/catalog";
-import { gradeLabel } from "@/data/types";
-import { GradePill, gradeHint } from "./grade-pill";
+import { gradeLabel, gradeHint } from "@/data/types";
+import { GradePill } from "./grade-pill";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 
 function find(items: { component: string; status: string; notes?: string }[], key: RegExp) {
@@ -24,7 +24,11 @@ export function InspectionTeaser({ listingId }: { listingId: string }) {
           ? `${listing.battery}%`
           : (find(items, /battery/i)?.status ?? "Not applicable"),
     },
-    { icon: Camera, label: "Camera test", value: find(items, /camera/i)?.status ?? "Not applicable" },
+    {
+      icon: Camera,
+      label: "Camera test",
+      value: find(items, /camera/i)?.status ?? "Not applicable",
+    },
     {
       icon: Smartphone,
       label: "Display",
@@ -51,7 +55,11 @@ export function InspectionTeaser({ listingId }: { listingId: string }) {
         <div className="px-4 space-y-5">
           <div className="flex gap-3 items-center">
             {product && (
-              <img src={product.image} alt={product.name} className="size-16 object-cover border border-border" />
+              <img
+                src={product.image}
+                alt={product.name}
+                className="size-16 object-cover border border-border"
+              />
             )}
             <div className="space-y-1">
               <p className="text-sm font-semibold text-foreground">{product?.name}</p>
@@ -72,7 +80,8 @@ export function InspectionTeaser({ listingId }: { listingId: string }) {
             ))}
           </ul>
           <p className="text-xs text-muted-foreground">
-            Condition score {listing.conditionScore}/100 · {listing.passedChecks ?? total}/{total} checks passed
+            Condition score {listing.conditionScore}/100 · {listing.passedChecks ?? total}/{total}{" "}
+            checks passed
           </p>
           <Link
             to="/listing/$listingId"

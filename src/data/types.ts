@@ -8,6 +8,14 @@ export const gradeLabel: Record<Grade, string> = {
   D: "Heavy Wear",
 };
 
+export const gradeHint: Record<Grade, string> = {
+  "A+": "Zero scratches",
+  A: "Hairline marks only",
+  B: "Cosmetic wear, 100% functional",
+  C: "Visible wear, functional",
+  D: "Heavy wear, defects disclosed",
+};
+
 export type InspectionItem = {
   component: string;
   status: string;

@@ -45,8 +45,6 @@ export const Route = createLazyFileRoute("/seller/dashboard")({
   component: SellerDashboardPage,
 });
 
-
-
 function SellerDashboardPage() {
   const { token, user } = useAuth();
   const [orders, setOrders] = useState<OrderRecord[]>([]);

@@ -2,6 +2,7 @@ import "./lib/error-capture";
 
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
+import { handleAdminApiRequest } from "./server/admin-api-handler";
 
 type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
@@ -47,6 +48,25 @@ function isH3SwallowedErrorBody(body: string): boolean {
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
+      const url = new URL(request.url);
+      if (url.pathname.startsWith("/api/admin")) {
+        return await handleAdminApiRequest(request);
+      }
+
+      if (url.pathname === "/admin" || url.pathname.startsWith("/admin/")) {
+        const adminBaseUrl =
+          typeof process !== "undefined" && process.env?.ADMIN_APP_URL
+            ? process.env.ADMIN_APP_URL
+            : url.hostname === "localhost" || url.hostname === "127.0.0.1"
+              ? "http://localhost:5174"
+              : "https://admin.resale.com";
+        const adminPath = url.pathname.replace(/^\/admin/, "") || "/";
+        return Response.redirect(
+          `${adminBaseUrl.replace(/\/$/, "")}${adminPath}${url.search}`,
+          302,
+        );
+      }
+
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
       return await normalizeCatastrophicSsrResponse(response);

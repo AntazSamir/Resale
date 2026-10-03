@@ -1791,7 +1791,6 @@ export function SiteFooter() {
             )}
           </div>
         </div>
-
       </div>
 
       {/* ── Global Bottom Bar ── */}

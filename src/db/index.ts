@@ -42,6 +42,11 @@ class MemoryDatabase {
       nidNumber: "199526920199201",
       role: "ADMIN",
       verified: true,
+      verificationStatus: "VERIFIED",
+      nidDocUrl: null,
+      selfieUrl: null,
+      verificationNote: null,
+      verificationReviewedAt: null,
       createdAt: new Date("2026-01-01").toISOString(),
     },
     {
@@ -52,6 +57,11 @@ class MemoryDatabase {
       nidNumber: "199526920199202",
       role: "SELLER",
       verified: true,
+      verificationStatus: "VERIFIED",
+      nidDocUrl: null,
+      selfieUrl: null,
+      verificationNote: null,
+      verificationReviewedAt: new Date("2026-01-20").toISOString(),
       createdAt: new Date("2026-01-15").toISOString(),
     },
     {
@@ -62,7 +72,43 @@ class MemoryDatabase {
       nidNumber: "199526920199203",
       role: "SELLER",
       verified: true,
+      verificationStatus: "VERIFIED",
+      nidDocUrl: null,
+      selfieUrl: null,
+      verificationNote: null,
+      verificationReviewedAt: new Date("2026-02-05").toISOString(),
       createdAt: new Date("2026-02-01").toISOString(),
+    },
+    {
+      id: "u-3",
+      phone: "01733333333",
+      email: "seller.arif@example.com",
+      name: "Arif M.",
+      nidNumber: null,
+      role: "SELLER",
+      verified: false,
+      verificationStatus: "PENDING",
+      nidDocUrl:
+        "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
+      selfieUrl: null,
+      verificationNote: null,
+      verificationReviewedAt: null,
+      createdAt: new Date("2026-08-10").toISOString(),
+    },
+    {
+      id: "u-4",
+      phone: "01744444444",
+      email: "seller.sakib@example.com",
+      name: "Sakib A.",
+      nidNumber: null,
+      role: "SELLER",
+      verified: false,
+      verificationStatus: "UNVERIFIED",
+      nidDocUrl: null,
+      selfieUrl: null,
+      verificationNote: null,
+      verificationReviewedAt: null,
+      createdAt: new Date("2026-09-01").toISOString(),
     },
   ];
 
@@ -174,6 +220,8 @@ class MemoryDatabase {
     ["u-admin", "Admin@1234"],
     ["u-1", "Seller@1234"],
     ["u-2", "Seller@1234"],
+    ["u-3", "Seller@1234"],
+    ["u-4", "Seller@1234"],
   ]);
 
   // Drizzle-like chainable select/query helper for compatibility
@@ -261,6 +309,11 @@ async function hydrateFromSupabase(): Promise<void> {
           nidNumber: row.nid_number,
           role: row.role ?? "BUYER",
           verified: Boolean(row.verified),
+          verificationStatus: row.verification_status ?? "UNVERIFIED",
+          nidDocUrl: row.nid_doc_url ?? null,
+          selfieUrl: row.selfie_url ?? null,
+          verificationNote: row.verification_note ?? null,
+          verificationReviewedAt: row.verification_reviewed_at ?? null,
           createdAt: row.created_at ?? new Date().toISOString(),
         });
       }

@@ -13,7 +13,6 @@ export const Route = createLazyFileRoute("/seller/$sellerId")({
   component: SellerProfilePage,
 });
 
-
 function SellerProfilePage() {
   const { sellerId } = Route.useParams();
   const { user } = useAuth();

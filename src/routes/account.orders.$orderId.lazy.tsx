@@ -38,7 +38,6 @@ export const Route = createLazyFileRoute("/account/orders/$orderId")({
   component: OrderDetailsPageWrapper,
 });
 
-
 function OrderDetailsPageWrapper() {
   return (
     <ProtectedRoute redirect="/account/orders">

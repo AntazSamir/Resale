@@ -8,7 +8,6 @@ import {
 } from "@/data/grading";
 import type { Grade } from "@/data/types";
 
-
 export type DeviceGradeRecord = {
   id: string;
   listingId: string | null;
