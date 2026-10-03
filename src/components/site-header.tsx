@@ -1538,6 +1538,34 @@ export function SiteFooter() {
           MOBILE ACCORDION FOOTER (Visible on <= 768px)
       ════════════════════════════════════════════════════════════════ */}
       <div className="block md:hidden px-4 py-8 space-y-6">
+        {/* Mobile Brand Info — shown above the accordion links */}
+        <div className="space-y-3">
+          <Link
+            to="/"
+            className="inline-flex items-center shrink-0 hover:opacity-90 transition-opacity"
+            aria-label="Resale Home"
+          >
+            <img
+              src={resaleLogo}
+              alt="Resale logo"
+              className="h-7.5 w-auto object-contain shrink-0"
+            />
+          </Link>
+          <p className="text-xs text-subtle-foreground leading-relaxed">
+            Bangladesh&apos;s marketplace for quality-checked pre-owned electronics with 32-point
+            standardized inspection, NID verification, and 48-hour buyer protection.
+          </p>
+
+          <div className="flex flex-wrap items-center gap-1.5 pt-1 text-[11px]">
+            <span className="bg-primary/10 text-primary border border-primary/20 px-2 py-0.5 font-medium">
+              ✓ NID Verified
+            </span>
+            <span className="bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 px-2 py-0.5 font-medium">
+              ✓ 48h Protection
+            </span>
+          </div>
+        </div>
+
         {/* Accordions */}
         <div className="border-t border-border divide-y divide-border">
           {/* Explore Categories */}
@@ -1740,35 +1768,8 @@ export function SiteFooter() {
           </div>
         </div>
 
-        {/* Mobile Brand Info */}
-        <div className="pt-4 space-y-3">
-          <Link
-            to="/"
-            className="inline-flex items-center shrink-0 hover:opacity-90 transition-opacity"
-            aria-label="Resale Home"
-          >
-            <img
-              src={resaleLogo}
-              alt="Resale logo"
-              className="h-7.5 w-auto object-contain shrink-0"
-            />
-          </Link>
-          <p className="text-xs text-subtle-foreground leading-relaxed">
-            Bangladesh&apos;s marketplace for quality-checked pre-owned electronics with 32-point
-            standardized inspection, NID verification, and 48-hour buyer protection.
-          </p>
-
-          <div className="flex flex-wrap items-center gap-1.5 pt-1 text-[11px]">
-            <span className="bg-primary/10 text-primary border border-primary/20 px-2 py-0.5 font-medium">
-              ✓ NID Verified
-            </span>
-            <span className="bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 px-2 py-0.5 font-medium">
-              ✓ 48h Protection
-            </span>
-          </div>
-
-          {/* Payment Badges */}
-          <div className="pt-3">
+        {/* Mobile Accepted Payments */}
+        <div className="pt-3">
             <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider block mb-2">
               Accepted Payments
             </span>
