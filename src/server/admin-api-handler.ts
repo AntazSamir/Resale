@@ -26,8 +26,8 @@ import type { ListingRejectionReasonCode } from "@/lib/types";
 const ALLOWED_ORIGINS = [
   "http://localhost:5174",
   "https://admin.resale.com",
-  ...(typeof process !== "undefined" && process.env?.ADMIN_APP_URL
-    ? [process.env.ADMIN_APP_URL.replace(/\/$/, "")]
+  ...(typeof process !== "undefined" && process.env?.["ADMIN_APP_URL"]
+    ? [process.env["ADMIN_APP_URL"].replace(/\/$/, "")]
     : []),
 ];
 
