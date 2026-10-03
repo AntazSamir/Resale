@@ -1564,6 +1564,30 @@ export function SiteFooter() {
               ✓ 48h Protection
             </span>
           </div>
+
+          {/* Accepted Payments */}
+          <div className="pt-1">
+            <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider block mb-2">
+              Accepted Payments
+            </span>
+            <div className="flex flex-wrap gap-1.5 text-[10px] font-semibold">
+              <span className="border border-border bg-background px-2 py-1 text-rose-600">
+                bKash
+              </span>
+              <span className="border border-border bg-background px-2 py-1 text-amber-600">
+                Nagad
+              </span>
+              <span className="border border-border bg-background px-2 py-1 text-purple-600">
+                Rocket
+              </span>
+              <span className="border border-border bg-background px-2 py-1 text-foreground">
+                COD
+              </span>
+              <span className="border border-border bg-background px-2 py-1 text-foreground">
+                Cards
+              </span>
+            </div>
+          </div>
         </div>
 
         {/* Accordions */}
