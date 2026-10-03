@@ -1789,7 +1789,6 @@ export function SiteFooter() {
               <span className="border border-border bg-background px-2 py-1 text-foreground">
                 Cards
               </span>
-            </div>
           </div>
         </div>
       </div>
